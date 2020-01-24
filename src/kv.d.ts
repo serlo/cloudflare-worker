@@ -19,6 +19,10 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org for the canonical source repository
  */
+declare var MAINTENANCE_KV: {
+  get(key: 'start'): Promise<string | null>
+  get(key: 'end'): Promise<string | null>
+}
 declare var PACKAGES_KV: {
-  get: (key: string) => Promise<string | null>
+  get(key: string): Promise<string | null>
 }

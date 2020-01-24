@@ -5,5 +5,6 @@ zone_id = "1a4afa776acb2e40c3c8a135248328ae"
 route = "*serlo.org/*"
 webpack_config = "webpack.config.js"
 kv-namespaces = [
-    { binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be" }
+    { binding = "MAINTENANCE_KV", id = "f6aea31840dc49708796f53ebb5741a6" },
+    { binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be" },
 ]

@@ -17,8 +17,12 @@
  *
  * @copyright Copyright (c) 2013-2020 Serlo Education e.V.
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
- * @link      https://github.com/serlo-org/serlo.org for the canonical source repository
+ * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
+import { DateTime } from 'luxon'
+
+import { maintenanceMode } from './maintenance'
+
 addEventListener('fetch', (event: Event) => {
   const e = event as FetchEvent
   e.respondWith(handleRequest(e.request))
@@ -26,6 +30,7 @@ addEventListener('fetch', (event: Event) => {
 
 export async function handleRequest(request: Request) {
   const response =
+    (await maintenanceMode(request)) ||
     (await enforceHttps(request)) ||
     (await redirects(request)) ||
     (await blockSerloEducation(request)) ||
