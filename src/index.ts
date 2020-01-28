@@ -19,8 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { DateTime } from 'luxon'
-
+import { edtrIoStats } from './are-we-edtr-io-yet'
 import { maintenanceMode } from './maintenance'
 
 addEventListener('fetch', (event: Event) => {
@@ -30,6 +29,7 @@ addEventListener('fetch', (event: Event) => {
 
 export async function handleRequest(request: Request) {
   const response =
+    (await edtrIoStats(request)) ||
     (await maintenanceMode(request)) ||
     (await enforceHttps(request)) ||
     (await redirects(request)) ||
