@@ -4,6 +4,8 @@
     "esModuleInterop": true,
     "importHelpers": true,
     "lib": ["esnext", "webworker"],
+    "jsx": "react",
+    "jsxFactory": "h",
     "module": "commonjs",
     "moduleResolution": "node",
     "skipLibCheck": true,
