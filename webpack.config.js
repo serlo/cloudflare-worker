@@ -12,14 +12,14 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.ts$/,
+        test: /\.(ts|tsx)$/,
         exclude: /node_modules/,
         loader: require.resolve('ts-loader')
       }
     ]
   },
   resolve: {
-    extensions: ['.ts']
+    extensions: ['.ts', '.tsx']
   },
   plugins: [
     new webpack.DefinePlugin({
