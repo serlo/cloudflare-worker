@@ -31,7 +31,6 @@ export async function handleRequest(request: Request) {
   const response =
     (await edtrIoStats(request)) ||
     (await maintenanceMode(request)) ||
-    (await pactBroker(request)) ||
     (await enforceHttps(request)) ||
     (await redirects(request)) ||
     (await blockSerloEducation(request)) ||
@@ -41,20 +40,6 @@ export async function handleRequest(request: Request) {
     (await fetch(request))
 
   return response
-}
-
-async function pactBroker(request: Request) {
-  if (!/^https?:\/\/pacts\.serlo\.org/.test(request.url)) return null
-  const url = new URL(request.url)
-  url.protocol = 'https'
-  return fetch(url.href, {
-    headers: {
-      'X-Forwarded-Scheme': 'https',
-      'X-Forwarded-Host': 'pacts.serlo.org',
-      'X-Forwarded-Port': '443',
-      'X-Forwarded-Ssl': 'On'
-    }
-  })
 }
 
 async function enforceHttps(request: Request) {
