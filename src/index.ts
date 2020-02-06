@@ -44,6 +44,7 @@ export async function handleRequest(request: Request) {
 
 async function enforceHttps(request: Request) {
   if (!/^http:\/\//.test(request.url)) return null
+  if (/^http:\/\/pacts\.serlo\.org/.test(request.url)) return null
   const url = new URL(request.url)
   url.protocol = 'https'
   return Response.redirect(url.href)
