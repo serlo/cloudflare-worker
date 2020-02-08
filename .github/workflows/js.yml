@@ -22,7 +22,10 @@ jobs:
         with:
           node-version: 12.x
       - run: yarn
-      - run: yarn build
+      - run: yarn build --env dev
+      - run: yarn build --env staging
+      - run: yarn build --env production
+
   prettier:
     runs-on: ubuntu-latest
     steps:
