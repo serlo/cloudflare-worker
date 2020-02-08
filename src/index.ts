@@ -21,6 +21,7 @@
  */
 import { edtrIoStats } from './are-we-edtr-io-yet'
 import { maintenanceMode } from './maintenance'
+import { getPathnameWithoutTrailingSlash, getSubdomain } from './url-utils'
 
 addEventListener('fetch', (event: Event) => {
   const e = event as FetchEvent
@@ -28,7 +29,7 @@ addEventListener('fetch', (event: Event) => {
 })
 
 export async function handleRequest(request: Request) {
-  const response =
+  return (
     (await edtrIoStats(request)) ||
     (await maintenanceMode(request)) ||
     (await enforceHttps(request)) ||
@@ -36,88 +37,105 @@ export async function handleRequest(request: Request) {
     (await semanticFileNames(request)) ||
     (await packages(request)) ||
     (await fetch(request))
-
-  return response
+  )
 }
 
 async function enforceHttps(request: Request) {
-  if (!/^http:\/\//.test(request.url)) return null
-  if (/^http:\/\/pacts\.serlo\.org/.test(request.url)) return null
+  if (getSubdomain(request.url) === 'pacts') return null
   const url = new URL(request.url)
-  url.protocol = 'https'
+  if (url.protocol !== 'http:') return null
+  url.protocol = 'https:'
   return Response.redirect(url.href)
 }
 
 async function redirects(request: Request) {
-  const { url } = request
-
-  if (/^https:\/\/start\.serlo\.org/.test(url)) {
+  if (getSubdomain(request.url) === 'start') {
     return Response.redirect(
       'https://docs.google.com/document/d/1qsgkXWNwC-mcgroyfqrQPkZyYqn7m1aimw2gwtDTmpM/',
       301
     )
   }
 
-  if (/^https:\/\/de\.serlo\.org\/labschool/.test(url)) {
-    return Response.redirect('https://labschool.serlo.org', 301)
+  if (
+    getSubdomain(request.url) === 'de' &&
+    getPathnameWithoutTrailingSlash(request.url) === '/labschool'
+  ) {
+    const url = new URL(request.url)
+    url.host = url.host.replace('de.', 'labschool.')
+    url.pathname = '/'
+    return Response.redirect(url.href, 301)
   }
 
-  if (/^https:\/\/de\.serlo\.org\/hochschule/.test(url)) {
-    return Response.redirect(
-      'https://de.serlo.org/mathe/universitaet/44323',
-      301
-    )
+  if (
+    getSubdomain(request.url) === 'de' &&
+    getPathnameWithoutTrailingSlash(request.url) === '/hochschule'
+  ) {
+    const url = new URL(request.url)
+    url.pathname = '/mathe/universitaet/44323'
+    return Response.redirect(url.href, 301)
   }
 
-  if (/^https:\/\/de\.serlo\.org\/beitreten/.test(url)) {
+  if (
+    getSubdomain(request.url) === 'de' &&
+    getPathnameWithoutTrailingSlash(request.url) === '/beitreten'
+  ) {
     return Response.redirect(
       'https://docs.google.com/forms/d/e/1FAIpQLSdEoyCcDVP_G_-G_u642S768e_sxz6wO6rJ3tad4Hb9z7Slwg/viewform',
       301
     )
   }
 
-  if (/^https:\/\/(www\.)?serlo\.org/.test(url)) {
-    const newUrl = new URL(url)
-    newUrl.hostname = 'de.serlo.org'
-    return Response.redirect(newUrl.href)
+  if (getSubdomain(request.url) === 'www') {
+    const url = new URL(request.url)
+    url.host = url.host.replace('www.', 'de.')
+    return Response.redirect(url.href)
+  }
+
+  if (getSubdomain(request.url) === null) {
+    const url = new URL(request.url)
+    url.host = `de.${url.host}`
+    return Response.redirect(url.href)
   }
 }
 
 async function semanticFileNames(request: Request) {
-  const { url } = request
+  if (getSubdomain(request.url) !== 'assets') return null
 
-  if (/^https:\/\/assets\.serlo\.org\/meta\//.test(url)) {
-    return null
-  }
+  const url = new URL(request.url)
+  url.host = 'assets.serlo.org'
 
-  const re = /^https:\/\/assets\.serlo\.org\/(legacy\/|)((?!legacy)\w+)\/([\w\-+]+)\.(\w+)$/
-  const match = url.match(re)
+  if (url.pathname.startsWith('/meta')) return fetch(url.href, request)
+  const re = /^\/(legacy\/|)((?!legacy)\w+)\/([\w\-+]+)\.(\w+)$/
+  const match = url.pathname.match(re)
 
-  if (!match) return null
+  if (!match) return fetch(url.href, request)
 
   const prefix = match[1]
   const hash = match[2]
   const extension = match[4]
 
-  return fetch(
-    `https://assets\.serlo\.org/${prefix}${hash}.${extension}`,
-    request
-  )
+  url.pathname = `${prefix}${hash}.${extension}`
+  return fetch(url.href, request)
 }
 
 async function packages(request: Request) {
-  const match = request.url.match(/https:\/\/packages\.serlo\.org\/([^\/]+)\//)
+  if (getSubdomain(request.url) !== 'packages') return null
 
-  if (!match) return null
+  const url = new URL(request.url)
+  url.host = 'packages.serlo.org'
+
+  const re = /([^\/]+)\//
+  const match = url.pathname.match(re)
+
+  if (!match) return fetch(url.href, request)
 
   const pkg = match[1]
-  if (pkg === 'athene2-assets@a' || pkg === 'athene2-assets@b') return null
 
   const resolvedPackage = await PACKAGES_KV.get(pkg)
-  if (!resolvedPackage) return
+  if (!resolvedPackage) return fetch(url.href, request)
 
-  const url = request.url.replace(pkg, resolvedPackage)
-  let response = await fetch(new Request(url, request))
+  url.pathname = url.pathname.replace(`/${pkg}/`, `/${resolvedPackage}/`)
+  let response = await fetch(new Request(url.href, request))
   response = new Response(response.body, response)
   response.headers.set('x-package', resolvedPackage)
   return response
