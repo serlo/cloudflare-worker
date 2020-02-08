@@ -19,87 +19,18 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { spawnSync } from 'child_process'
 import { DateTime } from 'luxon'
 
 exec()
 
 function exec() {
   if (process.argv.length <= 2) {
-    console.error('Expecting command')
-    process.exit(1)
-  }
-  const command = process.argv[2]
-  switch (command) {
-    case 'end':
-      return endHandler()
-    case 'schedule':
-      return scheduleHandler()
-    case 'status':
-      return statusHandler()
-  }
-}
-
-function endHandler() {
-  console.log('Disabling maintenance mode')
-
-  spawnSync(
-    'yarn',
-    ['wrangler', 'kv:key', 'delete', '--binding=MAINTENANCE_KV', 'start'],
-    {
-      stdio: 'inherit'
-    }
-  )
-  spawnSync(
-    'yarn',
-    ['wrangler', 'kv:key', 'delete', '--binding=MAINTENANCE_KV', 'end'],
-    {
-      stdio: 'inherit'
-    }
-  )
-}
-
-function scheduleHandler() {
-  if (process.argv.length <= 3 || process.argv.length > 5) {
-    console.error('Wrong number of arguments')
+    console.error('Expecting date')
     process.exit(1)
   }
 
-  console.log('Scheduling maintenance mode')
-
-  const start = process.argv[3]
-  const end = process.argv[4]
-
-  spawnSync(
-    'yarn',
-    [
-      'wrangler',
-      'kv:key',
-      'put',
-      '--binding=MAINTENANCE_KV',
-      'start',
-      `${parseDate(start).toISO()}`
-    ],
-    {
-      stdio: 'inherit'
-    }
-  )
-
-  if (!end) return
-  spawnSync(
-    'yarn',
-    [
-      'wrangler',
-      'kv:key',
-      'put',
-      '--binding=MAINTENANCE_KV',
-      'end',
-      `${parseDate(end).toISO()}`
-    ],
-    {
-      stdio: 'inherit'
-    }
-  )
+  const date = process.argv[2]
+  console.log(parseDate(date).toISO())
 
   function parseDate(raw: string): DateTime {
     const now = DateTime.local()
@@ -117,23 +48,4 @@ function scheduleHandler() {
       millisecond: 0
     })
   }
-}
-
-function statusHandler() {
-  console.log('Getting maintenance status')
-
-  spawnSync(
-    'yarn',
-    ['wrangler', 'kv:key', 'get', '--binding=MAINTENANCE_KV', 'start'],
-    {
-      stdio: 'inherit'
-    }
-  )
-  spawnSync(
-    'yarn',
-    ['wrangler', 'kv:key', 'get', '--binding=MAINTENANCE_KV', 'end'],
-    {
-      stdio: 'inherit'
-    }
-  )
 }

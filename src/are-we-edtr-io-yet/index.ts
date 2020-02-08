@@ -20,14 +20,18 @@
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
 import { render } from './render'
+import { getSubdomain } from '../url-utils'
 
 export async function edtrIoStats(request: Request) {
-  if (!/^https:\/\/are-we-edtr-io-yet\.serlo\.org/.test(request.url))
-    return null
-  const data = await fetch(
-    `https://de.serlo.org/entities/are-we-edtr-io-yet`,
-    ({ cf: { cacheTtl: 60 * 60 } } as unknown) as RequestInit
-  )
+  if (getSubdomain(request.url) !== 'are-we-edtr-io-yet') return null
+
+  const url = new URL(request.url)
+  url.host = url.host.replace('are-we-edtr-io-yet.', 'de.')
+  url.pathname = '/entities/are-we-edtr-io-yet'
+  const data = await fetch(url.href, ({
+    cf: { cacheTtl: 60 * 60 }
+  } as unknown) as RequestInit)
+
   return new Response(render(await data.json()), {
     headers: {
       'Content-Type': 'text/html;charset=utf-8'

@@ -22,17 +22,9 @@
 import { DateTime } from 'luxon'
 
 import { render } from './render'
+import { getSubdomain } from '../url-utils'
 
 export async function maintenanceMode(request: Request) {
-  const match = request.url.match(
-    /^https:\/\/((community|stats|www|de|en|es|fr|hi|ta)\.)?serlo\.org/
-  )
-  if (!match) return null
-  const subdomain = match[1]
-  const lang =
-    subdomain === undefined || subdomain === 'de.' || subdomain === 'www.'
-      ? 'de'
-      : 'en'
   const startISO = await MAINTENANCE_KV.get('start')
   if (!startISO) return null
   const now = DateTime.local()
@@ -42,9 +34,16 @@ export async function maintenanceMode(request: Request) {
   if (endISO) {
     const end = DateTime.fromISO(endISO)
     if (now > end) return null
-    return createMaintenanceResponse({ lang, end })
+    return createMaintenanceResponse({ lang: getLanguage(), end })
   }
-  return createMaintenanceResponse({ lang })
+  return createMaintenanceResponse({ lang: getLanguage() })
+
+  function getLanguage() {
+    const subdomain = getSubdomain(request.url)
+    return subdomain === null || subdomain === 'de' || subdomain === 'www'
+      ? 'de'
+      : 'en'
+  }
 }
 
 function createMaintenanceResponse({
