@@ -19,35 +19,30 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import * as StaticPage from './static-page'
+import { StaticPagesConfig, LanguageCode } from './config'
 
-const legalRepo = 'https://raw.githubusercontent.com/serlo/serlo.org-legal'
-
-export const config: StaticPagesConfig = {
-  en: {
-    staticPages: {
-      imprint: {
-        title: 'Imprint',
-        url: new URL(`${legalRepo}/master/en/imprint.md`)
-      }
-    }
-  },
-  de: {
-    staticPages: {
-      imprint: {
-        title: 'Impressum',
-        url: new URL(`${legalRepo}/master/de/imprint.md`)
-      }
-    }
-  }
+export enum Type {
+  Imprint = 'imprint',
+  TermsOfUse = 'terms'
 }
 
-export type StaticPagesConfig = {
-  readonly [K1 in LanguageCode]?: {
-    readonly staticPages: {
-      readonly [K2 in StaticPage.Type]?: StaticPage.Spec
-    }
-  }
+export interface Spec {
+  title: string
+  url: URL
 }
 
-export type LanguageCode = 'de' | 'en' | 'fr'
+export function getSpec(
+  config: StaticPagesConfig,
+  lang: LanguageCode,
+  pageType: Type
+): Spec | null {
+  const result = config[lang]?.staticPages?.[pageType]
+
+  if (result !== undefined) {
+    return result
+  } else if (lang !== 'en') {
+    return getSpec(config, 'en', pageType)
+  } else {
+    return null
+  }
+}
