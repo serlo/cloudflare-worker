@@ -108,3 +108,6 @@ dist
 
 wasm-pack.log
 worker/
+
+# asdf-vm configuration file
+.tool-versions
