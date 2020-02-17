@@ -25,17 +25,16 @@ import * as StaticPage from '../../src/static-pages/static-page'
 describe('getSpec()', () => {
   const englishImprint: StaticPage.Spec = {
     title: 'English Imprint',
-    url: new URL('http://example.com/imprint')
+    url: 'http://example.com/imprint'
   }
   const germanImprint: StaticPage.Spec = {
     title: 'German Imprint',
-    url: new URL('https://example.org/impressum.md')
+    url: 'https://example.org/impressum.md'
   }
   const germanTerms: StaticPage.Spec = {
     title: 'Nutzungsbedingungen',
-    url: new URL('ftp://serlo.org/terms')
+    url: 'ftp://serlo.org/terms'
   }
-
   const exampleConfig: StaticPagesConfig = {
     en: {
       staticPages: {
@@ -78,5 +77,64 @@ describe('getSpec()', () => {
     expect(
       StaticPage.getSpec(exampleConfig, 'en', StaticPage.Type.TermsOfUse)
     ).toBeNull()
+  })
+})
+
+describe('getPage()', () => {
+  let fetch: jest.Mocked<any>
+
+  beforeAll(() => {
+    fetch = jest.fn()
+
+    // @ts-ignore
+    global.fetch = fetch
+  })
+
+  describe('returns page when url can be resolved', () => {
+    test('parses reponse as Markdown if url ends with `.md`', async () => {
+      fetch.mockReturnValueOnce(new Response('# Hello World'))
+
+      expect(
+        await StaticPage.getPage({
+          title: 'Imprint',
+          url: 'https://example.org/imprint.md'
+        })
+      ).toEqual({
+        title: 'Imprint',
+        content: '<h1 id="hello-world">Hello World</h1>\n'
+      })
+
+      expect(fetch).toHaveBeenCalled()
+    })
+
+    test('no parsing when url does not end with `.md`', async () => {
+      fetch.mockReturnValueOnce(new Response('<h1>Hello World</h1>'))
+
+      expect(
+        await StaticPage.getPage({
+          title: 'Imprint',
+          url: 'https://example.org/'
+        })
+      ).toEqual({
+        title: 'Imprint',
+        content: '<h1>Hello World</h1>'
+      })
+
+      expect(fetch).toHaveBeenCalled()
+    })
+  })
+
+  describe('returns null when request on the url of the spec fails', () => {
+    test.each([301, 404, 500])('status code %p', async code => {
+      fetch.mockReturnValueOnce(new Response('', { status: code }))
+
+      expect(
+        await StaticPage.getPage({
+          title: 'Imprint',
+          url: 'https://example.org/'
+        })
+      ).toBeNull()
+      expect(fetch).toHaveBeenCalled()
+    })
   })
 })

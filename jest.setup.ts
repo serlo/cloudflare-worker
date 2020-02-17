@@ -19,35 +19,16 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import * as StaticPage from './static-page'
+import { Response, Request } from 'node-fetch'
 
-const legalRepo = 'https://raw.githubusercontent.com/serlo/serlo.org-legal'
+global.Response = Response
+global.Request = Request
 
-export const config: StaticPagesConfig = {
-  en: {
-    staticPages: {
-      imprint: {
-        title: 'Imprint',
-        url: `${legalRepo}/master/en/imprint.md`
-      }
-    }
-  },
-  de: {
-    staticPages: {
-      imprint: {
-        title: 'Impressum',
-        url: `${legalRepo}/master/de/imprint.md`
-      }
+declare global {
+  namespace NodeJS {
+    interface Global {
+      Response: typeof Response
+      Request: typeof Request
     }
   }
 }
-
-export type StaticPagesConfig = {
-  readonly [K1 in LanguageCode]?: {
-    readonly staticPages: {
-      readonly [K2 in StaticPage.Type]?: StaticPage.Spec
-    }
-  }
-}
-
-export type LanguageCode = 'de' | 'en' | 'fr'

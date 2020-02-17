@@ -1,3 +1,5 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * This file is part of Serlo.org Cloudflare Worker.
  *
@@ -19,35 +21,29 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import * as StaticPage from './static-page'
-
-const legalRepo = 'https://raw.githubusercontent.com/serlo/serlo.org-legal'
-
-export const config: StaticPagesConfig = {
-  en: {
-    staticPages: {
-      imprint: {
-        title: 'Imprint',
-        url: `${legalRepo}/master/en/imprint.md`
-      }
+const luxon_1 = require("luxon");
+exec();
+function exec() {
+    if (process.argv.length <= 2) {
+        console.error('Expecting date');
+        process.exit(1);
     }
-  },
-  de: {
-    staticPages: {
-      imprint: {
-        title: 'Impressum',
-        url: `${legalRepo}/master/de/imprint.md`
-      }
+    const date = process.argv[2];
+    console.log(parseDate(date).toISO());
+    function parseDate(raw) {
+        const now = luxon_1.DateTime.local();
+        const match = raw.match(/(\d\d):(\d\d)/);
+        if (!match) {
+            console.error(`Couldn't parse ${raw}`);
+            process.exit(1);
+        }
+        const hour = parseInt(match[1], 10);
+        const minute = parseInt(match[2], 10);
+        return now.set({
+            hour: hour,
+            minute: minute,
+            second: 0,
+            millisecond: 0
+        });
     }
-  }
 }
-
-export type StaticPagesConfig = {
-  readonly [K1 in LanguageCode]?: {
-    readonly staticPages: {
-      readonly [K2 in StaticPage.Type]?: StaticPage.Spec
-    }
-  }
-}
-
-export type LanguageCode = 'de' | 'en' | 'fr'
