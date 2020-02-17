@@ -27,7 +27,7 @@ export function sanitizeHtml(html: string): string {
     allowedTags: sanitize.defaults.allowedTags
       .filter(x => x !== 'iframe')
       .concat(['h1', 'h2'])
-  })
+  }).trim()
 }
 
 export function markdownToHtml(markdown: string): string {
