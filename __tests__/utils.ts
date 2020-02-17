@@ -19,14 +19,27 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { sanitizeHtml } from '../src/utils'
+import { sanitizeHtml, markdownToHtml } from '../src/utils'
 
 describe('sanitizeHtml()', () => {
   test.each([
     ['<p>Hello</p><script>42;</script>', '<p>Hello</p>'],
-    ['<h1>Hello</h1><iframe src="https://google.de/" />', '<h1>Hello</h1>'],
+    [
+      '<h1 id="test":>Hello</h1><iframe src="https://google.de/" />',
+      '<h1>Hello</h1>'
+    ],
     ['console.log(42)', 'console.log(42)']
   ])('HTML-Code %p', (html, sanitizedHtml) => {
-    expect(sanitizeHtml(html)).toEqual(sanitizedHtml)
+    expect(sanitizeHtml(html)).toBe(sanitizedHtml)
+  })
+})
+
+describe('markdownToHtml()', () => {
+  test.each([
+    ['# Hello', '<h1>Hello</h1>'],
+    ['* 1\n* 2', '<ul>\n<li>1</li>\n<li>2</li>\n</ul>'],
+    ['', '']
+  ])('Markdown: %p', (markdown, html) => {
+    expect(markdownToHtml(markdown)).toBe(html)
   })
 })

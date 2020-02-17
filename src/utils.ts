@@ -20,6 +20,7 @@
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
 import sanitize from 'sanitize-html'
+import marked from 'marked'
 
 export function sanitizeHtml(html: string): string {
   return sanitize(html, {
@@ -27,4 +28,8 @@ export function sanitizeHtml(html: string): string {
       .filter(x => x !== 'iframe')
       .concat(['h1', 'h2'])
   })
+}
+
+export function markdownToHtml(markdown: string): string {
+  return marked(markdown, { headerIds: false }).trim()
 }
