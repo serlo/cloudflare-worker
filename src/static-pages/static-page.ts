@@ -20,6 +20,7 @@
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
 import { StaticPagesConfig, LanguageCode } from './config'
+import marked from 'marked'
 
 export enum Type {
   Imprint = 'imprint',
@@ -28,7 +29,28 @@ export enum Type {
 
 export interface Spec {
   title: string
-  url: URL
+  url: string
+}
+
+export interface Page {
+  title: string
+  content: string
+}
+
+export async function getPage(spec: Spec): Promise<Page | null> {
+  const response = await fetch(new Request(spec.url))
+
+  if (response.ok) {
+    const text = await response.text()
+    const content = spec.url.endsWith('.md') ? marked(text) : text
+
+    return {
+      title: spec.title,
+      content: content
+    }
+  } else {
+    return null
+  }
 }
 
 export function getSpec(
