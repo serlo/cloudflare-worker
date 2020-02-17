@@ -81,6 +81,15 @@ describe('getSpec()', () => {
 })
 
 describe('getPage()', () => {
+  const exampleSpec: StaticPage.Spec = {
+    title: 'Imprint',
+    url: 'http://example.org/'
+  }
+  const exampleSpecMarkdown: StaticPage.Spec = {
+    title: 'Imprint',
+    url: 'http://example.org/imprint.md'
+  }
+
   let fetch: jest.Mocked<any>
 
   beforeAll(() => {
@@ -94,33 +103,51 @@ describe('getPage()', () => {
     test('parses reponse as Markdown if url ends with `.md`', async () => {
       fetch.mockReturnValueOnce(new Response('# Hello World'))
 
-      expect(
-        await StaticPage.getPage({
-          title: 'Imprint',
-          url: 'https://example.org/imprint.md'
-        })
-      ).toEqual({
-        title: 'Imprint',
-        content: '<h1 id="hello-world">Hello World</h1>\n'
-      })
-
-      expect(fetch).toHaveBeenCalled()
-    })
-
-    test('no parsing when url does not end with `.md`', async () => {
-      fetch.mockReturnValueOnce(new Response('<h1>Hello World</h1>'))
-
-      expect(
-        await StaticPage.getPage({
-          title: 'Imprint',
-          url: 'https://example.org/'
-        })
-      ).toEqual({
+      expect(await StaticPage.getPage(exampleSpecMarkdown)).toEqual({
         title: 'Imprint',
         content: '<h1>Hello World</h1>'
       })
 
       expect(fetch).toHaveBeenCalled()
+    })
+
+    test('returns response content when url does not end with `.md`', async () => {
+      fetch.mockReturnValueOnce(new Response('<h1>Hello World</h1>'))
+
+      expect(await StaticPage.getPage(exampleSpec)).toEqual({
+        title: 'Imprint',
+        content: '<h1>Hello World</h1>'
+      })
+
+      expect(fetch).toHaveBeenCalled()
+    })
+
+    describe('returned HTML is sanitized', () => {
+      test('HTML response', async () => {
+        fetch.mockReturnValueOnce(
+          new Response('<h1>Hello World</h1><script>alert(42)</script>')
+        )
+
+        expect(await StaticPage.getPage(exampleSpec)).toEqual({
+          title: 'Imprint',
+          content: '<h1>Hello World</h1>'
+        })
+
+        expect(fetch).toHaveBeenCalled()
+      })
+
+      test('Markdown response', async () => {
+        fetch.mockReturnValueOnce(
+          new Response('Hello\n<iframe src="http://serlo.org/">')
+        )
+
+        expect(await StaticPage.getPage(exampleSpecMarkdown)).toEqual({
+          title: 'Imprint',
+          content: '<p>Hello</p>'
+        })
+
+        expect(fetch).toHaveBeenCalled()
+      })
     })
   })
 
@@ -128,12 +155,7 @@ describe('getPage()', () => {
     test.each([301, 404, 500])('status code %p', async code => {
       fetch.mockReturnValueOnce(new Response('', { status: code }))
 
-      expect(
-        await StaticPage.getPage({
-          title: 'Imprint',
-          url: 'https://example.org/'
-        })
-      ).toBeNull()
+      expect(await StaticPage.getPage(exampleSpec)).toBeNull()
       expect(fetch).toHaveBeenCalled()
     })
   })

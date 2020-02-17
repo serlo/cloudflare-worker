@@ -20,7 +20,7 @@
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
 import { StaticPagesConfig, LanguageCode } from './config'
-import marked from 'marked'
+import { sanitizeHtml, markdownToHtml } from '../utils'
 
 export enum Type {
   Imprint = 'imprint',
@@ -42,11 +42,11 @@ export async function getPage(spec: Spec): Promise<Page | null> {
 
   if (response.ok) {
     const text = await response.text()
-    const content = spec.url.endsWith('.md') ? marked(text) : text
+    const content = spec.url.endsWith('.md') ? markdownToHtml(text) : text
 
     return {
       title: spec.title,
-      content: content
+      content: sanitizeHtml(content)
     }
   } else {
     return null
