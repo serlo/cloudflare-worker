@@ -23,12 +23,12 @@ import { sanitizeHtml, markdownToHtml } from '../src/utils'
 
 describe('sanitizeHtml()', () => {
   test.each([
-    ['<p>Hello</p><script>42;</script>', '<p>Hello</p>'],
+    ['<p>Hello</p>\n\n<script>42;</script>\n', '<p>Hello</p>'],
     [
       '<h1 id="test":>Hello</h1><iframe src="https://google.de/" />',
       '<h1>Hello</h1>'
     ],
-    ['console.log(42)', 'console.log(42)']
+    ['console.log(42)\n   ', 'console.log(42)']
   ])('HTML-Code %p', (html, sanitizedHtml) => {
     expect(sanitizeHtml(html)).toBe(sanitizedHtml)
   })
