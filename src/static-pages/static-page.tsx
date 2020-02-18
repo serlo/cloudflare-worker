@@ -19,8 +19,8 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { StaticPagesConfig, LanguageCode } from './config'
-import { sanitizeHtml, markdownToHtml } from '../utils'
+import { StaticPagesConfig } from './config'
+import { sanitizeHtml, markdownToHtml, LanguageCode } from '../utils'
 import { Template } from '../ui'
 import { h } from 'preact'
 

@@ -22,6 +22,13 @@
 import sanitize from 'sanitize-html'
 import marked from 'marked'
 
+export const ALL_LANGUAGE_CODES = ['en', 'de', 'fr'] as const
+export type LanguageCode = typeof ALL_LANGUAGE_CODES[number]
+
+export function isLanguageCode(code: string): code is LanguageCode {
+  return ALL_LANGUAGE_CODES.some(x => x === code)
+}
+
 export function sanitizeHtml(html: string): string {
   return sanitize(html, {
     allowedTags: sanitize.defaults.allowedTags

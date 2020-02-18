@@ -19,7 +19,25 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { sanitizeHtml, markdownToHtml } from '../src/utils'
+import {
+  sanitizeHtml,
+  markdownToHtml,
+  ALL_LANGUAGE_CODES,
+  isLanguageCode
+} from '../src/utils'
+
+test('ALL_LANGUAGE_CODES', () => {
+  expect(ALL_LANGUAGE_CODES.length).toBeGreaterThan(0)
+})
+
+describe('isLanguageCode()', () => {
+  expect(isLanguageCode('de')).toBe(true)
+  expect(isLanguageCode('fr')).toBe(true)
+
+  expect(isLanguageCode('serlo')).toBe(false)
+  expect(isLanguageCode('EN_EN')).toBe(false)
+  expect(isLanguageCode('')).toBe(false)
+})
 
 describe('sanitizeHtml()', () => {
   test.each([

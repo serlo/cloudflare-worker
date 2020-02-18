@@ -19,6 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
+import { LanguageCode } from '../utils'
 import * as StaticPage from './static-page'
 
 const legalRepo = 'https://raw.githubusercontent.com/serlo/serlo.org-legal'
@@ -54,5 +55,3 @@ export type StaticPagesConfig = {
     }
   }
 }
-
-export type LanguageCode = 'de' | 'en' | 'fr'
