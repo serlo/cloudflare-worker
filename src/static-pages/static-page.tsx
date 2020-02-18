@@ -39,7 +39,7 @@ export interface Page {
   content: string
 }
 
-export function render(page: Page) {
+export function StaticPageView(page: Page) {
   return (
     <Template title={page.title} lang="en">
       <div dangerouslySetInnerHTML={{ __html: page.content }} />
