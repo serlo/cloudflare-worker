@@ -19,6 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
+import '@testing-library/jest-dom'
 import { Response, Request } from 'node-fetch'
 
 global.Response = Response
