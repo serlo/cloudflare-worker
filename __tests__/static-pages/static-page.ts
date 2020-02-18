@@ -21,6 +21,19 @@
  */
 import { StaticPagesConfig } from '../../src/static-pages/config'
 import * as StaticPage from '../../src/static-pages/static-page'
+import { render } from '@testing-library/preact'
+
+test('StaticPageView()', () => {
+  const html = render(
+    StaticPage.StaticPageView({
+      title: 'Imprint',
+      content: '<p>Hello World</p>'
+    })
+  )
+
+  expect(html.getByText('Imprint')).toBeVisible()
+  expect(html.getByText('Hello World')).toBeVisible()
+})
 
 describe('getSpec()', () => {
   const englishImprint: StaticPage.Spec = {
