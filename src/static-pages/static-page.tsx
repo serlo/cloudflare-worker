@@ -21,6 +21,8 @@
  */
 import { StaticPagesConfig, LanguageCode } from './config'
 import { sanitizeHtml, markdownToHtml } from '../utils'
+import { Template } from '../ui'
+import { h } from 'preact'
 
 export enum Type {
   Imprint = 'imprint',
@@ -35,6 +37,14 @@ export interface Spec {
 export interface Page {
   title: string
   content: string
+}
+
+export function render(page: Page) {
+  return (
+    <Template title={page.title} lang="en">
+      <div dangerouslySetInnerHTML={{ __html: page.content }} />
+    </Template>
+  )
 }
 
 export async function getPage(spec: Spec): Promise<Page | null> {
