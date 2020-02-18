@@ -26,25 +26,28 @@ import { render } from '@testing-library/preact'
 test('StaticPageView()', () => {
   const html = render(
     StaticPage.StaticPageView({
+      lang: 'de',
       title: 'Imprint',
       content: '<p>Hello World</p>'
     })
   )
+  const htmlElement = html.getByText(/.*/, { selector: 'html' })
 
+  expect(htmlElement).toHaveAttribute('lang', 'de')
   expect(html.getByText('Imprint')).toBeVisible()
   expect(html.getByText('Hello World')).toBeVisible()
 })
 
 describe('getSpec()', () => {
-  const englishImprint: StaticPage.Spec = {
+  const englishImprint = {
     title: 'English Imprint',
     url: 'http://example.com/imprint'
   }
-  const germanImprint: StaticPage.Spec = {
+  const germanImprint = {
     title: 'German Imprint',
     url: 'https://example.org/impressum.md'
   }
-  const germanTerms: StaticPage.Spec = {
+  const germanTerms = {
     title: 'Nutzungsbedingungen',
     url: 'ftp://serlo.org/terms'
   }
@@ -65,21 +68,21 @@ describe('getSpec()', () => {
   test('returns Spec when it exists', () => {
     expect(
       StaticPage.getSpec(exampleConfig, 'en', StaticPage.Type.Imprint)
-    ).toEqual(englishImprint)
+    ).toEqual({ ...englishImprint, lang: 'en' })
 
     expect(
       StaticPage.getSpec(exampleConfig, 'de', StaticPage.Type.Imprint)
-    ).toEqual(germanImprint)
+    ).toEqual({ ...germanImprint, lang: 'de' })
 
     expect(
       StaticPage.getSpec(exampleConfig, 'de', StaticPage.Type.TermsOfUse)
-    ).toEqual(germanTerms)
+    ).toEqual({ ...germanTerms, lang: 'de' })
   })
 
   test('returns English version when requested Spec does not exist', () => {
     expect(
       StaticPage.getSpec(exampleConfig, 'fr', StaticPage.Type.Imprint)
-    ).toEqual(englishImprint)
+    ).toEqual({ ...englishImprint, lang: 'en' })
   })
 
   test('returns null when no Spec or English Spec can be found', () => {
@@ -95,10 +98,12 @@ describe('getSpec()', () => {
 
 describe('getPage()', () => {
   const exampleSpec: StaticPage.Spec = {
+    lang: 'en',
     title: 'Imprint',
     url: 'http://example.org/'
   }
   const exampleSpecMarkdown: StaticPage.Spec = {
+    lang: 'de',
     title: 'Imprint',
     url: 'http://example.org/imprint.md'
   }
@@ -117,6 +122,7 @@ describe('getPage()', () => {
       fetch.mockReturnValueOnce(new Response('# Hello World'))
 
       expect(await StaticPage.getPage(exampleSpecMarkdown)).toEqual({
+        lang: 'de',
         title: 'Imprint',
         content: '<h1>Hello World</h1>'
       })
@@ -128,6 +134,7 @@ describe('getPage()', () => {
       fetch.mockReturnValueOnce(new Response('<h1>Hello World</h1>'))
 
       expect(await StaticPage.getPage(exampleSpec)).toEqual({
+        lang: 'en',
         title: 'Imprint',
         content: '<h1>Hello World</h1>'
       })
@@ -142,6 +149,7 @@ describe('getPage()', () => {
         )
 
         expect(await StaticPage.getPage(exampleSpec)).toEqual({
+          lang: 'en',
           title: 'Imprint',
           content: '<h1>Hello World</h1>'
         })
@@ -155,6 +163,7 @@ describe('getPage()', () => {
         )
 
         expect(await StaticPage.getPage(exampleSpecMarkdown)).toEqual({
+          lang: 'de',
           title: 'Imprint',
           content: '<p>Hello</p>'
         })

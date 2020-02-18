@@ -42,10 +42,15 @@ export const config: StaticPagesConfig = {
   }
 }
 
+export interface StaticPageConfig {
+  title: string
+  url: string
+}
+
 export type StaticPagesConfig = {
   readonly [K1 in LanguageCode]?: {
     readonly staticPages: {
-      readonly [K2 in StaticPage.Type]?: StaticPage.Spec
+      readonly [K2 in StaticPage.Type]?: StaticPageConfig
     }
   }
 }

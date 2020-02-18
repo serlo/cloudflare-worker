@@ -30,18 +30,20 @@ export enum Type {
 }
 
 export interface Spec {
+  lang: LanguageCode
   title: string
   url: string
 }
 
 export interface Page {
+  lang: LanguageCode
   title: string
   content: string
 }
 
 export function StaticPageView(page: Page) {
   return (
-    <Template title={page.title} lang="en">
+    <Template title={page.title} lang={page.lang}>
       <div dangerouslySetInnerHTML={{ __html: page.content }} />
     </Template>
   )
@@ -55,6 +57,7 @@ export async function getPage(spec: Spec): Promise<Page | null> {
     const content = spec.url.endsWith('.md') ? markdownToHtml(text) : text
 
     return {
+      lang: spec.lang,
       title: spec.title,
       content: sanitizeHtml(content)
     }
@@ -71,7 +74,7 @@ export function getSpec(
   const result = config[lang]?.staticPages?.[pageType]
 
   if (result !== undefined) {
-    return result
+    return { ...result, lang }
   } else if (lang !== 'en') {
     return getSpec(config, 'en', pageType)
   } else {
