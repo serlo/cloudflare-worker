@@ -47,7 +47,7 @@ beforeEach(() => {
 
 describe('Maintenance mode', () => {
   test('Disabled (no maintenance planned)', async () => {
-    mockMaintenanceKV({ start: null, end: null })
+    mockMaintenanceKV({})
     await handleRequest('https://de.serlo.org')
     expectFetchToHaveBeenCalledWithRequest({
       url: 'https://de.serlo.org'
@@ -55,10 +55,17 @@ describe('Maintenance mode', () => {
   })
 
   test('Disabled (before scheduled maintenance)', async () => {
-    const now = Date.now()
+    const value = {
+      start: DateTime.local()
+        .plus({ minutes: 10 })
+        .toISO(),
+      end: DateTime.local()
+        .plus({ minutes: 20 })
+        .toISO(),
+      subdomains: ['de']
+    }
     mockMaintenanceKV({
-      start: new Date(now + minutesToMilliSeconds(10)).toISOString(),
-      end: new Date(now + minutesToMilliSeconds(20)).toISOString()
+      enabled: JSON.stringify(value)
     })
     await handleRequest('https://de.serlo.org')
     expectFetchToHaveBeenCalledWithRequest({
@@ -67,10 +74,17 @@ describe('Maintenance mode', () => {
   })
 
   test('Disabled (after scheduled maintenance)', async () => {
-    const now = Date.now()
+    const value = {
+      start: DateTime.local()
+        .minus({ minutes: 20 })
+        .toISO(),
+      end: DateTime.local()
+        .minus({ minutes: 10 })
+        .toISO(),
+      subdomains: ['de']
+    }
     mockMaintenanceKV({
-      start: new Date(now - minutesToMilliSeconds(20)).toISOString(),
-      end: new Date(now - minutesToMilliSeconds(10)).toISOString()
+      enabled: JSON.stringify(value)
     })
     await handleRequest('https://de.serlo.org')
     expectFetchToHaveBeenCalledWithRequest({
@@ -79,11 +93,16 @@ describe('Maintenance mode', () => {
   })
 
   test('Enabled (de, w/ end)', async () => {
-    const start = DateTime.local().minus({ minutes: 10 })
     const end = DateTime.local().plus({ minutes: 10 })
+    const value = {
+      start: DateTime.local()
+        .minus({ minutes: 10 })
+        .toISO(),
+      end: end.toISO(),
+      subdomains: ['de']
+    }
     mockMaintenanceKV({
-      start: start.toISO(),
-      end: end.toISO()
+      enabled: JSON.stringify(value)
     })
     const { html, init } = await handleRequest('https://de.serlo.org')
     expect(init && init.status).toEqual(503)
@@ -100,11 +119,16 @@ describe('Maintenance mode', () => {
   })
 
   test('Enabled (en, w/ end)', async () => {
-    const start = DateTime.local().minus({ minutes: 10 })
     const end = DateTime.local().plus({ minutes: 10 })
+    const value = {
+      start: DateTime.local()
+        .minus({ minutes: 10 })
+        .toISO(),
+      end: end.toISO(),
+      subdomains: ['en']
+    }
     mockMaintenanceKV({
-      start: start.toISO(),
-      end: end.toISO()
+      enabled: JSON.stringify(value)
     })
     const { html, init } = await handleRequest('https://en.serlo.org')
     expect(init && init.status).toEqual(503)
@@ -121,10 +145,14 @@ describe('Maintenance mode', () => {
   })
 
   test('Enabled (de, w/o end)', async () => {
-    const start = DateTime.local().minus({ minutes: 10 })
+    const value = {
+      start: DateTime.local()
+        .minus({ minutes: 10 })
+        .toISO(),
+      subdomains: ['de']
+    }
     mockMaintenanceKV({
-      start: start.toISO(),
-      end: null
+      enabled: JSON.stringify(value)
     })
     const { html, init } = await handleRequest('https://de.serlo.org')
     expect(init && init.status).toEqual(503)
@@ -136,10 +164,14 @@ describe('Maintenance mode', () => {
   })
 
   test('Enabled (en, w/o end)', async () => {
-    const start = DateTime.local().minus({ minutes: 10 })
+    const value = {
+      start: DateTime.local()
+        .minus({ minutes: 10 })
+        .toISO(),
+      subdomains: ['en']
+    }
     mockMaintenanceKV({
-      start: start.toISO(),
-      end: null
+      enabled: JSON.stringify(value)
     })
     const { html, init } = await handleRequest('https://en.serlo.org')
     expect(init && init.status).toEqual(503)
@@ -149,6 +181,40 @@ describe('Maintenance mode', () => {
     expect(html).toContain('Maintenance mode')
     expect(html).toContain('We expect to be back in a couple of hours.')
   })
+
+  test('Enabled (different subdomain, w/ end)', async () => {
+    const end = DateTime.local().plus({ minutes: 10 })
+    const value = {
+      start: DateTime.local()
+        .minus({ minutes: 10 })
+        .toISO(),
+      end: end.toISO(),
+      subdomains: ['en']
+    }
+    mockMaintenanceKV({
+      enabled: JSON.stringify(value)
+    })
+    await handleRequest('https://de.serlo.org')
+    expectFetchToHaveBeenCalledWithRequest({
+      url: 'https://de.serlo.org'
+    } as Request)
+  })
+
+  test('Enabled (different subdomain, w/o end)', async () => {
+    const value = {
+      start: DateTime.local()
+        .minus({ minutes: 10 })
+        .toISO(),
+      subdomains: ['en']
+    }
+    mockMaintenanceKV({
+      enabled: JSON.stringify(value)
+    })
+    await handleRequest('https://de.serlo.org')
+    expectFetchToHaveBeenCalledWithRequest({
+      url: 'https://de.serlo.org'
+    } as Request)
+  })
 })
 
 async function handleRequest(url: string): Promise<ResponseMock> {
@@ -156,28 +222,13 @@ async function handleRequest(url: string): Promise<ResponseMock> {
   return (response as unknown) as ResponseMock
 }
 
-function mockMaintenanceKV({
-  start,
-  end
-}: {
-  start: string | null
-  end: string | null
-}) {
+function mockMaintenanceKV(values: Record<string, unknown>) {
   // @ts-ignore
   window['MAINTENANCE_KV'] = {
-    async get(key: 'start' | 'end') {
-      switch (key) {
-        case 'start':
-          return start
-        case 'end':
-          return end
-      }
+    async get(key: string) {
+      return values[key] || null
     }
   }
-}
-
-function minutesToMilliSeconds(minutes: number) {
-  return minutes * 60 * 1000
 }
 
 function expectFetchToHaveBeenCalledWithRequest(request: Request) {

@@ -20,8 +20,7 @@
  * @link      https://github.com/serlo-org/serlo.org for the canonical source repository
  */
 declare var MAINTENANCE_KV: {
-  get(key: 'start'): Promise<string | null>
-  get(key: 'end'): Promise<string | null>
+  get(key: 'enabled'): Promise<string | null>
 }
 declare var PACKAGES_KV: {
   get(key: string): Promise<string | null>
