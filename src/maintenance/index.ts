@@ -25,12 +25,14 @@ import { render } from './render'
 import { getSubdomain } from '../url-utils'
 
 export async function maintenanceMode(request: Request) {
-  const startISO = await MAINTENANCE_KV.get('start')
+  const enabled = await MAINTENANCE_KV.get('enabled')
+  if (!enabled) return null
+  const { start: startISO, end: endISO, subdomains = [] } = JSON.parse(enabled)
+  if (!subdomains.includes(getSubdomain(request.url))) return null
   if (!startISO) return null
   const now = DateTime.local()
   const start = DateTime.fromISO(startISO)
   if (now < start) return null
-  const endISO = await MAINTENANCE_KV.get('end')
   if (endISO) {
     const end = DateTime.fromISO(endISO)
     if (now > end) return null
