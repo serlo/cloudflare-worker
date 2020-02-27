@@ -19,13 +19,12 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { StaticPagesConfig } from '../../src/static-pages/config'
-import * as StaticPage from '../../src/static-pages/static-page'
+import * as StaticPage from '../src/static-pages'
 import { render } from '@testing-library/preact'
 
 test('StaticPageView()', () => {
   const html = render(
-    StaticPage.StaticPageView({
+    StaticPage.UnrevisedPageView({
       lang: 'de',
       title: 'Imprint',
       content: '<p>Hello World</p>'
@@ -51,47 +50,55 @@ describe('getSpec()', () => {
     title: 'Nutzungsbedingungen',
     url: 'ftp://serlo.org/terms'
   }
-  const exampleConfig: StaticPagesConfig = {
+  const exampleConfig: StaticPage.UnrevisedConfig = {
     en: {
-      staticPages: {
-        imprint: englishImprint
-      }
+      imprint: englishImprint
     },
     de: {
-      staticPages: {
-        imprint: germanImprint,
-        terms: germanTerms
-      }
+      imprint: germanImprint,
+      terms: germanTerms
     }
   }
 
   test('returns Spec when it exists', () => {
     expect(
-      StaticPage.getSpec(exampleConfig, 'en', StaticPage.Type.Imprint)
+      StaticPage.getSpec(exampleConfig, 'en', StaticPage.UnrevisedType.Imprint)
     ).toEqual({ ...englishImprint, lang: 'en' })
 
     expect(
-      StaticPage.getSpec(exampleConfig, 'de', StaticPage.Type.Imprint)
+      StaticPage.getSpec(exampleConfig, 'de', StaticPage.UnrevisedType.Imprint)
     ).toEqual({ ...germanImprint, lang: 'de' })
 
     expect(
-      StaticPage.getSpec(exampleConfig, 'de', StaticPage.Type.TermsOfUse)
+      StaticPage.getSpec(
+        exampleConfig,
+        'de',
+        StaticPage.UnrevisedType.TermsOfUse
+      )
     ).toEqual({ ...germanTerms, lang: 'de' })
   })
 
   test('returns English version when requested Spec does not exist', () => {
     expect(
-      StaticPage.getSpec(exampleConfig, 'fr', StaticPage.Type.Imprint)
+      StaticPage.getSpec(exampleConfig, 'fr', StaticPage.UnrevisedType.Imprint)
     ).toEqual({ ...englishImprint, lang: 'en' })
   })
 
   test('returns null when no Spec or English Spec can be found', () => {
     expect(
-      StaticPage.getSpec(exampleConfig, 'fr', StaticPage.Type.TermsOfUse)
+      StaticPage.getSpec(
+        exampleConfig,
+        'fr',
+        StaticPage.UnrevisedType.TermsOfUse
+      )
     ).toBeNull()
 
     expect(
-      StaticPage.getSpec(exampleConfig, 'en', StaticPage.Type.TermsOfUse)
+      StaticPage.getSpec(
+        exampleConfig,
+        'en',
+        StaticPage.UnrevisedType.TermsOfUse
+      )
     ).toBeNull()
   })
 })

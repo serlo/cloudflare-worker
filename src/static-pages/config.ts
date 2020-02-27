@@ -19,39 +19,61 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { LanguageCode } from '../utils'
-import * as StaticPage from './static-page'
+import { LanguageCode, ALL_LANGUAGE_CODES } from '../utils'
+import {
+  RevisedConfig,
+  UnrevisedConfig,
+  UnrevisedType,
+  RevisedType,
+  SpecBase,
+  Revised
+} from './'
 
 const legalRepo = 'https://raw.githubusercontent.com/serlo/serlo.org-legal'
 
-export const config: StaticPagesConfig = {
+const config: BaseConfig = {
   en: {
-    staticPages: {
+    unrevised: {
       imprint: {
         title: 'Imprint',
         url: `${legalRepo}/master/en/imprint.md`
       }
-    }
+    },
+    revised: {}
   },
   de: {
-    staticPages: {
+    unrevised: {
       imprint: {
         title: 'Impressum',
         url: `${legalRepo}/master/de/imprint.md`
       }
-    }
+    },
+    revised: {}
   }
 }
 
-export interface StaticPageConfig {
-  title: string
-  url: string
-}
+export const unrevisedConfig = toUnrevisedConfig(config)
+export const revisedConfig = toRevisedConfig(config)
 
-export type StaticPagesConfig = {
+type BaseConfig = {
   readonly [K1 in LanguageCode]?: {
-    readonly staticPages: {
-      readonly [K2 in StaticPage.Type]?: StaticPageConfig
+    readonly unrevised: {
+      readonly [K2 in UnrevisedType]?: SpecBase
+    }
+    readonly revised: {
+      readonly [K3 in RevisedType]?: Revised<SpecBase>[]
     }
   }
+}
+
+function toUnrevisedConfig(config: BaseConfig): UnrevisedConfig {
+  return Object.fromEntries(
+    ALL_LANGUAGE_CODES.map(lang => [lang, config[lang]?.unrevised])
+  )
+}
+
+function toRevisedConfig(config: BaseConfig): RevisedConfig {
+  return Object.fromEntries(
+    ALL_LANGUAGE_CODES.map(lang => [lang, config[lang]?.revised])
+  )
 }

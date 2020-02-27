@@ -19,20 +19,28 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { StaticPagesConfig } from './config'
 import { sanitizeHtml, markdownToHtml, LanguageCode } from '../utils'
 import { Template } from '../ui'
 import { h } from 'preact'
 
-export enum Type {
+const defaultLanguage: LanguageCode = 'en'
+
+export enum UnrevisedType {
   Imprint = 'imprint',
   TermsOfUse = 'terms'
 }
 
-export interface Spec {
-  lang: LanguageCode
+export enum RevisedType {
+  Privacy = 'privacy'
+}
+
+export interface SpecBase {
   title: string
   url: string
+}
+
+export interface Spec extends SpecBase {
+  lang: LanguageCode
 }
 
 export interface Page {
@@ -41,7 +49,18 @@ export interface Page {
   content: string
 }
 
-export function StaticPageView(page: Page) {
+export type Revised<A extends object> = A & { revision: Date }
+
+export type UnrevisedConfig = Config<UnrevisedType, SpecBase>
+export type RevisedConfig = Config<RevisedType, Revised<SpecBase>[]>
+
+type Config<A extends string, B> = {
+  readonly [K1 in LanguageCode]?: {
+    [K2 in A]?: B
+  }
+}
+
+export function UnrevisedPageView(page: Page) {
   return (
     <Template title={page.title} lang={page.lang}>
       <div dangerouslySetInnerHTML={{ __html: page.content }} />
@@ -67,16 +86,31 @@ export async function getPage(spec: Spec): Promise<Page | null> {
 }
 
 export function getSpec(
-  config: StaticPagesConfig,
+  config: UnrevisedConfig,
   lang: LanguageCode,
-  pageType: Type
+  unrevisedType: UnrevisedType
 ): Spec | null {
-  const result = config[lang]?.staticPages?.[pageType]
+  const result = getSpecBaseAndLanguage(config, lang, unrevisedType)
+
+  return result === null ? null : toSpec(result[0], result[1])
+}
+
+function toSpec(base: SpecBase, lang: LanguageCode): Spec {
+  return { ...base, lang }
+}
+
+function getSpecBaseAndLanguage<A extends string, B>(
+  config: Config<A, B>,
+  lang: LanguageCode,
+  kind: A
+): [B, LanguageCode] | null {
+  // See https://stackoverflow.com/q/60400208 why the typecast is necessary
+  const result = config[lang]?.[kind] as B | undefined
 
   if (result !== undefined) {
-    return { ...result, lang }
-  } else if (lang !== 'en') {
-    return getSpec(config, 'en', pageType)
+    return [result, lang]
+  } else if (lang !== defaultLanguage) {
+    return getSpecBaseAndLanguage(config, defaultLanguage, kind)
   } else {
     return null
   }
