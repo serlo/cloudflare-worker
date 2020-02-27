@@ -1,12 +1,13 @@
-import { StaticPageView } from '../src/static-pages/static-page'
+import { UnrevisedPageView } from '../src/static-pages'
 
 export default {
-  component: StaticPageView,
+  component: UnrevisedPageView,
   title: 'static-pages'
 }
 
-export function ExampleStaticPage() {
-  return StaticPageView({
+export function ExampleUnrevisedPage() {
+  return UnrevisedPageView({
+    lang: 'en',
     title: 'Imprint',
     content: '<h1>Imprint</h1><p>Hello World. This is an imprint.</p>'
   })
