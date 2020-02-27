@@ -85,6 +85,22 @@ export async function getPage(spec: Spec): Promise<Page | null> {
   }
 }
 
+export function getRevisions(
+  config: RevisedConfig,
+  lang: LanguageCode,
+  revisedType: RevisedType
+): Revised<Spec>[] | null {
+  const result = getSpecBaseAndLanguage(config, lang, revisedType)
+
+  if (result === null) {
+    return null
+  } else {
+    const [revisions, lang] = result
+
+    return revisions.map(revision => mapRevised(x => toSpec(x, lang), revision))
+  }
+}
+
 export function getSpec(
   config: UnrevisedConfig,
   lang: LanguageCode,
@@ -93,6 +109,13 @@ export function getSpec(
   const result = getSpecBaseAndLanguage(config, lang, unrevisedType)
 
   return result === null ? null : toSpec(result[0], result[1])
+}
+
+export function mapRevised<A extends object, B extends object>(
+  func: (x: A) => B,
+  arg: Revised<A>
+): Revised<B> {
+  return { ...func(arg), revision: arg.revision }
 }
 
 function toSpec(base: SpecBase, lang: LanguageCode): Spec {
