@@ -22,7 +22,7 @@
 import * as StaticPage from '../src/static-pages'
 import { render } from '@testing-library/preact'
 
-test('StaticPageView()', () => {
+test('UnrevisedPageView()', () => {
   const html = render(
     StaticPage.UnrevisedPageView({
       lang: 'de',
@@ -124,6 +124,72 @@ describe('getPage()', () => {
   })
 })
 
+describe('getRevisions()', () => {
+  const englishRevisions = [
+    {
+      title: 'Foo',
+      url: 'http://example.com/bar',
+      revision: new Date(1995, 11, 17)
+    },
+    {
+      title: 'Hello',
+      url: 'http://example.com/world.md',
+      revision: new Date(2009, 12, 17)
+    }
+  ]
+  const germanRevisions = [
+    {
+      title: 'Imprint',
+      url: 'http://example.org/impressum',
+      revision: new Date(2020, 1, 1)
+    }
+  ]
+  const exampleSpec: StaticPage.RevisedConfig = {
+    en: { privacy: englishRevisions },
+    de: { privacy: germanRevisions }
+  }
+
+  test('returns revisions if they exist in config', () => {
+    expect(
+      StaticPage.getRevisions(exampleSpec, 'en', StaticPage.RevisedType.Privacy)
+    ).toEqual(
+      englishRevisions.map(x => {
+        return { ...x, lang: 'en' }
+      })
+    )
+    expect(
+      StaticPage.getRevisions(exampleSpec, 'de', StaticPage.RevisedType.Privacy)
+    ).toEqual(
+      germanRevisions.map(x => {
+        return { ...x, lang: 'de' }
+      })
+    )
+  })
+
+  test('returns revisions of default language if requested one does not exist', () => {
+    expect(
+      StaticPage.getRevisions(exampleSpec, 'fr', StaticPage.RevisedType.Privacy)
+    ).toEqual(
+      englishRevisions.map(x => {
+        return { ...x, lang: 'en' }
+      })
+    )
+  })
+
+  test('returns null if requested and default revisions do not exist', () => {
+    expect(
+      StaticPage.getRevisions({}, 'en', StaticPage.RevisedType.Privacy)
+    ).toBeNull()
+    expect(
+      StaticPage.getRevisions(
+        { de: { privacy: germanRevisions } },
+        'fr',
+        StaticPage.RevisedType.Privacy
+      )
+    ).toBeNull()
+  })
+})
+
 describe('getSpec()', () => {
   const englishImprint = {
     title: 'English Imprint',
@@ -188,4 +254,15 @@ describe('getSpec()', () => {
       )
     ).toBeNull()
   })
+})
+
+test('mapRevised()', () => {
+  type Foo = { foo: number }
+  const func = (x: Foo) => {
+    return { foo: x.foo ** 2 }
+  }
+
+  expect(
+    StaticPage.mapRevised(func, { foo: 4, revision: new Date(2020, 1, 1) })
+  ).toEqual({ foo: 16, revision: new Date(2020, 1, 1) })
 })
