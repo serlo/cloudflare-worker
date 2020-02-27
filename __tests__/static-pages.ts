@@ -37,72 +37,6 @@ test('StaticPageView()', () => {
   expect(html.getByText('Hello World')).toBeVisible()
 })
 
-describe('getSpec()', () => {
-  const englishImprint = {
-    title: 'English Imprint',
-    url: 'http://example.com/imprint'
-  }
-  const germanImprint = {
-    title: 'German Imprint',
-    url: 'https://example.org/impressum.md'
-  }
-  const germanTerms = {
-    title: 'Nutzungsbedingungen',
-    url: 'ftp://serlo.org/terms'
-  }
-  const exampleConfig: StaticPage.UnrevisedConfig = {
-    en: {
-      imprint: englishImprint
-    },
-    de: {
-      imprint: germanImprint,
-      terms: germanTerms
-    }
-  }
-
-  test('returns Spec when it exists', () => {
-    expect(
-      StaticPage.getSpec(exampleConfig, 'en', StaticPage.UnrevisedType.Imprint)
-    ).toEqual({ ...englishImprint, lang: 'en' })
-
-    expect(
-      StaticPage.getSpec(exampleConfig, 'de', StaticPage.UnrevisedType.Imprint)
-    ).toEqual({ ...germanImprint, lang: 'de' })
-
-    expect(
-      StaticPage.getSpec(
-        exampleConfig,
-        'de',
-        StaticPage.UnrevisedType.TermsOfUse
-      )
-    ).toEqual({ ...germanTerms, lang: 'de' })
-  })
-
-  test('returns English version when requested Spec does not exist', () => {
-    expect(
-      StaticPage.getSpec(exampleConfig, 'fr', StaticPage.UnrevisedType.Imprint)
-    ).toEqual({ ...englishImprint, lang: 'en' })
-  })
-
-  test('returns null when no Spec or English Spec can be found', () => {
-    expect(
-      StaticPage.getSpec(
-        exampleConfig,
-        'fr',
-        StaticPage.UnrevisedType.TermsOfUse
-      )
-    ).toBeNull()
-
-    expect(
-      StaticPage.getSpec(
-        exampleConfig,
-        'en',
-        StaticPage.UnrevisedType.TermsOfUse
-      )
-    ).toBeNull()
-  })
-})
-
 describe('getPage()', () => {
   const exampleSpec: StaticPage.Spec = {
     lang: 'en',
@@ -187,5 +121,71 @@ describe('getPage()', () => {
       expect(await StaticPage.getPage(exampleSpec)).toBeNull()
       expect(fetch).toHaveBeenCalled()
     })
+  })
+})
+
+describe('getSpec()', () => {
+  const englishImprint = {
+    title: 'English Imprint',
+    url: 'http://example.com/imprint'
+  }
+  const germanImprint = {
+    title: 'German Imprint',
+    url: 'https://example.org/impressum.md'
+  }
+  const germanTerms = {
+    title: 'Nutzungsbedingungen',
+    url: 'ftp://serlo.org/terms'
+  }
+  const exampleConfig: StaticPage.UnrevisedConfig = {
+    en: {
+      imprint: englishImprint
+    },
+    de: {
+      imprint: germanImprint,
+      terms: germanTerms
+    }
+  }
+
+  test('returns Spec when it exists', () => {
+    expect(
+      StaticPage.getSpec(exampleConfig, 'en', StaticPage.UnrevisedType.Imprint)
+    ).toEqual({ ...englishImprint, lang: 'en' })
+
+    expect(
+      StaticPage.getSpec(exampleConfig, 'de', StaticPage.UnrevisedType.Imprint)
+    ).toEqual({ ...germanImprint, lang: 'de' })
+
+    expect(
+      StaticPage.getSpec(
+        exampleConfig,
+        'de',
+        StaticPage.UnrevisedType.TermsOfUse
+      )
+    ).toEqual({ ...germanTerms, lang: 'de' })
+  })
+
+  test('returns English version when requested Spec does not exist', () => {
+    expect(
+      StaticPage.getSpec(exampleConfig, 'fr', StaticPage.UnrevisedType.Imprint)
+    ).toEqual({ ...englishImprint, lang: 'en' })
+  })
+
+  test('returns null when no Spec or English Spec can be found', () => {
+    expect(
+      StaticPage.getSpec(
+        exampleConfig,
+        'fr',
+        StaticPage.UnrevisedType.TermsOfUse
+      )
+    ).toBeNull()
+
+    expect(
+      StaticPage.getSpec(
+        exampleConfig,
+        'en',
+        StaticPage.UnrevisedType.TermsOfUse
+      )
+    ).toBeNull()
   })
 })
