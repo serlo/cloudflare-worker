@@ -22,6 +22,126 @@
 import * as StaticPage from '../src/static-pages'
 import { render } from '@testing-library/preact'
 
+let fetch: jest.Mocked<any>
+
+function newMockedFetch() {
+  fetch = jest.fn()
+
+  // @ts-ignore
+  global.fetch = fetch
+}
+
+describe('handleRequest()', () => {
+  beforeAll(newMockedFetch)
+
+  const unrevisedConfig: StaticPage.UnrevisedConfig = {
+    en: {
+      imprint: {
+        title: 'Imprint',
+        url: 'https://example.org/imprint.html'
+      }
+    },
+    de: {
+      terms: {
+        title: 'Nutzungsbedingungen',
+        url: 'https://example.org/terms.md'
+      }
+    }
+  }
+
+  const revisedConfig: StaticPage.RevisedConfig = {
+    de: {
+      privacy: [
+        {
+          title: 'Foo',
+          url: 'http://example.org/1',
+          revision: new Date(2020, 11, 11)
+        },
+        {
+          title: 'Bar',
+          url: 'http://example.org/2',
+          revision: new Date(1999, 9, 9)
+        }
+      ]
+    }
+  }
+
+  async function handleRequest(url: string): Promise<Response | null> {
+    return StaticPage.handleRequest(
+      new Request(url),
+      unrevisedConfig,
+      revisedConfig
+    )
+  }
+
+  describe('returns unrevised page response at /imprint (html specification)', () => {
+    test.each([
+      'https://en.serlo.org/imprint/',
+      'https://de.serlo.org/imprint',
+      'https://fr.serlo.org/imprint/'
+    ])('URL is %p', async url => {
+      fetch.mockReturnValueOnce(new Response('<p>Hello World</p>'))
+
+      const response = (await handleRequest(url)) as Response
+
+      expect(response).not.toBeNull()
+      expect(response.status).toBe(200)
+      expect(await response.text()).toEqual(
+        expect.stringContaining('<p>Hello World</p>')
+      )
+    })
+  })
+
+  test('returns unrevised page response at /terms (markdown specification)', async () => {
+    fetch.mockReturnValueOnce(new Response('# Terms of Use'))
+
+    const url = 'https://de.serlo.org/terms'
+    const response = (await handleRequest(url)) as Response
+
+    expect(response).not.toBeNull()
+    expect(response.status).toBe(200)
+    expect(await response.text()).toEqual(
+      expect.stringContaining('<h1>Terms of Use</h1>')
+    )
+  })
+
+  describe('returns 404 reponse if requested page and its default is not configured', () => {
+    test.each(['https://en.serlo.org/terms/', 'https://fr.serlo.org/terms'])(
+      'URL is %p',
+      async url => {
+        const response = (await handleRequest(url)) as Response
+
+        expect(response).not.toBeNull()
+        expect(response.status).toBe(404)
+      }
+    )
+  })
+
+  describe('returns null if requested domain is no serlo language tenant', () => {
+    test.each([
+      'https://stats.serlo.org/',
+      'https://stats.fr.serlo.org/',
+      'http://serlo.org',
+      'http://gg.serlo.org/',
+      'http://en.serlo.com/imprint',
+      'http://deserlo.org/imprint',
+      'http://en.google.org/imprint'
+    ])('URL is %p', async url => {
+      expect(await handleRequest(url)).toBeNull()
+    })
+  })
+
+  describe('returns null if requested path does not belong to static pages', () => {
+    test.each([
+      'https://en.serlo.org/imprint/foo',
+      'https://en.serlo.org/foo/imprint',
+      'https://en.serlo.org/privacy/jsons'
+    ])(' URL is %p', async url => {
+      expect(await handleRequest(url)).toBeNull()
+    })
+  })
+})
+
 test('UnrevisedPageView()', () => {
   const html = render(
     StaticPage.UnrevisedPageView({
@@ -30,14 +150,17 @@ test('UnrevisedPageView()', () => {
       content: '<p>Hello World</p>'
     })
   )
-  const htmlElement = html.getByText(/.*/, { selector: 'html' })
 
+  const htmlElement = html.getByText(/.*/, { selector: 'html' })
   expect(htmlElement).toHaveAttribute('lang', 'de')
+
   expect(html.getByText('Imprint')).toBeVisible()
   expect(html.getByText('Hello World')).toBeVisible()
 })
 
 describe('getPage()', () => {
+  beforeAll(newMockedFetch)
+
   const exampleSpec: StaticPage.Spec = {
     lang: 'en',
     title: 'Imprint',
@@ -48,15 +171,6 @@ describe('getPage()', () => {
     title: 'Imprint',
     url: 'http://example.org/imprint.md'
   }
-
-  let fetch: jest.Mocked<any>
-
-  beforeAll(() => {
-    fetch = jest.fn()
-
-    // @ts-ignore
-    global.fetch = fetch
-  })
 
   describe('returns page when url can be resolved', () => {
     test('parses reponse as Markdown if url ends with `.md`', async () => {

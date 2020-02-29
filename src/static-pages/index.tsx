@@ -19,9 +19,20 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { sanitizeHtml, markdownToHtml, LanguageCode } from '../utils'
+import {
+  sanitizeHtml,
+  markdownToHtml,
+  LanguageCode,
+  isLanguageCode
+} from '../utils'
+import { getPathnameWithoutTrailingSlash } from '../url-utils'
 import { Template } from '../ui'
+import renderToString from 'preact-render-to-string'
 import { h } from 'preact'
+import {
+  unrevisedConfig as defaultUnrevisedConfig,
+  revisedConfig as defaultRevisedConfig
+} from './config'
 
 const defaultLanguage: LanguageCode = 'en'
 
@@ -58,6 +69,41 @@ type Config<A extends string, B> = {
   readonly [K1 in LanguageCode]?: {
     [K2 in A]?: B
   }
+}
+
+export async function handleRequest(
+  request: Request,
+  unrevisedConfig = defaultUnrevisedConfig,
+  revisedConfig = defaultRevisedConfig
+): Promise<Response | null> {
+  const hostnameParts = new URL(request.url).hostname.split('.')
+
+  if (hostnameParts.length !== 3) return null
+  const [lang, secondLevelDomain, topLevelDomain] = hostnameParts
+
+  if (topLevelDomain !== 'org') return null
+  if (secondLevelDomain !== 'serlo') return null
+  if (!isLanguageCode(lang)) return null
+
+  const path = getPathnameWithoutTrailingSlash(request.url)
+
+  for (const unrevisedType of Object.values(UnrevisedType)) {
+    if (path === `/${unrevisedType}`) {
+      const spec = getSpec(unrevisedConfig, lang, unrevisedType)
+      const page = spec === null ? null : await getPage(spec)
+
+      if (page !== null) {
+        // TODO: Refactor to func
+        return new Response(renderToString(UnrevisedPageView(page)))
+      } else {
+        // TODO: Refactor to external func
+        // TODO: Better Look And Feel
+        return new Response('Page not Found', { status: 404 })
+      }
+    }
+  }
+
+  return null
 }
 
 export function UnrevisedPageView(page: Page) {
