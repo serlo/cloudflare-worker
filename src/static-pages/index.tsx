@@ -131,6 +131,17 @@ export async function getPage(spec: Spec): Promise<Page | null> {
   }
 }
 
+export function getRevisionId<A extends object>(revised: Revised<A>): string {
+  const year = revised.revision.getFullYear()
+  const month = revised.revision.getMonth() + 1
+  const day = revised.revision.getDate()
+
+  const paddedMonth = month.toString().padStart(2, '0')
+  const paddedDay = day.toString().padStart(2, '0')
+
+  return `${year}-${paddedMonth}-${paddedDay}`
+}
+
 export function getRevisions(
   config: RevisedConfig,
   lang: LanguageCode,
