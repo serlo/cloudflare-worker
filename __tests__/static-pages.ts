@@ -242,6 +242,16 @@ describe('getPage()', () => {
   })
 })
 
+describe('getRevisionId()', () => {
+  test.each([
+    [new Date(2020, 0, 3), '2020-01-03'],
+    [new Date(20, 8, 6), '1920-09-06'],
+    [new Date(1988, 11, 11), '1988-12-11']
+  ])('date %p', (date, id) => {
+    expect(StaticPage.getRevisionId({ revision: date })).toBe(id)
+  })
+})
+
 describe('getRevisions()', () => {
   const englishRevisions = [
     {
