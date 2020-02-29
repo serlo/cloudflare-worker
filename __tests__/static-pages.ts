@@ -89,6 +89,8 @@ describe('handleRequest()', () => {
       expect(await response.text()).toEqual(
         expect.stringContaining('<p>Hello World</p>')
       )
+
+      expect(fetch).toHaveBeenCalled()
     })
   })
 
@@ -103,6 +105,8 @@ describe('handleRequest()', () => {
     expect(await response.text()).toEqual(
       expect.stringContaining('<h1>Terms of Use</h1>')
     )
+
+    expect(fetch).toHaveBeenCalled()
   })
 
   describe('returns 404 reponse if requested page and its default is not configured', () => {
