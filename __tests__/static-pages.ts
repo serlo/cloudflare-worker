@@ -50,6 +50,9 @@ describe('handleRequest()', () => {
   }
 
   const revisedConfig: StaticPage.RevisedConfig = {
+    fr: {
+      privacy: []
+    },
     de: {
       privacy: [
         {
@@ -100,6 +103,7 @@ describe('handleRequest()', () => {
     const url = 'https://de.serlo.org/terms'
     const response = (await handleRequest(url)) as Response
 
+    // TODO Test response type is html
     expect(response).not.toBeNull()
     expect(response.status).toBe(200)
     expect(await response.text()).toEqual(
@@ -109,16 +113,30 @@ describe('handleRequest()', () => {
     expect(fetch).toHaveBeenCalled()
   })
 
-  describe('returns 404 reponse if requested page and its default is not configured', () => {
-    test.each(['https://en.serlo.org/terms/', 'https://fr.serlo.org/terms'])(
-      'URL is %p',
-      async url => {
-        const response = (await handleRequest(url)) as Response
+  test('returns list of revision ids for requests at /privacy/json', async () => {
+    const url = 'https://de.serlo.org/privacy/json'
+    const response = (await handleRequest(url)) as Response
 
-        expect(response).not.toBeNull()
-        expect(response.status).toBe(404)
-      }
-    )
+    // TODO: test header type is JSON
+    expect(response).not.toBeNull()
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual(['2020-12-11', '1999-10-09'])
+
+    expect(fetch).toHaveBeenCalled()
+  })
+
+  describe('returns 404 reponse if requested page and its default is not configured', () => {
+    test.each([
+      'https://en.serlo.org/terms/',
+      'https://fr.serlo.org/terms',
+      'https://fr.serlo.org/privacy/json',
+      'https://en.serlo.org/privacy/json'
+    ])('URL is %p', async url => {
+      const response = (await handleRequest(url)) as Response
+
+      expect(response).not.toBeNull()
+      expect(response.status).toBe(404)
+    })
   })
 
   describe('returns null if requested domain is no serlo language tenant', () => {
@@ -138,8 +156,9 @@ describe('handleRequest()', () => {
   describe('returns null if requested path does not belong to static pages', () => {
     test.each([
       'https://en.serlo.org/imprint/foo',
-      'https://en.serlo.org/foo/imprint',
-      'https://en.serlo.org/privacy/jsons'
+      'https://fr.serlo.org/foo/imprint',
+      'https://de.serlo.org/imprint/json',
+      'https://de.serlo.org/privacy/jsons'
     ])(' URL is %p', async url => {
       expect(await handleRequest(url)).toBeNull()
     })
@@ -274,7 +293,8 @@ describe('getRevisions()', () => {
   ]
   const exampleSpec: StaticPage.RevisedConfig = {
     en: { privacy: englishRevisions },
-    de: { privacy: germanRevisions }
+    de: { privacy: germanRevisions },
+    fr: { privacy: [] }
   }
 
   test('returns revisions if they exist in config', () => {

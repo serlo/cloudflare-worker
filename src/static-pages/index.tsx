@@ -103,6 +103,18 @@ export async function handleRequest(
     }
   }
 
+  for (const revisedType of Object.values(RevisedType)) {
+    if (path === `/${revisedType}/json`) {
+      const revisions = getRevisions(revisedConfig, lang, revisedType)
+
+      if (revisions !== null) {
+        return new Response(JSON.stringify(revisions.map(getRevisionId)))
+      } else {
+        return new Response('Page not Found', { status: 404 })
+      }
+    }
+  }
+
   return null
 }
 
@@ -187,7 +199,7 @@ function getSpecBaseAndLanguage<A extends string, B>(
   // See https://stackoverflow.com/q/60400208 why the typecast is necessary
   const result = config[lang]?.[kind] as B | undefined
 
-  if (result !== undefined) {
+  if (result !== undefined && (!Array.isArray(result) || result.length > 0)) {
     return [result, lang]
   } else if (lang !== defaultLanguage) {
     return getSpecBaseAndLanguage(config, defaultLanguage, kind)
