@@ -181,6 +181,24 @@ test('UnrevisedPageView()', () => {
   expect(html.getByText('Hello World')).toBeVisible()
 })
 
+test('RevisedPageView()', () => {
+  const html = render(
+    StaticPage.RevisedPageView({
+      lang: 'en',
+      revision: new Date(2019, 0, 1),
+      title: 'Privacy',
+      content: '<p>Hello World</p>'
+    })
+  )
+
+  const htmlElement = html.getByText(/.*/, { selector: 'html' })
+  expect(htmlElement).toHaveAttribute('lang', 'en')
+
+  expect(html.getByText('Privacy', { selector: 'h1' })).toBeVisible()
+  expect(html.getByText('(1/1/2019)')).toBeVisible()
+  expect(html.getByText('Hello World')).toBeVisible()
+})
+
 describe('getPage()', () => {
   beforeAll(newMockedFetch)
 
@@ -328,6 +346,7 @@ describe('getRevisions()', () => {
     expect(
       StaticPage.getRevisions({}, 'en', StaticPage.RevisedType.Privacy)
     ).toBeNull()
+
     expect(
       StaticPage.getRevisions(
         { de: { privacy: germanRevisions } },
