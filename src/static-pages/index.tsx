@@ -126,6 +126,18 @@ export function UnrevisedPageView(page: Page) {
   )
 }
 
+export function RevisedPageView(page: Revised<Page>) {
+  return (
+    <Template title={page.title} lang={page.lang}>
+      <h1>
+        {page.title}{' '}
+        <small>({page.revision.toLocaleDateString(page.lang)})</small>
+      </h1>
+      <div dangerouslySetInnerHTML={{ __html: page.content }} />
+    </Template>
+  )
+}
+
 export async function getPage(spec: Spec): Promise<Page | null> {
   const response = await fetch(new Request(spec.url))
 
