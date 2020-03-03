@@ -113,6 +113,21 @@ describe('handleRequest()', () => {
     expect(fetch).toHaveBeenCalled()
   })
 
+  test('returns current revisision for requests at /privacy', async () => {
+    fetch.mockReturnValueOnce(new Response('<p>Hello</p>'))
+
+    const url = 'https://de.serlo.org/privacy/'
+    const response = (await handleRequest(url)) as Response
+
+    expect(response).not.toBeNull()
+    expect(response.status).toBe(200)
+    expect(await response.text()).toEqual(
+      expect.stringContaining('<p>Hello</p>')
+    )
+
+    expect(fetch).toHaveBeenCalled()
+  })
+
   test('returns list of revision ids for requests at /privacy/json', async () => {
     const url = 'https://de.serlo.org/privacy/json'
     const response = (await handleRequest(url)) as Response
@@ -121,8 +136,6 @@ describe('handleRequest()', () => {
     expect(response).not.toBeNull()
     expect(response.status).toBe(200)
     expect(await response.json()).toEqual(['2020-12-11', '1999-10-09'])
-
-    expect(fetch).toHaveBeenCalled()
   })
 
   describe('returns 404 reponse if requested page and its default is not configured', () => {
@@ -177,7 +190,7 @@ test('UnrevisedPageView()', () => {
   const htmlElement = html.getByText(/.*/, { selector: 'html' })
   expect(htmlElement).toHaveAttribute('lang', 'de')
 
-  expect(html.getByText('Imprint', { selector: "h1" })).toBeVisible()
+  expect(html.getByText('Imprint', { selector: 'h1' })).toBeVisible()
   expect(html.getByText('Hello World')).toBeVisible()
 })
 
