@@ -121,6 +121,7 @@ export async function handleRequest(
 export function UnrevisedPageView(page: Page) {
   return (
     <Template title={page.title} lang={page.lang}>
+      <h1>{page.title}</h1>
       <div dangerouslySetInnerHTML={{ __html: page.content }} />
     </Template>
   )

@@ -177,7 +177,7 @@ test('UnrevisedPageView()', () => {
   const htmlElement = html.getByText(/.*/, { selector: 'html' })
   expect(htmlElement).toHaveAttribute('lang', 'de')
 
-  expect(html.getByText('Imprint')).toBeVisible()
+  expect(html.getByText('Imprint', { selector: "h1" })).toBeVisible()
   expect(html.getByText('Hello World')).toBeVisible()
 })
 
