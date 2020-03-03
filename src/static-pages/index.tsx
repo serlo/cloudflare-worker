@@ -112,10 +112,27 @@ export async function handleRequest(
       } else {
         return new Response('Page not Found', { status: 404 })
       }
+    } else if (path === `/${revisedType}`) {
+      const revisions = getRevisions(revisedConfig, lang, revisedType)
+      const current = revisions === null ? null : revisions[0]
+      const page = current === null ? null : await getRevisedPage(current)
+
+      if (page !== null) {
+        return new Response(renderToString(RevisedPageView(page)))
+      }
     }
   }
 
   return null
+}
+
+// TODO better solution
+async function getRevisedPage(
+  spec: Revised<Spec>
+): Promise<Revised<Page> | null> {
+  const page = await getPage(spec)
+
+  return page === null ? null : { ...page, revision: spec.revision }
 }
 
 export function UnrevisedPageView(page: Page) {
