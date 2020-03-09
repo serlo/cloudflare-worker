@@ -21,6 +21,7 @@ export function ExampleUnrevisedPage() {
   return UnrevisedPageView({
     lang: 'en',
     title: 'Imprint',
+    url: '',
     content
   })
 }
@@ -30,6 +31,7 @@ export function ExampleRevisedPage() {
     lang: 'en',
     revision: new Date(2020, 0, 10),
     title: 'Privacy',
+    url: '',
     content
   })
 }

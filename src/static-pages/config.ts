@@ -25,7 +25,7 @@ import {
   UnrevisedConfig,
   UnrevisedType,
   RevisedType,
-  SpecBase,
+  Spec,
   Revised
 } from './'
 
@@ -58,10 +58,10 @@ export const revisedConfig = toRevisedConfig(config)
 type BaseConfig = {
   readonly [K1 in LanguageCode]?: {
     readonly unrevised: {
-      readonly [K2 in UnrevisedType]?: SpecBase
+      readonly [K2 in UnrevisedType]?: Spec
     }
     readonly revised: {
-      readonly [K3 in RevisedType]?: Revised<SpecBase>[]
+      readonly [K3 in RevisedType]?: Revised<Spec>[]
     }
   }
 }
