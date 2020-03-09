@@ -1,4 +1,8 @@
-import { UnrevisedPageView, RevisedPageView } from '../src/static-pages'
+import {
+  UnrevisedPageView,
+  RevisedPageView,
+  RevisionsOverview
+} from '../src/static-pages'
 
 export default {
   title: 'static-pages'
@@ -28,4 +32,12 @@ export function ExampleRevisedPage() {
     title: 'Privacy',
     content
   })
+}
+
+export function ExampleRevisionsOverview() {
+  return RevisionsOverview([
+    { revision: new Date(2020, 1, 3), title: 'Privacy', lang: 'en', url: '' },
+    { revision: new Date(1999, 11, 7), title: 'Privacy', lang: 'en', url: '' },
+    { revision: new Date(1990, 4, 5), title: 'Privacy', lang: 'en', url: '' }
+  ])
 }

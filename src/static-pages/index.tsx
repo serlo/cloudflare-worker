@@ -176,6 +176,31 @@ export function RevisedPageView(page: Revised<Page>) {
   )
 }
 
+export function RevisionsOverview(revisions: Revised<Spec>[]) {
+  const current = revisions[0]
+  const title = `Versions: ${current.title}`
+
+  return (
+    <Template title={title} lang={current.lang}>
+      <h1>{title}</h1>
+      There are the following archived versions of {current.title} available:
+      <ul>
+        {revisions.map((rev, index) => {
+          const link = `/${rev.title}/archiv/${getRevisionId(rev)}`
+          return (
+            <li>
+              <a href={link}>
+                {rev.revision.toLocaleDateString(rev.lang)}
+                {index === 0 ? ' (current version)' : ''}
+              </a>
+            </li>
+          )
+        })}
+      </ul>
+    </Template>
+  )
+}
+
 export async function getPage(spec: Spec): Promise<Page | null> {
   const response = await fetch(new Request(spec.url))
 
