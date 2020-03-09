@@ -197,9 +197,9 @@ describe('handleRequest()', () => {
   })
 })
 
-test('UnrevisedPageView()', () => {
+test('UnrevisedPage()', () => {
   const html = render(
-    StaticPage.UnrevisedPageView({
+    StaticPage.UnrevisedPage({
       lang: 'de',
       title: 'Imprint',
       content: '<p>Hello World</p>',
@@ -214,9 +214,9 @@ test('UnrevisedPageView()', () => {
   expect(html.getByText('Hello World')).toBeVisible()
 })
 
-test('RevisedPageView()', () => {
+test('RevisedPage()', () => {
   const html = render(
-    StaticPage.RevisedPageView({
+    StaticPage.RevisedPage({
       lang: 'en',
       revision: new Date(2019, 0, 2),
       title: 'Privacy',

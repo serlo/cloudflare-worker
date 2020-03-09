@@ -94,7 +94,7 @@ export async function handleRequest(
 
       if (page !== null) {
         // TODO: Refactor to func
-        return new Response(renderToString(UnrevisedPageView(page)))
+        return new Response(renderToString(UnrevisedPage(page)))
       } else {
         // TODO: Refactor to external func
         // TODO: Better Look And Feel
@@ -126,7 +126,7 @@ export async function handleRequest(
       const page = archived === null ? null : await fetchContent(archived)
 
       if (page !== null) {
-        return new Response(renderToString(RevisedPageView(page)))
+        return new Response(renderToString(RevisedPage(page)))
       } else {
         return new Response('Page not Found', { status: 404 })
       }
@@ -138,7 +138,7 @@ export async function handleRequest(
       const page = current === null ? null : await fetchContent(current)
 
       if (page !== null) {
-        return new Response(renderToString(RevisedPageView(page)))
+        return new Response(renderToString(RevisedPage(page)))
       }
     }
   }
@@ -146,7 +146,7 @@ export async function handleRequest(
   return null
 }
 
-export function UnrevisedPageView(page: WithContent<Page>) {
+export function UnrevisedPage(page: WithContent<Page>) {
   return (
     <Template title={page.title} lang={page.lang}>
       <h1>{page.title}</h1>
@@ -155,7 +155,7 @@ export function UnrevisedPageView(page: WithContent<Page>) {
   )
 }
 
-export function RevisedPageView(page: WithContent<RevisedPage>) {
+export function RevisedPage(page: WithContent<RevisedPage>) {
   return (
     <Template title={page.title} lang={page.lang}>
       <h1>

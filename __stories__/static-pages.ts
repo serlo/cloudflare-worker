@@ -1,6 +1,6 @@
 import {
-  UnrevisedPageView,
-  RevisedPageView,
+  UnrevisedPage,
+  RevisedPage,
   RevisionsOverview
 } from '../src/static-pages'
 
@@ -18,7 +18,7 @@ tincidunt dui, at congue tellus nun sit amet felis. Mauris sodales euismod
 turpis sit amet tristi que.</p>`
 
 export function ExampleUnrevisedPage() {
-  return UnrevisedPageView({
+  return UnrevisedPage({
     lang: 'en',
     title: 'Imprint',
     url: '',
@@ -27,7 +27,7 @@ export function ExampleUnrevisedPage() {
 }
 
 export function ExampleRevisedPage() {
-  return RevisedPageView({
+  return RevisedPage({
     lang: 'en',
     revision: new Date(2020, 0, 10),
     title: 'Privacy',
