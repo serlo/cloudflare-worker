@@ -45,25 +45,25 @@ export enum RevisedType {
   Privacy = 'privacy'
 }
 
-export interface SpecBase {
+export interface Spec {
   title: string
   url: string
 }
 
-export interface Spec extends SpecBase {
+export interface Page extends Spec {
   lang: LanguageCode
 }
 
-export interface Page {
-  lang: LanguageCode
-  title: string
-  content: string
+export interface RevisedPage extends Page {
+  revision: Date
 }
+
+export type WithContent<A extends Spec> = A & { content: string }
 
 export type Revised<A extends object> = A & { revision: Date }
 
-export type UnrevisedConfig = Config<UnrevisedType, SpecBase>
-export type RevisedConfig = Config<RevisedType, Revised<SpecBase>[]>
+export type UnrevisedConfig = Config<UnrevisedType, Spec>
+export type RevisedConfig = Config<RevisedType, Revised<Spec>[]>
 
 type Config<A extends string, B> = {
   readonly [K1 in LanguageCode]?: {
@@ -89,8 +89,8 @@ export async function handleRequest(
 
   for (const unrevisedType of Object.values(UnrevisedType)) {
     if (path === `/${unrevisedType}`) {
-      const spec = getSpec(unrevisedConfig, lang, unrevisedType)
-      const page = spec === null ? null : await getPage(spec)
+      const spec = getPage(unrevisedConfig, lang, unrevisedType)
+      const page = spec === null ? null : await fetchContent(spec)
 
       if (page !== null) {
         // TODO: Refactor to func
@@ -123,7 +123,7 @@ export async function handleRequest(
         revisions === null
           ? null
           : findRevisionById(revisions, archivedMatch[1])
-      const page = archived === null ? null : await getRevisedPage(archived)
+      const page = archived === null ? null : await fetchContent(archived)
 
       if (page !== null) {
         return new Response(renderToString(RevisedPageView(page)))
@@ -135,7 +135,7 @@ export async function handleRequest(
     if (path === `/${revisedType}`) {
       const revisions = getRevisions(revisedConfig, lang, revisedType)
       const current = revisions === null ? null : revisions[0]
-      const page = current === null ? null : await getRevisedPage(current)
+      const page = current === null ? null : await fetchContent(current)
 
       if (page !== null) {
         return new Response(renderToString(RevisedPageView(page)))
@@ -146,16 +146,7 @@ export async function handleRequest(
   return null
 }
 
-// TODO better solution
-async function getRevisedPage(
-  spec: Revised<Spec>
-): Promise<Revised<Page> | null> {
-  const page = await getPage(spec)
-
-  return page === null ? null : { ...page, revision: spec.revision }
-}
-
-export function UnrevisedPageView(page: Page) {
+export function UnrevisedPageView(page: WithContent<Page>) {
   return (
     <Template title={page.title} lang={page.lang}>
       <h1>{page.title}</h1>
@@ -164,7 +155,7 @@ export function UnrevisedPageView(page: Page) {
   )
 }
 
-export function RevisedPageView(page: Revised<Page>) {
+export function RevisedPageView(page: WithContent<RevisedPage>) {
   return (
     <Template title={page.title} lang={page.lang}>
       <h1>
@@ -176,7 +167,7 @@ export function RevisedPageView(page: Revised<Page>) {
   )
 }
 
-export function RevisionsOverview(revisions: Revised<Spec>[]) {
+export function RevisionsOverview(revisions: RevisedPage[]) {
   const current = revisions[0]
   const title = `Versions: ${current.title}`
 
@@ -201,16 +192,17 @@ export function RevisionsOverview(revisions: Revised<Spec>[]) {
   )
 }
 
-export async function getPage(spec: Spec): Promise<Page | null> {
-  const response = await fetch(new Request(spec.url))
+export async function fetchContent<A extends Page>(
+  page: A
+): Promise<WithContent<A> | null> {
+  const response = await fetch(new Request(page.url))
 
   if (response.ok) {
     const text = await response.text()
-    const content = spec.url.endsWith('.md') ? markdownToHtml(text) : text
+    const content = page.url.endsWith('.md') ? markdownToHtml(text) : text
 
     return {
-      lang: spec.lang,
-      title: spec.title,
+      ...page,
       content: sanitizeHtml(content)
     }
   } else {
@@ -240,26 +232,26 @@ export function getRevisions(
   config: RevisedConfig,
   lang: LanguageCode,
   revisedType: RevisedType
-): Revised<Spec>[] | null {
-  const result = getSpecBaseAndLanguage(config, lang, revisedType)
+): Revised<Page>[] | null {
+  const result = getSpecAndLanguage(config, lang, revisedType)
 
   if (result === null) {
     return null
   } else {
     const [revisions, lang] = result
 
-    return revisions.map(revision => mapRevised(x => toSpec(x, lang), revision))
+    return revisions.map(revision => mapRevised(x => toPage(x, lang), revision))
   }
 }
 
-export function getSpec(
+export function getPage(
   config: UnrevisedConfig,
   lang: LanguageCode,
   unrevisedType: UnrevisedType
-): Spec | null {
-  const result = getSpecBaseAndLanguage(config, lang, unrevisedType)
+): Page | null {
+  const result = getSpecAndLanguage(config, lang, unrevisedType)
 
-  return result === null ? null : toSpec(result[0], result[1])
+  return result === null ? null : toPage(result[0], result[1])
 }
 
 export function mapRevised<A extends object, B extends object>(
@@ -269,11 +261,11 @@ export function mapRevised<A extends object, B extends object>(
   return { ...func(arg), revision: arg.revision }
 }
 
-function toSpec(base: SpecBase, lang: LanguageCode): Spec {
+function toPage(base: Spec, lang: LanguageCode): Page {
   return { ...base, lang }
 }
 
-function getSpecBaseAndLanguage<A extends string, B>(
+function getSpecAndLanguage<A extends string, B>(
   config: Config<A, B>,
   lang: LanguageCode,
   kind: A
@@ -284,7 +276,7 @@ function getSpecBaseAndLanguage<A extends string, B>(
   if (result !== undefined && (!Array.isArray(result) || result.length > 0)) {
     return [result, lang]
   } else if (lang !== defaultLanguage) {
-    return getSpecBaseAndLanguage(config, defaultLanguage, kind)
+    return getSpecAndLanguage(config, defaultLanguage, kind)
   } else {
     return null
   }

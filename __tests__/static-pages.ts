@@ -202,7 +202,8 @@ test('UnrevisedPageView()', () => {
     StaticPage.UnrevisedPageView({
       lang: 'de',
       title: 'Imprint',
-      content: '<p>Hello World</p>'
+      content: '<p>Hello World</p>',
+      url: ''
     })
   )
 
@@ -219,7 +220,8 @@ test('RevisedPageView()', () => {
       lang: 'en',
       revision: new Date(2019, 0, 2),
       title: 'Privacy',
-      content: '<p>Hello World</p>'
+      content: '<p>Hello World</p>',
+      url: ''
     })
   )
 
@@ -231,15 +233,15 @@ test('RevisedPageView()', () => {
   expect(html.getByText('Hello World')).toBeVisible()
 })
 
-describe('getPage()', () => {
+describe('fetchContent()', () => {
   beforeAll(newMockedFetch)
 
-  const exampleSpec: StaticPage.Spec = {
+  const exampleSpec: StaticPage.Page = {
     lang: 'en',
     title: 'Imprint',
     url: 'http://example.org/'
   }
-  const exampleSpecMarkdown: StaticPage.Spec = {
+  const exampleSpecMarkdown: StaticPage.Page = {
     lang: 'de',
     title: 'Imprint',
     url: 'http://example.org/imprint.md'
@@ -249,10 +251,11 @@ describe('getPage()', () => {
     test('parses reponse as Markdown if url ends with `.md`', async () => {
       fetch.mockReturnValueOnce(new Response('# Hello World'))
 
-      expect(await StaticPage.getPage(exampleSpecMarkdown)).toEqual({
+      expect(await StaticPage.fetchContent(exampleSpecMarkdown)).toEqual({
         lang: 'de',
         title: 'Imprint',
-        content: '<h1>Hello World</h1>'
+        content: '<h1>Hello World</h1>',
+        url: 'http://example.org/imprint.md'
       })
 
       expect(fetch).toHaveBeenCalled()
@@ -261,10 +264,11 @@ describe('getPage()', () => {
     test('returns response content when url does not end with `.md`', async () => {
       fetch.mockReturnValueOnce(new Response('<h1>Hello World</h1>'))
 
-      expect(await StaticPage.getPage(exampleSpec)).toEqual({
+      expect(await StaticPage.fetchContent(exampleSpec)).toEqual({
         lang: 'en',
         title: 'Imprint',
-        content: '<h1>Hello World</h1>'
+        content: '<h1>Hello World</h1>',
+        url: 'http://example.org/'
       })
 
       expect(fetch).toHaveBeenCalled()
@@ -276,10 +280,11 @@ describe('getPage()', () => {
           new Response('<h1>Hello World</h1><script>alert(42)</script>')
         )
 
-        expect(await StaticPage.getPage(exampleSpec)).toEqual({
+        expect(await StaticPage.fetchContent(exampleSpec)).toEqual({
           lang: 'en',
           title: 'Imprint',
-          content: '<h1>Hello World</h1>'
+          content: '<h1>Hello World</h1>',
+          url: 'http://example.org/'
         })
 
         expect(fetch).toHaveBeenCalled()
@@ -290,10 +295,11 @@ describe('getPage()', () => {
           new Response('Hello\n<iframe src="http://serlo.org/">')
         )
 
-        expect(await StaticPage.getPage(exampleSpecMarkdown)).toEqual({
+        expect(await StaticPage.fetchContent(exampleSpecMarkdown)).toEqual({
           lang: 'de',
           title: 'Imprint',
-          content: '<p>Hello</p>'
+          content: '<p>Hello</p>',
+          url: 'http://example.org/imprint.md'
         })
 
         expect(fetch).toHaveBeenCalled()
@@ -305,7 +311,7 @@ describe('getPage()', () => {
     test.each([301, 404, 500])('status code %p', async code => {
       fetch.mockReturnValueOnce(new Response('', { status: code }))
 
-      expect(await StaticPage.getPage(exampleSpec)).toBeNull()
+      expect(await StaticPage.fetchContent(exampleSpec)).toBeNull()
       expect(fetch).toHaveBeenCalled()
     })
   })
@@ -415,7 +421,7 @@ describe('getRevisions()', () => {
   })
 })
 
-describe('getSpec()', () => {
+describe('getPage()', () => {
   const englishImprint = {
     title: 'English Imprint',
     url: 'http://example.com/imprint'
@@ -440,15 +446,15 @@ describe('getSpec()', () => {
 
   test('returns Spec when it exists', () => {
     expect(
-      StaticPage.getSpec(exampleConfig, 'en', StaticPage.UnrevisedType.Imprint)
+      StaticPage.getPage(exampleConfig, 'en', StaticPage.UnrevisedType.Imprint)
     ).toEqual({ ...englishImprint, lang: 'en' })
 
     expect(
-      StaticPage.getSpec(exampleConfig, 'de', StaticPage.UnrevisedType.Imprint)
+      StaticPage.getPage(exampleConfig, 'de', StaticPage.UnrevisedType.Imprint)
     ).toEqual({ ...germanImprint, lang: 'de' })
 
     expect(
-      StaticPage.getSpec(
+      StaticPage.getPage(
         exampleConfig,
         'de',
         StaticPage.UnrevisedType.TermsOfUse
@@ -458,13 +464,13 @@ describe('getSpec()', () => {
 
   test('returns English version when requested Spec does not exist', () => {
     expect(
-      StaticPage.getSpec(exampleConfig, 'fr', StaticPage.UnrevisedType.Imprint)
+      StaticPage.getPage(exampleConfig, 'fr', StaticPage.UnrevisedType.Imprint)
     ).toEqual({ ...englishImprint, lang: 'en' })
   })
 
   test('returns null when no Spec or English Spec can be found', () => {
     expect(
-      StaticPage.getSpec(
+      StaticPage.getPage(
         exampleConfig,
         'fr',
         StaticPage.UnrevisedType.TermsOfUse
@@ -472,7 +478,7 @@ describe('getSpec()', () => {
     ).toBeNull()
 
     expect(
-      StaticPage.getSpec(
+      StaticPage.getPage(
         exampleConfig,
         'en',
         StaticPage.UnrevisedType.TermsOfUse
