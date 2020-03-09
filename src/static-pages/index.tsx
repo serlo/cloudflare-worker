@@ -173,6 +173,10 @@ export async function getPage(spec: Spec): Promise<Page | null> {
   }
 }
 
+export function findRevisionById<A extends object>(revisions: Revised<A>[], id: string): Revised<A> | null {
+  return revisions.find(x => getRevisionId(x) === id) ?? null
+}
+
 export function getRevisionId<A extends object>(revised: Revised<A>): string {
   const year = revised.revision.getFullYear()
   const month = revised.revision.getMonth() + 1
