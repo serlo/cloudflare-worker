@@ -121,9 +121,26 @@ describe('handleRequest()', () => {
 
     expect(response).not.toBeNull()
     expect(response.status).toBe(200)
-    expect(await response.text()).toEqual(
-      expect.stringContaining('<p>Hello</p>')
-    )
+
+    const text = await response.text()
+    expect(text).toEqual(expect.stringContaining('<p>Hello</p>'))
+    expect(text).toEqual(expect.stringContaining('(12/11/2020)'))
+
+    expect(fetch).toHaveBeenCalled()
+  })
+
+  test('returns archived revision for requests at /privacy/archiv/<id>', async () => {
+    fetch.mockReturnValueOnce(new Response('<p>Hello</p>'))
+
+    const url = 'https://de.serlo.org/privacy/archiv/1999-10-09'
+    const response = (await handleRequest(url)) as Response
+
+    expect(response).not.toBeNull()
+    expect(response.status).toBe(200)
+
+    const text = await response.text()
+    expect(text).toEqual(expect.stringContaining('<p>Hello</p>'))
+    expect(text).toEqual(expect.stringContaining('(10/9/1999)'))
 
     expect(fetch).toHaveBeenCalled()
   })
@@ -143,7 +160,9 @@ describe('handleRequest()', () => {
       'https://en.serlo.org/terms/',
       'https://fr.serlo.org/terms',
       'https://fr.serlo.org/privacy/json',
-      'https://en.serlo.org/privacy/json'
+      'https://en.serlo.org/privacy/json',
+      'http://de.serlo.org/privacy/archiv/2020-01-01',
+      'http://de.serlo.org/privacy/archiv/1999-33-55'
     ])('URL is %p', async url => {
       const response = (await handleRequest(url)) as Response
 
@@ -198,7 +217,7 @@ test('RevisedPageView()', () => {
   const html = render(
     StaticPage.RevisedPageView({
       lang: 'en',
-      revision: new Date(2019, 0, 1),
+      revision: new Date(2019, 0, 2),
       title: 'Privacy',
       content: '<p>Hello World</p>'
     })
@@ -208,7 +227,7 @@ test('RevisedPageView()', () => {
   expect(htmlElement).toHaveAttribute('lang', 'en')
 
   expect(html.getByText('Privacy', { selector: 'h1' })).toBeVisible()
-  expect(html.getByText('(1/1/2019)')).toBeVisible()
+  expect(html.getByText('(1/2/2019)')).toBeVisible()
   expect(html.getByText('Hello World')).toBeVisible()
 })
 
