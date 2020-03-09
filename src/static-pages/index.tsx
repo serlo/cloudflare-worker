@@ -112,7 +112,27 @@ export async function handleRequest(
       } else {
         return new Response('Page not Found', { status: 404 })
       }
-    } else if (path === `/${revisedType}`) {
+    }
+
+    const archivedRegex = `^\\/${revisedType}\\/archiv\\/(\\d{4}-\\d{2}-\\d{2})$`
+    const archivedMatch = path.match(new RegExp(archivedRegex))
+
+    if (archivedMatch) {
+      const revisions = getRevisions(revisedConfig, lang, revisedType)
+      const archived =
+        revisions === null
+          ? null
+          : findRevisionById(revisions, archivedMatch[1])
+      const page = archived === null ? null : await getRevisedPage(archived)
+
+      if (page !== null) {
+        return new Response(renderToString(RevisedPageView(page)))
+      } else {
+        return new Response('Page not Found', { status: 404 })
+      }
+    }
+
+    if (path === `/${revisedType}`) {
       const revisions = getRevisions(revisedConfig, lang, revisedType)
       const current = revisions === null ? null : revisions[0]
       const page = current === null ? null : await getRevisedPage(current)
@@ -173,7 +193,10 @@ export async function getPage(spec: Spec): Promise<Page | null> {
   }
 }
 
-export function findRevisionById<A extends object>(revisions: Revised<A>[], id: string): Revised<A> | null {
+export function findRevisionById<A extends object>(
+  revisions: Revised<A>[],
+  id: string
+): Revised<A> | null {
   return revisions.find(x => getRevisionId(x) === id) ?? null
 }
 
