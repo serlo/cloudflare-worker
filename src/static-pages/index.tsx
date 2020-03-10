@@ -23,7 +23,8 @@ import {
   sanitizeHtml,
   markdownToHtml,
   LanguageCode,
-  isLanguageCode
+  isLanguageCode,
+  NotFoundResponse
 } from '../utils'
 import { getPathnameWithoutTrailingSlash } from '../url-utils'
 import { Template } from '../ui'
@@ -92,9 +93,7 @@ export async function handleRequest(
         // TODO: Refactor to func
         return new Response(renderToString(UnrevisedPage(page)))
       } else {
-        // TODO: Refactor to external func
-        // TODO: Better Look And Feel
-        return new Response('Page not Found', { status: 404 })
+        return new NotFoundResponse()
       }
     }
   }
@@ -106,7 +105,7 @@ export async function handleRequest(
       if (revisions !== null) {
         return new Response(JSON.stringify(revisions.map(getRevisionId)))
       } else {
-        return new Response('Page not Found', { status: 404 })
+        return new NotFoundResponse()
       }
     }
 
@@ -124,7 +123,7 @@ export async function handleRequest(
       if (page !== null) {
         return new Response(renderToString(RevisedPage(page)))
       } else {
-        return new Response('Page not Found', { status: 404 })
+        return new NotFoundResponse()
       }
     }
 
@@ -134,7 +133,7 @@ export async function handleRequest(
       if (revisions !== null) {
         return new Response(renderToString(RevisionsOverview(revisions)))
       } else {
-        return new Response('Page not Found', { status: 404 })
+        return new NotFoundResponse()
       }
     }
 
@@ -146,7 +145,7 @@ export async function handleRequest(
       if (page !== null) {
         return new Response(renderToString(RevisedPage(page)))
       } else {
-        return new Response('Page not Found', { status: 404 })
+        return new NotFoundResponse()
       }
     }
   }

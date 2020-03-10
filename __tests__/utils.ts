@@ -23,7 +23,8 @@ import {
   sanitizeHtml,
   markdownToHtml,
   ALL_LANGUAGE_CODES,
-  isLanguageCode
+  isLanguageCode,
+  NotFoundResponse
 } from '../src/utils'
 
 test('ALL_LANGUAGE_CODES', () => {
@@ -61,3 +62,13 @@ describe('markdownToHtml()', () => {
     expect(markdownToHtml(markdown)).toBe(html)
   })
 })
+
+test('NotFoundResponse', async () => {
+  await isNotFoundResponse(new NotFoundResponse())
+})
+
+export async function isNotFoundResponse(response: Response): Promise<void> {
+  expect(response.status).toBe(404)
+  expect(response.statusText).toBe('Not Found')
+  expect(await response.text()).toBe('Page not found')
+}

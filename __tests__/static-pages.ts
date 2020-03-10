@@ -19,6 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
+import { isNotFoundResponse } from './utils'
 import * as StaticPage from '../src/static-pages'
 import { render } from '@testing-library/preact'
 
@@ -152,10 +153,7 @@ describe('handleRequest()', () => {
       'http://de.serlo.org/privacy/archiv/2020-01-01',
       'http://de.serlo.org/privacy/archiv/1999-33-55'
     ])('URL is %p', async url => {
-      const response = (await handleRequest(url)) as Response
-
-      expect(response).not.toBeNull()
-      expect(response.status).toBe(404)
+      await isNotFoundResponse((await handleRequest(url)) as Response)
     })
   })
 
