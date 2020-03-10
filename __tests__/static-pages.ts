@@ -318,27 +318,27 @@ describe('fetchContent()', () => {
 })
 
 describe('findRevisionById()', () => {
-  type Foo = { foo: number }
-  const revs: StaticPage.Revised<Foo>[] = [
-    { revision: new Date(2020, 0, 1), foo: 1 },
-    { revision: new Date(1999, 11, 31), foo: 2 },
-    { revision: new Date(2020, 0, 1), foo: 3 }
+  const revs: StaticPage.RevisedSpec[] = [
+    { revision: new Date(2020, 0, 1), title: '', url: '1' },
+    { revision: new Date(1999, 11, 31), title: '', url: '2' },
+    { revision: new Date(2020, 0, 1), title: '', url: '3' }
   ]
 
   test('returns first found revision with given id', () => {
     expect(StaticPage.findRevisionById(revs, '2020-01-01')).toEqual({
       revision: new Date(2020, 0, 1),
-      foo: 1
+      title: '',
+      url: '1'
     })
     expect(StaticPage.findRevisionById(revs, '1999-12-31')).toEqual({
       revision: new Date(1999, 11, 31),
-      foo: 2
+      title: '',
+      url: '2'
     })
   })
 
   test('returns null if no revision has given id', () => {
     expect(StaticPage.findRevisionById(revs, '2020-00-01')).toBeNull()
-    expect(StaticPage.findRevisionById(revs, '99-12-31')).toBeNull()
     expect(StaticPage.findRevisionById(revs, '1999-11-31')).toBeNull()
   })
 })
@@ -349,7 +349,9 @@ describe('getRevisionId()', () => {
     [new Date(20, 8, 6), '1920-09-06'],
     [new Date(1988, 11, 11), '1988-12-11']
   ])('date %p', (date, id) => {
-    expect(StaticPage.getRevisionId({ revision: date })).toBe(id)
+    expect(
+      StaticPage.getRevisionId({ revision: date, title: '', url: '' })
+    ).toBe(id)
   })
 })
 
@@ -485,15 +487,4 @@ describe('getPage()', () => {
       )
     ).toBeNull()
   })
-})
-
-test('mapRevised()', () => {
-  type Foo = { foo: number }
-  const func = (x: Foo) => {
-    return { foo: x.foo ** 2 }
-  }
-
-  expect(
-    StaticPage.mapRevised(func, { foo: 4, revision: new Date(2020, 1, 1) })
-  ).toEqual({ foo: 16, revision: new Date(2020, 1, 1) })
 })
