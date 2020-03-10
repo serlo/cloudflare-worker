@@ -70,18 +70,24 @@ describe('markdownToHtml()', () => {
 test('PreactResponse', async () => {
   const hello = new PreactResponse((<h1>Hello</h1>))
 
-  isOkResponse(hello)
-  await responseContains(hello, ['<h1>Hello</h1>'])
+  hasOkStatus(hello)
+  contentTypeIsHtml(hello)
+  await containsText(hello, ['<h1>Hello</h1>'])
 
   const template = (
     <Template title="not modified" lang="en">
       <p>Not Modified</p>
     </Template>
   )
-  const notModified = new PreactResponse(template, { status: 304 })
+
+  const notModified = new PreactResponse(template, {
+    status: 304,
+    headers: { 'Content-Type': 'test' }
+  })
 
   expect(notModified.status).toBe(304)
-  await responseContains(notModified, [
+  expect(notModified.headers.get('Content-Type')).toBe('test')
+  await containsText(notModified, [
     '<p>Not Modified</p>',
     '<title>Serlo - not modified</title>'
   ])
@@ -91,19 +97,20 @@ test('NotFoundResponse', async () => {
   await isNotFoundResponse(new NotFoundResponse())
 })
 
-export async function responseContains(
-  response: Response,
-  texts: string[]
-): Promise<void> {
+export async function containsText(response: Response, texts: string[]) {
   expect(response).not.toBeNull()
-  const responseText = await response.text()
 
+  const responseText = await response.text()
   texts.forEach(text =>
     expect(responseText).toEqual(expect.stringContaining(text))
   )
 }
 
-export function isOkResponse(response: Response): void {
+export function contentTypeIsHtml(response: Response): void {
+  expect(response.headers.get('Content-Type')).toBe('text/html;charset=utf-8')
+}
+
+export function hasOkStatus(response: Response): void {
   expect(response).not.toBeNull()
   expect(response.status).toBe(200)
   expect(response.statusText).toBe('OK')

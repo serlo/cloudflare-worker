@@ -45,7 +45,13 @@ export function markdownToHtml(markdown: string): string {
 
 export class PreactResponse extends Response {
   constructor(component: VNode, opt?: ResponseInit) {
-    super(renderToString(component), opt)
+    super(renderToString(component), {
+      ...opt,
+      headers: {
+        'Content-Type': 'text/html;charset=utf-8',
+        ...opt?.headers
+      }
+    })
   }
 }
 
