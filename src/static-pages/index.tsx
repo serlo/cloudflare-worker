@@ -135,6 +135,8 @@ export async function handleRequest(
 
       if (page !== null) {
         return new Response(renderToString(RevisedPage(page)))
+      } else {
+        return new Response('Page not Found', { status: 404 })
       }
     }
   }

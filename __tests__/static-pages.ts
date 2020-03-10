@@ -159,6 +159,8 @@ describe('handleRequest()', () => {
     test.each([
       'https://en.serlo.org/terms/',
       'https://fr.serlo.org/terms',
+      'https://en.serlo.org/privacy/',
+      'https://fr.serlo.org/privacy',
       'https://fr.serlo.org/privacy/json',
       'https://en.serlo.org/privacy/json',
       'http://de.serlo.org/privacy/archiv/2020-01-01',
