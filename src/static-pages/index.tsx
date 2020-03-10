@@ -60,7 +60,10 @@ export interface Page extends Spec {
   lang: LanguageCode
 }
 
-export interface RevisedPage extends Page, RevisedSpec {}
+export interface RevisedPage extends Page, RevisedSpec {
+  revisedType: string
+  isCurrentRevision: boolean
+}
 
 export type WithContent<A extends Spec> = A & { content: string }
 
@@ -153,7 +156,11 @@ export function RevisedPage(page: WithContent<RevisedPage>) {
     <Template title={page.title} lang={page.lang}>
       <h1>
         {page.title}{' '}
-        <small>({page.revision.toLocaleDateString(page.lang)})</small>
+        <small>
+          ({page.isCurrentRevision ? 'Current' : 'Archived'}
+          {' version of '}
+          {page.revision.toLocaleDateString(page.lang)})
+        </small>
       </h1>
       <div dangerouslySetInnerHTML={{ __html: page.content }} />
     </Template>
@@ -169,13 +176,14 @@ export function RevisionsOverview(revisions: RevisedPage[]) {
       <h1>{title}</h1>
       There are the following archived versions of {current.title} available:
       <ul>
-        {revisions.map((rev, index) => {
-          const link = `/${rev.title}/archiv/${getRevisionId(rev)}`
+        {revisions.map(rev => {
+          const link = `/${rev.revisedType}/archiv/${getRevisionId(rev)}`
+
           return (
             <li>
               <a href={link}>
                 {rev.revision.toLocaleDateString(rev.lang)}
-                {index === 0 ? ' (current version)' : ''}
+                {rev.isCurrentRevision ? ' (current version)' : ''}
               </a>
             </li>
           )
@@ -234,8 +242,14 @@ export function getRevisions(
   } else {
     const [revisions, lang] = result
 
-    return revisions.map(revision => {
-      return { ...revision, lang, title: getTitle(revisedType) }
+    return revisions.map((revision, index) => {
+      return {
+        ...revision,
+        lang,
+        title: getTitle(revisedType),
+        revisedType: revisedType,
+        isCurrentRevision: index === 0
+      }
     })
   }
 }

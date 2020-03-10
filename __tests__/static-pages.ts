@@ -120,7 +120,9 @@ describe('handleRequest()', () => {
 
     const text = await response.text()
     expect(text).toEqual(expect.stringContaining('<p>Hello</p>'))
-    expect(text).toEqual(expect.stringContaining('(12/11/2020)'))
+    expect(text).toEqual(
+      expect.stringContaining('(Current version of 12/11/2020)')
+    )
 
     expect(fetch).toHaveBeenCalled()
   })
@@ -136,7 +138,9 @@ describe('handleRequest()', () => {
 
     const text = await response.text()
     expect(text).toEqual(expect.stringContaining('<p>Hello</p>'))
-    expect(text).toEqual(expect.stringContaining('(10/9/1999)'))
+    expect(text).toEqual(
+      expect.stringContaining('(Archived version of 10/9/1999)')
+    )
 
     expect(fetch).toHaveBeenCalled()
   })
@@ -217,7 +221,9 @@ test('RevisedPage()', () => {
       revision: new Date(2019, 0, 2),
       title: 'Privacy',
       content: '<p>Hello World</p>',
-      url: ''
+      url: '',
+      isCurrentRevision: true,
+      revisedType: 'privacy'
     })
   )
 
@@ -225,7 +231,7 @@ test('RevisedPage()', () => {
   expect(htmlElement).toHaveAttribute('lang', 'en')
 
   expect(html.getByText('Privacy', { selector: 'h1' })).toBeVisible()
-  expect(html.getByText('(1/2/2019)')).toBeVisible()
+  expect(html.getByText('(Current version of 1/2/2019)')).toBeVisible()
   expect(html.getByText('Hello World')).toBeVisible()
 })
 
@@ -349,52 +355,43 @@ describe('getRevisionId()', () => {
 
 describe('getRevisions()', () => {
   const englishRevisions = [
-    {
-      url: 'http://example.com/bar',
-      revision: new Date(1995, 11, 17)
-    },
-    {
-      url: 'http://example.com/world.md',
-      revision: new Date(2009, 12, 17)
-    }
-  ]
-  const germanRevisions = [
-    {
-      url: 'http://example.org/impressum',
-      revision: new Date(2020, 1, 1)
-    }
+    { url: 'bar', revision: new Date(1995, 11, 17) },
+    { url: 'w.md', revision: new Date(2009, 12, 17) }
   ]
   const exampleSpec: StaticPage.RevisedConfig = {
     en: { privacy: englishRevisions },
-    de: { privacy: germanRevisions },
     fr: { privacy: [] }
   }
+
+  const target = [
+    {
+      url: 'bar',
+      lang: 'en',
+      revision: new Date(1995, 11, 17),
+      title: '#privacy#',
+      revisedType: 'privacy',
+      isCurrentRevision: true
+    },
+    {
+      url: 'w.md',
+      lang: 'en',
+      revision: new Date(2009, 12, 17),
+      title: '#privacy#',
+      revisedType: 'privacy',
+      isCurrentRevision: false
+    }
+  ]
 
   test('returns revisions if they exist in config', () => {
     expect(
       StaticPage.getRevisions(exampleSpec, 'en', 'privacy', getTitle)
-    ).toEqual(
-      englishRevisions.map(x => {
-        return { ...x, lang: 'en', title: '#privacy#' }
-      })
-    )
-    expect(
-      StaticPage.getRevisions(exampleSpec, 'de', 'privacy', getTitle)
-    ).toEqual(
-      germanRevisions.map(x => {
-        return { ...x, lang: 'de', title: '#privacy#' }
-      })
-    )
+    ).toEqual(target)
   })
 
   test('returns revisions of default language if requested one does not exist', () => {
     expect(
       StaticPage.getRevisions(exampleSpec, 'fr', 'privacy', getTitle)
-    ).toEqual(
-      englishRevisions.map(x => {
-        return { ...x, lang: 'en', title: '#privacy#' }
-      })
-    )
+    ).toEqual(target)
   })
 
   test('returns null if requested and default revisions do not exist', () => {
@@ -402,7 +399,7 @@ describe('getRevisions()', () => {
 
     expect(
       StaticPage.getRevisions(
-        { de: { privacy: germanRevisions } },
+        { de: { privacy: [] } },
         'fr',
         'privacy',
         getTitle

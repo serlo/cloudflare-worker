@@ -26,20 +26,55 @@ export function ExampleUnrevisedPage() {
   })
 }
 
-export function ExampleRevisedPage() {
+export function ExampleCurrentRevisedPage() {
   return RevisedPage({
     lang: 'en',
     revision: new Date(2020, 0, 10),
     title: 'Privacy',
     url: '',
+    revisedType: 'privacy',
+    isCurrentRevision: true,
+    content
+  })
+}
+
+export function ExampleArchivedRevisedPage() {
+  return RevisedPage({
+    lang: 'en',
+    revision: new Date(2020, 0, 10),
+    title: 'Privacy',
+    url: '',
+    revisedType: 'privacy',
+    isCurrentRevision: false,
     content
   })
 }
 
 export function ExampleRevisionsOverview() {
   return RevisionsOverview([
-    { revision: new Date(2020, 1, 3), title: 'Privacy', lang: 'en', url: '' },
-    { revision: new Date(1999, 11, 7), title: 'Privacy', lang: 'en', url: '' },
-    { revision: new Date(1990, 4, 5), title: 'Privacy', lang: 'en', url: '' }
+    {
+      revision: new Date(2020, 1, 3),
+      title: 'Privacy',
+      lang: 'en',
+      url: '',
+      revisedType: 'privacy',
+      isCurrentRevision: true
+    },
+    {
+      revision: new Date(1999, 11, 7),
+      title: 'Privacy',
+      lang: 'en',
+      url: '',
+      revisedType: 'privacy',
+      isCurrentRevision: false
+    },
+    {
+      revision: new Date(1987, 4, 5),
+      title: 'Privacy',
+      lang: 'en',
+      url: '',
+      revisedType: 'privacy',
+      isCurrentRevision: false
+    }
   ])
 }
