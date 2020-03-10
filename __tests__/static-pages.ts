@@ -195,8 +195,7 @@ test('UnrevisedPage()', () => {
     })
   )
 
-  const htmlElement = html.getByText(/.*/, { selector: 'html' })
-  expect(htmlElement).toHaveAttribute('lang', 'de')
+  hasLangAttribute(html, 'de')
 
   expect(html.getByText('Imprint', { selector: 'h1' })).toBeVisible()
   expect(html.getByText('Hello World')).toBeVisible()
@@ -215,8 +214,7 @@ test('RevisedPage()', () => {
     })
   )
 
-  const htmlElement = html.getByText(/.*/, { selector: 'html' })
-  expect(htmlElement).toHaveAttribute('lang', 'en')
+  hasLangAttribute(html, 'en')
 
   expect(html.getByText('Privacy', { selector: 'h1' })).toBeVisible()
   expect(html.getByText('(Current version of 1/2/2019)')).toBeVisible()
@@ -245,8 +243,7 @@ test('RevisionsOverview()', () => {
     ])
   )
 
-  const htmlElement = html.getByText(/.*/, { selector: 'html' })
-  expect(htmlElement).toHaveAttribute('lang', 'en')
+  hasLangAttribute(html, 'en')
 
   expect(html.getByText('Versions: Privacy', { selector: 'h1' })).toBeVisible()
   expect(html.getByText('2/3/2020 (current version)')).toBeVisible()
@@ -492,4 +489,9 @@ async function withMockedFetch(
   await fn()
 
   expect(fetch).toHaveBeenCalled()
+}
+
+function hasLangAttribute(html: ReturnType<typeof render>, lang: string): void {
+  const htmlElement = html.getByText(/.*/, { selector: 'html' })
+  expect(htmlElement).toHaveAttribute('lang', lang)
 }
