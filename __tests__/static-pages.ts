@@ -22,18 +22,7 @@
 import * as StaticPage from '../src/static-pages'
 import { render } from '@testing-library/preact'
 
-let fetch: jest.Mocked<any>
-
-function newMockedFetch() {
-  fetch = jest.fn()
-
-  // @ts-ignore
-  global.fetch = fetch
-}
-
 describe('handleRequest()', () => {
-  beforeAll(newMockedFetch)
-
   const unrevisedConfig: StaticPage.UnrevisedConfig = {
     en: {
       imprint: {
@@ -79,70 +68,62 @@ describe('handleRequest()', () => {
       'https://de.serlo.org/imprint',
       'https://fr.serlo.org/imprint/'
     ])('URL is %p', async url => {
-      fetch.mockReturnValueOnce(new Response('<p>Hello World</p>'))
+      await withMockedFetch('<p>Hello World</p>', async () => {
+        const response = (await handleRequest(url)) as Response
 
-      const response = (await handleRequest(url)) as Response
-
-      expect(response).not.toBeNull()
-      expect(response.status).toBe(200)
-      expect(await response.text()).toEqual(
-        expect.stringContaining('<p>Hello World</p>')
-      )
-
-      expect(fetch).toHaveBeenCalled()
+        expect(response).not.toBeNull()
+        expect(response.status).toBe(200)
+        expect(await response.text()).toEqual(
+          expect.stringContaining('<p>Hello World</p>')
+        )
+      })
     })
   })
 
   test('returns unrevised page response at /terms (markdown specification)', async () => {
-    fetch.mockReturnValueOnce(new Response('# Terms of Use'))
+    await withMockedFetch('# Terms of Use', async () => {
+      const url = 'https://de.serlo.org/terms'
+      const response = (await handleRequest(url)) as Response
 
-    const url = 'https://de.serlo.org/terms'
-    const response = (await handleRequest(url)) as Response
-
-    // TODO Test response type is html
-    expect(response).not.toBeNull()
-    expect(response.status).toBe(200)
-    expect(await response.text()).toEqual(
-      expect.stringContaining('<h1>Terms of Use</h1>')
-    )
-
-    expect(fetch).toHaveBeenCalled()
+      // TODO Test response type is html
+      expect(response).not.toBeNull()
+      expect(response.status).toBe(200)
+      expect(await response.text()).toEqual(
+        expect.stringContaining('<h1>Terms of Use</h1>')
+      )
+    })
   })
 
   test('returns current revisision for requests at /privacy', async () => {
-    fetch.mockReturnValueOnce(new Response('<p>Hello</p>'))
+    await withMockedFetch('<p>Hello</p>', async () => {
+      const url = 'https://de.serlo.org/privacy/'
+      const response = (await handleRequest(url)) as Response
 
-    const url = 'https://de.serlo.org/privacy/'
-    const response = (await handleRequest(url)) as Response
+      expect(response).not.toBeNull()
+      expect(response.status).toBe(200)
 
-    expect(response).not.toBeNull()
-    expect(response.status).toBe(200)
-
-    const text = await response.text()
-    expect(text).toEqual(expect.stringContaining('<p>Hello</p>'))
-    expect(text).toEqual(
-      expect.stringContaining('(Current version of 12/11/2020)')
-    )
-
-    expect(fetch).toHaveBeenCalled()
+      const text = await response.text()
+      expect(text).toEqual(expect.stringContaining('<p>Hello</p>'))
+      expect(text).toEqual(
+        expect.stringContaining('(Current version of 12/11/2020)')
+      )
+    })
   })
 
   test('returns archived revision for requests at /privacy/archiv/<id>', async () => {
-    fetch.mockReturnValueOnce(new Response('<p>Hello</p>'))
+    await withMockedFetch('<p>Hello</p>', async () => {
+      const url = 'https://de.serlo.org/privacy/archiv/1999-10-09'
+      const response = (await handleRequest(url)) as Response
 
-    const url = 'https://de.serlo.org/privacy/archiv/1999-10-09'
-    const response = (await handleRequest(url)) as Response
+      expect(response).not.toBeNull()
+      expect(response.status).toBe(200)
 
-    expect(response).not.toBeNull()
-    expect(response.status).toBe(200)
-
-    const text = await response.text()
-    expect(text).toEqual(expect.stringContaining('<p>Hello</p>'))
-    expect(text).toEqual(
-      expect.stringContaining('(Archived version of 10/9/1999)')
-    )
-
-    expect(fetch).toHaveBeenCalled()
+      const text = await response.text()
+      expect(text).toEqual(expect.stringContaining('<p>Hello</p>'))
+      expect(text).toEqual(
+        expect.stringContaining('(Archived version of 10/9/1999)')
+      )
+    })
   })
 
   test('returns overview of revisions for requests at /privacy/archiv', async () => {
@@ -294,8 +275,6 @@ test('RevisionsOverview()', () => {
 })
 
 describe('fetchContent()', () => {
-  beforeAll(newMockedFetch)
-
   const exampleSpec: StaticPage.Page = {
     lang: 'en',
     title: 'Imprint',
@@ -309,70 +288,64 @@ describe('fetchContent()', () => {
 
   describe('returns page when url can be resolved', () => {
     test('parses reponse as Markdown if url ends with `.md`', async () => {
-      fetch.mockReturnValueOnce(new Response('# Hello World'))
-
-      expect(await StaticPage.fetchContent(exampleSpecMarkdown)).toEqual({
-        lang: 'de',
-        title: 'Imprint',
-        content: '<h1>Hello World</h1>',
-        url: 'http://example.org/imprint.md'
+      await withMockedFetch('# Hello World', async () => {
+        expect(await StaticPage.fetchContent(exampleSpecMarkdown)).toEqual({
+          lang: 'de',
+          title: 'Imprint',
+          content: '<h1>Hello World</h1>',
+          url: 'http://example.org/imprint.md'
+        })
       })
-
-      expect(fetch).toHaveBeenCalled()
     })
 
     test('returns response content when url does not end with `.md`', async () => {
-      fetch.mockReturnValueOnce(new Response('<h1>Hello World</h1>'))
-
-      expect(await StaticPage.fetchContent(exampleSpec)).toEqual({
-        lang: 'en',
-        title: 'Imprint',
-        content: '<h1>Hello World</h1>',
-        url: 'http://example.org/'
-      })
-
-      expect(fetch).toHaveBeenCalled()
-    })
-
-    describe('returned HTML is sanitized', () => {
-      test('HTML response', async () => {
-        fetch.mockReturnValueOnce(
-          new Response('<h1>Hello World</h1><script>alert(42)</script>')
-        )
-
+      await withMockedFetch('<h1>Hello World</h1>', async () => {
         expect(await StaticPage.fetchContent(exampleSpec)).toEqual({
           lang: 'en',
           title: 'Imprint',
           content: '<h1>Hello World</h1>',
           url: 'http://example.org/'
         })
+      })
+    })
 
-        expect(fetch).toHaveBeenCalled()
+    describe('returned HTML is sanitized', () => {
+      test('HTML response', async () => {
+        await withMockedFetch(
+          '<h1>Hello World</h1><script>alert(42)</script>',
+          async () => {
+            expect(await StaticPage.fetchContent(exampleSpec)).toEqual({
+              lang: 'en',
+              title: 'Imprint',
+              content: '<h1>Hello World</h1>',
+              url: 'http://example.org/'
+            })
+          }
+        )
       })
 
       test('Markdown response', async () => {
-        fetch.mockReturnValueOnce(
-          new Response('Hello\n<iframe src="http://serlo.org/">')
+        await withMockedFetch(
+          'Hello\n<iframe src="http://serlo.org/">',
+          async () => {
+            expect(await StaticPage.fetchContent(exampleSpecMarkdown)).toEqual({
+              lang: 'de',
+              title: 'Imprint',
+              content: '<p>Hello</p>',
+              url: 'http://example.org/imprint.md'
+            })
+          }
         )
-
-        expect(await StaticPage.fetchContent(exampleSpecMarkdown)).toEqual({
-          lang: 'de',
-          title: 'Imprint',
-          content: '<p>Hello</p>',
-          url: 'http://example.org/imprint.md'
-        })
-
-        expect(fetch).toHaveBeenCalled()
       })
     })
   })
 
   describe('returns null when request on the url of the spec fails', () => {
     test.each([301, 404, 500])('status code %p', async code => {
-      fetch.mockReturnValueOnce(new Response('', { status: code }))
-
-      expect(await StaticPage.fetchContent(exampleSpec)).toBeNull()
-      expect(fetch).toHaveBeenCalled()
+      await withMockedFetch(new Response('', { status: code }), async () => {
+        expect(await StaticPage.fetchContent(exampleSpec)).toBeNull()
+        expect(fetch).toHaveBeenCalled()
+      })
     })
   })
 })
@@ -530,4 +503,19 @@ function getTitle(
   typeName: StaticPage.RevisedType | StaticPage.UnrevisedType
 ): string {
   return '#' + typeName + '#'
+}
+
+async function withMockedFetch(
+  response: Response | string,
+  fn: () => Promise<void>
+): Promise<void> {
+  const value = typeof response === 'string' ? new Response(response) : response
+  const fetch = jest.fn().mockReturnValueOnce(value)
+
+  // @ts-ignore
+  global.fetch = fetch
+
+  await fn()
+
+  expect(fetch).toHaveBeenCalled()
 }
