@@ -25,31 +25,19 @@ import { render } from '@testing-library/preact'
 describe('handleRequest()', () => {
   const unrevisedConfig: StaticPage.UnrevisedConfig = {
     en: {
-      imprint: {
-        url: 'https://example.org/imprint.html'
-      }
+      imprint: { url: 'https://example.org/imprint.html' }
     },
     de: {
-      terms: {
-        url: 'https://example.org/terms.md'
-      }
+      terms: { url: 'https://example.org/terms.md' }
     }
   }
 
   const revisedConfig: StaticPage.RevisedConfig = {
-    fr: {
-      privacy: []
-    },
+    fr: { privacy: [] },
     de: {
       privacy: [
-        {
-          url: 'http://example.org/1',
-          revision: new Date(2020, 11, 11)
-        },
-        {
-          url: 'http://example.org/2',
-          revision: new Date(1999, 9, 9)
-        }
+        { url: 'http://example.org/1', revision: new Date(2020, 11, 11) },
+        { url: 'http://example.org/2', revision: new Date(1999, 9, 9) }
       ]
     }
   }
@@ -440,30 +428,16 @@ describe('getRevisions()', () => {
 })
 
 describe('getPage()', () => {
-  const englishImprint: StaticPage.Spec = {
-    url: 'http://example.com/imprint'
-  }
-  const germanImprint: StaticPage.Spec = {
-    url: 'https://example.org/impressum.md'
-  }
-  const germanTerms: StaticPage.Spec = {
-    url: 'ftp://serlo.org/terms'
-  }
   const exampleConfig: StaticPage.UnrevisedConfig = {
-    en: {
-      imprint: englishImprint
-    },
-    de: {
-      imprint: germanImprint,
-      terms: germanTerms
-    }
+    en: { imprint: { url: 'http://e/' } },
+    de: { imprint: { url: 'http://g/' }, terms: { url: 'ftp://gt/' } }
   }
 
   test('returns Spec when it exists', () => {
     expect(
       StaticPage.getPage(exampleConfig, 'en', 'imprint', getTitle)
     ).toEqual({
-      ...englishImprint,
+      url: 'http://e/',
       lang: 'en',
       title: '#imprint#'
     })
@@ -471,13 +445,13 @@ describe('getPage()', () => {
     expect(
       StaticPage.getPage(exampleConfig, 'de', 'imprint', getTitle)
     ).toEqual({
-      ...germanImprint,
+      url: 'http://g/',
       lang: 'de',
       title: '#imprint#'
     })
 
     expect(StaticPage.getPage(exampleConfig, 'de', 'terms', getTitle)).toEqual({
-      ...germanTerms,
+      url: 'ftp://gt/',
       lang: 'de',
       title: '#terms#'
     })
@@ -487,7 +461,7 @@ describe('getPage()', () => {
     expect(
       StaticPage.getPage(exampleConfig, 'fr', 'imprint', getTitle)
     ).toEqual({
-      ...englishImprint,
+      url: 'http://e/',
       lang: 'en',
       title: '#imprint#'
     })
