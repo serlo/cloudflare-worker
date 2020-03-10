@@ -50,20 +50,20 @@ export interface Spec {
   url: string
 }
 
+export interface RevisedSpec extends Spec {
+  revision: Date
+}
+
 export interface Page extends Spec {
   lang: LanguageCode
 }
 
-export interface RevisedPage extends Page {
-  revision: Date
-}
+export interface RevisedPage extends Page, RevisedSpec {}
 
 export type WithContent<A extends Spec> = A & { content: string }
 
-export type Revised<A extends object> = A & { revision: Date }
-
 export type UnrevisedConfig = Config<UnrevisedType, Spec>
-export type RevisedConfig = Config<RevisedType, Revised<Spec>[]>
+export type RevisedConfig = Config<RevisedType, RevisedSpec[]>
 
 type Config<A extends string, B> = {
   readonly [K1 in LanguageCode]?: {
@@ -210,14 +210,14 @@ export async function fetchContent<A extends Page>(
   }
 }
 
-export function findRevisionById<A extends object>(
-  revisions: Revised<A>[],
+export function findRevisionById<A extends RevisedSpec>(
+  revisions: A[],
   id: string
-): Revised<A> | null {
+): A | null {
   return revisions.find(x => getRevisionId(x) === id) ?? null
 }
 
-export function getRevisionId<A extends object>(revised: Revised<A>): string {
+export function getRevisionId(revised: RevisedSpec): string {
   const year = revised.revision.getFullYear()
   const month = revised.revision.getMonth() + 1
   const day = revised.revision.getDate()
@@ -232,7 +232,7 @@ export function getRevisions(
   config: RevisedConfig,
   lang: LanguageCode,
   revisedType: RevisedType
-): Revised<Page>[] | null {
+): RevisedPage[] | null {
   const result = getSpecAndLanguage(config, lang, revisedType)
 
   if (result === null) {
@@ -240,7 +240,9 @@ export function getRevisions(
   } else {
     const [revisions, lang] = result
 
-    return revisions.map(revision => mapRevised(x => toPage(x, lang), revision))
+    return revisions.map(revision => {
+      return { ...revision, lang }
+    })
   }
 }
 
@@ -251,18 +253,7 @@ export function getPage(
 ): Page | null {
   const result = getSpecAndLanguage(config, lang, unrevisedType)
 
-  return result === null ? null : toPage(result[0], result[1])
-}
-
-export function mapRevised<A extends object, B extends object>(
-  func: (x: A) => B,
-  arg: Revised<A>
-): Revised<B> {
-  return { ...func(arg), revision: arg.revision }
-}
-
-function toPage(base: Spec, lang: LanguageCode): Page {
-  return { ...base, lang }
+  return result === null ? null : { ...result[0], lang: result[1] }
 }
 
 function getSpecAndLanguage<A extends string, B>(

@@ -26,7 +26,7 @@ import {
   UnrevisedType,
   RevisedType,
   Spec,
-  Revised
+  RevisedSpec
 } from './'
 
 const legalRepo = 'https://raw.githubusercontent.com/serlo/serlo.org-legal'
@@ -61,7 +61,7 @@ type BaseConfig = {
       readonly [K2 in UnrevisedType]?: Spec
     }
     readonly revised: {
-      readonly [K3 in RevisedType]?: Revised<Spec>[]
+      readonly [K3 in RevisedType]?: RevisedSpec[]
     }
   }
 }
