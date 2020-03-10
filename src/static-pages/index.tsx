@@ -24,11 +24,11 @@ import {
   markdownToHtml,
   LanguageCode,
   isLanguageCode,
+  PreactResponse,
   NotFoundResponse
 } from '../utils'
 import { getPathnameWithoutTrailingSlash } from '../url-utils'
 import { Template } from '../ui'
-import renderToString from 'preact-render-to-string'
 import { h } from 'preact'
 import {
   ALL_UNREVISED_TYPES,
@@ -90,8 +90,7 @@ export async function handleRequest(
       const page = spec === null ? null : await fetchContent(spec)
 
       if (page !== null) {
-        // TODO: Refactor to func
-        return new Response(renderToString(UnrevisedPage(page)))
+        return new PreactResponse(UnrevisedPage(page))
       } else {
         return new NotFoundResponse()
       }
@@ -121,7 +120,7 @@ export async function handleRequest(
       const page = archived === null ? null : await fetchContent(archived)
 
       if (page !== null) {
-        return new Response(renderToString(RevisedPage(page)))
+        return new PreactResponse(RevisedPage(page))
       } else {
         return new NotFoundResponse()
       }
@@ -131,7 +130,7 @@ export async function handleRequest(
       const revisions = getRevisions(revisedConfig, lang, revisedType)
 
       if (revisions !== null) {
-        return new Response(renderToString(RevisionsOverview(revisions)))
+        return new PreactResponse(RevisionsOverview(revisions))
       } else {
         return new NotFoundResponse()
       }
@@ -143,7 +142,7 @@ export async function handleRequest(
       const page = current === null ? null : await fetchContent(current)
 
       if (page !== null) {
-        return new Response(renderToString(RevisedPage(page)))
+        return new PreactResponse(RevisedPage(page))
       } else {
         return new NotFoundResponse()
       }
