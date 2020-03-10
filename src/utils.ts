@@ -40,3 +40,9 @@ export function sanitizeHtml(html: string): string {
 export function markdownToHtml(markdown: string): string {
   return marked(markdown, { headerIds: false }).trim()
 }
+
+export class NotFoundResponse extends Response {
+  constructor() {
+    super('Page not found', { status: 404 })
+  }
+}
