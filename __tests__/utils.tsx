@@ -24,8 +24,12 @@ import {
   markdownToHtml,
   ALL_LANGUAGE_CODES,
   isLanguageCode,
+  PreactResponse,
   NotFoundResponse
 } from '../src/utils'
+
+import { h } from 'preact'
+import { Template } from '../src/ui'
 
 test('ALL_LANGUAGE_CODES', () => {
   expect(ALL_LANGUAGE_CODES.length).toBeGreaterThan(0)
@@ -63,11 +67,50 @@ describe('markdownToHtml()', () => {
   })
 })
 
+test('PreactResponse', async () => {
+  const hello = new PreactResponse((<h1>Hello</h1>))
+
+  isOkResponse(hello)
+  await responseContains(hello, ['<h1>Hello</h1>'])
+
+  const template = (
+    <Template title="not modified" lang="en">
+      <p>Not Modified</p>
+    </Template>
+  )
+  const notModified = new PreactResponse(template, { status: 304 })
+
+  expect(notModified.status).toBe(304)
+  await responseContains(notModified, [
+    '<p>Not Modified</p>',
+    '<title>Serlo - not modified</title>'
+  ])
+})
+
 test('NotFoundResponse', async () => {
   await isNotFoundResponse(new NotFoundResponse())
 })
 
+export async function responseContains(
+  response: Response,
+  texts: string[]
+): Promise<void> {
+  expect(response).not.toBeNull()
+  const responseText = await response.text()
+
+  texts.forEach(text =>
+    expect(responseText).toEqual(expect.stringContaining(text))
+  )
+}
+
+export function isOkResponse(response: Response): void {
+  expect(response).not.toBeNull()
+  expect(response.status).toBe(200)
+  expect(response.statusText).toBe('OK')
+}
+
 export async function isNotFoundResponse(response: Response): Promise<void> {
+  expect(response).not.toBeNull()
   expect(response.status).toBe(404)
   expect(response.statusText).toBe('Not Found')
   expect(await response.text()).toBe('Page not found')

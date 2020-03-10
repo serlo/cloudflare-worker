@@ -21,6 +21,8 @@
  */
 import sanitize from 'sanitize-html'
 import marked from 'marked'
+import { VNode } from 'preact'
+import renderToString from 'preact-render-to-string'
 
 export const ALL_LANGUAGE_CODES = ['en', 'de', 'fr'] as const
 export type LanguageCode = typeof ALL_LANGUAGE_CODES[number]
@@ -39,6 +41,12 @@ export function sanitizeHtml(html: string): string {
 
 export function markdownToHtml(markdown: string): string {
   return marked(markdown, { headerIds: false }).trim()
+}
+
+export class PreactResponse extends Response {
+  constructor(component: VNode, opt?: ResponseInit) {
+    super(renderToString(component), opt)
+  }
 }
 
 export class NotFoundResponse extends Response {
