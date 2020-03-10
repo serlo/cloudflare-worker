@@ -19,7 +19,12 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { isNotFoundResponse, isOkResponse, responseContains } from './utils'
+import {
+  isNotFoundResponse,
+  hasOkStatus,
+  containsText,
+  contentTypeIsHtml
+} from './utils'
 import * as StaticPage from '../src/static-pages'
 import { render } from '@testing-library/preact'
 
@@ -60,8 +65,9 @@ describe('handleRequest()', () => {
       await withMockedFetch('<p>Hello World</p>', async () => {
         const response = (await handleRequest(url)) as Response
 
-        isOkResponse(response)
-        await responseContains(response, ['<p>Hello World</p>'])
+        hasOkStatus(response)
+        contentTypeIsHtml(response)
+        await containsText(response, ['<p>Hello World</p>'])
       })
     })
   })
@@ -71,9 +77,9 @@ describe('handleRequest()', () => {
       const url = 'https://de.serlo.org/terms'
       const response = (await handleRequest(url)) as Response
 
-      // TODO Test response type is html
-      isOkResponse(response)
-      await responseContains(response, ['<h1>Terms of Use</h1>'])
+      hasOkStatus(response)
+      contentTypeIsHtml(response)
+      await containsText(response, ['<h1>Terms of Use</h1>'])
     })
   })
 
@@ -82,8 +88,9 @@ describe('handleRequest()', () => {
       const url = 'https://de.serlo.org/privacy/'
       const response = (await handleRequest(url)) as Response
 
-      isOkResponse(response)
-      await responseContains(response, [
+      hasOkStatus(response)
+      contentTypeIsHtml(response)
+      await containsText(response, [
         '<p>Hello</p>',
         '(Current version of 12/11/2020)'
       ])
@@ -95,8 +102,9 @@ describe('handleRequest()', () => {
       const url = 'https://de.serlo.org/privacy/archiv/1999-10-09'
       const response = (await handleRequest(url)) as Response
 
-      isOkResponse(response)
-      await responseContains(response, [
+      hasOkStatus(response)
+      contentTypeIsHtml(response)
+      await containsText(response, [
         '<p>Hello</p>',
         '(Archived version of 10/9/1999)'
       ])
@@ -107,8 +115,9 @@ describe('handleRequest()', () => {
     const url = 'https://de.serlo.org/privacy/archiv'
     const response = (await handleRequest(url)) as Response
 
-    isOkResponse(response)
-    await responseContains(response, [
+    hasOkStatus(response)
+    contentTypeIsHtml(response)
+    await containsText(response, [
       '<h1>Versions: Privacy</h1>',
       '12/11/2020 (current version)',
       '10/9/1999'
@@ -120,7 +129,7 @@ describe('handleRequest()', () => {
     const response = (await handleRequest(url)) as Response
 
     // TODO: test header type is JSON
-    isOkResponse(response)
+    hasOkStatus(response)
     expect(await response.json()).toEqual(['2020-12-11', '1999-10-09'])
   })
 
