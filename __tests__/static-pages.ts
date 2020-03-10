@@ -145,6 +145,21 @@ describe('handleRequest()', () => {
     expect(fetch).toHaveBeenCalled()
   })
 
+  test('returns overview of revisions for requests at /privacy/archiv', async () => {
+    const url = 'https://de.serlo.org/privacy/archiv'
+    const response = (await handleRequest(url)) as Response
+
+    expect(response).not.toBeNull()
+    expect(response.status).toBe(200)
+
+    const text = await response.text()
+    expect(text).toEqual(expect.stringContaining('<h1>Versions: Privacy</h1>'))
+    expect(text).toEqual(
+      expect.stringContaining('12/11/2020 (current version)')
+    )
+    expect(text).toEqual(expect.stringContaining('10/9/1999'))
+  })
+
   test('returns list of revision ids for requests at /privacy/json', async () => {
     const url = 'https://de.serlo.org/privacy/json'
     const response = (await handleRequest(url)) as Response
@@ -157,10 +172,12 @@ describe('handleRequest()', () => {
 
   describe('returns 404 reponse if requested page and its default is not configured', () => {
     test.each([
-      'https://en.serlo.org/terms/',
+      'http://en.serlo.org/terms/',
       'https://fr.serlo.org/terms',
-      'https://en.serlo.org/privacy/',
+      'http://en.serlo.org/privacy/',
       'https://fr.serlo.org/privacy',
+      'https://en.serlo.org/privacy/archiv',
+      'http://fr.serlo.org/privacy/archiv/',
       'https://fr.serlo.org/privacy/json',
       'https://en.serlo.org/privacy/json',
       'http://de.serlo.org/privacy/archiv/2020-01-01',

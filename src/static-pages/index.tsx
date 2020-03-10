@@ -128,6 +128,16 @@ export async function handleRequest(
       }
     }
 
+    if (path === `/${revisedType}/archiv`) {
+      const revisions = getRevisions(revisedConfig, lang, revisedType)
+
+      if (revisions !== null) {
+        return new Response(renderToString(RevisionsOverview(revisions)))
+      } else {
+        return new Response('Page not Found', { status: 404 })
+      }
+    }
+
     if (path === `/${revisedType}`) {
       const revisions = getRevisions(revisedConfig, lang, revisedType)
       const current = revisions === null ? null : revisions[0]
