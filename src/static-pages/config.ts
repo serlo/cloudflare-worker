@@ -20,31 +20,39 @@
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
 import { LanguageCode, ALL_LANGUAGE_CODES } from '../utils'
-import {
-  RevisedConfig,
-  UnrevisedConfig,
-  UnrevisedType,
-  RevisedType,
-  Spec,
-  RevisedSpec
-} from './'
+
+export const ALL_UNREVISED_TYPES = ['imprint', 'terms'] as const
+export const ALL_REVSIED_TYPES = ['privacy'] as const
+export type UnrevisedType = typeof ALL_UNREVISED_TYPES[number]
+export type RevisedType = typeof ALL_REVSIED_TYPES[number]
 
 const legalRepo = 'https://raw.githubusercontent.com/serlo/serlo.org-legal'
+
+// TODO: i18n
+export const titles: { [K in RevisedType | UnrevisedType]: string } = {
+  imprint: 'Imprint',
+  terms: 'Terms of Use',
+  privacy: 'Privacy'
+}
 
 const config: BaseConfig = {
   en: {
     unrevised: {
       imprint: {
-        title: 'Imprint',
         url: `${legalRepo}/master/en/imprint.md`
       }
     },
-    revised: {}
+    revised: {
+      privacy: [
+        { revision: new Date(2929, 0, 1), url: '1' },
+        { revision: new Date(229, 0, 1), url: '1' },
+        { revision: new Date(29, 0, 1), url: '1' }
+      ]
+    }
   },
   de: {
     unrevised: {
       imprint: {
-        title: 'Impressum',
         url: `${legalRepo}/master/de/imprint.md`
       }
     },
@@ -52,8 +60,25 @@ const config: BaseConfig = {
   }
 }
 
-export const unrevisedConfig = toUnrevisedConfig(config)
-export const revisedConfig = toRevisedConfig(config)
+export const unrevisedConfig: UnrevisedConfig = toUnrevisedConfig(config)
+export const revisedConfig: RevisedConfig = toRevisedConfig(config)
+
+export interface Spec {
+  url: string
+}
+
+export interface RevisedSpec extends Spec {
+  revision: Date
+}
+
+export type UnrevisedConfig = Config<UnrevisedType, Spec>
+export type RevisedConfig = Config<RevisedType, RevisedSpec[]>
+
+export type Config<A extends string, B> = {
+  readonly [K1 in LanguageCode]?: {
+    [K2 in A]?: B
+  }
+}
 
 type BaseConfig = {
   readonly [K1 in LanguageCode]?: {

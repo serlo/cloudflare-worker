@@ -37,13 +37,11 @@ describe('handleRequest()', () => {
   const unrevisedConfig: StaticPage.UnrevisedConfig = {
     en: {
       imprint: {
-        title: 'Imprint',
         url: 'https://example.org/imprint.html'
       }
     },
     de: {
       terms: {
-        title: 'Nutzungsbedingungen',
         url: 'https://example.org/terms.md'
       }
     }
@@ -56,12 +54,10 @@ describe('handleRequest()', () => {
     de: {
       privacy: [
         {
-          title: 'Foo',
           url: 'http://example.org/1',
           revision: new Date(2020, 11, 11)
         },
         {
-          title: 'Bar',
           url: 'http://example.org/2',
           revision: new Date(1999, 9, 9)
         }
@@ -319,20 +315,18 @@ describe('fetchContent()', () => {
 
 describe('findRevisionById()', () => {
   const revs: StaticPage.RevisedSpec[] = [
-    { revision: new Date(2020, 0, 1), title: '', url: '1' },
-    { revision: new Date(1999, 11, 31), title: '', url: '2' },
-    { revision: new Date(2020, 0, 1), title: '', url: '3' }
+    { revision: new Date(2020, 0, 1), url: '1' },
+    { revision: new Date(1999, 11, 31), url: '2' },
+    { revision: new Date(2020, 0, 1), url: '3' }
   ]
 
   test('returns first found revision with given id', () => {
     expect(StaticPage.findRevisionById(revs, '2020-01-01')).toEqual({
       revision: new Date(2020, 0, 1),
-      title: '',
       url: '1'
     })
     expect(StaticPage.findRevisionById(revs, '1999-12-31')).toEqual({
       revision: new Date(1999, 11, 31),
-      title: '',
       url: '2'
     })
   })
@@ -349,28 +343,23 @@ describe('getRevisionId()', () => {
     [new Date(20, 8, 6), '1920-09-06'],
     [new Date(1988, 11, 11), '1988-12-11']
   ])('date %p', (date, id) => {
-    expect(
-      StaticPage.getRevisionId({ revision: date, title: '', url: '' })
-    ).toBe(id)
+    expect(StaticPage.getRevisionId({ revision: date, url: '' })).toBe(id)
   })
 })
 
 describe('getRevisions()', () => {
   const englishRevisions = [
     {
-      title: 'Foo',
       url: 'http://example.com/bar',
       revision: new Date(1995, 11, 17)
     },
     {
-      title: 'Hello',
       url: 'http://example.com/world.md',
       revision: new Date(2009, 12, 17)
     }
   ]
   const germanRevisions = [
     {
-      title: 'Imprint',
       url: 'http://example.org/impressum',
       revision: new Date(2020, 1, 1)
     }
@@ -383,57 +372,53 @@ describe('getRevisions()', () => {
 
   test('returns revisions if they exist in config', () => {
     expect(
-      StaticPage.getRevisions(exampleSpec, 'en', StaticPage.RevisedType.Privacy)
+      StaticPage.getRevisions(exampleSpec, 'en', 'privacy', getTitle)
     ).toEqual(
       englishRevisions.map(x => {
-        return { ...x, lang: 'en' }
+        return { ...x, lang: 'en', title: '#privacy#' }
       })
     )
     expect(
-      StaticPage.getRevisions(exampleSpec, 'de', StaticPage.RevisedType.Privacy)
+      StaticPage.getRevisions(exampleSpec, 'de', 'privacy', getTitle)
     ).toEqual(
       germanRevisions.map(x => {
-        return { ...x, lang: 'de' }
+        return { ...x, lang: 'de', title: '#privacy#' }
       })
     )
   })
 
   test('returns revisions of default language if requested one does not exist', () => {
     expect(
-      StaticPage.getRevisions(exampleSpec, 'fr', StaticPage.RevisedType.Privacy)
+      StaticPage.getRevisions(exampleSpec, 'fr', 'privacy', getTitle)
     ).toEqual(
       englishRevisions.map(x => {
-        return { ...x, lang: 'en' }
+        return { ...x, lang: 'en', title: '#privacy#' }
       })
     )
   })
 
   test('returns null if requested and default revisions do not exist', () => {
-    expect(
-      StaticPage.getRevisions({}, 'en', StaticPage.RevisedType.Privacy)
-    ).toBeNull()
+    expect(StaticPage.getRevisions({}, 'en', 'privacy', getTitle)).toBeNull()
 
     expect(
       StaticPage.getRevisions(
         { de: { privacy: germanRevisions } },
         'fr',
-        StaticPage.RevisedType.Privacy
+        'privacy',
+        getTitle
       )
     ).toBeNull()
   })
 })
 
 describe('getPage()', () => {
-  const englishImprint = {
-    title: 'English Imprint',
+  const englishImprint: StaticPage.Spec = {
     url: 'http://example.com/imprint'
   }
-  const germanImprint = {
-    title: 'German Imprint',
+  const germanImprint: StaticPage.Spec = {
     url: 'https://example.org/impressum.md'
   }
-  const germanTerms = {
-    title: 'Nutzungsbedingungen',
+  const germanTerms: StaticPage.Spec = {
     url: 'ftp://serlo.org/terms'
   }
   const exampleConfig: StaticPage.UnrevisedConfig = {
@@ -448,43 +433,46 @@ describe('getPage()', () => {
 
   test('returns Spec when it exists', () => {
     expect(
-      StaticPage.getPage(exampleConfig, 'en', StaticPage.UnrevisedType.Imprint)
-    ).toEqual({ ...englishImprint, lang: 'en' })
+      StaticPage.getPage(exampleConfig, 'en', 'imprint', getTitle)
+    ).toEqual({
+      ...englishImprint,
+      lang: 'en',
+      title: '#imprint#'
+    })
 
     expect(
-      StaticPage.getPage(exampleConfig, 'de', StaticPage.UnrevisedType.Imprint)
-    ).toEqual({ ...germanImprint, lang: 'de' })
+      StaticPage.getPage(exampleConfig, 'de', 'imprint', getTitle)
+    ).toEqual({
+      ...germanImprint,
+      lang: 'de',
+      title: '#imprint#'
+    })
 
-    expect(
-      StaticPage.getPage(
-        exampleConfig,
-        'de',
-        StaticPage.UnrevisedType.TermsOfUse
-      )
-    ).toEqual({ ...germanTerms, lang: 'de' })
+    expect(StaticPage.getPage(exampleConfig, 'de', 'terms', getTitle)).toEqual({
+      ...germanTerms,
+      lang: 'de',
+      title: '#terms#'
+    })
   })
 
   test('returns English version when requested Spec does not exist', () => {
     expect(
-      StaticPage.getPage(exampleConfig, 'fr', StaticPage.UnrevisedType.Imprint)
-    ).toEqual({ ...englishImprint, lang: 'en' })
+      StaticPage.getPage(exampleConfig, 'fr', 'imprint', getTitle)
+    ).toEqual({
+      ...englishImprint,
+      lang: 'en',
+      title: '#imprint#'
+    })
   })
 
   test('returns null when no Spec or English Spec can be found', () => {
-    expect(
-      StaticPage.getPage(
-        exampleConfig,
-        'fr',
-        StaticPage.UnrevisedType.TermsOfUse
-      )
-    ).toBeNull()
-
-    expect(
-      StaticPage.getPage(
-        exampleConfig,
-        'en',
-        StaticPage.UnrevisedType.TermsOfUse
-      )
-    ).toBeNull()
+    expect(StaticPage.getPage(exampleConfig, 'fr', 'terms')).toBeNull()
+    expect(StaticPage.getPage(exampleConfig, 'en', 'terms')).toBeNull()
   })
 })
+
+function getTitle(
+  typeName: StaticPage.RevisedType | StaticPage.UnrevisedType
+): string {
+  return '#' + typeName + '#'
+}
