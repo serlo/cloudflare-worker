@@ -235,6 +235,45 @@ test('RevisedPage()', () => {
   expect(html.getByText('Hello World')).toBeVisible()
 })
 
+test('RevisionsOverview()', () => {
+  const html = render(
+    StaticPage.RevisionsOverview([
+      {
+        revision: new Date(2020, 1, 3),
+        title: 'Privacy',
+        lang: 'en',
+        url: '',
+        revisedType: 'privacy',
+        isCurrentRevision: true
+      },
+      {
+        revision: new Date(1999, 11, 7),
+        title: 'Privacy',
+        lang: 'en',
+        url: '',
+        revisedType: 'privacy',
+        isCurrentRevision: false
+      }
+    ])
+  )
+
+  const htmlElement = html.getByText(/.*/, { selector: 'html' })
+  expect(htmlElement).toHaveAttribute('lang', 'en')
+
+  expect(html.getByText('Versions: Privacy', { selector: 'h1' })).toBeVisible()
+  expect(html.getByText('2/3/2020 (current version)')).toBeVisible()
+  expect(html.getByText('12/7/1999')).toBeVisible()
+
+  expect(html.getByText('2/3/2020 (current version)')).toHaveAttribute(
+    'href',
+    '/privacy/archiv/2020-02-03'
+  )
+  expect(html.getByText('12/7/1999')).toHaveAttribute(
+    'href',
+    '/privacy/archiv/1999-12-07'
+  )
+})
+
 describe('fetchContent()', () => {
   beforeAll(newMockedFetch)
 
