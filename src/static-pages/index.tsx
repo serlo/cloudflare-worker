@@ -30,46 +30,39 @@ import { Template } from '../ui'
 import renderToString from 'preact-render-to-string'
 import { h } from 'preact'
 import {
+  ALL_UNREVISED_TYPES,
+  ALL_REVSIED_TYPES,
+  UnrevisedType,
+  RevisedType,
+  Spec,
+  RevisedSpec,
   unrevisedConfig as defaultUnrevisedConfig,
-  revisedConfig as defaultRevisedConfig
+  revisedConfig as defaultRevisedConfig,
+  UnrevisedConfig,
+  RevisedConfig,
+  Config,
+  titles
 } from './config'
 
 const defaultLanguage: LanguageCode = 'en'
 
-export enum UnrevisedType {
-  Imprint = 'imprint',
-  TermsOfUse = 'terms'
-}
-
-export enum RevisedType {
-  Privacy = 'privacy'
-}
-
-export interface Spec {
-  title: string
-  url: string
-}
-
-export interface RevisedSpec extends Spec {
-  revision: Date
-}
+export {
+  RevisedType,
+  UnrevisedType,
+  Spec,
+  RevisedSpec,
+  UnrevisedConfig,
+  RevisedConfig
+} from './config'
 
 export interface Page extends Spec {
+  title: string
   lang: LanguageCode
 }
 
 export interface RevisedPage extends Page, RevisedSpec {}
 
 export type WithContent<A extends Spec> = A & { content: string }
-
-export type UnrevisedConfig = Config<UnrevisedType, Spec>
-export type RevisedConfig = Config<RevisedType, RevisedSpec[]>
-
-type Config<A extends string, B> = {
-  readonly [K1 in LanguageCode]?: {
-    [K2 in A]?: B
-  }
-}
 
 export async function handleRequest(
   request: Request,
@@ -87,7 +80,7 @@ export async function handleRequest(
 
   const path = getPathnameWithoutTrailingSlash(request.url)
 
-  for (const unrevisedType of Object.values(UnrevisedType)) {
+  for (const unrevisedType of ALL_UNREVISED_TYPES) {
     if (path === `/${unrevisedType}`) {
       const spec = getPage(unrevisedConfig, lang, unrevisedType)
       const page = spec === null ? null : await fetchContent(spec)
@@ -103,7 +96,7 @@ export async function handleRequest(
     }
   }
 
-  for (const revisedType of Object.values(RevisedType)) {
+  for (const revisedType of ALL_REVSIED_TYPES) {
     if (path === `/${revisedType}/json`) {
       const revisions = getRevisions(revisedConfig, lang, revisedType)
 
@@ -231,7 +224,8 @@ export function getRevisionId(revised: RevisedSpec): string {
 export function getRevisions(
   config: RevisedConfig,
   lang: LanguageCode,
-  revisedType: RevisedType
+  revisedType: RevisedType,
+  getTitle: (revisedType: RevisedType) => string = x => titles[x]
 ): RevisedPage[] | null {
   const result = getSpecAndLanguage(config, lang, revisedType)
 
@@ -241,7 +235,7 @@ export function getRevisions(
     const [revisions, lang] = result
 
     return revisions.map(revision => {
-      return { ...revision, lang }
+      return { ...revision, lang, title: getTitle(revisedType) }
     })
   }
 }
@@ -249,11 +243,14 @@ export function getRevisions(
 export function getPage(
   config: UnrevisedConfig,
   lang: LanguageCode,
-  unrevisedType: UnrevisedType
+  unrevisedType: UnrevisedType,
+  getTitle: (unrevisedType: UnrevisedType) => string = x => titles[x]
 ): Page | null {
   const result = getSpecAndLanguage(config, lang, unrevisedType)
 
-  return result === null ? null : { ...result[0], lang: result[1] }
+  return result === null
+    ? null
+    : { ...result[0], lang: result[1], title: getTitle(unrevisedType) }
 }
 
 function getSpecAndLanguage<A extends string, B>(
