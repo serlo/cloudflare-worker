@@ -1,5 +1,14 @@
 import { h, ComponentChildren } from 'preact'
 
+export function NotFound() {
+  return (
+    <Template title="Not Found" lang="en">
+      <h1>Page not found</h1>
+      <p>The page you have requested does not exist.</p>
+    </Template>
+  )
+}
+
 export function Template({
   children,
   lang,
@@ -56,7 +65,9 @@ export function Template({
               <div class="content clearfix">
                 <div class="r">
                   <div class="c24">
-                    <div class="call" style="text-align: left;">{children}</div>
+                    <div class="call" style="text-align: left;">
+                      {children}
+                    </div>
                   </div>
                 </div>
               </div>

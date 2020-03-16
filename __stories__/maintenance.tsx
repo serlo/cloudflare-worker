@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon'
 import { h } from 'preact'
 
+import { NotFound } from '../src/ui/'
 import { render } from '../src/maintenance/render'
 
 const Maintenance = createStaticComponent(render)
@@ -38,6 +39,10 @@ export function EnEndDate() {
 }
 EnEndDate.story = {
   name: 'en (w/ end date)'
+}
+
+export function PageNotFound() {
+  return NotFound()
 }
 
 function createStaticComponent<P>(f: (props: P) => string) {
