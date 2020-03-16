@@ -57,6 +57,14 @@ export class PreactResponse extends Response {
   }
 }
 
+export class JsonResponse extends Response {
+  constructor(json: any) {
+    super(JSON.stringify(json), {
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }
+}
+
 export class NotFoundResponse extends PreactResponse {
   constructor() {
     super(NotFound(), { status: 404 })

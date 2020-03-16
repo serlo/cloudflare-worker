@@ -25,6 +25,7 @@ import {
   LanguageCode,
   isLanguageCode,
   PreactResponse,
+  JsonResponse,
   NotFoundResponse
 } from '../utils'
 import { getPathnameWithoutTrailingSlash } from '../url-utils'
@@ -102,7 +103,7 @@ export async function handleRequest(
       const revisions = getRevisions(revisedConfig, lang, revisedType)
 
       if (revisions !== null) {
-        return new Response(JSON.stringify(revisions.map(getRevisionId)))
+        return new JsonResponse(revisions.map(getRevisionId))
       } else {
         return new NotFoundResponse()
       }

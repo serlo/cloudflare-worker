@@ -21,6 +21,7 @@
  */
 import {
   isNotFoundResponse,
+  isJsonResponse,
   hasOkStatus,
   containsText,
   contentTypeIsHtml
@@ -128,9 +129,7 @@ describe('handleRequest()', () => {
     const url = 'https://de.serlo.org/privacy/json'
     const response = (await handleRequest(url)) as Response
 
-    // TODO: test header type is JSON
-    hasOkStatus(response)
-    expect(await response.json()).toEqual(['2020-12-11', '1999-10-09'])
+    isJsonResponse(response, ['2020-12-11', '1999-10-09'])
   })
 
   describe('returns 404 reponse if requested page and its default is not configured', () => {
