@@ -320,7 +320,6 @@ describe('fetchContent()', () => {
     test.each([301, 404, 500])('status code %p', async code => {
       await withMockedFetch(new Response('', { status: code }), async () => {
         expect(await StaticPage.fetchContent(exampleSpec)).toBeNull()
-        expect(fetch).toHaveBeenCalled()
       })
     })
   })
