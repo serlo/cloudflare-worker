@@ -21,19 +21,10 @@
  */
 import { DateTime } from 'luxon'
 
+import { contentTypeIsHtml, containsText } from './utils'
 import { handleRequest as f } from '../src'
 
 let fetchMock: jest.Mock
-class ResponseMock {
-  constructor(
-    public html: string,
-    public init?: {
-      headers?: Record<string, string>
-      status?: number
-      statusText?: string
-    }
-  ) {}
-}
 
 beforeEach(() => {
   fetchMock = jest.fn((...args) => {
@@ -41,8 +32,6 @@ beforeEach(() => {
   })
   // @ts-ignore
   window['fetch'] = fetchMock
-  // @ts-ignore
-  window['Response'] = ResponseMock
 })
 
 describe('Maintenance mode', () => {
@@ -85,18 +74,14 @@ describe('Maintenance mode', () => {
       start: start.toISO(),
       end: end.toISO()
     })
-    const { html, init } = await handleRequest('https://de.serlo.org')
-    expect(init && init.status).toEqual(503)
-    expect(init && init.headers && init.headers['Content-Type']).toEqual(
-      'text/html;charset=utf-8'
-    )
-    expect(init && init.headers && init.headers['Retry-After']).toEqual(
-      end.toHTTP()
-    )
-    expect(html).toContain('Wartungsmodus')
-    expect(html).toContain(
+    const response = await handleRequest('https://de.serlo.org')
+    expect(response.status).toEqual(503)
+    contentTypeIsHtml(response)
+    expect(response.headers.get('Retry-After')).toEqual(end.toHTTP())
+    containsText(response, [
+      'Wartungsmodus',
       `gegen ${end.setLocale('de').toFormat('HH:mm (ZZZZ)')} wieder online`
-    )
+    ])
   })
 
   test('Enabled (en, w/ end)', async () => {
@@ -106,18 +91,14 @@ describe('Maintenance mode', () => {
       start: start.toISO(),
       end: end.toISO()
     })
-    const { html, init } = await handleRequest('https://en.serlo.org')
-    expect(init && init.status).toEqual(503)
-    expect(init && init.headers && init.headers['Content-Type']).toEqual(
-      'text/html;charset=utf-8'
-    )
-    expect(init && init.headers && init.headers['Retry-After']).toEqual(
-      end.toHTTP()
-    )
-    expect(html).toContain('Maintenance mode')
-    expect(html).toContain(
+    const response = await handleRequest('https://en.serlo.org')
+    expect(response.status).toEqual(503)
+    contentTypeIsHtml(response)
+    expect(response.headers.get('Retry-After')).toEqual(end.toHTTP())
+    containsText(response, [
+      'Maintenance mode',
       `We expect to be back by ${end.setLocale('en').toFormat('HH:mm (ZZZZ)')}`
-    )
+    ])
   })
 
   test('Enabled (de, w/o end)', async () => {
@@ -126,13 +107,13 @@ describe('Maintenance mode', () => {
       start: start.toISO(),
       end: null
     })
-    const { html, init } = await handleRequest('https://de.serlo.org')
-    expect(init && init.status).toEqual(503)
-    expect(init && init.headers && init.headers['Content-Type']).toEqual(
-      'text/html;charset=utf-8'
-    )
-    expect(html).toContain('Wartungsmodus')
-    expect(html).toContain('in ein paar Stunden wieder online')
+    const response = await handleRequest('https://de.serlo.org')
+    expect(response.status).toEqual(503)
+    contentTypeIsHtml(response)
+    containsText(response, [
+      'Wartungsmodus',
+      'in ein paar Stunden wieder online'
+    ])
   })
 
   test('Enabled (en, w/o end)', async () => {
@@ -141,19 +122,18 @@ describe('Maintenance mode', () => {
       start: start.toISO(),
       end: null
     })
-    const { html, init } = await handleRequest('https://en.serlo.org')
-    expect(init && init.status).toEqual(503)
-    expect(init && init.headers && init.headers['Content-Type']).toEqual(
-      'text/html;charset=utf-8'
-    )
-    expect(html).toContain('Maintenance mode')
-    expect(html).toContain('We expect to be back in a couple of hours.')
+    const response = await handleRequest('https://en.serlo.org')
+    expect(response.status).toEqual(503)
+    contentTypeIsHtml(response)
+    containsText(response, [
+      'Maintenance mode',
+      'We expect to be back in a couple of hours.'
+    ])
   })
 })
 
-async function handleRequest(url: string): Promise<ResponseMock> {
-  const response = await f({ url } as Request)
-  return (response as unknown) as ResponseMock
+async function handleRequest(url: string): Promise<Response> {
+  return await f({ url } as Request)
 }
 
 function mockMaintenanceKV({

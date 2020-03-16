@@ -2,9 +2,7 @@ import { DateTime } from 'luxon'
 import { h } from 'preact'
 
 import { NotFound } from '../src/ui/'
-import { render } from '../src/maintenance/render'
-
-const Maintenance = createStaticComponent(render)
+import { Maintenance } from '../src/maintenance/template'
 
 export default {
   component: Maintenance,
@@ -43,11 +41,4 @@ EnEndDate.story = {
 
 export function PageNotFound() {
   return NotFound()
-}
-
-function createStaticComponent<P>(f: (props: P) => string) {
-  return function StaticComponent(props: P) {
-    const html = f(props)
-    return <div dangerouslySetInnerHTML={{ __html: html }} />
-  }
 }
