@@ -315,6 +315,36 @@ describe('fetchContent()', () => {
     })
   })
 
+  describe('support for __JS_GOOGLE_ANALYTICS_DEACTIVATE__', () => {
+    test('HTML response', async () => {
+      await withMockedFetch(
+        'Click <a href="__JS_GOOGLE_ANALYTICS_DEACTIVATE__">here</a>',
+        async () => {
+          expect(await StaticPage.fetchContent(exampleSpec)).toEqual({
+            lang: 'en',
+            title: 'Imprint',
+            content: 'Click <a href="javascript:gaOptout();">here</a>',
+            url: 'http://example.org/'
+          })
+        }
+      )
+    })
+
+    test('Markdown response', async () => {
+      await withMockedFetch(
+        'Click [here](__JS_GOOGLE_ANALYTICS_DEACTIVATE__)',
+        async () => {
+          expect(await StaticPage.fetchContent(exampleSpecMarkdown)).toEqual({
+            lang: 'de',
+            title: 'Imprint',
+            content: '<p>Click <a href="javascript:gaOptout();">here</a></p>',
+            url: 'http://example.org/imprint.md'
+          })
+        }
+      )
+    })
+  })
+
   describe('returns null when request on the url of the spec fails', () => {
     test.each([301, 404, 500])('status code %p', async code => {
       await withMockedFetch(new Response('', { status: code }), async () => {
