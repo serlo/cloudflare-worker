@@ -1,14 +1,15 @@
 import { DateTime } from 'luxon'
 import { h } from 'preact'
-import renderToString from 'preact-render-to-string'
 
 import { Template } from '../ui'
 
-export function render(props: { lang: 'de' | 'en'; end?: DateTime }) {
-  return renderToString(<Maintenance {...props} />)
-}
-
-function Maintenance({ lang, end }: { lang: 'de' | 'en'; end?: DateTime }) {
+export function Maintenance({
+  lang,
+  end
+}: {
+  lang: 'de' | 'en'
+  end?: DateTime
+}) {
   const { content, title } = getTranslations()
   return (
     <Template lang={lang} title={title}>

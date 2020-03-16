@@ -21,8 +21,9 @@
  */
 import { DateTime } from 'luxon'
 
-import { render } from './render'
+import { Maintenance } from './template'
 import { getSubdomain } from '../url-utils'
+import { PreactResponse } from '../utils'
 
 export async function maintenanceMode(request: Request) {
   const startISO = await MAINTENANCE_KV.get('start')
@@ -53,15 +54,8 @@ function createMaintenanceResponse({
   lang: 'de' | 'en'
   end?: DateTime
 }) {
-  return new Response(render({ lang, end }), {
+  return new PreactResponse(Maintenance({ lang, end }), {
     status: 503,
-    headers: getHeaders()
+    headers: end ? { 'Retry-After': end.toHTTP() } : {}
   })
-
-  function getHeaders(): HeadersInit {
-    return {
-      'Content-Type': 'text/html;charset=utf-8',
-      ...(end ? { 'Retry-After': end.toHTTP() } : {})
-    }
-  }
 }
