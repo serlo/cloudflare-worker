@@ -56,7 +56,7 @@ export function Template({
               <div class="content clearfix">
                 <div class="r">
                   <div class="c24">
-                    <div class="call">{children}</div>
+                    <div class="call" style="text-align: left;">{children}</div>
                   </div>
                 </div>
               </div>
