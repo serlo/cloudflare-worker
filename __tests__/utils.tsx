@@ -25,6 +25,7 @@ import {
   ALL_LANGUAGE_CODES,
   isLanguageCode,
   PreactResponse,
+  JsonResponse,
   NotFoundResponse
 } from '../src/utils'
 
@@ -93,6 +94,12 @@ test('PreactResponse', async () => {
   ])
 })
 
+test('JsonResponse', async () => {
+  const response = new JsonResponse({ foo: [1, 2, 3] })
+
+  isJsonResponse(response, { foo: [1, 2, 3] })
+})
+
 test('NotFoundResponse', async () => {
   await isNotFoundResponse(new NotFoundResponse())
 })
@@ -123,4 +130,10 @@ export async function isNotFoundResponse(response: Response): Promise<void> {
   expect(await response.text()).toEqual(
     expect.stringContaining('Page not found')
   )
+}
+
+export async function isJsonResponse(response: Response, targetJson: any) {
+  hasOkStatus(response)
+  expect(response.headers.get('Content-Type')).toBe('application/json')
+  expect(JSON.parse(await response.text())).toEqual(targetJson)
 }
