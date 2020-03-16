@@ -120,5 +120,7 @@ export async function isNotFoundResponse(response: Response): Promise<void> {
   expect(response).not.toBeNull()
   expect(response.status).toBe(404)
   expect(response.statusText).toBe('Not Found')
-  expect(await response.text()).toBe('Page not found')
+  expect(await response.text()).toEqual(
+    expect.stringContaining('Page not found')
+  )
 }

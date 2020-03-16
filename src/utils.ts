@@ -24,6 +24,8 @@ import marked from 'marked'
 import { VNode } from 'preact'
 import renderToString from 'preact-render-to-string'
 
+import { NotFound } from './ui'
+
 export const ALL_LANGUAGE_CODES = ['en', 'de', 'fr'] as const
 export type LanguageCode = typeof ALL_LANGUAGE_CODES[number]
 
@@ -55,8 +57,8 @@ export class PreactResponse extends Response {
   }
 }
 
-export class NotFoundResponse extends Response {
+export class NotFoundResponse extends PreactResponse {
   constructor() {
-    super('Page not found', { status: 404 })
+    super(NotFound(), { status: 404 })
   }
 }
