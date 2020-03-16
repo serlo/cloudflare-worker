@@ -19,7 +19,8 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { render } from './render'
+import { AreWeEdtrIoYet } from './template'
+import { PreactResponse } from '../utils'
 import { getSubdomain } from '../url-utils'
 
 export async function edtrIoStats(request: Request) {
@@ -32,7 +33,7 @@ export async function edtrIoStats(request: Request) {
     cf: { cacheTtl: 60 * 60 }
   } as unknown) as RequestInit)
 
-  return new Response(render(await data.json()), {
+  return new PreactResponse(AreWeEdtrIoYet(await data.json()), {
     headers: {
       'Content-Type': 'text/html;charset=utf-8'
     }

@@ -1,11 +1,6 @@
 import { h } from 'preact'
-import renderToString from 'preact-render-to-string'
 
 import { Template } from '../ui'
-
-export function render(data: Record<EntityType, EntityProps['data']>) {
-  return renderToString(<AreWeEdtrIoYet data={data} />)
-}
 
 export enum EntityType {
   applet = 'applet',
@@ -19,7 +14,7 @@ export enum EntityType {
   video = 'video'
 }
 
-function AreWeEdtrIoYet({
+export function AreWeEdtrIoYet({
   data
 }: {
   data: Record<EntityType, EntityProps['data']>
