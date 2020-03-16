@@ -39,24 +39,46 @@ const config: BaseConfig = {
   en: {
     unrevised: {
       imprint: {
-        url: `${legalRepo}/master/en/imprint.md`
+        url: `${legalRepo}/28aaa08d291a85bad79511eb03289ee8146bf25c/en/imprint.md`
+      },
+      terms: {
+        url: `${legalRepo}/28aaa08d291a85bad79511eb03289ee8146bf25c/en/terms.md`
       }
     },
     revised: {
       privacy: [
-        { revision: new Date('2929-01-01'), url: '1' },
-        { revision: new Date('1229-01-01'), url: '1' },
-        { revision: new Date('1129-01-01'), url: '1' }
+        {
+          revision: new Date('2020-03-16'),
+          url: `${legalRepo}/28aaa08d291a85bad79511eb03289ee8146bf25c/en/privacy.md`
+        }
       ]
     }
   },
   de: {
     unrevised: {
       imprint: {
-        url: `${legalRepo}/master/de/imprint.md`
+        url: `${legalRepo}/966b13e04b51a99c5a7cd9aa3a5464ede4b99429/de/imprint.md`
+      },
+      terms: {
+        url: `${legalRepo}/966b13e04b51a99c5a7cd9aa3a5464ede4b99429/de/terms.md`
       }
     },
-    revised: {}
+    revised: {
+      privacy: [
+        {
+          revision: new Date('2020-02-10'),
+          url: `${legalRepo}/1adc8fc546c86dde79219768c96a413d4173d3d9/de/privacy.md`
+        },
+        {
+          revision: new Date('2018-12-01'),
+          url: `${legalRepo}/b9948435b6a0e08216d8c8eb972ae4b8a4080570/de/privacy.md`
+        },
+        {
+          revision: new Date('2018-10-17'),
+          url: `${legalRepo}/0a4225021ca6b3cd1a448cb41c916f258fe980b3/de/privacy.md`
+        }
+      ]
+    }
   }
 }
 
