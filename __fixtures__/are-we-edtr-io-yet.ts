@@ -1,4 +1,4 @@
-import { EntityType } from '../src/are-we-edtr-io-yet/render'
+import { EntityType } from '../src/are-we-edtr-io-yet/template'
 
 export const data: Record<EntityType, { id: string; converted: boolean }[]> = {
   applet: [],
