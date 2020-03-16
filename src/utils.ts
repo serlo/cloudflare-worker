@@ -26,7 +26,7 @@ import renderToString from 'preact-render-to-string'
 
 import { NotFound } from './ui'
 
-export const ALL_LANGUAGE_CODES = ['en', 'de', 'fr'] as const
+export const ALL_LANGUAGE_CODES = ['en', 'de', 'fr', 'ta', 'hi', 'es'] as const
 export type LanguageCode = typeof ALL_LANGUAGE_CODES[number]
 
 export function isLanguageCode(code: string): code is LanguageCode {
