@@ -44,9 +44,9 @@ const config: BaseConfig = {
     },
     revised: {
       privacy: [
-        { revision: new Date(2929, 0, 1), url: '1' },
-        { revision: new Date(229, 0, 1), url: '1' },
-        { revision: new Date(29, 0, 1), url: '1' }
+        { revision: new Date('2929-01-01'), url: '1' },
+        { revision: new Date('1229-01-01'), url: '1' },
+        { revision: new Date('1129-01-01'), url: '1' }
       ]
     }
   },
