@@ -211,12 +211,14 @@ export async function fetchContent<A extends Page>(
 
   if (response.ok) {
     const text = await response.text()
-    const content = page.url.endsWith('.md') ? markdownToHtml(text) : text
+    const rawContent = page.url.endsWith('.md') ? markdownToHtml(text) : text
+    const sanitizedContent = sanitizeHtml(rawContent)
+    const content = sanitizedContent.replace(
+      '__JS_GOOGLE_ANALYTICS_DEACTIVATE__',
+      'javascript:gaOptout();'
+    )
 
-    return {
-      ...page,
-      content: sanitizeHtml(content)
-    }
+    return { ...page, content }
   } else {
     return null
   }
