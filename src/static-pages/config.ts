@@ -49,7 +49,7 @@ const config: BaseConfig = {
       privacy: [
         {
           revision: new Date('2020-03-16'),
-          url: `${legalRepo}/e391a2407e1191fdd371e255fd33324be933b487/en/privacy.md`
+          url: `${legalRepo}/98f3ded41c2af13c62de89aa470491570978a131/en/privacy.md`
         }
       ]
     }
@@ -67,7 +67,7 @@ const config: BaseConfig = {
       privacy: [
         {
           revision: new Date('2020-02-10'),
-          url: `${legalRepo}/591ea9400e166c3f288c8255f186aa398a200bb6/de/privacy.md`
+          url: `${legalRepo}/4c33d7a99b4cf18f300b5204c250f7bfd451ffd8/de/privacy.md`
         },
         {
           revision: new Date('2018-12-01'),
