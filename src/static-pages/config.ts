@@ -57,7 +57,7 @@ const config: BaseConfig = {
   de: {
     unrevised: {
       imprint: {
-        url: `${legalRepo}/e391a2407e1191fdd371e255fd33324be933b487/de/imprint.md`
+        url: `${legalRepo}/5dd8abbc6f6a0eac1c89c7aad4bd8ec6ce530473/de/imprint.md`
       },
       terms: {
         url: `${legalRepo}/e391a2407e1191fdd371e255fd33324be933b487/de/terms.md`
