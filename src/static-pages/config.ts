@@ -49,7 +49,7 @@ const config: BaseConfig = {
       privacy: [
         {
           revision: new Date('2020-03-16'),
-          url: `${legalRepo}/98f3ded41c2af13c62de89aa470491570978a131/en/privacy.md`
+          url: `${legalRepo}/e78d86b9d4a1729de48d87c740c573813038a320/en/privacy.md`
         }
       ]
     }
