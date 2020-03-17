@@ -1,10 +1,8 @@
-Serlo Cloudflare Worker
-=======================
+# Serlo Cloudflare Worker
 
 This repository contains the source code for the cloudflare worker of Serlo ([https://serlo.org/](https://serlo.org)).
 
-Static pages
-------------
+## Static pages
 
 Our cloudflare worker also serves some static pages (mostly our legal documents like the imprint or our privacy statement).
 The legal documents and other static pages are stored in the repository [https://github.com/serlo/serlo.org-legal](https://github.com/serlo/serlo.org-legal).
@@ -21,5 +19,7 @@ The content of the static pages are automatically sanatized (e.g. potentially ma
 In case you need a link which deactivates Google Analytics use the string `__JS_GOOGLE_ANALYTICS_DEACTIVATE__` as the `href` attribute:
 
 ```html
-<a href="__JS_GOOGLE_ANALYTICS_DEACTIVATE__">Click here to deactivate Google Analytics</a>
+<a href="__JS_GOOGLE_ANALYTICS_DEACTIVATE__"
+  >Click here to deactivate Google Analytics</a
+>
 ```
