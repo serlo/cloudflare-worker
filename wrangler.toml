@@ -10,6 +10,7 @@ kv-namespaces = [
     { binding = "MAINTENANCE_KV", id = "d5f281b897f643b8824881cfe2a24dd2" },
     { binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be" },
 ]
+vars = { DOMAIN = "serlo-development.dev", ENABLE_BASIC_AUTH = "true" }
 
 [env.staging]
 name = "serlo-staging"
@@ -19,6 +20,7 @@ kv-namespaces = [
     { binding = "MAINTENANCE_KV", id = "3c3c25aba0b94b7e99f855f013f5b09c" },
     { binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be" },
 ]
+vars = { DOMAIN = "serlo-staging.dev", ENABLE_BASIC_AUTH = "true" }
 
 [env.production]
 name = "serlo-production"
@@ -28,3 +30,4 @@ kv-namespaces = [
     { binding = "MAINTENANCE_KV", id = "b1f17ebbe39c4fd9b49d1368ce225faa" },
     { binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be" },
 ]
+vars = { DOMAIN = "serlo.org", ENABLE_BASIC_AUTH = "false" }
