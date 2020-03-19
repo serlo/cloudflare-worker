@@ -19,12 +19,18 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: ['.ts', '.tsx']
+    extensions: ['.ts', '.tsx', '.mjs', '.js', '.jsx']
+  },
+  optimization: {
+    usedExports: true
   },
   plugins: [
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify('production')
     })
   ],
-  target: 'webworker'
+  target: 'webworker',
+  node: {
+    fs: 'empty'
+  }
 }
