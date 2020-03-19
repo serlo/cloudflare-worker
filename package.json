@@ -9,6 +9,7 @@
   "author": "Serlo Education e.V.",
   "scripts": {
     "build": "wrangler build",
+    "dev": "wrangler dev --env dev",
     "format": "yarn _prettier --write",
     "lint": "npm-run-all --parallel lint:prettier lint:tsc",
     "lint:prettier": "yarn _prettier --check",
