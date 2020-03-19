@@ -173,7 +173,7 @@ describe('Entity', () => {
         willRespondWith: {
           status: 200,
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json; charset=utf-8'
           },
           body: {
             id: 1,
@@ -398,7 +398,7 @@ test('License', async () => {
     willRespondWith: {
       status: 200,
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json; charset=utf-8'
       },
       body: {
         id: 1,
@@ -448,7 +448,7 @@ async function addAliasInteraction<
 >(payload: { request: string; response: T }) {
   const { request, response } = payload
   await pact.addInteraction({
-    state: `${path} is alias of (${response.discriminator}, ${response.id}} in instance de`,
+    state: `${request} is alias of (${response.discriminator}, ${response.id}) in instance de`,
     uponReceiving: `resolve de.serlo.org${request}`,
     withRequest: {
       method: 'GET',
@@ -457,7 +457,7 @@ async function addAliasInteraction<
     willRespondWith: {
       status: 200,
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json; charset=utf-8'
       },
       body: response
     }
@@ -478,7 +478,7 @@ async function addUuidInteraction<
     willRespondWith: {
       status: 200,
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json; charset=utf-8'
       },
       body: response
     }
