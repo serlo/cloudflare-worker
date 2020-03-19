@@ -108,3 +108,6 @@ dist
 
 wasm-pack.log
 worker/
+
+# Generated pact files
+pacts/
