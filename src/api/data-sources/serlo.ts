@@ -19,6 +19,17 @@ export class SerloDataSource extends RESTDataSource {
     if (process.env.NODE_ENV === 'test') {
       return super.get(`http://localhost:9009/${path}`)
     }
-    // TODO: handle production env
+
+    return super.get(
+      `https://${instance}.${DOMAIN}/${path}`,
+      undefined,
+      ENABLE_BASIC_AUTH === 'true'
+        ? {
+            headers: {
+              Authorization: 'Basic c2VybG90ZWFtOnNlcmxvdGVhbQ=='
+            }
+          }
+        : undefined
+    )
   }
 }
