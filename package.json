@@ -29,6 +29,7 @@
   "dependencies": {
     "apollo-datasource-rest": "^0.8.0",
     "apollo-server-cloudflare": "^2.0.0",
+    "graphql": "^14.0.0",
     "graphql-parse-resolve-info": "^4.0.0",
     "luxon": "^1.0.0",
     "preact": "^10.0.0",
