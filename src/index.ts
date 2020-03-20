@@ -19,6 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
+import { api } from './api'
 import { edtrIoStats } from './are-we-edtr-io-yet'
 import { maintenanceMode } from './maintenance'
 import { handleRequest as staticPages } from './static-pages'
@@ -38,6 +39,7 @@ export async function handleRequest(request: Request) {
     (await staticPages(request)) ||
     (await semanticFileNames(request)) ||
     (await packages(request)) ||
+    (await api(request)) ||
     (await fetch(request))
   )
 }

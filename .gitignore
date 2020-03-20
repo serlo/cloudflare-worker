@@ -111,3 +111,6 @@ worker/
 
 # asdf-vm configuration file
 .tool-versions
+
+# Generated pact files
+pacts/
