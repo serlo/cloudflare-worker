@@ -19,6 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
+import { h } from 'preact'
 import sanitize from 'sanitize-html'
 import marked from 'marked'
 import { VNode } from 'preact'
@@ -67,6 +68,6 @@ export class JsonResponse extends Response {
 
 export class NotFoundResponse extends PreactResponse {
   constructor() {
-    super(NotFound(), { status: 404 })
+    super(<NotFound />, { status: 404 })
   }
 }
