@@ -26,7 +26,8 @@ import {
   isLanguageCode,
   PreactResponse,
   JsonResponse,
-  NotFoundResponse
+  NotFoundResponse,
+  fetchWithCache
 } from '../utils'
 import { getPathnameWithoutTrailingSlash } from '../url-utils'
 import { Template } from '../ui'
@@ -207,7 +208,7 @@ export function RevisionsOverview({ revisions }: { revisions: RevisedPage[] }) {
 export async function fetchContent<A extends Page>(
   page: A
 ): Promise<WithContent<A> | null> {
-  const response = await fetch(new Request(page.url))
+  const response = await fetchWithCache(page.url)
 
   if (response.ok) {
     const text = await response.text()
