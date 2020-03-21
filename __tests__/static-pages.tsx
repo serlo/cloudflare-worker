@@ -45,8 +45,8 @@ describe('handleRequest()', () => {
     fr: { privacy: [] },
     de: {
       privacy: [
-        { url: 'http://example.org/1', revision: new Date('2020-12-11') },
-        { url: 'http://example.org/2', revision: new Date('1999-10-09') }
+        { url: 'http://example.org/1', revision: '2020-12-11' },
+        { url: 'http://example.org/2', revision: '1999-10-09' }
       ]
     }
   }
@@ -198,7 +198,8 @@ test('RevisedPage()', () => {
     <StaticPage.RevisedPage
       page={{
         lang: 'en',
-        revision: new Date(2019, 0, 2),
+        revision: '2019-01-02',
+        revisionDate: new Date('2019-01-02'),
         title: 'Privacy',
         content: '<p>Hello World</p>',
         url: '',
@@ -220,7 +221,8 @@ test('RevisionsOverview()', () => {
     <StaticPage.RevisionsOverview
       revisions={[
         {
-          revision: new Date('2020-02-03'),
+          revision: '2020-02-03',
+          revisionDate: new Date('2020-02-03'),
           title: 'Privacy',
           lang: 'en',
           url: '',
@@ -228,7 +230,8 @@ test('RevisionsOverview()', () => {
           isCurrentRevision: true
         },
         {
-          revision: new Date('1999-12-07'),
+          revision: '1999-12-07',
+          revisionDate: new Date('1999-12-07'),
           title: 'Privacy',
           lang: 'en',
           url: '',
@@ -362,18 +365,18 @@ describe('fetchContent()', () => {
 
 describe('findRevisionById()', () => {
   const revs: StaticPage.RevisedSpec[] = [
-    { revision: new Date('2020-01-01'), url: '1' },
-    { revision: new Date('1999-12-31'), url: '2' },
-    { revision: new Date('2020-01-01'), url: '3' }
+    { revision: '2020-01-01', url: '1' },
+    { revision: '1999-12-31', url: '2' },
+    { revision: '2020-01-01', url: '3' }
   ]
 
   test('returns first found revision with given id', () => {
     expect(StaticPage.findRevisionById(revs, '2020-01-01')).toEqual({
-      revision: new Date('2020-01-01'),
+      revision: '2020-01-01',
       url: '1'
     })
     expect(StaticPage.findRevisionById(revs, '1999-12-31')).toEqual({
-      revision: new Date('1999-12-31'),
+      revision: '1999-12-31',
       url: '2'
     })
   })
@@ -384,20 +387,10 @@ describe('findRevisionById()', () => {
   })
 })
 
-describe('getRevisionId()', () => {
-  test.each([
-    [new Date('2020-01-03'), '2020-01-03'],
-    [new Date('1920-09-06'), '1920-09-06'],
-    [new Date('1988-12-11'), '1988-12-11']
-  ])('date %p', (date, id) => {
-    expect(StaticPage.getRevisionId({ revision: date, url: '' })).toBe(id)
-  })
-})
-
 describe('getRevisions()', () => {
   const englishRevisions = [
-    { url: 'bar', revision: new Date('1995-12-17') },
-    { url: 'w.md', revision: new Date('2009-12-17') }
+    { url: 'bar', revision: '1995-12-17' },
+    { url: 'w.md', revision: '2009-12-17' }
   ]
   const exampleSpec: StaticPage.RevisedConfig = {
     en: { privacy: englishRevisions },
@@ -408,7 +401,8 @@ describe('getRevisions()', () => {
     {
       url: 'bar',
       lang: 'en',
-      revision: new Date('1995-12-17'),
+      revision: '1995-12-17',
+      revisionDate: new Date('1995-12-17'),
       title: '#privacy#',
       revisedType: 'privacy',
       isCurrentRevision: true
@@ -416,7 +410,8 @@ describe('getRevisions()', () => {
     {
       url: 'w.md',
       lang: 'en',
-      revision: new Date('2009-12-17'),
+      revision: '2009-12-17',
+      revisionDate: new Date('2009-12-17'),
       title: '#privacy#',
       revisedType: 'privacy',
       isCurrentRevision: false
