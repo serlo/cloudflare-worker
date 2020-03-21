@@ -33,8 +33,6 @@ import { getPathnameWithoutTrailingSlash, getSubdomain } from '../url-utils'
 import { Template } from '../ui'
 import { h } from 'preact'
 import {
-  ALL_UNREVISED_TYPES,
-  ALL_REVISED_TYPES,
   UnrevisedType,
   RevisedType,
   Spec,
@@ -47,7 +45,7 @@ import {
   titles
 } from './config'
 
-const defaultLanguage: LanguageCode = 'en'
+const defaultLanguage = LanguageCode.En
 
 export {
   RevisedType,
@@ -83,7 +81,7 @@ export async function handleRequest(
 
   const path = getPathnameWithoutTrailingSlash(request.url)
 
-  for (const unrevisedType of ALL_UNREVISED_TYPES) {
+  for (const unrevisedType of Object.values(UnrevisedType)) {
     if (path === `/${unrevisedType}`) {
       const spec = getPage(unrevisedConfig, lang, unrevisedType)
       const page = spec === null ? null : await fetchContent(spec)
@@ -96,7 +94,7 @@ export async function handleRequest(
     }
   }
 
-  for (const revisedType of ALL_REVISED_TYPES) {
+  for (const revisedType of Object.values(RevisedType)) {
     if (path === `/${revisedType}/json`) {
       const revisions = getRevisions(revisedConfig, lang, revisedType)
 

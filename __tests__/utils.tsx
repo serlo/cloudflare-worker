@@ -22,7 +22,6 @@
 import {
   sanitizeHtml,
   markdownToHtml,
-  ALL_LANGUAGE_CODES,
   fetchWithCache,
   isLanguageCode,
   createPreactResponse,
@@ -32,10 +31,6 @@ import {
 
 import { h } from 'preact'
 import { Template } from '../src/ui'
-
-test('ALL_LANGUAGE_CODES', () => {
-  expect(ALL_LANGUAGE_CODES.length).toBeGreaterThan(0)
-})
 
 describe('isLanguageCode()', () => {
   expect(isLanguageCode('de')).toBe(true)

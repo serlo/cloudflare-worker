@@ -27,11 +27,17 @@ import renderToString from 'preact-render-to-string'
 
 import { NotFound } from './ui'
 
-export const ALL_LANGUAGE_CODES = ['en', 'de', 'fr', 'ta', 'hi', 'es'] as const
-export type LanguageCode = typeof ALL_LANGUAGE_CODES[number]
+export enum LanguageCode {
+  En = 'en',
+  De = 'de',
+  Fr = 'fr',
+  Ta = 'ta',
+  Hi = 'hi',
+  Es = 'es'
+}
 
 export function isLanguageCode(code: string): code is LanguageCode {
-  return ALL_LANGUAGE_CODES.some(x => x === code)
+  return Object.values(LanguageCode).some(x => x === code)
 }
 
 export function sanitizeHtml(html: string): string {
