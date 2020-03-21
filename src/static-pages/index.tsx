@@ -240,9 +240,9 @@ export function getRevisions(
   if (result === null) {
     return null
   } else {
-    const [revisions, lang] = result
+    const { spec, lang } = result
 
-    return revisions.map((revision, index) => {
+    return spec.map((revision, index) => {
       return {
         ...revision,
         lang,
@@ -265,19 +265,19 @@ export function getPage(
 
   return result === null
     ? null
-    : { ...result[0], lang: result[1], title: getTitle(unrevisedType) }
+    : { ...result.spec, lang: result.lang, title: getTitle(unrevisedType) }
 }
 
 function getSpecAndLanguage<A extends string, B>(
   config: Config<A, B>,
   lang: LanguageCode,
   kind: A
-): [B, LanguageCode] | null {
+): { spec: B; lang: LanguageCode } | null {
   // See https://stackoverflow.com/q/60400208 why the typecast is necessary
   const result = config[lang]?.[kind] as B | undefined
 
   if (result !== undefined && (!Array.isArray(result) || result.length > 0)) {
-    return [result, lang]
+    return { spec: result, lang }
   } else if (lang !== defaultLanguage) {
     return getSpecAndLanguage(config, defaultLanguage, kind)
   } else {
