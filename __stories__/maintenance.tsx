@@ -2,10 +2,7 @@ import { DateTime } from 'luxon'
 import { h } from 'preact'
 import { createStaticComponent } from './utils'
 
-import { NotFound as NotFoundOriginal } from '../src/ui/'
 import { Maintenance as MaintenanceOriginal } from '../src/maintenance/template'
-
-const NotFound = createStaticComponent(NotFoundOriginal)
 const Maintenance = createStaticComponent(MaintenanceOriginal)
 
 export default {
@@ -41,8 +38,4 @@ export function EnEndDate() {
 }
 EnEndDate.story = {
   name: 'en (w/ end date)'
-}
-
-export function PageNotFound() {
-  return <NotFound/>
 }
