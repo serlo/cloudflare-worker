@@ -19,6 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
+import { h } from 'preact'
 import {
   isNotFoundResponse,
   isJsonResponse,
@@ -177,12 +178,14 @@ describe('handleRequest()', () => {
 
 test('UnrevisedPage()', () => {
   const html = render(
-    StaticPage.UnrevisedPage({
-      lang: 'de',
-      title: 'Imprint',
-      content: '<p>Hello World</p>',
-      url: ''
-    })
+    <StaticPage.UnrevisedPage
+      page={{
+        lang: 'de',
+        title: 'Imprint',
+        content: '<p>Hello World</p>',
+        url: ''
+      }}
+    />
   )
 
   hasLangAttribute(html, 'de')
@@ -193,15 +196,17 @@ test('UnrevisedPage()', () => {
 
 test('RevisedPage()', () => {
   const html = render(
-    StaticPage.RevisedPage({
-      lang: 'en',
-      revision: new Date(2019, 0, 2),
-      title: 'Privacy',
-      content: '<p>Hello World</p>',
-      url: '',
-      isCurrentRevision: true,
-      revisedType: 'privacy'
-    })
+    <StaticPage.RevisedPage
+      page={{
+        lang: 'en',
+        revision: new Date(2019, 0, 2),
+        title: 'Privacy',
+        content: '<p>Hello World</p>',
+        url: '',
+        isCurrentRevision: true,
+        revisedType: 'privacy'
+      }}
+    />
   )
 
   hasLangAttribute(html, 'en')
@@ -213,24 +218,26 @@ test('RevisedPage()', () => {
 
 test('RevisionsOverview()', () => {
   const html = render(
-    StaticPage.RevisionsOverview([
-      {
-        revision: new Date('2020-02-03'),
-        title: 'Privacy',
-        lang: 'en',
-        url: '',
-        revisedType: 'privacy',
-        isCurrentRevision: true
-      },
-      {
-        revision: new Date('1999-12-07'),
-        title: 'Privacy',
-        lang: 'en',
-        url: '',
-        revisedType: 'privacy',
-        isCurrentRevision: false
-      }
-    ])
+    <StaticPage.RevisionsOverview
+      revisions={[
+        {
+          revision: new Date('2020-02-03'),
+          title: 'Privacy',
+          lang: 'en',
+          url: '',
+          revisedType: 'privacy',
+          isCurrentRevision: true
+        },
+        {
+          revision: new Date('1999-12-07'),
+          title: 'Privacy',
+          lang: 'en',
+          url: '',
+          revisedType: 'privacy',
+          isCurrentRevision: false
+        }
+      ]}
+    />
   )
 
   hasLangAttribute(html, 'en')
