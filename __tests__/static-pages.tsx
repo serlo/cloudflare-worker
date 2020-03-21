@@ -29,11 +29,26 @@ import {
   withMockedFetch
 } from './utils'
 import { LanguageCode } from '../src/utils'
-import * as StaticPage from '../src/static-pages'
+import {
+  UnrevisedConfig,
+  RevisedConfig,
+  RevisedType,
+  UnrevisedType,
+  handleRequest,
+  getPage,
+  getRevisions,
+  findRevisionById,
+  RevisedSpec,
+  fetchContent,
+  Page,
+  UnrevisedPage,
+  RevisedPage,
+  RevisionsOverview
+} from '../src/static-pages'
 import { render } from '@testing-library/preact'
 
 describe('handleRequest()', () => {
-  const unrevisedConfig: StaticPage.UnrevisedConfig = {
+  const unrevisedConfig: UnrevisedConfig = {
     en: {
       imprint: { url: 'https://example.org/imprint.html' }
     },
@@ -42,7 +57,7 @@ describe('handleRequest()', () => {
     }
   }
 
-  const revisedConfig: StaticPage.RevisedConfig = {
+  const revisedConfig: RevisedConfig = {
     fr: { privacy: [] },
     de: {
       privacy: [
@@ -52,12 +67,8 @@ describe('handleRequest()', () => {
     }
   }
 
-  async function handleRequest(url: string): Promise<Response | null> {
-    return StaticPage.handleRequest(
-      new Request(url),
-      unrevisedConfig,
-      revisedConfig
-    )
+  async function testHandleRequest(url: string): Promise<Response | null> {
+    return handleRequest(new Request(url), unrevisedConfig, revisedConfig)
   }
 
   describe('returns unrevised page response at /imprint (html specification)', () => {
@@ -67,7 +78,7 @@ describe('handleRequest()', () => {
       'https://fr.serlo.org/imprint/'
     ])('URL is %p', async url => {
       await withMockedFetch('<p>Hello World</p>', async () => {
-        const response = (await handleRequest(url)) as Response
+        const response = (await testHandleRequest(url)) as Response
 
         hasOkStatus(response)
         contentTypeIsHtml(response)
@@ -79,7 +90,7 @@ describe('handleRequest()', () => {
   test('returns unrevised page response at /terms (markdown specification)', async () => {
     await withMockedFetch('# Terms of Use', async () => {
       const url = 'https://de.serlo.org/terms'
-      const response = (await handleRequest(url)) as Response
+      const response = (await testHandleRequest(url)) as Response
 
       hasOkStatus(response)
       contentTypeIsHtml(response)
@@ -90,7 +101,7 @@ describe('handleRequest()', () => {
   test('returns current revisision for requests at /privacy', async () => {
     await withMockedFetch('<p>Hello</p>', async () => {
       const url = 'https://de.serlo.org/privacy/'
-      const response = (await handleRequest(url)) as Response
+      const response = (await testHandleRequest(url)) as Response
 
       hasOkStatus(response)
       contentTypeIsHtml(response)
@@ -104,7 +115,7 @@ describe('handleRequest()', () => {
   test('returns archived revision for requests at /privacy/archive/<id>', async () => {
     await withMockedFetch('<p>Hello</p>', async () => {
       const url = 'https://de.serlo.org/privacy/archive/1999-10-09'
-      const response = (await handleRequest(url)) as Response
+      const response = (await testHandleRequest(url)) as Response
 
       hasOkStatus(response)
       contentTypeIsHtml(response)
@@ -117,7 +128,7 @@ describe('handleRequest()', () => {
 
   test('returns overview of revisions for requests at /privacy/archive', async () => {
     const url = 'https://de.serlo.org/privacy/archive'
-    const response = (await handleRequest(url)) as Response
+    const response = (await testHandleRequest(url)) as Response
 
     hasOkStatus(response)
     contentTypeIsHtml(response)
@@ -130,7 +141,7 @@ describe('handleRequest()', () => {
 
   test('returns list of revision ids for requests at /privacy/json', async () => {
     const url = 'https://de.serlo.org/privacy/json'
-    const response = (await handleRequest(url)) as Response
+    const response = (await testHandleRequest(url)) as Response
 
     isJsonResponse(response, ['2020-12-11', '1999-10-09'])
   })
@@ -148,7 +159,7 @@ describe('handleRequest()', () => {
       'http://de.serlo.org/privacy/archive/2020-01-01',
       'http://de.serlo.org/privacy/archive/1999-33-55'
     ])('URL is %p', async url => {
-      await isNotFoundResponse((await handleRequest(url)) as Response)
+      await isNotFoundResponse((await testHandleRequest(url)) as Response)
     })
   })
 
@@ -160,7 +171,7 @@ describe('handleRequest()', () => {
       'http://gg.serlo.org/',
       'http://deserlo.org/imprint'
     ])('URL is %p', async url => {
-      expect(await handleRequest(url)).toBeNull()
+      expect(await testHandleRequest(url)).toBeNull()
     })
   })
 
@@ -171,14 +182,14 @@ describe('handleRequest()', () => {
       'https://de.serlo.org/imprint/json',
       'https://de.serlo.org/privacy/jsons'
     ])(' URL is %p', async url => {
-      expect(await handleRequest(url)).toBeNull()
+      expect(await testHandleRequest(url)).toBeNull()
     })
   })
 })
 
 test('UnrevisedPage()', () => {
   const html = render(
-    <StaticPage.UnrevisedPage
+    <UnrevisedPage
       page={{
         lang: LanguageCode.De,
         title: 'Imprint',
@@ -196,7 +207,7 @@ test('UnrevisedPage()', () => {
 
 test('RevisedPage()', () => {
   const html = render(
-    <StaticPage.RevisedPage
+    <RevisedPage
       page={{
         lang: LanguageCode.En,
         revision: '2019-01-02',
@@ -219,7 +230,7 @@ test('RevisedPage()', () => {
 
 test('RevisionsOverview()', () => {
   const html = render(
-    <StaticPage.RevisionsOverview
+    <RevisionsOverview
       revisions={[
         {
           revision: '2020-02-03',
@@ -260,12 +271,12 @@ test('RevisionsOverview()', () => {
 })
 
 describe('fetchContent()', () => {
-  const exampleSpec: StaticPage.Page = {
+  const exampleSpec: Page = {
     lang: LanguageCode.En,
     title: 'Imprint',
     url: 'http://example.org/'
   }
-  const exampleSpecMarkdown: StaticPage.Page = {
+  const exampleSpecMarkdown: Page = {
     lang: LanguageCode.De,
     title: 'Imprint',
     url: 'http://example.org/imprint.md'
@@ -274,7 +285,7 @@ describe('fetchContent()', () => {
   describe('returns page when url can be resolved', () => {
     test('parses reponse as Markdown if url ends with `.md`', async () => {
       await withMockedFetch('# Hello World', async () => {
-        expect(await StaticPage.fetchContent(exampleSpecMarkdown)).toEqual({
+        expect(await fetchContent(exampleSpecMarkdown)).toEqual({
           lang: 'de',
           title: 'Imprint',
           content: '<h1>Hello World</h1>',
@@ -285,7 +296,7 @@ describe('fetchContent()', () => {
 
     test('returns response content when url does not end with `.md`', async () => {
       await withMockedFetch('<h1>Hello World</h1>', async () => {
-        expect(await StaticPage.fetchContent(exampleSpec)).toEqual({
+        expect(await fetchContent(exampleSpec)).toEqual({
           lang: 'en',
           title: 'Imprint',
           content: '<h1>Hello World</h1>',
@@ -299,7 +310,7 @@ describe('fetchContent()', () => {
         await withMockedFetch(
           '<h1>Hello World</h1><script>alert(42)</script>',
           async () => {
-            expect(await StaticPage.fetchContent(exampleSpec)).toEqual({
+            expect(await fetchContent(exampleSpec)).toEqual({
               lang: 'en',
               title: 'Imprint',
               content: '<h1>Hello World</h1>',
@@ -313,7 +324,7 @@ describe('fetchContent()', () => {
         await withMockedFetch(
           'Hello\n<iframe src="http://serlo.org/">',
           async () => {
-            expect(await StaticPage.fetchContent(exampleSpecMarkdown)).toEqual({
+            expect(await fetchContent(exampleSpecMarkdown)).toEqual({
               lang: 'de',
               title: 'Imprint',
               content: '<p>Hello</p>',
@@ -330,7 +341,7 @@ describe('fetchContent()', () => {
       await withMockedFetch(
         'Click <a href="__JS_GOOGLE_ANALYTICS_DEACTIVATE__">here</a>',
         async () => {
-          expect(await StaticPage.fetchContent(exampleSpec)).toEqual({
+          expect(await fetchContent(exampleSpec)).toEqual({
             lang: 'en',
             title: 'Imprint',
             content: 'Click <a href="javascript:gaOptout();">here</a>',
@@ -344,7 +355,7 @@ describe('fetchContent()', () => {
       await withMockedFetch(
         'Click [here](__JS_GOOGLE_ANALYTICS_DEACTIVATE__)',
         async () => {
-          expect(await StaticPage.fetchContent(exampleSpecMarkdown)).toEqual({
+          expect(await fetchContent(exampleSpecMarkdown)).toEqual({
             lang: 'de',
             title: 'Imprint',
             content: '<p>Click <a href="javascript:gaOptout();">here</a></p>',
@@ -358,33 +369,33 @@ describe('fetchContent()', () => {
   describe('returns null when request on the url of the spec fails', () => {
     test.each([301, 404, 500])('status code %p', async code => {
       await withMockedFetch(new Response('', { status: code }), async () => {
-        expect(await StaticPage.fetchContent(exampleSpec)).toBeNull()
+        expect(await fetchContent(exampleSpec)).toBeNull()
       })
     })
   })
 })
 
 describe('findRevisionById()', () => {
-  const revs: StaticPage.RevisedSpec[] = [
+  const revs: RevisedSpec[] = [
     { revision: '2020-01-01', url: '1' },
     { revision: '1999-12-31', url: '2' },
     { revision: '2020-01-01', url: '3' }
   ]
 
   test('returns first found revision with given id', () => {
-    expect(StaticPage.findRevisionById(revs, '2020-01-01')).toEqual({
+    expect(findRevisionById(revs, '2020-01-01')).toEqual({
       revision: '2020-01-01',
       url: '1'
     })
-    expect(StaticPage.findRevisionById(revs, '1999-12-31')).toEqual({
+    expect(findRevisionById(revs, '1999-12-31')).toEqual({
       revision: '1999-12-31',
       url: '2'
     })
   })
 
   test('returns null if no revision has given id', () => {
-    expect(StaticPage.findRevisionById(revs, '2020-00-01')).toBeNull()
-    expect(StaticPage.findRevisionById(revs, '1999-11-31')).toBeNull()
+    expect(findRevisionById(revs, '2020-00-01')).toBeNull()
+    expect(findRevisionById(revs, '1999-11-31')).toBeNull()
   })
 })
 
@@ -393,7 +404,7 @@ describe('getRevisions()', () => {
     { url: 'bar', revision: '1995-12-17' },
     { url: 'w.md', revision: '2009-12-17' }
   ]
-  const exampleSpec: StaticPage.RevisedConfig = {
+  const exampleSpec: RevisedConfig = {
     en: { privacy: englishRevisions },
     fr: { privacy: [] }
   }
@@ -421,41 +432,26 @@ describe('getRevisions()', () => {
 
   test('returns revisions if they exist in config', () => {
     expect(
-      StaticPage.getRevisions(
-        exampleSpec,
-        LanguageCode.En,
-        StaticPage.RevisedType.Privacy,
-        getTitle
-      )
+      getRevisions(exampleSpec, LanguageCode.En, RevisedType.Privacy, getTitle)
     ).toEqual(target)
   })
 
   test('returns revisions of default language if requested one does not exist', () => {
     expect(
-      StaticPage.getRevisions(
-        exampleSpec,
-        LanguageCode.Fr,
-        StaticPage.RevisedType.Privacy,
-        getTitle
-      )
+      getRevisions(exampleSpec, LanguageCode.Fr, RevisedType.Privacy, getTitle)
     ).toEqual(target)
   })
 
   test('returns null if requested and default revisions do not exist', () => {
     expect(
-      StaticPage.getRevisions(
-        {},
-        LanguageCode.En,
-        StaticPage.RevisedType.Privacy,
-        getTitle
-      )
+      getRevisions({}, LanguageCode.En, RevisedType.Privacy, getTitle)
     ).toBeNull()
 
     expect(
-      StaticPage.getRevisions(
+      getRevisions(
         { de: { privacy: [] } },
         LanguageCode.Fr,
-        StaticPage.RevisedType.Privacy,
+        RevisedType.Privacy,
         getTitle
       )
     ).toBeNull()
@@ -463,19 +459,14 @@ describe('getRevisions()', () => {
 })
 
 describe('getPage()', () => {
-  const exampleConfig: StaticPage.UnrevisedConfig = {
+  const exampleConfig: UnrevisedConfig = {
     en: { imprint: { url: 'http://e/' } },
     de: { imprint: { url: 'http://g/' }, terms: { url: 'ftp://gt/' } }
   }
 
   test('returns Spec when it exists', () => {
     expect(
-      StaticPage.getPage(
-        exampleConfig,
-        LanguageCode.En,
-        StaticPage.UnrevisedType.Imprint,
-        getTitle
-      )
+      getPage(exampleConfig, LanguageCode.En, UnrevisedType.Imprint, getTitle)
     ).toEqual({
       url: 'http://e/',
       lang: 'en',
@@ -483,12 +474,7 @@ describe('getPage()', () => {
     })
 
     expect(
-      StaticPage.getPage(
-        exampleConfig,
-        LanguageCode.De,
-        StaticPage.UnrevisedType.Imprint,
-        getTitle
-      )
+      getPage(exampleConfig, LanguageCode.De, UnrevisedType.Imprint, getTitle)
     ).toEqual({
       url: 'http://g/',
       lang: 'de',
@@ -496,12 +482,7 @@ describe('getPage()', () => {
     })
 
     expect(
-      StaticPage.getPage(
-        exampleConfig,
-        LanguageCode.De,
-        StaticPage.UnrevisedType.Terms,
-        getTitle
-      )
+      getPage(exampleConfig, LanguageCode.De, UnrevisedType.Terms, getTitle)
     ).toEqual({
       url: 'ftp://gt/',
       lang: 'de',
@@ -511,12 +492,7 @@ describe('getPage()', () => {
 
   test('returns English version when requested Spec does not exist', () => {
     expect(
-      StaticPage.getPage(
-        exampleConfig,
-        LanguageCode.Fr,
-        StaticPage.UnrevisedType.Imprint,
-        getTitle
-      )
+      getPage(exampleConfig, LanguageCode.Fr, UnrevisedType.Imprint, getTitle)
     ).toEqual({
       url: 'http://e/',
       lang: 'en',
@@ -526,25 +502,15 @@ describe('getPage()', () => {
 
   test('returns null when no Spec or English Spec can be found', () => {
     expect(
-      StaticPage.getPage(
-        exampleConfig,
-        LanguageCode.Fr,
-        StaticPage.UnrevisedType.Terms
-      )
+      getPage(exampleConfig, LanguageCode.Fr, UnrevisedType.Terms)
     ).toBeNull()
     expect(
-      StaticPage.getPage(
-        exampleConfig,
-        LanguageCode.En,
-        StaticPage.UnrevisedType.Terms
-      )
+      getPage(exampleConfig, LanguageCode.En, UnrevisedType.Terms)
     ).toBeNull()
   })
 })
 
-function getTitle(
-  typeName: StaticPage.RevisedType | StaticPage.UnrevisedType
-): string {
+function getTitle(typeName: RevisedType | UnrevisedType): string {
   return '#' + typeName + '#'
 }
 
