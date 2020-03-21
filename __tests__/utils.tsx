@@ -82,13 +82,10 @@ test('PreactResponse', async () => {
     </Template>
   )
 
-  const notModified = new PreactResponse(template, {
-    status: 304,
-    headers: { 'Content-Type': 'test' }
-  })
+  const notModified = new PreactResponse(template, { status: 304 })
 
   expect(notModified.status).toBe(304)
-  expect(notModified.headers.get('Content-Type')).toBe('test')
+  contentTypeIsHtml(notModified)
   await containsText(notModified, [
     '<p>Not Modified</p>',
     '<title>Serlo - not modified</title>'

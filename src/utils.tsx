@@ -57,8 +57,8 @@ export class PreactResponse extends Response {
     super(renderToString(component), {
       ...opt,
       headers: {
-        'Content-Type': 'text/html;charset=utf-8',
-        ...opt?.headers
+        ...opt?.headers,
+        'Content-Type': 'text/html;charset=utf-8'
       }
     })
   }
