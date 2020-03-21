@@ -19,12 +19,16 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { LanguageCode, ALL_LANGUAGE_CODES } from '../utils'
+import { LanguageCode } from '../utils'
 
-export const ALL_UNREVISED_TYPES = ['imprint', 'terms'] as const
-export const ALL_REVISED_TYPES = ['privacy'] as const
-export type UnrevisedType = typeof ALL_UNREVISED_TYPES[number]
-export type RevisedType = typeof ALL_REVISED_TYPES[number]
+export enum UnrevisedType {
+  Imprint = 'imprint',
+  Terms = 'terms'
+}
+
+export enum RevisedType {
+  Privacy = 'privacy'
+}
 
 const legalRepo =
   'https://raw.githubusercontent.com/serlo/serlo.org-legal/master'
@@ -116,12 +120,12 @@ type BaseConfig = {
 
 function toUnrevisedConfig(config: BaseConfig): UnrevisedConfig {
   return Object.fromEntries(
-    ALL_LANGUAGE_CODES.map(lang => [lang, config[lang]?.unrevised])
+    Object.values(LanguageCode).map(lang => [lang, config[lang]?.unrevised])
   )
 }
 
 function toRevisedConfig(config: BaseConfig): RevisedConfig {
   return Object.fromEntries(
-    ALL_LANGUAGE_CODES.map(lang => [lang, config[lang]?.revised])
+    Object.values(LanguageCode).map(lang => [lang, config[lang]?.revised])
   )
 }
