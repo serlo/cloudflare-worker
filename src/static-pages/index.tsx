@@ -29,7 +29,7 @@ import {
   NotFoundResponse,
   fetchWithCache
 } from '../utils'
-import { getPathnameWithoutTrailingSlash } from '../url-utils'
+import { getPathnameWithoutTrailingSlash, getSubdomain } from '../url-utils'
 import { Template } from '../ui'
 import { h } from 'preact'
 import {
@@ -75,13 +75,9 @@ export async function handleRequest(
   unrevisedConfig = defaultUnrevisedConfig,
   revisedConfig = defaultRevisedConfig
 ): Promise<Response | null> {
-  const hostnameParts = new URL(request.url).hostname.split('.')
+  const lang = getSubdomain(request.url)
 
-  if (hostnameParts.length !== 3) return null
-  const [lang, secondLevelDomain, topLevelDomain] = hostnameParts
-
-  if (topLevelDomain !== 'org') return null
-  if (secondLevelDomain !== 'serlo') return null
+  if (lang === null) return null
   if (!isLanguageCode(lang)) return null
 
   const path = getPathnameWithoutTrailingSlash(request.url)

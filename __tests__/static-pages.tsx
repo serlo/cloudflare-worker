@@ -157,9 +157,7 @@ describe('handleRequest()', () => {
       'https://stats.fr.serlo.org/',
       'http://serlo.org',
       'http://gg.serlo.org/',
-      'http://en.serlo.com/imprint',
-      'http://deserlo.org/imprint',
-      'http://en.google.org/imprint'
+      'http://deserlo.org/imprint'
     ])('URL is %p', async url => {
       expect(await handleRequest(url)).toBeNull()
     })
