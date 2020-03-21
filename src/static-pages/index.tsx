@@ -109,7 +109,7 @@ export async function handleRequest(
       }
     }
 
-    const archivedRegex = `^\\/${revisedType}\\/archiv\\/(\\d{4}-\\d{2}-\\d{2})$`
+    const archivedRegex = `^\\/${revisedType}\\/archive\\/(\\d{4}-\\d{2}-\\d{2})$`
     const archivedMatch = path.match(new RegExp(archivedRegex))
 
     if (archivedMatch) {
@@ -127,7 +127,7 @@ export async function handleRequest(
       }
     }
 
-    if (path === `/${revisedType}/archiv`) {
+    if (path === `/${revisedType}/archive`) {
       const revisions = getRevisions(revisedConfig, lang, revisedType)
 
       if (revisions !== null) {
@@ -188,7 +188,7 @@ export function RevisionsOverview({ revisions }: { revisions: RevisedPage[] }) {
       There are the following archived versions of {current.title} available:
       <ul>
         {revisions.map(rev => {
-          const link = `/${rev.revisedType}/archiv/${getRevisionId(rev)}`
+          const link = `/${rev.revisedType}/archive/${getRevisionId(rev)}`
 
           return (
             <li>

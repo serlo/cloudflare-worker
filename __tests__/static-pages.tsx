@@ -99,9 +99,9 @@ describe('handleRequest()', () => {
     })
   })
 
-  test('returns archived revision for requests at /privacy/archiv/<id>', async () => {
+  test('returns archived revision for requests at /privacy/archive/<id>', async () => {
     await withMockedFetch('<p>Hello</p>', async () => {
-      const url = 'https://de.serlo.org/privacy/archiv/1999-10-09'
+      const url = 'https://de.serlo.org/privacy/archive/1999-10-09'
       const response = (await handleRequest(url)) as Response
 
       hasOkStatus(response)
@@ -113,8 +113,8 @@ describe('handleRequest()', () => {
     })
   })
 
-  test('returns overview of revisions for requests at /privacy/archiv', async () => {
-    const url = 'https://de.serlo.org/privacy/archiv'
+  test('returns overview of revisions for requests at /privacy/archive', async () => {
+    const url = 'https://de.serlo.org/privacy/archive'
     const response = (await handleRequest(url)) as Response
 
     hasOkStatus(response)
@@ -139,12 +139,12 @@ describe('handleRequest()', () => {
       'https://fr.serlo.org/terms',
       'http://en.serlo.org/privacy/',
       'https://fr.serlo.org/privacy',
-      'https://en.serlo.org/privacy/archiv',
-      'http://fr.serlo.org/privacy/archiv/',
+      'https://en.serlo.org/privacy/archive',
+      'http://fr.serlo.org/privacy/archive/',
       'https://fr.serlo.org/privacy/json',
       'https://en.serlo.org/privacy/json',
-      'http://de.serlo.org/privacy/archiv/2020-01-01',
-      'http://de.serlo.org/privacy/archiv/1999-33-55'
+      'http://de.serlo.org/privacy/archive/2020-01-01',
+      'http://de.serlo.org/privacy/archive/1999-33-55'
     ])('URL is %p', async url => {
       await isNotFoundResponse((await handleRequest(url)) as Response)
     })
@@ -248,11 +248,11 @@ test('RevisionsOverview()', () => {
 
   expect(html.getByText('2/3/2020 (current version)')).toHaveAttribute(
     'href',
-    '/privacy/archiv/2020-02-03'
+    '/privacy/archive/2020-02-03'
   )
   expect(html.getByText('12/7/1999')).toHaveAttribute(
     'href',
-    '/privacy/archiv/1999-12-07'
+    '/privacy/archive/1999-12-07'
   )
 })
 
