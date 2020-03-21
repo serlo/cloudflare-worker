@@ -23,6 +23,7 @@ import {
   sanitizeHtml,
   markdownToHtml,
   ALL_LANGUAGE_CODES,
+  fetchWithCache,
   isLanguageCode,
   PreactResponse,
   JsonResponse,
@@ -104,6 +105,18 @@ test('NotFoundResponse', async () => {
   await isNotFoundResponse(new NotFoundResponse())
 })
 
+test('fetchWithCache()', async () => {
+  const mockedFetch = await withMockedFetch('test', async () => {
+    const response = await fetchWithCache('http://example.com')
+
+    expect(await response.text()).toBe('test')
+  })
+
+  expect(mockedFetch).toHaveBeenCalledWith('http://example.com', {
+    cf: { cacheTtl: 3600 }
+  })
+})
+
 export async function containsText(response: Response, texts: string[]) {
   expect(response).not.toBeNull()
 
@@ -136,4 +149,21 @@ export async function isJsonResponse(response: Response, targetJson: any) {
   hasOkStatus(response)
   expect(response.headers.get('Content-Type')).toBe('application/json')
   expect(JSON.parse(await response.text())).toEqual(targetJson)
+}
+
+export async function withMockedFetch(
+  response: Response | string,
+  fn: () => Promise<void>
+) {
+  const value = typeof response === 'string' ? new Response(response) : response
+  const fetch = jest.fn().mockReturnValueOnce(value)
+
+  // @ts-ignore
+  global.fetch = fetch
+
+  await fn()
+
+  expect(fetch).toHaveBeenCalled()
+
+  return fetch
 }

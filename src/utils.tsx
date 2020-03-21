@@ -46,6 +46,12 @@ export function markdownToHtml(markdown: string): string {
   return marked(markdown, { headerIds: false }).trim()
 }
 
+export async function fetchWithCache(url: string): Promise<Response> {
+  return await fetch(url, ({
+    cf: { cacheTtl: 60 * 60 }
+  } as unknown) as RequestInit)
+}
+
 export class PreactResponse extends Response {
   constructor(component: VNode, opt?: ResponseInit) {
     super(renderToString(component), {

@@ -25,7 +25,8 @@ import {
   isJsonResponse,
   hasOkStatus,
   containsText,
-  contentTypeIsHtml
+  contentTypeIsHtml,
+  withMockedFetch
 } from './utils'
 import * as StaticPage from '../src/static-pages'
 import { render } from '@testing-library/preact'
@@ -500,21 +501,6 @@ function getTitle(
   typeName: StaticPage.RevisedType | StaticPage.UnrevisedType
 ): string {
   return '#' + typeName + '#'
-}
-
-async function withMockedFetch(
-  response: Response | string,
-  fn: () => Promise<void>
-): Promise<void> {
-  const value = typeof response === 'string' ? new Response(response) : response
-  const fetch = jest.fn().mockReturnValueOnce(value)
-
-  // @ts-ignore
-  global.fetch = fetch
-
-  await fn()
-
-  expect(fetch).toHaveBeenCalled()
 }
 
 function hasLangAttribute(html: ReturnType<typeof render>, lang: string): void {

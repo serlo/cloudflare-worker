@@ -20,7 +20,7 @@
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
 import { AreWeEdtrIoYet } from './template'
-import { PreactResponse } from '../utils'
+import { PreactResponse, fetchWithCache } from '../utils'
 import { getSubdomain } from '../url-utils'
 
 export async function edtrIoStats(request: Request) {
@@ -29,9 +29,7 @@ export async function edtrIoStats(request: Request) {
   const url = new URL(request.url)
   url.host = url.host.replace('are-we-edtr-io-yet.', 'de.')
   url.pathname = '/entities/are-we-edtr-io-yet'
-  const data = await fetch(url.href, ({
-    cf: { cacheTtl: 60 * 60 }
-  } as unknown) as RequestInit)
+  const data = await fetchWithCache(url.href)
 
   return new PreactResponse(AreWeEdtrIoYet(await data.json()), {
     headers: {
