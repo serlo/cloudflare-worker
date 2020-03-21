@@ -31,9 +31,5 @@ export async function edtrIoStats(request: Request) {
   url.pathname = '/entities/are-we-edtr-io-yet'
   const data = await fetchWithCache(url.href)
 
-  return new PreactResponse(AreWeEdtrIoYet(await data.json()), {
-    headers: {
-      'Content-Type': 'text/html;charset=utf-8'
-    }
-  })
+  return new PreactResponse(AreWeEdtrIoYet(await data.json()))
 }
