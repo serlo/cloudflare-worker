@@ -1,9 +1,14 @@
 import { h } from 'preact'
 import {
-  UnrevisedPage,
-  RevisedPage,
-  RevisionsOverview
+  UnrevisedPage as UnrevisedPageOriginal,
+  RevisedPage as RevisedPageOriginal,
+  RevisionsOverview as RevisionsOverviewOriginal
 } from '../src/static-pages'
+import { createStaticComponent } from './utils'
+
+const UnrevisedPage = createStaticComponent(UnrevisedPageOriginal)
+const RevisedPage = createStaticComponent(RevisedPageOriginal)
+const RevisionsOverview = createStaticComponent(RevisionsOverviewOriginal)
 
 export default {
   title: 'static-pages'
