@@ -1,3 +1,4 @@
+import { h } from 'preact'
 import {
   UnrevisedPage,
   RevisedPage,
@@ -18,16 +19,16 @@ tincidunt dui, at congue tellus nun sit amet felis. Mauris sodales euismod
 turpis sit amet tristi que.</p>`
 
 export function ExampleUnrevisedPage() {
-  return UnrevisedPage({
+  return <UnrevisedPage page={{
     lang: 'en',
     title: 'Imprint',
     url: '',
     content
-  })
+  }}/>
 }
 
 export function ExampleCurrentRevisedPage() {
-  return RevisedPage({
+  return <RevisedPage page={{
     lang: 'en',
     revision: new Date(2020, 0, 10),
     title: 'Privacy',
@@ -35,11 +36,11 @@ export function ExampleCurrentRevisedPage() {
     revisedType: 'privacy',
     isCurrentRevision: true,
     content
-  })
+  }} />
 }
 
 export function ExampleArchivedRevisedPage() {
-  return RevisedPage({
+  return <RevisedPage page={{
     lang: 'en',
     revision: new Date(2020, 0, 10),
     title: 'Privacy',
@@ -47,11 +48,11 @@ export function ExampleArchivedRevisedPage() {
     revisedType: 'privacy',
     isCurrentRevision: false,
     content
-  })
+  }}/>
 }
 
 export function ExampleRevisionsOverview() {
-  return RevisionsOverview([
+  return <RevisionsOverview revisions={[
     {
       revision: new Date(2020, 1, 3),
       title: 'Privacy',
@@ -76,5 +77,5 @@ export function ExampleRevisionsOverview() {
       revisedType: 'privacy',
       isCurrentRevision: false
     }
-  ])
+  ]} />
 }

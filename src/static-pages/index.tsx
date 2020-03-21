@@ -91,7 +91,7 @@ export async function handleRequest(
       const page = spec === null ? null : await fetchContent(spec)
 
       if (page !== null) {
-        return new PreactResponse(UnrevisedPage(page))
+        return new PreactResponse((<UnrevisedPage page={page} />))
       } else {
         return new NotFoundResponse()
       }
@@ -121,7 +121,7 @@ export async function handleRequest(
       const page = archived === null ? null : await fetchContent(archived)
 
       if (page !== null) {
-        return new PreactResponse(RevisedPage(page))
+        return new PreactResponse((<RevisedPage page={page} />))
       } else {
         return new NotFoundResponse()
       }
@@ -131,7 +131,7 @@ export async function handleRequest(
       const revisions = getRevisions(revisedConfig, lang, revisedType)
 
       if (revisions !== null) {
-        return new PreactResponse(RevisionsOverview(revisions))
+        return new PreactResponse((<RevisionsOverview revisions={revisions} />))
       } else {
         return new NotFoundResponse()
       }
@@ -143,7 +143,7 @@ export async function handleRequest(
       const page = current === null ? null : await fetchContent(current)
 
       if (page !== null) {
-        return new PreactResponse(RevisedPage(page))
+        return new PreactResponse((<RevisedPage page={page} />))
       } else {
         return new NotFoundResponse()
       }
@@ -153,7 +153,7 @@ export async function handleRequest(
   return null
 }
 
-export function UnrevisedPage(page: WithContent<Page>) {
+export function UnrevisedPage({ page }: { page: WithContent<Page> }) {
   return (
     <Template title={page.title} lang={page.lang}>
       <h1>{page.title}</h1>
@@ -162,7 +162,7 @@ export function UnrevisedPage(page: WithContent<Page>) {
   )
 }
 
-export function RevisedPage(page: WithContent<RevisedPage>) {
+export function RevisedPage({ page }: { page: WithContent<RevisedPage> }) {
   return (
     <Template title={page.title} lang={page.lang}>
       <h1>
@@ -178,7 +178,7 @@ export function RevisedPage(page: WithContent<RevisedPage>) {
   )
 }
 
-export function RevisionsOverview(revisions: RevisedPage[]) {
+export function RevisionsOverview({ revisions }: { revisions: RevisedPage[] }) {
   const current = revisions[0]
   const title = `Versions: ${current.title}`
 
