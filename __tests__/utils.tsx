@@ -25,9 +25,9 @@ import {
   ALL_LANGUAGE_CODES,
   fetchWithCache,
   isLanguageCode,
-  PreactResponse,
-  JsonResponse,
-  NotFoundResponse
+  createPreactResponse,
+  createJsonResponse,
+  createNotFoundResponse
 } from '../src/utils'
 
 import { h } from 'preact'
@@ -70,7 +70,7 @@ describe('markdownToHtml()', () => {
 })
 
 test('PreactResponse', async () => {
-  const hello = new PreactResponse((<h1>Hello</h1>))
+  const hello = createPreactResponse(<h1>Hello</h1>)
 
   hasOkStatus(hello)
   contentTypeIsHtml(hello)
@@ -82,7 +82,7 @@ test('PreactResponse', async () => {
     </Template>
   )
 
-  const notModified = new PreactResponse(template, { status: 304 })
+  const notModified = createPreactResponse(template, { status: 304 })
 
   expect(notModified.status).toBe(304)
   contentTypeIsHtml(notModified)
@@ -93,13 +93,13 @@ test('PreactResponse', async () => {
 })
 
 test('JsonResponse', async () => {
-  const response = new JsonResponse({ foo: [1, 2, 3] })
+  const response = createJsonResponse({ foo: [1, 2, 3] })
 
   isJsonResponse(response, { foo: [1, 2, 3] })
 })
 
 test('NotFoundResponse', async () => {
-  await isNotFoundResponse(new NotFoundResponse())
+  await isNotFoundResponse(createNotFoundResponse())
 })
 
 test('fetchWithCache()', async () => {

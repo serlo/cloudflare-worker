@@ -24,9 +24,9 @@ import {
   markdownToHtml,
   LanguageCode,
   isLanguageCode,
-  PreactResponse,
-  JsonResponse,
-  NotFoundResponse,
+  createPreactResponse,
+  createJsonResponse,
+  createNotFoundResponse,
   fetchWithCache
 } from '../utils'
 import { getPathnameWithoutTrailingSlash, getSubdomain } from '../url-utils'
@@ -88,9 +88,9 @@ export async function handleRequest(
       const page = spec === null ? null : await fetchContent(spec)
 
       if (page !== null) {
-        return new PreactResponse((<UnrevisedPage page={page} />))
+        return createPreactResponse(<UnrevisedPage page={page} />)
       } else {
-        return new NotFoundResponse()
+        return createNotFoundResponse()
       }
     }
   }
@@ -100,9 +100,9 @@ export async function handleRequest(
       const revisions = getRevisions(revisedConfig, lang, revisedType)
 
       if (revisions !== null) {
-        return new JsonResponse(revisions.map(getRevisionId))
+        return createJsonResponse(revisions.map(getRevisionId))
       } else {
-        return new NotFoundResponse()
+        return createNotFoundResponse()
       }
     }
 
@@ -118,9 +118,9 @@ export async function handleRequest(
       const page = archived === null ? null : await fetchContent(archived)
 
       if (page !== null) {
-        return new PreactResponse((<RevisedPage page={page} />))
+        return createPreactResponse(<RevisedPage page={page} />)
       } else {
-        return new NotFoundResponse()
+        return createNotFoundResponse()
       }
     }
 
@@ -128,9 +128,9 @@ export async function handleRequest(
       const revisions = getRevisions(revisedConfig, lang, revisedType)
 
       if (revisions !== null) {
-        return new PreactResponse((<RevisionsOverview revisions={revisions} />))
+        return createPreactResponse(<RevisionsOverview revisions={revisions} />)
       } else {
-        return new NotFoundResponse()
+        return createNotFoundResponse()
       }
     }
 
@@ -140,9 +140,9 @@ export async function handleRequest(
       const page = current === null ? null : await fetchContent(current)
 
       if (page !== null) {
-        return new PreactResponse((<RevisedPage page={page} />))
+        return createPreactResponse(<RevisedPage page={page} />)
       } else {
-        return new NotFoundResponse()
+        return createNotFoundResponse()
       }
     }
   }

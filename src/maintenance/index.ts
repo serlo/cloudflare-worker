@@ -23,7 +23,7 @@ import { DateTime } from 'luxon'
 
 import { Maintenance } from './template'
 import { getSubdomain } from '../url-utils'
-import { PreactResponse } from '../utils'
+import { createPreactResponse } from '../utils'
 
 export async function maintenanceMode(request: Request) {
   const enabled = await MAINTENANCE_KV.get('enabled')
@@ -56,7 +56,7 @@ function createMaintenanceResponse({
   lang: 'de' | 'en'
   end?: DateTime
 }) {
-  return new PreactResponse(Maintenance({ lang, end }), {
+  return createPreactResponse(Maintenance({ lang, end }), {
     status: 503,
     headers: end ? { 'Retry-After': end.toHTTP() } : {}
   })

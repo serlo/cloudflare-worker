@@ -52,28 +52,22 @@ export async function fetchWithCache(url: string): Promise<Response> {
   } as unknown) as RequestInit)
 }
 
-export class PreactResponse extends Response {
-  constructor(component: VNode, opt?: ResponseInit) {
-    super(renderToString(component), {
-      ...opt,
-      headers: {
-        ...opt?.headers,
-        'Content-Type': 'text/html;charset=utf-8'
-      }
-    })
-  }
+export function createPreactResponse(component: VNode, opt?: ResponseInit) {
+  return new Response(renderToString(component), {
+    ...opt,
+    headers: {
+      ...opt?.headers,
+      'Content-Type': 'text/html;charset=utf-8'
+    }
+  })
 }
 
-export class JsonResponse extends Response {
-  constructor(json: any) {
-    super(JSON.stringify(json), {
-      headers: { 'Content-Type': 'application/json' }
-    })
-  }
+export function createJsonResponse(json: any) {
+  return new Response(JSON.stringify(json), {
+    headers: { 'Content-Type': 'application/json' }
+  })
 }
 
-export class NotFoundResponse extends PreactResponse {
-  constructor() {
-    super(<NotFound />, { status: 404 })
-  }
+export function createNotFoundResponse() {
+  return createPreactResponse(<NotFound />, { status: 404 })
 }
