@@ -26,7 +26,8 @@ export const ALL_REVISED_TYPES = ['privacy'] as const
 export type UnrevisedType = typeof ALL_UNREVISED_TYPES[number]
 export type RevisedType = typeof ALL_REVISED_TYPES[number]
 
-const legalRepo = 'https://raw.githubusercontent.com/serlo/serlo.org-legal/master'
+const legalRepo =
+  'https://raw.githubusercontent.com/serlo/serlo.org-legal/master'
 
 // TODO: i18n
 export const titles: { [K in RevisedType | UnrevisedType]: string } = {
