@@ -9,6 +9,10 @@ export function NotFound() {
   )
 }
 
+export function CenteredContent({ children }: { children: ComponentChildren }) {
+  return <div class="call">{children}</div>
+}
+
 export function Template({
   children,
   lang,
@@ -80,11 +84,7 @@ export function Template({
             <section class="clearfix">
               <div class="content clearfix">
                 <div class="r">
-                  <div class="c24">
-                    <div class="call" style="text-align: left;">
-                      {children}
-                    </div>
-                  </div>
+                  <div class="c24">{children}</div>
                 </div>
               </div>
             </section>

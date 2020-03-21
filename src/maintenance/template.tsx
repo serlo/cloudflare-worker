@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import { h } from 'preact'
 
-import { Template } from '../ui'
+import { Template, CenteredContent } from '../ui'
 
 export function Maintenance({
   lang,
@@ -13,7 +13,7 @@ export function Maintenance({
   const { content, title } = getTranslations()
   return (
     <Template lang={lang} title={title}>
-      {content}
+      <CenteredContent>{content}</CenteredContent>
     </Template>
   )
 
