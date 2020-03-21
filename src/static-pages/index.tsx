@@ -64,8 +64,9 @@ export interface Page extends Spec {
 }
 
 export interface RevisedPage extends Page, RevisedSpec {
-  revisedType: string
   isCurrentRevision: boolean
+  revisionDate: Date
+  revisedType: string
 }
 
 export type WithContent<A extends Spec> = A & { content: string }
@@ -100,7 +101,7 @@ export async function handleRequest(
       const revisions = getRevisions(revisedConfig, lang, revisedType)
 
       if (revisions !== null) {
-        return createJsonResponse(revisions.map(getRevisionId))
+        return createJsonResponse(revisions.map(x => x.revision))
       } else {
         return createNotFoundResponse()
       }
@@ -167,7 +168,7 @@ export function RevisedPage({ page }: { page: WithContent<RevisedPage> }) {
         <small>
           ({page.isCurrentRevision ? 'Current' : 'Archived'}
           {' version of '}
-          {page.revision.toLocaleDateString(page.lang)})
+          {page.revisionDate.toLocaleDateString(page.lang)})
         </small>
       </h1>
       <div dangerouslySetInnerHTML={{ __html: page.content }} />
@@ -185,12 +186,12 @@ export function RevisionsOverview({ revisions }: { revisions: RevisedPage[] }) {
       There are the following archived versions of {current.title} available:
       <ul>
         {revisions.map(rev => {
-          const link = `/${rev.revisedType}/archive/${getRevisionId(rev)}`
+          const link = `/${rev.revisedType}/archive/${rev.revision}`
 
           return (
             <li>
               <a href={link}>
-                {rev.revision.toLocaleDateString(rev.lang)}
+                {rev.revisionDate.toLocaleDateString(rev.lang)}
                 {rev.isCurrentRevision ? ' (current version)' : ''}
               </a>
             </li>
@@ -225,18 +226,7 @@ export function findRevisionById<A extends RevisedSpec>(
   revisions: A[],
   id: string
 ): A | null {
-  return revisions.find(x => getRevisionId(x) === id) ?? null
-}
-
-export function getRevisionId(revised: RevisedSpec): string {
-  const year = revised.revision.getFullYear()
-  const month = revised.revision.getMonth() + 1
-  const day = revised.revision.getDate()
-
-  const paddedMonth = month.toString().padStart(2, '0')
-  const paddedDay = day.toString().padStart(2, '0')
-
-  return `${year}-${paddedMonth}-${paddedDay}`
+  return revisions.find(x => x.revision === id) ?? null
 }
 
 export function getRevisions(
@@ -257,6 +247,7 @@ export function getRevisions(
         ...revision,
         lang,
         title: getTitle(revisedType),
+        revisionDate: new Date(revision.revision),
         revisedType: revisedType,
         isCurrentRevision: index === 0
       }

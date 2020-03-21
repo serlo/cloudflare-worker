@@ -24,63 +24,84 @@ tincidunt dui, at congue tellus nun sit amet felis. Mauris sodales euismod
 turpis sit amet tristi que.</p>`
 
 export function ExampleUnrevisedPage() {
-  return <UnrevisedPage page={{
-    lang: 'en',
-    title: 'Imprint',
-    url: '',
-    content
-  }}/>
+  return (
+    <UnrevisedPage
+      page={{
+        lang: 'en',
+        title: 'Imprint',
+        url: '',
+        content
+      }}
+    />
+  )
 }
 
 export function ExampleCurrentRevisedPage() {
-  return <RevisedPage page={{
-    lang: 'en',
-    revision: new Date(2020, 0, 10),
-    title: 'Privacy',
-    url: '',
-    revisedType: 'privacy',
-    isCurrentRevision: true,
-    content
-  }} />
+  return (
+    <RevisedPage
+      page={{
+        lang: 'en',
+        revision: '2020-01-10',
+        revisionDate: new Date('2020-01-10'),
+        title: 'Privacy',
+        url: '',
+        revisedType: 'privacy',
+        isCurrentRevision: true,
+        content
+      }}
+    />
+  )
 }
 
 export function ExampleArchivedRevisedPage() {
-  return <RevisedPage page={{
-    lang: 'en',
-    revision: new Date(2020, 0, 10),
-    title: 'Privacy',
-    url: '',
-    revisedType: 'privacy',
-    isCurrentRevision: false,
-    content
-  }}/>
+  return (
+    <RevisedPage
+      page={{
+        lang: 'en',
+        revision: '2020-01-10',
+        revisionDate: new Date('2020-01-10'),
+        title: 'Privacy',
+        url: '',
+        revisedType: 'privacy',
+        isCurrentRevision: false,
+        content
+      }}
+    />
+  )
 }
 
 export function ExampleRevisionsOverview() {
-  return <RevisionsOverview revisions={[
-    {
-      revision: new Date(2020, 1, 3),
-      title: 'Privacy',
-      lang: 'en',
-      url: '',
-      revisedType: 'privacy',
-      isCurrentRevision: true
-    },
-    {
-      revision: new Date(1999, 11, 7),
-      title: 'Privacy',
-      lang: 'en',
-      url: '',
-      revisedType: 'privacy',
-      isCurrentRevision: false
-    },
-    {
-      revision: new Date(1987, 4, 5),
-      title: 'Privacy',
-      lang: 'en',
-      url: '',
-      revisedType: 'privacy',
-      isCurrentRevision: false
-    }
-  ]} />
+  return (
+    <RevisionsOverview
+      revisions={[
+        {
+          revision: '2020-01-10',
+          revisionDate: new Date('2020-01-10'),
+          title: 'Privacy',
+          lang: 'en',
+          url: '',
+          revisedType: 'privacy',
+          isCurrentRevision: true
+        },
+        {
+          revision: '2010-12-13',
+          revisionDate: new Date('2010-12-13'),
+          title: 'Privacy',
+          lang: 'en',
+          url: '',
+          revisedType: 'privacy',
+          isCurrentRevision: false
+        },
+        {
+          revision: '1999-02-23',
+          revisionDate: new Date('1999-02-23'),
+          title: 'Privacy',
+          lang: 'en',
+          url: '',
+          revisedType: 'privacy',
+          isCurrentRevision: false
+        }
+      ]}
+    />
+  )
 }

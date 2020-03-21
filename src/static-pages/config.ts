@@ -48,7 +48,7 @@ const config: BaseConfig = {
     revised: {
       privacy: [
         {
-          revision: new Date('2020-03-16'),
+          revision: '2020-03-16',
           url: `${legalRepo}/e78d86b9d4a1729de48d87c740c573813038a320/en/privacy.md`
         }
       ]
@@ -66,15 +66,15 @@ const config: BaseConfig = {
     revised: {
       privacy: [
         {
-          revision: new Date('2020-02-10'),
+          revision: '2020-02-10',
           url: `${legalRepo}/4c33d7a99b4cf18f300b5204c250f7bfd451ffd8/de/privacy.md`
         },
         {
-          revision: new Date('2018-12-01'),
+          revision: '2018-12-01',
           url: `${legalRepo}/65368036529cd74c2ea177a1d0bbbe73098baab1/de/privacy.md`
         },
         {
-          revision: new Date('2018-10-17'),
+          revision: '2018-10-17',
           url: `${legalRepo}/d9fb1775e1abf52352d1453a0ca54d09d14bdac0/de/privacy.md`
         }
       ]
@@ -90,7 +90,7 @@ export interface Spec {
 }
 
 export interface RevisedSpec extends Spec {
-  revision: Date
+  revision: string
 }
 
 export type UnrevisedConfig = Config<UnrevisedType, Spec>
