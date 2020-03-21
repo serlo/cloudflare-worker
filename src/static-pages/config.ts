@@ -26,7 +26,7 @@ export const ALL_REVISED_TYPES = ['privacy'] as const
 export type UnrevisedType = typeof ALL_UNREVISED_TYPES[number]
 export type RevisedType = typeof ALL_REVISED_TYPES[number]
 
-const legalRepo = 'https://raw.githubusercontent.com/serlo/serlo.org-legal'
+const legalRepo = 'https://raw.githubusercontent.com/serlo/serlo.org-legal/master'
 
 // TODO: i18n
 export const titles: { [K in RevisedType | UnrevisedType]: string } = {
@@ -39,17 +39,17 @@ const config: BaseConfig = {
   en: {
     unrevised: {
       imprint: {
-        url: `${legalRepo}/e391a2407e1191fdd371e255fd33324be933b487/en/imprint.md`
+        url: `${legalRepo}/en/imprint.md`
       },
       terms: {
-        url: `${legalRepo}/e391a2407e1191fdd371e255fd33324be933b487/en/terms.md`
+        url: `${legalRepo}/en/terms.md`
       }
     },
     revised: {
       privacy: [
         {
           revision: '2020-03-16',
-          url: `${legalRepo}/e78d86b9d4a1729de48d87c740c573813038a320/en/privacy.md`
+          url: `${legalRepo}/en/privacy/current.md`
         }
       ]
     }
@@ -57,25 +57,25 @@ const config: BaseConfig = {
   de: {
     unrevised: {
       imprint: {
-        url: `${legalRepo}/5dd8abbc6f6a0eac1c89c7aad4bd8ec6ce530473/de/imprint.md`
+        url: `${legalRepo}/de/imprint.md`
       },
       terms: {
-        url: `${legalRepo}/e391a2407e1191fdd371e255fd33324be933b487/de/terms.md`
+        url: `${legalRepo}/de/terms.md`
       }
     },
     revised: {
       privacy: [
         {
           revision: '2020-02-10',
-          url: `${legalRepo}/4c33d7a99b4cf18f300b5204c250f7bfd451ffd8/de/privacy.md`
+          url: `${legalRepo}/de/privacy/current.md`
         },
         {
           revision: '2018-12-01',
-          url: `${legalRepo}/65368036529cd74c2ea177a1d0bbbe73098baab1/de/privacy.md`
+          url: `${legalRepo}/de/privacy/2018-12-01.md`
         },
         {
           revision: '2018-10-17',
-          url: `${legalRepo}/d9fb1775e1abf52352d1453a0ca54d09d14bdac0/de/privacy.md`
+          url: `${legalRepo}/de/privacy/2018-10-17.md`
         }
       ]
     }
