@@ -22,9 +22,9 @@
 import { LanguageCode, ALL_LANGUAGE_CODES } from '../utils'
 
 export const ALL_UNREVISED_TYPES = ['imprint', 'terms'] as const
-export const ALL_REVSIED_TYPES = ['privacy'] as const
+export const ALL_REVISED_TYPES = ['privacy'] as const
 export type UnrevisedType = typeof ALL_UNREVISED_TYPES[number]
-export type RevisedType = typeof ALL_REVSIED_TYPES[number]
+export type RevisedType = typeof ALL_REVISED_TYPES[number]
 
 const legalRepo = 'https://raw.githubusercontent.com/serlo/serlo.org-legal'
 

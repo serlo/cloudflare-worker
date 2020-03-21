@@ -33,7 +33,7 @@ import { Template } from '../ui'
 import { h } from 'preact'
 import {
   ALL_UNREVISED_TYPES,
-  ALL_REVSIED_TYPES,
+  ALL_REVISED_TYPES,
   UnrevisedType,
   RevisedType,
   Spec,
@@ -98,7 +98,7 @@ export async function handleRequest(
     }
   }
 
-  for (const revisedType of ALL_REVSIED_TYPES) {
+  for (const revisedType of ALL_REVISED_TYPES) {
     if (path === `/${revisedType}/json`) {
       const revisions = getRevisions(revisedConfig, lang, revisedType)
 
