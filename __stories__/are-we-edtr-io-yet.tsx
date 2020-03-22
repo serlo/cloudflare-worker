@@ -1,9 +1,10 @@
 import { h } from 'preact'
 
 import { data } from '../__fixtures__/are-we-edtr-io-yet'
-import { render } from '../src/are-we-edtr-io-yet/render'
+import { createStaticComponent } from './utils'
 
-const AreWeEdtrIoYet = createStaticComponent(render)
+import { AreWeEdtrIoYet as Original } from '../src/are-we-edtr-io-yet/template'
+const AreWeEdtrIoYet = createStaticComponent(Original)
 
 export default {
   component: AreWeEdtrIoYet,
@@ -11,12 +12,5 @@ export default {
 }
 
 export function Simple() {
-  return <AreWeEdtrIoYet {...data} />
-}
-
-function createStaticComponent<P>(f: (props: P) => string) {
-  return function StaticComponent(props: P) {
-    const html = f(props)
-    return <div dangerouslySetInnerHTML={{ __html: html }} />
-  }
+  return <AreWeEdtrIoYet data={data} />
 }

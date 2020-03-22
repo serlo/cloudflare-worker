@@ -1,9 +1,9 @@
 import { DateTime } from 'luxon'
 import { h } from 'preact'
+import { createStaticComponent } from './utils'
 
-import { render } from '../src/maintenance/render'
-
-const Maintenance = createStaticComponent(render)
+import { Maintenance as MaintenanceOriginal } from '../src/maintenance/template'
+const Maintenance = createStaticComponent(MaintenanceOriginal)
 
 export default {
   component: Maintenance,
@@ -38,11 +38,4 @@ export function EnEndDate() {
 }
 EnEndDate.story = {
   name: 'en (w/ end date)'
-}
-
-function createStaticComponent<P>(f: (props: P) => string) {
-  return function StaticComponent(props: P) {
-    const html = f(props)
-    return <div dangerouslySetInnerHTML={{ __html: html }} />
-  }
 }

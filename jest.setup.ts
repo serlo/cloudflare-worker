@@ -19,17 +19,17 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { AreWeEdtrIoYet } from './template'
-import { createPreactResponse, fetchWithCache } from '../utils'
-import { getSubdomain } from '../url-utils'
+import '@testing-library/jest-dom'
+import { Response, Request } from 'node-fetch'
 
-export async function edtrIoStats(request: Request) {
-  if (getSubdomain(request.url) !== 'are-we-edtr-io-yet') return null
+global.Response = Response
+global.Request = Request
 
-  const url = new URL(request.url)
-  url.host = url.host.replace('are-we-edtr-io-yet.', 'de.')
-  url.pathname = '/entities/are-we-edtr-io-yet'
-  const data = await fetchWithCache(url.href)
-
-  return createPreactResponse(AreWeEdtrIoYet(await data.json()))
+declare global {
+  namespace NodeJS {
+    interface Global {
+      Response: typeof Response
+      Request: typeof Request
+    }
+  }
 }
