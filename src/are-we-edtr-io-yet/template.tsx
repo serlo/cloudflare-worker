@@ -1,11 +1,6 @@
 import { h } from 'preact'
-import renderToString from 'preact-render-to-string'
 
-import { Template } from '../ui'
-
-export function render(data: Record<EntityType, EntityProps['data']>) {
-  return renderToString(<AreWeEdtrIoYet data={data} />)
-}
+import { Template, CenteredContent } from '../ui'
 
 export enum EntityType {
   applet = 'applet',
@@ -19,7 +14,7 @@ export enum EntityType {
   video = 'video'
 }
 
-function AreWeEdtrIoYet({
+export function AreWeEdtrIoYet({
   data
 }: {
   data: Record<EntityType, EntityProps['data']>
@@ -28,28 +23,30 @@ function AreWeEdtrIoYet({
 
   return (
     <Template lang="en" title="Are we Edtr.io yet?">
-      <table id="toc" class="table">
-        <tbody>
-          {types.map(type => {
-            const progress = getProgress(data[type])
-            const done = progress.current === progress.max
+      <CenteredContent>
+        <table id="toc" class="table">
+          <tbody>
+            {types.map(type => {
+              const progress = getProgress(data[type])
+              const done = progress.current === progress.max
 
-            return (
-              <tr class={done ? 'success' : undefined}>
-                <td>
-                  <a href={`#${type}`}>{getTitle(type)}</a>
-                </td>
-                <td>
-                  <EntityProgress type={type} data={data[type]} />
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-      {types.map(type => {
-        return <Entity type={type} data={data[type]} />
-      })}
+              return (
+                <tr class={done ? 'success' : undefined}>
+                  <td>
+                    <a href={`#${type}`}>{getTitle(type)}</a>
+                  </td>
+                  <td>
+                    <EntityProgress type={type} data={data[type]} />
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+        {types.map(type => {
+          return <Entity type={type} data={data[type]} />
+        })}
+      </CenteredContent>
     </Template>
   )
 }

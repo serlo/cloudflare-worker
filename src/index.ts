@@ -22,6 +22,7 @@
 import { api } from './api'
 import { edtrIoStats } from './are-we-edtr-io-yet'
 import { maintenanceMode } from './maintenance'
+import { handleRequest as staticPages } from './static-pages'
 import { getPathnameWithoutTrailingSlash, getSubdomain } from './url-utils'
 
 addEventListener('fetch', (event: Event) => {
@@ -35,6 +36,7 @@ export async function handleRequest(request: Request) {
     (await maintenanceMode(request)) ||
     (await enforceHttps(request)) ||
     (await redirects(request)) ||
+    (await staticPages(request)) ||
     (await semanticFileNames(request)) ||
     (await packages(request)) ||
     (await api(request)) ||
