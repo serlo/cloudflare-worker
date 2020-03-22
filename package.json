@@ -10,6 +10,7 @@
   "scripts": {
     "build": "wrangler build",
     "dev": "wrangler dev --env dev",
+    "deploy": "wrangler publish",
     "format": "yarn _prettier --write",
     "lint": "npm-run-all --parallel lint:prettier lint:tsc",
     "lint:prettier": "yarn _prettier --check",
@@ -18,7 +19,6 @@
     "test": "jest",
     "pacts": "jest --config jest-pacts.config.js",
     "pacts:publish": "ts-node scripts/publish-pacts",
-    "wrangler:publish": "wrangler publish",
     "wrangler:maintenance:kv:get": "wrangler kv:key get --binding=MAINTENANCE_KV",
     "wrangler:maintenance:kv:put": "wrangler kv:key put --binding=MAINTENANCE_KV",
     "wrangler:maintenance:kv:delete": "wrangler kv:key delete --binding=MAINTENANCE_KV",
