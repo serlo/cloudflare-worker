@@ -35,7 +35,9 @@ const legalRepo =
 
 // TODO: i18n
 export const titles: {
-  [K in RevisedType | UnrevisedType]: { [key in LanguageCode]?: string }
+  [K in RevisedType | UnrevisedType]: {
+    [key in LanguageCode]?: string
+  }
 } = {
   imprint: {
     de: 'Impressum',
