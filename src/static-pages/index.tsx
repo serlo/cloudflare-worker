@@ -332,7 +332,8 @@ export function getRevisions(
   config: RevisedConfig,
   lang: LanguageCode,
   revisedType: RevisedType,
-  getTitle: (revisedType: RevisedType) => string = x => titles[x][lang] || ''
+  getTitle: (revisedType: RevisedType) => string = x =>
+    titles[x][lang] || titles[x][LanguageCode.En] || ''
 ): RevisedPage[] | null {
   const result = getSpecAndLanguage(config, lang, revisedType)
 
@@ -359,7 +360,7 @@ export function getPage(
   lang: LanguageCode,
   unrevisedType: UnrevisedType,
   getTitle: (unrevisedType: UnrevisedType) => string = x =>
-    titles[x][lang] || ''
+    titles[x][lang] || titles[x][LanguageCode.En] || ''
 ): Page | null {
   const result = getSpecAndLanguage(config, lang, unrevisedType)
 
