@@ -20,29 +20,29 @@
  * @link     https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
 import {
-  sanitizeHtml,
-  markdownToHtml,
-  LanguageCode,
-  isLanguageCode,
-  createPreactResponse,
   createJsonResponse,
   createNotFoundResponse,
-  fetchWithCache
+  createPreactResponse,
+  fetchWithCache,
+  isLanguageCode,
+  LanguageCode,
+  markdownToHtml,
+  sanitizeHtml
 } from '../utils'
 import { getPathnameWithoutTrailingSlash, getSubdomain } from '../url-utils'
 import { Template } from '../ui'
-import { h } from 'preact'
+import { Fragment, h } from 'preact'
 import {
-  UnrevisedType,
+  Config,
+  revisedConfig as defaultRevisedConfig,
+  RevisedConfig,
+  RevisedSpec,
   RevisedType,
   Spec,
-  RevisedSpec,
+  titles,
   unrevisedConfig as defaultUnrevisedConfig,
-  revisedConfig as defaultRevisedConfig,
   UnrevisedConfig,
-  RevisedConfig,
-  Config,
-  titles
+  UnrevisedType
 } from './config'
 
 const defaultLanguage = LanguageCode.En
@@ -161,43 +161,144 @@ export function UnrevisedPage({ page }: { page: WithContent<Page> }) {
 export function RevisedPage({ page }: { page: WithContent<RevisedPage> }) {
   return (
     <Template title={page.title} lang={page.lang}>
+      {page.isCurrentRevision ? null : (
+        <div class="alert alert-info" style="margin-top: 20px;">
+          {getAlert()}
+        </div>
+      )}
       <h1>
-        {page.title}{' '}
-        <small>
-          ({page.isCurrentRevision ? 'Current' : 'Archived'}
-          {' version of '}
-          {page.revisionDate.toLocaleDateString(page.lang)})
-        </small>
+        {page.title} <small>{getSubHeader()}</small>
       </h1>
+      {page.isCurrentRevision ? <p>{getArchiveDescription()}</p> : null}
       <div dangerouslySetInnerHTML={{ __html: page.content }} />
     </Template>
   )
+
+  function getAlert() {
+    switch (page.lang) {
+      case LanguageCode.De:
+        return (
+          <Fragment>
+            Dies ist eine archivierte Version. Schaue Dir die{' '}
+            <a href={`/${page.revisedType}`}>aktuelle Version</a> oder{' '}
+            <a href={`/${page.revisedType}/archive`}>frühere Versionen</a> an.
+          </Fragment>
+        )
+      case LanguageCode.En:
+      default:
+        return (
+          <Fragment>
+            This is an archived version. View the{' '}
+            <a href={`/${page.revisedType}`}>current version</a> or{' '}
+            <a href={`/${page.revisedType}/archive`}>all past versions</a>.
+          </Fragment>
+        )
+    }
+  }
+
+  function getArchiveDescription() {
+    switch (page.lang) {
+      case LanguageCode.De:
+        return (
+          <Fragment>
+            Frühere Versionen findest Du im{' '}
+            <a href={`/${page.revisedType}/archive`}>Archiv</a>.
+          </Fragment>
+        )
+      case LanguageCode.En:
+      default:
+        return (
+          <Fragment>
+            You can view past versions in the{' '}
+            <a href={`/${page.revisedType}/archive`}>archive</a>.
+          </Fragment>
+        )
+    }
+  }
+
+  function getSubHeader() {
+    switch (page.lang) {
+      case LanguageCode.De:
+        return (
+          <Fragment>
+            wirksam ab dem {page.revisionDate.toLocaleDateString(page.lang)}
+          </Fragment>
+        )
+      case LanguageCode.En:
+      default:
+        return (
+          <Fragment>
+            effective {page.revisionDate.toLocaleDateString(page.lang)}
+          </Fragment>
+        )
+    }
+  }
 }
 
 export function RevisionsOverview({ revisions }: { revisions: RevisedPage[] }) {
   const current = revisions[0]
-  const title = `Versions: ${current.title}`
+  const title = getTitle()
 
   return (
     <Template title={title} lang={current.lang}>
       <h1>{title}</h1>
-      There are the following archived versions of {current.title} available:
+      <p>{getDescription()}</p>
       <ul>
         {revisions.map(rev => {
           const link = `/${rev.revisedType}/archive/${rev.revision}`
-
           return (
             <li>
-              <a href={link}>
-                {rev.revisionDate.toLocaleDateString(rev.lang)}
-                {rev.isCurrentRevision ? ' (current version)' : ''}
-              </a>
+              <a href={link}>{renderRevision(rev)}</a>
             </li>
           )
         })}
       </ul>
     </Template>
   )
+
+  function getTitle() {
+    switch (current.lang) {
+      case LanguageCode.De:
+        return `Aktualisierungen: ${current.title}`
+      case LanguageCode.En:
+      default:
+        return `Updates: ${current.title}`
+    }
+  }
+
+  function renderRevision(rev: RevisedPage) {
+    switch (current.lang) {
+      case LanguageCode.De:
+        return (
+          <Fragment>
+            {rev.isCurrentRevision
+              ? 'Aktuelle Version'
+              : rev.revisionDate.toLocaleDateString(rev.lang)}
+          </Fragment>
+        )
+      case LanguageCode.En:
+      default:
+        return (
+          <Fragment>
+            {rev.isCurrentRevision
+              ? 'current version'
+              : rev.revisionDate.toLocaleDateString(rev.lang)}
+          </Fragment>
+        )
+    }
+  }
+
+  function getDescription() {
+    switch (current.lang) {
+      case LanguageCode.De:
+        return <Fragment>Du findest hier frühere Versionen:</Fragment>
+      case LanguageCode.En:
+      default:
+        return (
+          <Fragment>In this archive, you can see all past versions:</Fragment>
+        )
+    }
+  }
 }
 
 export async function fetchContent<A extends Page>(
@@ -231,7 +332,7 @@ export function getRevisions(
   config: RevisedConfig,
   lang: LanguageCode,
   revisedType: RevisedType,
-  getTitle: (revisedType: RevisedType) => string = x => titles[x]
+  getTitle: (revisedType: RevisedType) => string = x => titles[x][lang] || ''
 ): RevisedPage[] | null {
   const result = getSpecAndLanguage(config, lang, revisedType)
 
@@ -257,7 +358,8 @@ export function getPage(
   config: UnrevisedConfig,
   lang: LanguageCode,
   unrevisedType: UnrevisedType,
-  getTitle: (unrevisedType: UnrevisedType) => string = x => titles[x]
+  getTitle: (unrevisedType: UnrevisedType) => string = x =>
+    titles[x][lang] || ''
 ): Page | null {
   const result = getSpecAndLanguage(config, lang, unrevisedType)
 

@@ -1,4 +1,5 @@
-import { h, ComponentChildren } from 'preact'
+import { h, ComponentChildren, Fragment } from 'preact'
+import { LanguageCode } from '../utils'
 
 export function NotFound() {
   return (
@@ -78,7 +79,14 @@ export function Template({
               </div>
             </section>
           </div>
+          <div id="horizon" />
+          <div id="footer-push" style="height: 200px;" />
         </div>
+        <footer id="footer" className="home-row">
+          <div className="footer-wrapper col-lg-8 col-lg-push-1">
+            {getFooter()}
+          </div>
+        </footer>
         <script
           type="text/javascript"
           dangerouslySetInnerHTML={{ __html: googleAnalytics }}
@@ -86,4 +94,62 @@ export function Template({
       </body>
     </html>
   )
+
+  function getFooter() {
+    switch (lang) {
+      case LanguageCode.De:
+        return (
+          <Fragment>
+            <div className="logo-wrapper">
+              <a href="/">
+                <span className="serlo-logo">V</span>
+                <div className="serlo-brand">Serlo</div>
+              </a>{' '}
+              Die freie Lernplattform
+            </div>
+            <nav>
+              <div className="footer-title">Rechtlich</div>
+              <ul className="nav nav-list">
+                <li>
+                  <a href="/terms">Nutzungsbedingungen und Urheberrecht</a>
+                </li>
+                <li>
+                  <a href="/privacy">Datenschutz</a>
+                </li>
+                <li>
+                  <a href="/imprint">Impressum</a>
+                </li>
+              </ul>
+            </nav>
+          </Fragment>
+        )
+      case LanguageCode.En:
+      default:
+        return (
+          <Fragment>
+            <div className="logo-wrapper">
+              <a href="/">
+                <span className="serlo-logo">V</span>
+                <div className="serlo-brand">Serlo</div>
+              </a>{' '}
+              The Open Learning Platform
+            </div>
+            <nav>
+              <div className="footer-title">Legal Terms</div>
+              <ul className="nav nav-list">
+                <li>
+                  <a href="/terms">Terms of Use</a>
+                </li>
+                <li>
+                  <a href="/privacy">Privacy Policy</a>
+                </li>
+                <li>
+                  <a href="/imprint">Imprint</a>
+                </li>
+              </ul>
+            </nav>
+          </Fragment>
+        )
+    }
+  }
 }
