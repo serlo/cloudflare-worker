@@ -34,10 +34,21 @@ const legalRepo =
   'https://raw.githubusercontent.com/serlo/serlo.org-legal/master'
 
 // TODO: i18n
-export const titles: { [K in RevisedType | UnrevisedType]: string } = {
-  imprint: 'Imprint',
-  terms: 'Terms of Use',
-  privacy: 'Privacy'
+export const titles: {
+  [K in RevisedType | UnrevisedType]: { [key in LanguageCode]?: string }
+} = {
+  imprint: {
+    de: 'Impressum',
+    en: 'Imprint'
+  },
+  terms: {
+    de: 'Nutzungsbedigungen und Urheberrecht',
+    en: 'Terms of Use'
+  },
+  privacy: {
+    de: 'Datenschutzerklärung',
+    en: 'Privacy Policy'
+  }
 }
 
 const config: BaseConfig = {

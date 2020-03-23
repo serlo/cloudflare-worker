@@ -98,7 +98,7 @@ describe('handleRequest()', () => {
     })
   })
 
-  test('returns current revisision for requests at /privacy', async () => {
+  test('returns current revision for requests at /privacy', async () => {
     await withMockedFetch('<p>Hello</p>', async () => {
       const url = 'https://de.serlo.org/privacy/'
       const response = (await testHandleRequest(url)) as Response
@@ -107,7 +107,7 @@ describe('handleRequest()', () => {
       contentTypeIsHtml(response)
       await containsText(response, [
         '<p>Hello</p>',
-        '(Current version of 12/11/2020)'
+        'wirksam ab dem 12/11/2020'
       ])
     })
   })
@@ -119,10 +119,7 @@ describe('handleRequest()', () => {
 
       hasOkStatus(response)
       contentTypeIsHtml(response)
-      await containsText(response, [
-        '<p>Hello</p>',
-        '(Archived version of 10/9/1999)'
-      ])
+      await containsText(response, ['<p>Hello</p>', 'wirksam ab dem 10/9/1999'])
     })
   })
 
@@ -133,8 +130,8 @@ describe('handleRequest()', () => {
     hasOkStatus(response)
     contentTypeIsHtml(response)
     await containsText(response, [
-      '<h1>Versions: Privacy</h1>',
-      '12/11/2020 (current version)',
+      '<h1>Aktualisierungen: Datenschutzerklärung</h1>',
+      'Aktuelle Version',
       '10/9/1999'
     ])
   })
@@ -224,7 +221,7 @@ test('RevisedPage()', () => {
   hasLangAttribute(html, 'en')
 
   expect(html.getByText('Privacy', { selector: 'h1' })).toBeVisible()
-  expect(html.getByText('(Current version of 1/2/2019)')).toBeVisible()
+  expect(html.getByText('effective 1/2/2019')).toBeVisible()
   expect(html.getByText('Hello World')).toBeVisible()
 })
 
@@ -256,11 +253,11 @@ test('RevisionsOverview()', () => {
 
   hasLangAttribute(html, 'en')
 
-  expect(html.getByText('Versions: Privacy', { selector: 'h1' })).toBeVisible()
-  expect(html.getByText('2/3/2020 (current version)')).toBeVisible()
+  expect(html.getByText('Updates: Privacy', { selector: 'h1' })).toBeVisible()
+  expect(html.getByText('current version')).toBeVisible()
   expect(html.getByText('12/7/1999')).toBeVisible()
 
-  expect(html.getByText('2/3/2020 (current version)')).toHaveAttribute(
+  expect(html.getByText('current version')).toHaveAttribute(
     'href',
     '/privacy/archive/2020-02-03'
   )
