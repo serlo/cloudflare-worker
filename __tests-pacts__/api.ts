@@ -57,30 +57,7 @@ afterAll(async () => {
 })
 
 test('License', async () => {
-  await pact.addInteraction({
-    state: `1 is a license`,
-    uponReceiving: `resolve license 1`,
-    withRequest: {
-      method: 'GET',
-      path: '/api/license/1',
-    },
-    willRespondWith: {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-      },
-      body: {
-        id: 1,
-        instance: Matchers.string('de'),
-        default: Matchers.boolean(true),
-        title: Matchers.string('title'),
-        url: Matchers.string('url'),
-        content: Matchers.string('content'),
-        agreement: Matchers.string('agreement'),
-        iconHref: Matchers.string('iconHref'),
-      },
-    },
-  })
+  await addLicenseInteraction()
   const response = await client.query({
     query: gql`
       {
@@ -116,18 +93,7 @@ describe('Uuid', () => {
   describe('Entity', () => {
     describe('Article', () => {
       test('by alias', async () => {
-        await addAliasInteraction({
-          request:
-            '/mathe/funktionen/uebersicht-aller-artikel-zu-funktionen/parabel',
-          response: {
-            id: 1855,
-            discriminator: 'entity',
-            type: 'article',
-            instance: 'de',
-            currentRevisionId: Matchers.integer(30674),
-            licenseId: Matchers.integer(1),
-          },
-        })
+        await addArticleAliasInteraction()
         const response = await client.query({
           query: gql`
             {
@@ -169,42 +135,8 @@ describe('Uuid', () => {
       })
 
       test('by alias (w/ license)', async () => {
-        await addAliasInteraction({
-          request:
-            '/mathe/funktionen/uebersicht-aller-artikel-zu-funktionen/parabel',
-          response: {
-            id: 1855,
-            discriminator: 'entity',
-            type: 'article',
-            instance: 'de',
-            currentRevisionId: Matchers.integer(30674),
-            licenseId: Matchers.integer(1),
-          },
-        })
-        await pact.addInteraction({
-          state: `1 is a license`,
-          uponReceiving: `resolve license 1`,
-          withRequest: {
-            method: 'GET',
-            path: '/api/license/1',
-          },
-          willRespondWith: {
-            status: 200,
-            headers: {
-              'Content-Type': 'application/json; charset=utf-8',
-            },
-            body: {
-              id: 1,
-              instance: Matchers.string('de'),
-              default: Matchers.boolean(true),
-              title: Matchers.string('title'),
-              url: Matchers.string('url'),
-              content: Matchers.string('content'),
-              agreement: Matchers.string('agreement'),
-              iconHref: Matchers.string('iconHref'),
-            },
-          },
-        })
+        await addArticleAliasInteraction()
+        await addLicenseInteraction()
         const response = await client.query({
           query: gql`
             {
@@ -248,31 +180,8 @@ describe('Uuid', () => {
       })
 
       test('by alias (w/ currentRevision)', async () => {
-        await addAliasInteraction({
-          request:
-            '/mathe/funktionen/uebersicht-aller-artikel-zu-funktionen/parabel',
-          response: {
-            id: 1855,
-            discriminator: 'entity',
-            type: 'article',
-            instance: 'de',
-            currentRevisionId: Matchers.integer(30674),
-            licenseId: Matchers.integer(1),
-          },
-        })
-        await addUuidInteraction({
-          request: 30674,
-          response: {
-            id: 30674,
-            discriminator: 'entityRevision',
-            type: 'article',
-            fields: {
-              title: Matchers.string('title'),
-              content: Matchers.string('content'),
-              changes: Matchers.string('changes'),
-            },
-          },
-        })
+        await addArticleAliasInteraction()
+        await addArticleRevisionInteraction()
         const response = await client.query({
           query: gql`
             {
@@ -314,17 +223,7 @@ describe('Uuid', () => {
       })
 
       test('by id', async () => {
-        await addUuidInteraction({
-          request: 1855,
-          response: {
-            id: 1855,
-            discriminator: 'entity',
-            type: 'article',
-            instance: 'de',
-            currentRevisionId: 30674,
-            licenseId: 1,
-          },
-        })
+        await addArticleUuidInteraction()
         const response = await client.query({
           query: gql`
             {
@@ -363,58 +262,89 @@ describe('Uuid', () => {
   })
 
   describe('EntityRevision', () => {
-    test('by id', async () => {
-      await addUuidInteraction({
-        request: 30674,
-        response: {
-          id: 30674,
-          discriminator: 'entityRevision',
-          type: 'article',
-          fields: {
-            title: Matchers.string('title'),
-            content: Matchers.string('content'),
-            changes: Matchers.string('changes'),
-          },
-        },
-      })
-      const response = await client.query({
-        query: gql`
-          {
-            uuid(id: 30674) {
-              __typename
-              ... on ArticleRevision {
-                id
-                title
-                content
-                changes
+    describe('ArticleRevision', () => {
+      test('by id', async () => {
+        await addArticleRevisionInteraction()
+        const response = await client.query({
+          query: gql`
+            {
+              uuid(id: 30674) {
+                __typename
+                ... on ArticleRevision {
+                  id
+                  title
+                  content
+                  changes
+                  article {
+                    id
+                  }
+                }
               }
             }
-          }
-        `,
+          `,
+        })
+        expect(response.errors).toBe(undefined)
+        expect(response.data).toEqual({
+          uuid: {
+            __typename: 'ArticleRevision',
+            id: 30674,
+            title: 'title',
+            content: 'content',
+            changes: 'changes',
+            article: {
+              id: 1855,
+            },
+          },
+        })
       })
-      expect(response.errors).toBe(undefined)
-      expect(response.data).toEqual({
-        uuid: {
-          __typename: 'ArticleRevision',
-          id: 30674,
-          title: 'title',
-          content: 'content',
-          changes: 'changes',
-        },
+
+      test('by id (w/ article)', async () => {
+        await addArticleRevisionInteraction()
+        await addArticleUuidInteraction()
+        const response = await client.query({
+          query: gql`
+            {
+              uuid(id: 30674) {
+                __typename
+                ... on ArticleRevision {
+                  id
+                  title
+                  content
+                  changes
+                  article {
+                    id
+                    license {
+                      id
+                    }
+                  }
+                }
+              }
+            }
+          `,
+        })
+        expect(response.errors).toBe(undefined)
+        expect(response.data).toEqual({
+          uuid: {
+            __typename: 'ArticleRevision',
+            id: 30674,
+            title: 'title',
+            content: 'content',
+            changes: 'changes',
+            article: {
+              id: 1855,
+              license: {
+                id: 1,
+              },
+            },
+          },
+        })
       })
     })
   })
 
   describe('Page', () => {
     test('by alias', async () => {
-      await addAliasInteraction({
-        request: '/mathe',
-        response: {
-          id: 19767,
-          discriminator: 'page',
-          currentRevisionId: Matchers.integer(35476),
-        },
-      })
+      await addPageAliasInteraction()
       const response = await client.query({
         query: gql`
           {
@@ -443,23 +373,8 @@ describe('Uuid', () => {
     })
 
     test('by alias (w/ currentRevision)', async () => {
-      await addAliasInteraction({
-        request: '/mathe',
-        response: {
-          id: 19767,
-          discriminator: 'page',
-          currentRevisionId: Matchers.integer(35476),
-        },
-      })
-      await addUuidInteraction({
-        request: 35476,
-        response: {
-          id: 35476,
-          discriminator: 'pageRevision',
-          title: Matchers.string('title'),
-          content: Matchers.string('content'),
-        },
-      })
+      await addPageAliasInteraction()
+      await addPageRevisionInteraction()
       const response = await client.query({
         query: gql`
           {
@@ -492,14 +407,7 @@ describe('Uuid', () => {
     })
 
     test('by id', async () => {
-      await addUuidInteraction({
-        request: 19767,
-        response: {
-          id: 19767,
-          discriminator: 'page',
-          currentRevisionId: Matchers.integer(35476),
-        },
-      })
+      await addPageUuidInteraction()
       const response = await client.query({
         query: gql`
           {
@@ -530,15 +438,7 @@ describe('Uuid', () => {
 
   describe('PageRevision', () => {
     test('by id', async () => {
-      await addUuidInteraction({
-        request: 35476,
-        response: {
-          id: 35476,
-          discriminator: 'pageRevision',
-          title: Matchers.string('title'),
-          content: Matchers.string('content'),
-        },
-      })
+      await addPageRevisionInteraction()
       const response = await client.query({
         query: gql`
           {
@@ -565,6 +465,112 @@ describe('Uuid', () => {
     })
   })
 })
+
+function addLicenseInteraction() {
+  return pact.addInteraction({
+    state: `1 is a license`,
+    uponReceiving: `resolve license 1`,
+    withRequest: {
+      method: 'GET',
+      path: '/api/license/1',
+    },
+    willRespondWith: {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+      },
+      body: {
+        id: 1,
+        instance: Matchers.string('de'),
+        default: Matchers.boolean(true),
+        title: Matchers.string('title'),
+        url: Matchers.string('url'),
+        content: Matchers.string('content'),
+        agreement: Matchers.string('agreement'),
+        iconHref: Matchers.string('iconHref'),
+      },
+    },
+  })
+}
+
+function addArticleAliasInteraction() {
+  return addAliasInteraction({
+    request: '/mathe/funktionen/uebersicht-aller-artikel-zu-funktionen/parabel',
+    response: {
+      id: 1855,
+      discriminator: 'entity',
+      type: 'article',
+      instance: 'de',
+      currentRevisionId: Matchers.integer(30674),
+      licenseId: Matchers.integer(1),
+    },
+  })
+}
+
+function addArticleUuidInteraction() {
+  return addUuidInteraction({
+    request: 1855,
+    response: {
+      id: 1855,
+      discriminator: 'entity',
+      type: 'article',
+      instance: 'de',
+      currentRevisionId: 30674,
+      licenseId: 1,
+    },
+  })
+}
+
+function addArticleRevisionInteraction() {
+  return addUuidInteraction({
+    request: 30674,
+    response: {
+      id: 30674,
+      discriminator: 'entityRevision',
+      type: 'article',
+      repositoryId: 1855,
+      fields: {
+        title: Matchers.string('title'),
+        content: Matchers.string('content'),
+        changes: Matchers.string('changes'),
+      },
+    },
+  })
+}
+
+function addPageAliasInteraction() {
+  return addAliasInteraction({
+    request: '/mathe',
+    response: {
+      id: 19767,
+      discriminator: 'page',
+      currentRevisionId: Matchers.integer(35476),
+    },
+  })
+}
+
+function addPageUuidInteraction() {
+  return addUuidInteraction({
+    request: 19767,
+    response: {
+      id: 19767,
+      discriminator: 'page',
+      currentRevisionId: Matchers.integer(35476),
+    },
+  })
+}
+
+function addPageRevisionInteraction() {
+  return addUuidInteraction({
+    request: 35476,
+    response: {
+      id: 35476,
+      discriminator: 'pageRevision',
+      title: Matchers.string('title'),
+      content: Matchers.string('content'),
+    },
+  })
+}
 
 async function addAliasInteraction<
   T extends { discriminator: string; id: number }

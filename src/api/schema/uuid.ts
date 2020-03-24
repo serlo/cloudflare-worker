@@ -49,6 +49,7 @@ export const uuidTypeDefs = gql`
 
   type ArticleRevision implements Uuid {
     id: Int!
+    article: Article!
     title: String!
     content: String!
     changes: String!
@@ -89,8 +90,11 @@ export const uuidResolvers: {
     __resolveType(entity: Entity): EntityType
   }
   Article: {
-    currentRevision: Resolver<Entity, {}, Partial<ArticleRevision>>
+    currentRevision: Resolver<Article, {}, Partial<ArticleRevision>>
     license: Resolver<Entity, {}, Partial<License>>
+  }
+  ArticleRevision: {
+    article: Resolver<ArticleRevision, {}, Partial<Article>>
   }
   Page: {
     currentRevision: Resolver<Page, {}, Partial<PageRevision>>
@@ -100,24 +104,24 @@ export const uuidResolvers: {
     uuid,
   },
   Uuid: {
-    __resolveType(uuid: Uuid) {
+    __resolveType(uuid) {
       return uuid.__typename
     },
   },
   Entity: {
-    __resolveType(entity: Entity) {
+    __resolveType(entity) {
       return entity.__typename
     },
   },
   Article: {
-    async currentRevision(entity: Entity, _args, context, info) {
+    async currentRevision(entity, _args, context, info) {
       const partialCurrentRevision = { id: entity.currentRevisionId }
       if (requestsOnlyFields('ArticleRevision', ['id'], info)) {
         return partialCurrentRevision
       }
       return uuid(undefined, partialCurrentRevision, context)
     },
-    async license(entity: Entity, _args, context, info) {
+    async license(entity, _args, context, info) {
       const partialLicense = { id: entity.licenseId }
       if (requestsOnlyFields('License', ['id'], info)) {
         return partialLicense
@@ -130,8 +134,17 @@ export const uuidResolvers: {
       )
     },
   },
+  ArticleRevision: {
+    async article(articleRevision, _args, context, info) {
+      const partialArticle = { id: articleRevision.repositoryId }
+      if (requestsOnlyFields('Article', ['id'], info)) {
+        return partialArticle
+      }
+      return uuid(undefined, partialArticle, context)
+    },
+  },
   Page: {
-    async currentRevision(page: Page, _args, context, info) {
+    async currentRevision(page, _args, context, info) {
       const partialCurrentRevision = { id: page.currentRevisionId }
       if (requestsOnlyFields('PageRevision', ['id'], info)) {
         return partialCurrentRevision
@@ -190,6 +203,12 @@ class Article extends Entity {
 
 abstract class EntityRevision extends Uuid {
   public abstract __typename: EntityRevisionType
+  public repositoryId: number
+
+  public constructor(payload: { id: number; repositoryId: number }) {
+    super(payload)
+    this.repositoryId = payload.repositoryId
+  }
 }
 
 class ArticleRevision extends EntityRevision {
@@ -200,6 +219,7 @@ class ArticleRevision extends EntityRevision {
 
   public constructor(payload: {
     id: number
+    repositoryId: number
     title: string
     content: string
     changes: string
