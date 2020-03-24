@@ -106,6 +106,7 @@ describe('Uuid', () => {
                 __typename
                 ... on Article {
                   id
+                  trashed
                   instance
                   currentRevision {
                     id
@@ -122,6 +123,7 @@ describe('Uuid', () => {
         expect(response.data).toEqual({
           uuid: {
             __typename: 'Article',
+            trashed: false,
             id: 1855,
             instance: 'de',
             currentRevision: {
@@ -149,6 +151,7 @@ describe('Uuid', () => {
                 __typename
                 ... on Article {
                   id
+                  trashed
                   instance
                   currentRevision {
                     id
@@ -166,6 +169,7 @@ describe('Uuid', () => {
         expect(response.data).toEqual({
           uuid: {
             __typename: 'Article',
+            trashed: false,
             id: 1855,
             instance: 'de',
             currentRevision: {
@@ -194,6 +198,7 @@ describe('Uuid', () => {
                 __typename
                 ... on Article {
                   id
+                  trashed
                   instance
                   currentRevision {
                     id
@@ -210,6 +215,7 @@ describe('Uuid', () => {
         expect(response.data).toEqual({
           uuid: {
             __typename: 'Article',
+            trashed: false,
             id: 1855,
             instance: 'de',
             currentRevision: {
@@ -231,6 +237,7 @@ describe('Uuid', () => {
                 __typename
                 ... on Article {
                   id
+                  trashed
                   instance
                   currentRevision {
                     id
@@ -247,6 +254,7 @@ describe('Uuid', () => {
         expect(response.data).toEqual({
           uuid: {
             __typename: 'Article',
+            trashed: false,
             id: 1855,
             instance: 'de',
             currentRevision: {
@@ -272,6 +280,7 @@ describe('Uuid', () => {
                 __typename
                 ... on ArticleRevision {
                   id
+                  trashed
                   title
                   content
                   changes
@@ -287,6 +296,7 @@ describe('Uuid', () => {
         expect(response.data).toEqual({
           uuid: {
             __typename: 'ArticleRevision',
+            trashed: false,
             id: 30674,
             title: 'title',
             content: 'content',
@@ -308,6 +318,7 @@ describe('Uuid', () => {
                 __typename
                 ... on ArticleRevision {
                   id
+                  trashed
                   title
                   content
                   changes
@@ -326,6 +337,7 @@ describe('Uuid', () => {
         expect(response.data).toEqual({
           uuid: {
             __typename: 'ArticleRevision',
+            trashed: false,
             id: 30674,
             title: 'title',
             content: 'content',
@@ -352,6 +364,7 @@ describe('Uuid', () => {
               __typename
               ... on Page {
                 id
+                trashed
                 currentRevision {
                   id
                 }
@@ -365,6 +378,7 @@ describe('Uuid', () => {
         uuid: {
           __typename: 'Page',
           id: 19767,
+          trashed: false,
           currentRevision: {
             id: 35476,
           },
@@ -382,6 +396,7 @@ describe('Uuid', () => {
               __typename
               ... on Page {
                 id
+                trashed
                 currentRevision {
                   id
                   title
@@ -396,6 +411,7 @@ describe('Uuid', () => {
       expect(response.data).toEqual({
         uuid: {
           __typename: 'Page',
+          trashed: false,
           id: 19767,
           currentRevision: {
             id: 35476,
@@ -415,6 +431,7 @@ describe('Uuid', () => {
               __typename
               ... on Page {
                 id
+                trashed
                 currentRevision {
                   id
                 }
@@ -427,6 +444,7 @@ describe('Uuid', () => {
       expect(response.data).toEqual({
         uuid: {
           __typename: 'Page',
+          trashed: false,
           id: 19767,
           currentRevision: {
             id: 35476,
@@ -446,6 +464,7 @@ describe('Uuid', () => {
               __typename
               ... on PageRevision {
                 id
+                trashed
                 title
                 content
                 page {
@@ -460,6 +479,7 @@ describe('Uuid', () => {
       expect(response.data).toEqual({
         uuid: {
           __typename: 'PageRevision',
+          trashed: false,
           id: 35476,
           title: 'title',
           content: 'content',
@@ -481,6 +501,7 @@ describe('Uuid', () => {
             __typename
             ... on PageRevision {
               id
+              trashed
               title
               content
               page {
@@ -498,6 +519,7 @@ describe('Uuid', () => {
     expect(response.data).toEqual({
       uuid: {
         __typename: 'PageRevision',
+        trashed: false,
         id: 35476,
         title: 'title',
         content: 'content',
@@ -542,6 +564,7 @@ function addArticleAliasInteraction() {
     request: '/mathe/funktionen/uebersicht-aller-artikel-zu-funktionen/parabel',
     response: {
       id: 1855,
+      trashed: false,
       discriminator: 'entity',
       type: 'article',
       instance: 'de',
@@ -556,6 +579,7 @@ function addArticleUuidInteraction() {
     request: 1855,
     response: {
       id: 1855,
+      trashed: false,
       discriminator: 'entity',
       type: 'article',
       instance: 'de',
@@ -570,6 +594,7 @@ function addArticleRevisionInteraction() {
     request: 30674,
     response: {
       id: 30674,
+      trashed: false,
       discriminator: 'entityRevision',
       type: 'article',
       repositoryId: 1855,
@@ -587,6 +612,7 @@ function addPageAliasInteraction() {
     request: '/mathe',
     response: {
       id: 19767,
+      trashed: false,
       discriminator: 'page',
       currentRevisionId: Matchers.integer(35476),
     },
@@ -598,6 +624,7 @@ function addPageUuidInteraction() {
     request: 19767,
     response: {
       id: 19767,
+      trashed: false,
       discriminator: 'page',
       currentRevisionId: Matchers.integer(35476),
     },
@@ -609,6 +636,7 @@ function addPageRevisionInteraction() {
     request: 35476,
     response: {
       id: 35476,
+      trashed: false,
       discriminator: 'pageRevision',
       repositoryId: 19767,
       title: Matchers.string('title'),
