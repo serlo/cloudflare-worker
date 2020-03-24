@@ -296,6 +296,9 @@ describe('Uuid', () => {
                   title
                   content
                   changes
+                  author {
+                    id
+                  }
                   article {
                     id
                   }
@@ -314,6 +317,57 @@ describe('Uuid', () => {
             title: 'title',
             content: 'content',
             changes: 'changes',
+            author: {
+              id: 1,
+            },
+            article: {
+              id: 1855,
+            },
+          },
+        })
+      })
+
+      test('by id (w/ author)', async () => {
+        await addArticleRevisionInteraction()
+        await addUserInteraction()
+        const response = await client.query({
+          query: gql`
+            {
+              uuid(id: 30674) {
+                __typename
+                ... on ArticleRevision {
+                  id
+                  trashed
+                  date
+                  title
+                  content
+                  changes
+                  author {
+                    id
+                    username
+                  }
+                  article {
+                    id
+                  }
+                }
+              }
+            }
+          `,
+        })
+        expect(response.errors).toBe(undefined)
+        expect(response.data).toEqual({
+          uuid: {
+            __typename: 'ArticleRevision',
+            id: 30674,
+            trashed: false,
+            date: '2014-09-15T15:28:35Z',
+            title: 'title',
+            content: 'content',
+            changes: 'changes',
+            author: {
+              id: 1,
+              username: 'admin',
+            },
             article: {
               id: 1855,
             },
@@ -336,6 +390,9 @@ describe('Uuid', () => {
                   title
                   content
                   changes
+                  author {
+                    id
+                  }
                   article {
                     id
                     currentRevision {
@@ -357,6 +414,9 @@ describe('Uuid', () => {
             title: 'title',
             content: 'content',
             changes: 'changes',
+            author: {
+              id: 1,
+            },
             article: {
               id: 1855,
               currentRevision: {
@@ -485,6 +545,9 @@ describe('Uuid', () => {
                 title
                 content
                 date
+                author {
+                  id
+                }
                 page {
                   id
                 }
@@ -502,12 +565,59 @@ describe('Uuid', () => {
           title: 'title',
           content: 'content',
           date: '2015-02-28T02:06:40Z',
+          author: {
+            id: 1,
+          },
           page: {
             id: 19767,
           },
         },
       })
     })
+
+    test('by id (w/ author)', async () => {
+      await addPageRevisionInteraction()
+      await addUserInteraction()
+      const response = await client.query({
+        query: gql`
+          {
+            uuid(id: 35476) {
+              __typename
+              ... on PageRevision {
+                id
+                trashed
+                title
+                content
+                date
+                author {
+                  id
+                  username
+                }
+                page {
+                  id
+                }
+              }
+            }
+          }
+        `,
+      })
+      expect(response.errors).toBe(undefined)
+      expect(response.data).toEqual({
+        uuid: {
+          __typename: 'PageRevision',
+          trashed: false,
+          id: 35476,
+          title: 'title',
+          date: '2015-02-28T02:06:40Z',
+          content: 'content',
+          author: { id: 1, username: 'admin' },
+          page: {
+            id: 19767,
+          },
+        },
+      })
+    })
+
     test('by id (w/ page)', async () => {
       await addPageRevisionInteraction()
       await addPageUuidInteraction()
@@ -522,6 +632,9 @@ describe('Uuid', () => {
                 title
                 content
                 date
+                author {
+                  id
+                }
                 page {
                   id
                   currentRevision {
@@ -542,6 +655,7 @@ describe('Uuid', () => {
           title: 'title',
           date: '2015-02-28T02:06:40Z',
           content: 'content',
+          author: { id: 1 },
           page: {
             id: 19767,
             currentRevision: { id: 35476 },
@@ -650,6 +764,7 @@ function addArticleRevisionInteraction() {
       discriminator: 'entityRevision',
       date: Matchers.iso8601DateTime('2014-09-15T15:28:35Z'),
       type: 'article',
+      authorId: Matchers.integer(1),
       repositoryId: 1855,
       fields: {
         title: Matchers.string('title'),
@@ -693,6 +808,7 @@ function addPageRevisionInteraction() {
       title: Matchers.string('title'),
       content: Matchers.string('content'),
       date: Matchers.iso8601DateTime('2015-02-28T02:06:40Z'),
+      authorId: Matchers.integer(1),
       repositoryId: 19767,
     },
   })
