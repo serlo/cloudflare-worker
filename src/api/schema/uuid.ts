@@ -49,10 +49,10 @@ export const uuidTypeDefs = gql`
 
   type ArticleRevision implements Uuid {
     id: Int!
-    article: Article!
     title: String!
     content: String!
     changes: String!
+    article: Article!
   }
 
   type Page implements Uuid {
@@ -64,6 +64,7 @@ export const uuidTypeDefs = gql`
     id: Int!
     title: String!
     content: String!
+    page: Page!
   }
 
   input AliasInput {
@@ -98,6 +99,9 @@ export const uuidResolvers: {
   }
   Page: {
     currentRevision: Resolver<Page, {}, Partial<PageRevision>>
+  }
+  PageRevision: {
+    page: Resolver<PageRevision, {}, Partial<Page>>
   }
 } = {
   Query: {
@@ -150,6 +154,15 @@ export const uuidResolvers: {
         return partialCurrentRevision
       }
       return uuid(undefined, partialCurrentRevision, context)
+    },
+  },
+  PageRevision: {
+    async page(pageRevision, _args, context, info) {
+      const partialPage = { id: pageRevision.repositoryId }
+      if (requestsOnlyFields('Page', ['id'], info)) {
+        return partialPage
+      }
+      return uuid(undefined, partialPage, context)
     },
   },
 }
@@ -245,11 +258,18 @@ class PageRevision extends Uuid {
   public __typename = DiscriminatorType.PageRevision
   public title: string
   public content: string
+  public repositoryId: number
 
-  public constructor(payload: { id: number; title: string; content: string }) {
+  public constructor(payload: {
+    id: number
+    title: string
+    content: string
+    repositoryId: number
+  }) {
     super(payload)
     this.title = payload.title
     this.content = payload.content
+    this.repositoryId = payload.repositoryId
   }
 }
 
