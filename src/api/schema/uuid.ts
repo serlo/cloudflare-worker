@@ -56,6 +56,13 @@ export const uuidTypeDefs = gql`
 
   type Page implements Uuid {
     id: Int!
+    currentRevision: PageRevision
+  }
+
+  type PageRevision implements Uuid {
+    id: Int!
+    title: String!
+    content: String!
   }
 
   input AliasInput {
@@ -75,19 +82,32 @@ export const uuidResolvers: {
       Uuid
     >
   }
-  Article: {
-    currentRevision: Resolver<Entity, {}, Partial<ArticleRevision>>
-    license: Resolver<Entity, {}, Partial<License>>
+  Uuid: {
+    __resolveType(uuid: Uuid): UuidType
   }
   Entity: {
     __resolveType(entity: Entity): EntityType
   }
-  Uuid: {
-    __resolveType(uuid: Uuid): UuidType
+  Article: {
+    currentRevision: Resolver<Entity, {}, Partial<ArticleRevision>>
+    license: Resolver<Entity, {}, Partial<License>>
+  }
+  Page: {
+    currentRevision: Resolver<Page, {}, Partial<PageRevision>>
   }
 } = {
   Query: {
     uuid,
+  },
+  Uuid: {
+    __resolveType(uuid: Uuid) {
+      return uuid.__typename
+    },
+  },
+  Entity: {
+    __resolveType(entity: Entity) {
+      return entity.__typename
+    },
   },
   Article: {
     async currentRevision(entity: Entity, _args, context, info) {
@@ -110,14 +130,13 @@ export const uuidResolvers: {
       )
     },
   },
-  Entity: {
-    __resolveType(entity: Entity) {
-      return entity.__typename
-    },
-  },
-  Uuid: {
-    __resolveType(uuid: Uuid) {
-      return uuid.__typename
+  Page: {
+    async currentRevision(page: Page, _args, context, info) {
+      const partialCurrentRevision = { id: page.currentRevisionId }
+      if (requestsOnlyFields('PageRevision', ['id'], info)) {
+        return partialCurrentRevision
+      }
+      return uuid(undefined, partialCurrentRevision, context)
     },
   },
 }
@@ -132,6 +151,7 @@ enum EntityRevisionType {
 
 enum DiscriminatorType {
   Page = 'Page',
+  PageRevision = 'PageRevision',
 }
 
 type UuidType = DiscriminatorType | EntityType | EntityRevisionType
@@ -193,6 +213,24 @@ class ArticleRevision extends EntityRevision {
 
 class Page extends Uuid {
   public __typename = DiscriminatorType.Page
+  public currentRevisionId: number
+
+  public constructor(payload: { id: number; currentRevisionId: number }) {
+    super(payload)
+    this.currentRevisionId = payload.currentRevisionId
+  }
+}
+
+class PageRevision extends Uuid {
+  public __typename = DiscriminatorType.PageRevision
+  public title: string
+  public content: string
+
+  public constructor(payload: { id: number; title: string; content: string }) {
+    super(payload)
+    this.title = payload.title
+    this.content = payload.content
+  }
 }
 
 interface AliasInput {
@@ -224,5 +262,7 @@ async function uuid(
       break
     case 'page':
       return new Page(data)
+    case 'pageRevision':
+      return new PageRevision(data)
   }
 }
