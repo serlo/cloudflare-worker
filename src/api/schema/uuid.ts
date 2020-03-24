@@ -81,6 +81,15 @@ export const uuidTypeDefs = gql`
     page: Page!
   }
 
+  type User implements Uuid {
+    id: Int!
+    trashed: Boolean!
+    username: String!
+    date: DateTime!
+    lastLogin: DateTime
+    description: String
+  }
+
   input AliasInput {
     instance: Instance!
     path: String!
@@ -105,7 +114,7 @@ export const uuidResolvers: {
     __resolveType(entity: Entity): EntityType
   }
   Article: {
-    currentRevision: Resolver<Article, {}, Partial<ArticleRevision>>
+    currentRevision: Resolver<Article, {}, Partial<ArticleRevision> | null>
     license: Resolver<Entity, {}, Partial<License>>
   }
   EntityRevision: {
@@ -115,7 +124,7 @@ export const uuidResolvers: {
     article: Resolver<ArticleRevision, {}, Partial<Article>>
   }
   Page: {
-    currentRevision: Resolver<Page, {}, Partial<PageRevision>>
+    currentRevision: Resolver<Page, {}, Partial<PageRevision> | null>
   }
   PageRevision: {
     page: Resolver<PageRevision, {}, Partial<Page>>
@@ -136,6 +145,7 @@ export const uuidResolvers: {
   },
   Article: {
     async currentRevision(entity, _args, context, info) {
+      if (!entity.currentRevisionId) return null
       const partialCurrentRevision = { id: entity.currentRevisionId }
       if (requestsOnlyFields('ArticleRevision', ['id'], info)) {
         return partialCurrentRevision
@@ -171,6 +181,7 @@ export const uuidResolvers: {
   },
   Page: {
     async currentRevision(page, _args, context, info) {
+      if (!page.currentRevisionId) return null
       const partialCurrentRevision = { id: page.currentRevisionId }
       if (requestsOnlyFields('PageRevision', ['id'], info)) {
         return partialCurrentRevision
@@ -200,6 +211,7 @@ enum EntityRevisionType {
 enum DiscriminatorType {
   Page = 'Page',
   PageRevision = 'PageRevision',
+  User = 'User',
 }
 
 type UuidType = DiscriminatorType | EntityType | EntityRevisionType
@@ -220,7 +232,7 @@ abstract class Entity extends Uuid {
   public instance: Instance
   public date: string
   public licenseId: number
-  public currentRevisionId: number
+  public currentRevisionId?: number
 
   public constructor(payload: {
     id: number
@@ -228,7 +240,7 @@ abstract class Entity extends Uuid {
     date: DateTime
     instance: Instance
     licenseId: number
-    currentRevisionId: number
+    currentRevisionId?: number
   }) {
     super(payload)
     this.instance = payload.instance
@@ -283,12 +295,12 @@ class ArticleRevision extends EntityRevision {
 
 class Page extends Uuid {
   public __typename = DiscriminatorType.Page
-  public currentRevisionId: number
+  public currentRevisionId?: number
 
   public constructor(payload: {
     id: number
     trashed: boolean
-    currentRevisionId: number
+    currentRevisionId?: number
   }) {
     super(payload)
     this.currentRevisionId = payload.currentRevisionId
@@ -315,6 +327,29 @@ class PageRevision extends Uuid {
     this.content = payload.content
     this.date = payload.date
     this.repositoryId = payload.repositoryId
+  }
+}
+
+class User extends Uuid {
+  public __typename = DiscriminatorType.User
+  public username: string
+  public date: DateTime
+  public lastLogin?: DateTime
+  public description?: string
+
+  public constructor(payload: {
+    id: number
+    trashed: boolean
+    username: string
+    date: DateTime
+    lastLogin?: DateTime
+    description?: string
+  }) {
+    super(payload)
+    this.username = payload.username
+    this.date = payload.date
+    this.lastLogin = payload.lastLogin
+    this.description = payload.description
   }
 }
 
@@ -350,5 +385,7 @@ async function uuid(
       return new Page(data)
     case 'pageRevision':
       return new PageRevision(data)
+    case 'user':
+      return new User(data)
   }
 }

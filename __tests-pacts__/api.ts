@@ -508,47 +508,81 @@ describe('Uuid', () => {
         },
       })
     })
-  })
-
-  test('by id (w/ page)', async () => {
-    await addPageRevisionInteraction()
-    await addPageUuidInteraction()
-    const response = await client.query({
-      query: gql`
-        {
-          uuid(id: 35476) {
-            __typename
-            ... on PageRevision {
-              id
-              trashed
-              title
-              content
-              date
-              page {
+    test('by id (w/ page)', async () => {
+      await addPageRevisionInteraction()
+      await addPageUuidInteraction()
+      const response = await client.query({
+        query: gql`
+          {
+            uuid(id: 35476) {
+              __typename
+              ... on PageRevision {
                 id
-                currentRevision {
+                trashed
+                title
+                content
+                date
+                page {
                   id
+                  currentRevision {
+                    id
+                  }
                 }
               }
             }
           }
-        }
-      `,
-    })
-    expect(response.errors).toBe(undefined)
-    expect(response.data).toEqual({
-      uuid: {
-        __typename: 'PageRevision',
-        trashed: false,
-        id: 35476,
-        title: 'title',
-        date: '2015-02-28T02:06:40Z',
-        content: 'content',
-        page: {
-          id: 19767,
-          currentRevision: { id: 35476 },
+        `,
+      })
+      expect(response.errors).toBe(undefined)
+      expect(response.data).toEqual({
+        uuid: {
+          __typename: 'PageRevision',
+          trashed: false,
+          id: 35476,
+          title: 'title',
+          date: '2015-02-28T02:06:40Z',
+          content: 'content',
+          page: {
+            id: 19767,
+            currentRevision: { id: 35476 },
+          },
         },
-      },
+      })
+    })
+  })
+
+  describe('User', () => {
+    test('by id', async () => {
+      await addUserInteraction()
+      const response = await client.query({
+        query: gql`
+          {
+            uuid(id: 1) {
+              __typename
+              ... on User {
+                id
+                trashed
+                username
+                date
+                lastLogin
+                description
+              }
+            }
+          }
+        `,
+      })
+      expect(response.errors).toBe(undefined)
+      expect(response.data).toEqual({
+        uuid: {
+          __typename: 'User',
+          trashed: false,
+          id: 1,
+          username: 'admin',
+          date: '2014-03-01T20:36:21Z',
+          lastLogin: '2020-03-24T09:40:55Z',
+          description: null,
+        },
+      })
     })
   })
 })
@@ -596,7 +630,7 @@ function addArticleUuidInteraction() {
     request: 1855,
     response: {
       id: 1855,
-      trashed: false,
+      trashed: Matchers.boolean(false),
       discriminator: 'entity',
       type: 'article',
       instance: 'de',
@@ -612,7 +646,7 @@ function addArticleRevisionInteraction() {
     request: 30674,
     response: {
       id: 30674,
-      trashed: false,
+      trashed: Matchers.boolean(false),
       discriminator: 'entityRevision',
       date: Matchers.iso8601DateTime('2014-09-15T15:28:35Z'),
       type: 'article',
@@ -642,7 +676,7 @@ function addPageUuidInteraction() {
     request: 19767,
     response: {
       id: 19767,
-      trashed: false,
+      trashed: Matchers.boolean(false),
       discriminator: 'page',
       currentRevisionId: Matchers.integer(35476),
     },
@@ -654,12 +688,27 @@ function addPageRevisionInteraction() {
     request: 35476,
     response: {
       id: 35476,
-      trashed: false,
+      trashed: Matchers.boolean(false),
       discriminator: 'pageRevision',
       title: Matchers.string('title'),
       content: Matchers.string('content'),
       date: Matchers.iso8601DateTime('2015-02-28T02:06:40Z'),
       repositoryId: 19767,
+    },
+  })
+}
+
+function addUserInteraction() {
+  return addUuidInteraction({
+    request: 1,
+    response: {
+      id: 1,
+      trashed: Matchers.boolean(false),
+      discriminator: 'user',
+      username: Matchers.string('admin'),
+      date: Matchers.iso8601DateTime('2014-03-01T20:36:21Z'),
+      lastLogin: Matchers.iso8601DateTime('2020-03-24T09:40:55Z'),
+      description: null,
     },
   })
 }
