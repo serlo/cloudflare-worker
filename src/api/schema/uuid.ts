@@ -75,6 +75,7 @@ export const uuidTypeDefs = gql`
   type PageRevision implements Uuid {
     id: Int!
     trashed: Boolean!
+    date: DateTime!
     title: String!
     content: String!
     page: Page!
@@ -298,11 +299,13 @@ class PageRevision extends Uuid {
   public __typename = DiscriminatorType.PageRevision
   public title: string
   public content: string
+  public date: DateTime
   public repositoryId: number
 
   public constructor(payload: {
     id: number
     trashed: boolean
+    date: DateTime
     title: string
     content: string
     repositoryId: number
@@ -310,6 +313,7 @@ class PageRevision extends Uuid {
     super(payload)
     this.title = payload.title
     this.content = payload.content
+    this.date = payload.date
     this.repositoryId = payload.repositoryId
   }
 }
