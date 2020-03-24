@@ -26,7 +26,7 @@ import {
   isLanguageCode,
   createPreactResponse,
   createJsonResponse,
-  createNotFoundResponse
+  createNotFoundResponse,
 } from '../src/utils'
 
 import { h } from 'preact'
@@ -46,9 +46,9 @@ describe('sanitizeHtml()', () => {
     ['<p>Hello</p>\n\n<script>42;</script>\n', '<p>Hello</p>'],
     [
       '<h1 id="test":>Hello</h1><iframe src="https://google.de/" />',
-      '<h1>Hello</h1>'
+      '<h1>Hello</h1>',
     ],
-    ['console.log(42)\n   ', 'console.log(42)']
+    ['console.log(42)\n   ', 'console.log(42)'],
   ])('HTML-Code %p', (html, sanitizedHtml) => {
     expect(sanitizeHtml(html)).toBe(sanitizedHtml)
   })
@@ -58,7 +58,7 @@ describe('markdownToHtml()', () => {
   test.each([
     ['# Hello', '<h1>Hello</h1>'],
     ['* 1\n* 2', '<ul>\n<li>1</li>\n<li>2</li>\n</ul>'],
-    ['', '']
+    ['', ''],
   ])('Markdown: %p', (markdown, html) => {
     expect(markdownToHtml(markdown)).toBe(html)
   })
@@ -83,7 +83,7 @@ test('PreactResponse', async () => {
   contentTypeIsHtml(notModified)
   await containsText(notModified, [
     '<p>Not Modified</p>',
-    '<title>Serlo - not modified</title>'
+    '<title>Serlo - not modified</title>',
   ])
 })
 
@@ -105,7 +105,7 @@ test('fetchWithCache()', async () => {
   })
 
   expect(mockedFetch).toHaveBeenCalledWith('http://example.com', {
-    cf: { cacheTtl: 3600 }
+    cf: { cacheTtl: 3600 },
   })
 })
 
@@ -113,7 +113,7 @@ export async function containsText(response: Response, texts: string[]) {
   expect(response).not.toBeNull()
 
   const responseText = await response.text()
-  texts.forEach(text =>
+  texts.forEach((text) =>
     expect(responseText).toEqual(expect.stringContaining(text))
   )
 }

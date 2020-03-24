@@ -2,7 +2,7 @@ import { h } from 'preact'
 import {
   UnrevisedPage as UnrevisedPageOriginal,
   RevisedPage as RevisedPageOriginal,
-  RevisionsOverview as RevisionsOverviewOriginal
+  RevisionsOverview as RevisionsOverviewOriginal,
 } from '../src/static-pages'
 import { LanguageCode } from '../src/utils'
 import { createStaticComponent } from './utils'
@@ -12,7 +12,7 @@ const RevisedPage = createStaticComponent(RevisedPageOriginal)
 const RevisionsOverview = createStaticComponent(RevisionsOverviewOriginal)
 
 export default {
-  title: 'static-pages'
+  title: 'static-pages',
 }
 
 const content = `<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam
@@ -31,7 +31,7 @@ export function ExampleUnrevisedPage() {
         lang: LanguageCode.En,
         title: 'Imprint',
         url: '',
-        content
+        content,
       }}
     />
   )
@@ -48,7 +48,7 @@ export function ExampleCurrentRevisedPage() {
         url: '',
         revisedType: 'privacy',
         isCurrentRevision: true,
-        content
+        content,
       }}
     />
   )
@@ -65,7 +65,7 @@ export function ExampleArchivedRevisedPage() {
         url: '',
         revisedType: 'privacy',
         isCurrentRevision: false,
-        content
+        content,
       }}
     />
   )
@@ -82,7 +82,7 @@ export function ExampleRevisionsOverview() {
           lang: LanguageCode.En,
           url: '',
           revisedType: 'privacy',
-          isCurrentRevision: true
+          isCurrentRevision: true,
         },
         {
           revision: '2010-12-13',
@@ -91,7 +91,7 @@ export function ExampleRevisionsOverview() {
           lang: LanguageCode.En,
           url: '',
           revisedType: 'privacy',
-          isCurrentRevision: false
+          isCurrentRevision: false,
         },
         {
           revision: '1999-02-23',
@@ -100,8 +100,8 @@ export function ExampleRevisionsOverview() {
           lang: LanguageCode.En,
           url: '',
           revisedType: 'privacy',
-          isCurrentRevision: false
-        }
+          isCurrentRevision: false,
+        },
       ]}
     />
   )

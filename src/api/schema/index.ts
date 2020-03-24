@@ -14,7 +14,7 @@ export const typeDefs = [
   schemaTypeDefs,
   instanceTypeDefs,
   licenseTypeDefs,
-  uuidTypeDefs
+  uuidTypeDefs,
 ]
 
 export const resolvers = {
@@ -22,6 +22,6 @@ export const resolvers = {
   ...licenseResolvers,
   Query: {
     ...uuidResolvers.Query,
-    ...licenseResolvers.Query
-  }
+    ...licenseResolvers.Query,
+  },
 }

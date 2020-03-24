@@ -8,7 +8,7 @@ const AreWeEdtrIoYet = createStaticComponent(Original)
 
 export default {
   component: AreWeEdtrIoYet,
-  title: 'are-we-edtr-io-yet'
+  title: 'are-we-edtr-io-yet',
 }
 
 export function Simple() {

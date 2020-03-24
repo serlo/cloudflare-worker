@@ -26,8 +26,8 @@ export class SerloDataSource extends RESTDataSource {
       ENABLE_BASIC_AUTH === 'true'
         ? {
             headers: {
-              Authorization: 'Basic c2VybG90ZWFtOnNlcmxvdGVhbQ=='
-            }
+              Authorization: 'Basic c2VybG90ZWFtOnNlcmxvdGVhbQ==',
+            },
           }
         : undefined
     )

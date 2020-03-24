@@ -7,14 +7,14 @@ const Maintenance = createStaticComponent(MaintenanceOriginal)
 
 export default {
   component: Maintenance,
-  title: 'maintenance'
+  title: 'maintenance',
 }
 
 export function De() {
   return <Maintenance lang="de" />
 }
 De.story = {
-  name: 'de (w/o end date)'
+  name: 'de (w/o end date)',
 }
 
 export function DeEndDate() {
@@ -22,14 +22,14 @@ export function DeEndDate() {
   return <Maintenance lang="de" end={end} />
 }
 DeEndDate.story = {
-  name: 'de (w/ end date)'
+  name: 'de (w/ end date)',
 }
 
 export function En() {
   return <Maintenance lang="en" />
 }
 En.story = {
-  name: 'en (w/o end date)'
+  name: 'en (w/o end date)',
 }
 
 export function EnEndDate() {
@@ -37,5 +37,5 @@ export function EnEndDate() {
   return <Maintenance lang="de" end={end} />
 }
 EnEndDate.story = {
-  name: 'en (w/ end date)'
+  name: 'en (w/ end date)',
 }

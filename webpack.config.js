@@ -7,30 +7,30 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'index.js',
-    publicPath: '/'
+    publicPath: '/',
   },
   module: {
     rules: [
       {
         test: /\.(ts|tsx)$/,
         exclude: /node_modules/,
-        loader: require.resolve('ts-loader')
-      }
-    ]
+        loader: require.resolve('ts-loader'),
+      },
+    ],
   },
   resolve: {
-    extensions: ['.ts', '.tsx', '.mjs', '.js', '.jsx']
+    extensions: ['.ts', '.tsx', '.mjs', '.js', '.jsx'],
   },
   optimization: {
-    usedExports: true
+    usedExports: true,
   },
   plugins: [
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify('production')
-    })
+      'process.env.NODE_ENV': JSON.stringify('production'),
+    }),
   ],
   target: 'webworker',
   node: {
-    fs: 'empty'
-  }
+    fs: 'empty',
+  },
 }

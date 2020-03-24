@@ -23,11 +23,11 @@ import { LanguageCode } from '../utils'
 
 export enum UnrevisedType {
   Imprint = 'imprint',
-  Terms = 'terms'
+  Terms = 'terms',
 }
 
 export enum RevisedType {
-  Privacy = 'privacy'
+  Privacy = 'privacy',
 }
 
 const legalRepo =
@@ -41,63 +41,63 @@ export const titles: {
 } = {
   imprint: {
     de: 'Impressum',
-    en: 'Imprint'
+    en: 'Imprint',
   },
   terms: {
     de: 'Nutzungsbedigungen und Urheberrecht',
-    en: 'Terms of Use'
+    en: 'Terms of Use',
   },
   privacy: {
     de: 'Datenschutzerklärung',
-    en: 'Privacy Policy'
-  }
+    en: 'Privacy Policy',
+  },
 }
 
 const config: BaseConfig = {
   en: {
     unrevised: {
       imprint: {
-        url: `${legalRepo}/en/imprint.md`
+        url: `${legalRepo}/en/imprint.md`,
       },
       terms: {
-        url: `${legalRepo}/en/terms.md`
-      }
+        url: `${legalRepo}/en/terms.md`,
+      },
     },
     revised: {
       privacy: [
         {
           revision: '2020-03-16',
-          url: `${legalRepo}/en/privacy/current.md`
-        }
-      ]
-    }
+          url: `${legalRepo}/en/privacy/current.md`,
+        },
+      ],
+    },
   },
   de: {
     unrevised: {
       imprint: {
-        url: `${legalRepo}/de/imprint.md`
+        url: `${legalRepo}/de/imprint.md`,
       },
       terms: {
-        url: `${legalRepo}/de/terms.md`
-      }
+        url: `${legalRepo}/de/terms.md`,
+      },
     },
     revised: {
       privacy: [
         {
           revision: '2020-02-10',
-          url: `${legalRepo}/de/privacy/current.md`
+          url: `${legalRepo}/de/privacy/current.md`,
         },
         {
           revision: '2018-12-01',
-          url: `${legalRepo}/de/privacy/2018-12-01.md`
+          url: `${legalRepo}/de/privacy/2018-12-01.md`,
         },
         {
           revision: '2018-10-17',
-          url: `${legalRepo}/de/privacy/2018-10-17.md`
-        }
-      ]
-    }
-  }
+          url: `${legalRepo}/de/privacy/2018-10-17.md`,
+        },
+      ],
+    },
+  },
 }
 
 export const unrevisedConfig: UnrevisedConfig = toUnrevisedConfig(config)
@@ -133,12 +133,12 @@ type BaseConfig = {
 
 function toUnrevisedConfig(config: BaseConfig): UnrevisedConfig {
   return Object.fromEntries(
-    Object.values(LanguageCode).map(lang => [lang, config[lang]?.unrevised])
+    Object.values(LanguageCode).map((lang) => [lang, config[lang]?.unrevised])
   )
 }
 
 function toRevisedConfig(config: BaseConfig): RevisedConfig {
   return Object.fromEntries(
-    Object.values(LanguageCode).map(lang => [lang, config[lang]?.revised])
+    Object.values(LanguageCode).map((lang) => [lang, config[lang]?.revised])
   )
 }

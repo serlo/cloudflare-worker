@@ -39,9 +39,9 @@ export function createGraphQLServer() {
     introspection: true,
     dataSources() {
       return {
-        serlo: new SerloDataSource()
+        serlo: new SerloDataSource(),
       }
-    }
+    },
   })
 }
 
