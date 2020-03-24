@@ -93,6 +93,29 @@ export const uuidTypeDefs = gql`
     description: String
   }
 
+  type TaxonomyTerm implements Uuid {
+    id: Int!
+    type: TaxonomyTermType!
+    instance: Instance!
+    name: String!
+    description: String
+    weight: Int!
+  }
+
+  enum TaxonomyTermType {
+    topic
+    topic-folder
+    subject
+    curriculum
+    locale
+    curriculum-topic
+    root
+    forum-category
+    forum
+    blog
+    curriculum-topic-folder
+  }
+
   input AliasInput {
     instance: Instance!
     path: String!
@@ -231,6 +254,19 @@ enum DiscriminatorType {
   Page = 'Page',
   PageRevision = 'PageRevision',
   User = 'User',
+  TaxonomyTerm = 'TaxonomyTerm'
+}
+
+enum TaxonomyTermType {
+  Topic = 'Topic',
+  TopicFolder = 'TopicFolder',
+  Subject = 'Subject',
+  Curriculum = 'Curriculum',
+  Root = 'Root',
+  ForumCategory = 'ForumCategory',
+  Forum = 'Forum',
+  Blog = 'Blog',
+  CurriculumTopicFolder = 'CurriculumTopicFolder'
 }
 
 type UuidType = DiscriminatorType | EntityType | EntityRevisionType
@@ -379,6 +415,33 @@ class User extends Uuid {
   }
 }
 
+class TaxonomyTerm extends Uuid {
+  public __typename: DiscriminatorType.TaxonomyTerm
+  public type: TaxonomyTermType
+  public instance: Instance
+  public name: string
+  public description?: string
+  public weight: number
+
+  public constructor(payload: {
+    id: number
+    type: TaxonomyTermType
+    trashed: boolean
+    instance: Instance
+    name: string
+    description?: string
+    weight: number
+  }) {
+    super(payload)
+    this.type = payload.type
+    this.instance = payload.instance
+    this.name = payload.name
+    this.description = payload.description
+    this.weight = payload.weight
+  }
+}
+
+
 interface AliasInput {
   instance: Instance
   path: string
@@ -413,5 +476,7 @@ async function uuid(
       return new PageRevision(data)
     case 'user':
       return new User(data)
+    case 'taxonomyTerm':
+      return new TaxonomyTerm(data)
   }
 }
