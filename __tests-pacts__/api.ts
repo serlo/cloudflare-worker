@@ -699,6 +699,42 @@ describe('Uuid', () => {
       })
     })
   })
+  describe('TaxonomyTerm', () => {
+    test('by id', async () => {
+      await addTaxonomyTermInteraction()
+      const response = await client.query({
+        query: gql`
+          {
+            uuid(id: 1) {
+              __typename
+              ... on TaxonomyTerm {
+                id
+                type
+                trashed
+                instance
+                name
+                description
+                weight
+              }
+            }
+          }
+        `,
+      })
+      expect(response.errors).toBe(undefined)
+      expect(response.data).toEqual({
+        uuid: {
+          __typename: 'TaxonomyTerm',
+          type: 'topic',
+          trashed: false,
+          id: 1,
+          instance: 'de',
+          name: 'mathe',
+          description: null,
+          weight: 13
+        },
+      })
+    })
+  })
 })
 
 function addLicenseInteraction() {
@@ -825,6 +861,21 @@ function addUserInteraction() {
       date: Matchers.iso8601DateTime('2014-03-01T20:36:21Z'),
       lastLogin: Matchers.iso8601DateTime('2020-03-24T09:40:55Z'),
       description: null,
+    },
+  })
+}
+
+function addTaxonomyTermInteraction() {
+  return addUuidInteraction({
+    request: 1,
+    response: {
+      id: 1,
+      trashed: Matchers.boolean(false),
+      discriminator: 'taxonomyterm',
+      type: 'topic',
+      name: Matchers.string('mathe'),
+      description: null,
+      weight: Matchers.integer(13)
     },
   })
 }
