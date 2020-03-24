@@ -53,11 +53,13 @@ export const uuidTypeDefs = gql`
   }
 
   interface EntityRevision {
+    author: User!
     date: DateTime!
   }
 
   type ArticleRevision implements Uuid & EntityRevision {
     id: Int!
+    author: User!
     trashed: Boolean!
     date: DateTime!
     title: String!
@@ -74,6 +76,7 @@ export const uuidTypeDefs = gql`
 
   type PageRevision implements Uuid {
     id: Int!
+    author: User!
     trashed: Boolean!
     date: DateTime!
     title: String!
@@ -121,12 +124,14 @@ export const uuidResolvers: {
     __resolveType(entity: EntityRevision): EntityRevisionType
   }
   ArticleRevision: {
+    author: Resolver<ArticleRevision, {}, Partial<User>>
     article: Resolver<ArticleRevision, {}, Partial<Article>>
   }
   Page: {
     currentRevision: Resolver<Page, {}, Partial<PageRevision> | null>
   }
   PageRevision: {
+    author: Resolver<PageRevision, {}, Partial<User>>
     page: Resolver<PageRevision, {}, Partial<Page>>
   }
 } = {
@@ -171,6 +176,13 @@ export const uuidResolvers: {
     },
   },
   ArticleRevision: {
+    async author(articleRevision, _args, context, info) {
+      const partialUser = { id: articleRevision.authorId }
+      if (requestsOnlyFields('User', ['id'], info)) {
+        return partialUser
+      }
+      return uuid(undefined, partialUser, context)
+    },
     async article(articleRevision, _args, context, info) {
       const partialArticle = { id: articleRevision.repositoryId }
       if (requestsOnlyFields('Article', ['id'], info)) {
@@ -190,6 +202,13 @@ export const uuidResolvers: {
     },
   },
   PageRevision: {
+    async author(pageRevision, _args, context, info) {
+      const partialUser = { id: pageRevision.authorId }
+      if (requestsOnlyFields('User', ['id'], info)) {
+        return partialUser
+      }
+      return uuid(undefined, partialUser, context)
+    },
     async page(pageRevision, _args, context, info) {
       const partialPage = { id: pageRevision.repositoryId }
       if (requestsOnlyFields('Page', ['id'], info)) {
@@ -257,16 +276,19 @@ class Article extends Entity {
 abstract class EntityRevision extends Uuid {
   public abstract __typename: EntityRevisionType
   public date: string
+  public authorId: number
   public repositoryId: number
 
   public constructor(payload: {
     id: number
     date: DateTime
     trashed: boolean
+    authorId: number
     repositoryId: number
   }) {
     super(payload)
     this.date = payload.date
+    this.authorId = payload.authorId
     this.repositoryId = payload.repositoryId
   }
 }
@@ -281,6 +303,7 @@ class ArticleRevision extends EntityRevision {
     id: number
     date: DateTime
     trashed: boolean
+    authorId: number
     repositoryId: number
     title: string
     content: string
@@ -312,6 +335,7 @@ class PageRevision extends Uuid {
   public title: string
   public content: string
   public date: DateTime
+  public authorId: number
   public repositoryId: number
 
   public constructor(payload: {
@@ -320,12 +344,14 @@ class PageRevision extends Uuid {
     date: DateTime
     title: string
     content: string
+    authorId: number
     repositoryId: number
   }) {
     super(payload)
     this.title = payload.title
     this.content = payload.content
     this.date = payload.date
+    this.authorId = payload.authorId
     this.repositoryId = payload.repositoryId
   }
 }
