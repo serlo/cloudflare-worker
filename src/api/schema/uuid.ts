@@ -33,6 +33,7 @@ export const uuidTypeDefs = gql`
 
   interface Uuid {
     id: Int!
+    trashed: Boolean!
   }
 
   interface Entity {
@@ -42,6 +43,7 @@ export const uuidTypeDefs = gql`
 
   type Article implements Uuid & Entity {
     id: Int!
+    trashed: Boolean!
     instance: Instance!
     license: License!
     currentRevision: ArticleRevision
@@ -49,6 +51,7 @@ export const uuidTypeDefs = gql`
 
   type ArticleRevision implements Uuid {
     id: Int!
+    trashed: Boolean!
     title: String!
     content: String!
     changes: String!
@@ -57,11 +60,13 @@ export const uuidTypeDefs = gql`
 
   type Page implements Uuid {
     id: Int!
+    trashed: Boolean!
     currentRevision: PageRevision
   }
 
   type PageRevision implements Uuid {
     id: Int!
+    trashed: Boolean!
     title: String!
     content: String!
     page: Page!
@@ -185,9 +190,11 @@ type UuidType = DiscriminatorType | EntityType | EntityRevisionType
 abstract class Uuid {
   public abstract __typename: UuidType
   public id: number
+  public trashed: boolean
 
-  public constructor(payload: { id: number }) {
+  public constructor(payload: { id: number; trashed: boolean }) {
     this.id = payload.id
+    this.trashed = payload.trashed
   }
 }
 
@@ -199,6 +206,7 @@ abstract class Entity extends Uuid {
 
   public constructor(payload: {
     id: number
+    trashed: boolean
     instance: Instance
     licenseId: number
     currentRevisionId: number
@@ -218,7 +226,11 @@ abstract class EntityRevision extends Uuid {
   public abstract __typename: EntityRevisionType
   public repositoryId: number
 
-  public constructor(payload: { id: number; repositoryId: number }) {
+  public constructor(payload: {
+    id: number
+    trashed: boolean
+    repositoryId: number
+  }) {
     super(payload)
     this.repositoryId = payload.repositoryId
   }
@@ -232,6 +244,7 @@ class ArticleRevision extends EntityRevision {
 
   public constructor(payload: {
     id: number
+    trashed: boolean
     repositoryId: number
     title: string
     content: string
@@ -248,7 +261,11 @@ class Page extends Uuid {
   public __typename = DiscriminatorType.Page
   public currentRevisionId: number
 
-  public constructor(payload: { id: number; currentRevisionId: number }) {
+  public constructor(payload: {
+    id: number
+    trashed: boolean
+    currentRevisionId: number
+  }) {
     super(payload)
     this.currentRevisionId = payload.currentRevisionId
   }
@@ -262,6 +279,7 @@ class PageRevision extends Uuid {
 
   public constructor(payload: {
     id: number
+    trashed: boolean
     title: string
     content: string
     repositoryId: number
