@@ -21,6 +21,7 @@
  */
 import { gql } from 'apollo-server-cloudflare'
 
+import { DateTime } from './date-time'
 import { Instance } from './instance'
 import { License, licenseResolvers } from './license'
 import { Context, Resolver } from './types'
@@ -37,6 +38,7 @@ export const uuidTypeDefs = gql`
   }
 
   interface Entity {
+    date: DateTime!
     instance: Instance!
     license: License!
   }
@@ -45,6 +47,7 @@ export const uuidTypeDefs = gql`
     id: Int!
     trashed: Boolean!
     instance: Instance!
+    date: DateTime!
     license: License!
     currentRevision: ArticleRevision
   }
@@ -201,18 +204,21 @@ abstract class Uuid {
 abstract class Entity extends Uuid {
   public abstract __typename: EntityType
   public instance: Instance
+  public date: string
   public licenseId: number
   public currentRevisionId: number
 
   public constructor(payload: {
     id: number
     trashed: boolean
+    date: DateTime
     instance: Instance
     licenseId: number
     currentRevisionId: number
   }) {
     super(payload)
     this.instance = payload.instance
+    this.date = payload.date
     this.licenseId = payload.licenseId
     this.currentRevisionId = payload.currentRevisionId
   }
