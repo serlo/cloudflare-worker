@@ -7,6 +7,7 @@ name = "serlo-dev"
 zone_id = "cedde9a4ab2980cd92bfc3765dc2e475"
 route = "*serlo-development.dev/*"
 kv-namespaces = [
+    { binding = "API_KV", id = "a48a5ab5588643b98335f750c9b197a4" },
     { binding = "MAINTENANCE_KV", id = "d5f281b897f643b8824881cfe2a24dd2" },
     { binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be" },
 ]
@@ -17,6 +18,7 @@ name = "serlo-staging"
 zone_id = "0067b08b108fbcf88ddaeaae4ac3d6ac"
 route = "*serlo-staging.dev/*"
 kv-namespaces = [
+    { binding = "API_KV", id = "707aa458a11d4f098db87724a195283c" },
     { binding = "MAINTENANCE_KV", id = "3c3c25aba0b94b7e99f855f013f5b09c" },
     { binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be" },
 ]
@@ -27,6 +29,7 @@ name = "serlo-production"
 zone_id = "1a4afa776acb2e40c3c8a135248328ae"
 route = "*serlo.org/*"
 kv-namespaces = [
+    { binding = "API_KV", id = "592276fb8d204b8aa5bd7be4ca9774ce"},
     { binding = "MAINTENANCE_KV", id = "b1f17ebbe39c4fd9b49d1368ce225faa" },
     { binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be" },
 ]
