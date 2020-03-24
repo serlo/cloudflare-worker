@@ -19,6 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
+// eslint-disable-next-line import/no-unassigned-import
 import '@testing-library/jest-dom'
 import { Response, Request } from 'node-fetch'
 
@@ -26,6 +27,7 @@ global.Response = Response
 global.Request = Request
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace NodeJS {
     interface Global {
       Response: typeof Response

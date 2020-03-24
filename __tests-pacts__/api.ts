@@ -20,13 +20,13 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 import { Matchers, Pact } from '@pact-foundation/pact'
+import { gql } from 'apollo-server-cloudflare'
 import { createTestClient } from 'apollo-server-testing'
 import * as path from 'path'
 import rimraf from 'rimraf'
 import * as util from 'util'
 
 import { createGraphQLServer } from '../src/api'
-import { gql } from 'apollo-server-cloudflare'
 
 const rm = util.promisify(rimraf)
 

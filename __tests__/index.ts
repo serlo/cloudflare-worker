@@ -52,18 +52,23 @@ class RequestMock {
 }
 
 beforeEach(() => {
-  fetchMock = jest.fn((...args) => {
+  fetchMock = jest.fn(() => {
     return true
   })
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   window['fetch'] = fetchMock
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   window['Response'] = ResponseMock
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   window['Request'] = RequestMock
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   window['MAINTENANCE_KV'] = {
-    async get(key: string) {
+    // eslint-disable-next-line @typescript-eslint/require-await
+    async get(_Key: string) {
       return null
     },
   }
@@ -162,7 +167,7 @@ describe('Packages', () => {
     mockPackagesKV({
       foo: 'foo@1.0.0',
     })
-    const response = await handleRequest('https://packages.serlo.local/foo/bar')
+    await handleRequest('https://packages.serlo.local/foo/bar')
     expectFetchToHaveBeenCalledWithRequest({
       url: 'https://packages.serlo.org/foo@1.0.0/bar',
     } as Request)
@@ -185,8 +190,10 @@ async function handleRequest(url: string): Promise<ResponseMock> {
 }
 
 function mockPackagesKV(packages: Record<string, unknown>) {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   window['PACKAGES_KV'] = {
+    // eslint-disable-next-line @typescript-eslint/require-await
     async get(key: string) {
       return packages[key] || null
     },

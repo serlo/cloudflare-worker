@@ -19,16 +19,9 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
+import { render } from '@testing-library/preact'
 import { h } from 'preact'
-import {
-  isNotFoundResponse,
-  isJsonResponse,
-  hasOkStatus,
-  containsText,
-  contentTypeIsHtml,
-  withMockedFetch,
-} from './utils'
-import { LanguageCode } from '../src/utils'
+
 import {
   UnrevisedConfig,
   RevisedConfig,
@@ -45,7 +38,15 @@ import {
   RevisedPage,
   RevisionsOverview,
 } from '../src/static-pages'
-import { render } from '@testing-library/preact'
+import { LanguageCode } from '../src/utils'
+import {
+  isNotFoundResponse,
+  isJsonResponse,
+  hasOkStatus,
+  containsText,
+  contentTypeIsHtml,
+  withMockedFetch,
+} from './utils'
 
 describe('handleRequest()', () => {
   const unrevisedConfig: UnrevisedConfig = {

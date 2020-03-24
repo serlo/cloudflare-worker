@@ -20,6 +20,7 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 import { h } from 'preact'
+
 import {
   UnrevisedPage as UnrevisedPageOriginal,
   RevisedPage as RevisedPageOriginal,
@@ -32,6 +33,7 @@ const UnrevisedPage = createStaticComponent(UnrevisedPageOriginal)
 const RevisedPage = createStaticComponent(RevisedPageOriginal)
 const RevisionsOverview = createStaticComponent(RevisionsOverviewOriginal)
 
+// eslint-disable-next-line import/no-default-export
 export default {
   title: 'static-pages',
 }

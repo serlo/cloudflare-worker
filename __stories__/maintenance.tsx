@@ -21,11 +21,13 @@
  */
 import { DateTime } from 'luxon'
 import { h } from 'preact'
-import { createStaticComponent } from './utils'
 
 import { Maintenance as MaintenanceOriginal } from '../src/maintenance/template'
+import { createStaticComponent } from './utils'
+
 const Maintenance = createStaticComponent(MaintenanceOriginal)
 
+// eslint-disable-next-line import/no-default-export
 export default {
   component: Maintenance,
   title: 'maintenance',

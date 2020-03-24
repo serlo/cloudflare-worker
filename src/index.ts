@@ -44,6 +44,7 @@ export async function handleRequest(request: Request) {
   )
 }
 
+// eslint-disable-next-line @typescript-eslint/require-await
 async function enforceHttps(request: Request) {
   if (getSubdomain(request.url) === 'pacts') return null
   const url = new URL(request.url)
@@ -52,6 +53,7 @@ async function enforceHttps(request: Request) {
   return Response.redirect(url.href)
 }
 
+// eslint-disable-next-line @typescript-eslint/require-await
 async function redirects(request: Request) {
   if (getSubdomain(request.url) === 'start') {
     return Response.redirect(
@@ -110,7 +112,7 @@ async function semanticFileNames(request: Request) {
 
   if (url.pathname.startsWith('/meta')) return fetch(url.href, request)
   const re = /^\/(legacy\/|)((?!legacy)\w+)\/([\w\-+]+)\.(\w+)$/
-  const match = url.pathname.match(re)
+  const match = re.exec(url.pathname)
 
   if (!match) return fetch(url.href, request)
 
@@ -128,8 +130,8 @@ async function packages(request: Request) {
   const url = new URL(request.url)
   url.host = 'packages.serlo.org'
 
-  const re = /([^\/]+)\//
-  const match = url.pathname.match(re)
+  const re = /([^/]+)\//
+  const match = re.exec(url.pathname)
 
   if (!match) return fetch(url.href, request)
 
