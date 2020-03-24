@@ -20,11 +20,13 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 import { h } from 'preact'
+
+import { NotFound as NotFoundOriginal } from '../src/ui'
 import { createStaticComponent } from './utils'
 
-import { NotFound as NotFoundOriginal } from '../src/ui/'
 const NotFound = createStaticComponent(NotFoundOriginal)
 
+// eslint-disable-next-line import/no-default-export
 export default {
   component: NotFound,
   title: '404page',

@@ -19,14 +19,15 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { getPathname, getSubdomain } from '../url-utils'
 import { ApolloServer } from 'apollo-server-cloudflare'
+// eslint-disable-next-line import/no-internal-modules
 import { graphqlCloudflare } from 'apollo-server-cloudflare/dist/cloudflareApollo'
 import { Request as ApolloServerRequest } from 'apollo-server-env/dist/fetch'
 
+import { getPathname, getSubdomain } from '../url-utils'
 import { SerloDataSource } from './data-sources/serlo'
-import { typeDefs, resolvers } from './schema'
 import { graphiql } from './graphiql'
+import { typeDefs, resolvers } from './schema'
 
 export async function api(request: Request) {
   if (getSubdomain(request.url) !== 'api') return null

@@ -23,6 +23,7 @@ import pact from '@pact-foundation/pact-node'
 import { spawnSync } from 'child_process'
 import * as path from 'path'
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires,import/no-commonjs
 const { version } = require('../package.json')
 
 const result = spawnSync('git', ['rev-parse', '--short', 'HEAD'], {

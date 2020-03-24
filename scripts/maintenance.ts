@@ -34,7 +34,7 @@ function exec() {
 
   function parseDate(raw: string): DateTime {
     const now = DateTime.local()
-    const match = raw.match(/(\d\d):(\d\d)/)
+    const match = /(\d\d):(\d\d)/.exec(raw)
     if (!match) {
       console.error(`Couldn't parse ${raw}`)
       process.exit(1)

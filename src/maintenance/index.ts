@@ -21,9 +21,9 @@
  */
 import { DateTime } from 'luxon'
 
-import { Maintenance } from './template'
 import { getSubdomain } from '../url-utils'
 import { createPreactResponse } from '../utils'
+import { Maintenance } from './template'
 
 export async function maintenanceMode(request: Request) {
   const enabled = await MAINTENANCE_KV.get('enabled')

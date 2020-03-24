@@ -19,8 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { h } from 'preact'
-import { ComponentType, RenderableProps } from 'preact'
+import { h, ComponentType, RenderableProps } from 'preact'
 import renderToString from 'preact-render-to-string'
 
 export function createStaticComponent<P = {}>(Component: ComponentType<P>) {

@@ -22,11 +22,12 @@
 import { h } from 'preact'
 
 import { data } from '../__fixtures__/are-we-edtr-io-yet'
+import { AreWeEdtrIoYet as Original } from '../src/are-we-edtr-io-yet/template'
 import { createStaticComponent } from './utils'
 
-import { AreWeEdtrIoYet as Original } from '../src/are-we-edtr-io-yet/template'
 const AreWeEdtrIoYet = createStaticComponent(Original)
 
+// eslint-disable-next-line import/no-default-export
 export default {
   component: AreWeEdtrIoYet,
   title: 'are-we-edtr-io-yet',

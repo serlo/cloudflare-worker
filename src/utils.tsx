@@ -19,11 +19,10 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { h } from 'preact'
-import sanitize from 'sanitize-html'
 import marked from 'marked'
-import { VNode } from 'preact'
+import { h, VNode } from 'preact'
 import renderToString from 'preact-render-to-string'
+import sanitize from 'sanitize-html'
 
 import { NotFound } from './ui'
 
@@ -68,7 +67,7 @@ export function createPreactResponse(component: VNode, opt?: ResponseInit) {
   })
 }
 
-export function createJsonResponse(json: any) {
+export function createJsonResponse(json: unknown) {
   return new Response(JSON.stringify(json), {
     headers: { 'Content-Type': 'application/json' },
   })

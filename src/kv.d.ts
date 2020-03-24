@@ -19,9 +19,9 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-declare var MAINTENANCE_KV: {
+declare let MAINTENANCE_KV: {
   get(key: 'enabled'): Promise<string | null>
 }
-declare var PACKAGES_KV: {
+declare let PACKAGES_KV: {
   get(key: string): Promise<string | null>
 }

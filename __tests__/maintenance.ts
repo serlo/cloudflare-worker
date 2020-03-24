@@ -21,15 +21,16 @@
  */
 import { DateTime } from 'luxon'
 
-import { contentTypeIsHtml, containsText } from './utils'
 import { handleRequest as f } from '../src'
+import { contentTypeIsHtml, containsText } from './utils'
 
 let fetchMock: jest.Mock
 
 beforeEach(() => {
-  fetchMock = jest.fn((...args) => {
+  fetchMock = jest.fn(() => {
     return true
   })
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   window['fetch'] = fetchMock
 })
@@ -87,7 +88,7 @@ describe('Maintenance mode', () => {
     expect(response.status).toEqual(503)
     contentTypeIsHtml(response)
     expect(response.headers.get('Retry-After')).toEqual(end.toHTTP())
-    containsText(response, [
+    await containsText(response, [
       'Wartungsmodus',
       `gegen ${end.setLocale('de').toFormat('HH:mm (ZZZZ)')} wieder online`,
     ])
@@ -107,7 +108,7 @@ describe('Maintenance mode', () => {
     expect(response.status).toEqual(503)
     contentTypeIsHtml(response)
     expect(response.headers.get('Retry-After')).toEqual(end.toHTTP())
-    containsText(response, [
+    await containsText(response, [
       'Maintenance mode',
       `We expect to be back by ${end.setLocale('en').toFormat('HH:mm (ZZZZ)')}`,
     ])
@@ -124,7 +125,7 @@ describe('Maintenance mode', () => {
     const response = await handleRequest('https://de.serlo.org')
     expect(response.status).toEqual(503)
     contentTypeIsHtml(response)
-    containsText(response, [
+    await containsText(response, [
       'Wartungsmodus',
       'in ein paar Stunden wieder online',
     ])
@@ -141,7 +142,7 @@ describe('Maintenance mode', () => {
     const response = await handleRequest('https://en.serlo.org')
     expect(response.status).toEqual(503)
     contentTypeIsHtml(response)
-    containsText(response, [
+    await containsText(response, [
       'Maintenance mode',
       'We expect to be back in a couple of hours.',
     ])
@@ -183,8 +184,10 @@ async function handleRequest(url: string): Promise<Response> {
 }
 
 function mockMaintenanceKV(values: Record<string, unknown>) {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   window['MAINTENANCE_KV'] = {
+    // eslint-disable-next-line @typescript-eslint/require-await
     async get(key: string) {
       return values[key] || null
     },

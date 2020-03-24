@@ -19,9 +19,9 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { AreWeEdtrIoYet } from './template'
-import { createPreactResponse, fetchWithCache } from '../utils'
 import { getSubdomain } from '../url-utils'
+import { createPreactResponse, fetchWithCache } from '../utils'
+import { AreWeEdtrIoYet } from './template'
 
 export async function edtrIoStats(request: Request) {
   if (getSubdomain(request.url) !== 'are-we-edtr-io-yet') return null

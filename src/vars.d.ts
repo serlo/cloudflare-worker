@@ -19,5 +19,5 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-declare var DOMAIN: string
-declare var ENABLE_BASIC_AUTH: 'true' | 'false'
+declare let DOMAIN: string
+declare let ENABLE_BASIC_AUTH: 'true' | 'false'

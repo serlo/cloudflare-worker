@@ -20,6 +20,7 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 import { h, ComponentChildren, Fragment } from 'preact'
+
 import { LanguageCode } from '../utils'
 
 export function NotFound() {
@@ -32,7 +33,7 @@ export function NotFound() {
 }
 
 export function CenteredContent({ children }: { children: ComponentChildren }) {
-  return <div class="call">{children}</div>
+  return <div className="call">{children}</div>
 }
 
 export function Template({
@@ -77,25 +78,25 @@ export function Template({
         `}</style>
       </head>
       <body>
-        <div class="wrap" style="margin-bottom: -200px;">
+        <div className="wrap" style="margin-bottom: -200px;">
           <header id="header">
-            <div class="container">
+            <div className="container">
               <nav id="header-nav">
                 <div id="mobile-nav-toggle">
-                  <a class="main-headline-link" href="/">
-                    <span class="serlo-logo">V</span>
-                    <div class="serlo-brand">Serlo</div>
+                  <a className="main-headline-link" href="/">
+                    <span className="serlo-logo">V</span>
+                    <div className="serlo-brand">Serlo</div>
                   </a>
-                  <span class="subject-title">{title}</span>
+                  <span className="subject-title">{title}</span>
                 </div>
               </nav>
             </div>
           </header>
-          <div id="page" class="container has-sidebar clearfix">
-            <section class="clearfix">
-              <div class="content clearfix">
-                <div class="r">
-                  <div class="c24">{children}</div>
+          <div id="page" className="container has-sidebar clearfix">
+            <section className="clearfix">
+              <div className="content clearfix">
+                <div className="r">
+                  <div className="c24">{children}</div>
                 </div>
               </div>
             </section>

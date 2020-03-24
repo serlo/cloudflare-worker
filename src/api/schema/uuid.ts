@@ -22,8 +22,8 @@
 import { gql } from 'apollo-server-cloudflare'
 
 import { Instance } from './instance'
-import { Context, Resolver } from './types'
 import { License, licenseResolvers } from './license'
+import { Context, Resolver } from './types'
 import { requestsOnlyFields } from './utils'
 
 export const uuidTypeDefs = gql`
@@ -215,11 +215,13 @@ async function uuid(
         case 'article':
           return new Article(data)
       }
+      break
     case 'entityRevision':
       switch (data.type) {
         case 'article':
           return new ArticleRevision({ ...data, ...data.fields })
       }
+      break
     case 'page':
       return new Page(data)
   }

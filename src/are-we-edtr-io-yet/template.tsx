@@ -45,14 +45,14 @@ export function AreWeEdtrIoYet({
   return (
     <Template lang="en" title="Are we Edtr.io yet?">
       <CenteredContent>
-        <table id="toc" class="table">
+        <table id="toc" className="table">
           <tbody>
             {types.map((type) => {
               const progress = getProgress(data[type])
               const done = progress.current === progress.max
 
               return (
-                <tr class={done ? 'success' : undefined}>
+                <tr key={type} className={done ? 'success' : undefined}>
                   <td>
                     <a href={`#${type}`}>{getTitle(type)}</a>
                   </td>
@@ -65,7 +65,7 @@ export function AreWeEdtrIoYet({
           </tbody>
         </table>
         {types.map((type) => {
-          return <Entity type={type} data={data[type]} />
+          return <Entity key={type} type={type} data={data[type]} />
         })}
       </CenteredContent>
     </Template>
@@ -76,18 +76,18 @@ function Entity(props: EntityProps) {
   const { type, data } = props
 
   return (
-    <div id={type} class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title">
+    <div id={type} className="panel panel-default">
+      <div className="panel-heading">
+        <h3 className="panel-title">
           {getTitle(type)}{' '}
           <small>
             <a href="#toc">back to top</a>
           </small>
         </h3>
       </div>
-      <div class="panel-body">
+      <div className="panel-body">
         <EntityProgress {...props} />
-        <table class="table">
+        <table className="table">
           <tbody>
             {data
               .sort((a, b) => (a.converted ? 1 : 0) - (b.converted ? 1 : 0))
@@ -97,9 +97,12 @@ function Entity(props: EntityProps) {
                   : 'fa-circle-o'
                 const href = `https://de.serlo.org/${entity.id}`
                 return (
-                  <tr class={entity.converted ? 'success' : undefined}>
+                  <tr
+                    key={entity.id}
+                    className={entity.converted ? 'success' : undefined}
+                  >
                     <td>
-                      <i class={`fa ${icon}`} aria-hidden="true" />
+                      <i className={`fa ${icon}`} aria-hidden="true" />
                       <a href={href}>{href}</a>
                     </td>
                   </tr>
@@ -119,9 +122,9 @@ function EntityProgress({ data }: EntityProps) {
       ? 'progress-bar progress-bar-success'
       : 'progress-bar'
   return (
-    <div class="progress">
+    <div className="progress">
       <div
-        class={className}
+        className={className}
         role="progressbar"
         aria-valuenow={progress.current}
         aria-valuemin="0"

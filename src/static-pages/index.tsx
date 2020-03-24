@@ -19,6 +19,10 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
+import { Fragment, h } from 'preact'
+
+import { Template } from '../ui'
+import { getPathnameWithoutTrailingSlash, getSubdomain } from '../url-utils'
 import {
   createJsonResponse,
   createNotFoundResponse,
@@ -29,9 +33,6 @@ import {
   markdownToHtml,
   sanitizeHtml,
 } from '../utils'
-import { getPathnameWithoutTrailingSlash, getSubdomain } from '../url-utils'
-import { Template } from '../ui'
-import { Fragment, h } from 'preact'
 import {
   Config,
   revisedConfig as defaultRevisedConfig,
@@ -106,7 +107,7 @@ export async function handleRequest(
     }
 
     const archivedRegex = `^\\/${revisedType}\\/archive\\/(\\d{4}-\\d{2}-\\d{2})$`
-    const archivedMatch = path.match(new RegExp(archivedRegex))
+    const archivedMatch = new RegExp(archivedRegex).exec(path)
 
     if (archivedMatch) {
       const revisions = getRevisions(revisedConfig, lang, revisedType)
@@ -162,7 +163,7 @@ export function RevisedPage({ page }: { page: WithContent<RevisedPage> }) {
   return (
     <Template title={page.title} lang={page.lang}>
       {page.isCurrentRevision ? null : (
-        <div class="alert alert-info" style="margin-top: 20px;">
+        <div className="alert alert-info" style="margin-top: 20px;">
           {getAlert()}
         </div>
       )}
@@ -247,7 +248,7 @@ export function RevisionsOverview({ revisions }: { revisions: RevisedPage[] }) {
         {revisions.map((rev) => {
           const link = `/${rev.revisedType}/archive/${rev.revision}`
           return (
-            <li>
+            <li key={rev.revisionDate}>
               <a href={link}>{renderRevision(rev)}</a>
             </li>
           )

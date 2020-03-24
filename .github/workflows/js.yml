@@ -25,7 +25,15 @@ jobs:
       - run: yarn build --env dev
       - run: yarn build --env staging
       - run: yarn build --env production
-
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - run: yarn
+      - run: yarn lint:eslint
   prettier:
     runs-on: ubuntu-latest
     steps:

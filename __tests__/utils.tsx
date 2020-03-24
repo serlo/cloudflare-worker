@@ -19,6 +19,10 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
+
+import { h } from 'preact'
+
+import { Template } from '../src/ui'
 import {
   sanitizeHtml,
   markdownToHtml,
@@ -28,9 +32,6 @@ import {
   createJsonResponse,
   createNotFoundResponse,
 } from '../src/utils'
-
-import { h } from 'preact'
-import { Template } from '../src/ui'
 
 describe('isLanguageCode()', () => {
   expect(isLanguageCode('de')).toBe(true)
@@ -87,9 +88,8 @@ test('PreactResponse', async () => {
   ])
 })
 
-test('JsonResponse', async () => {
+test('JsonResponse', () => {
   const response = createJsonResponse({ foo: [1, 2, 3] })
-
   isJsonResponse(response, { foo: [1, 2, 3] })
 })
 
@@ -137,7 +137,7 @@ export async function isNotFoundResponse(response: Response): Promise<void> {
   )
 }
 
-export async function isJsonResponse(response: Response, targetJson: any) {
+export async function isJsonResponse(response: Response, targetJson: unknown) {
   hasOkStatus(response)
   expect(response.headers.get('Content-Type')).toBe('application/json')
   expect(JSON.parse(await response.text())).toEqual(targetJson)
@@ -150,6 +150,7 @@ export async function withMockedFetch(
   const value = typeof response === 'string' ? new Response(response) : response
   const fetch = jest.fn().mockReturnValueOnce(value)
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   global.fetch = fetch
 
