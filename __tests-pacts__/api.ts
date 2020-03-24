@@ -733,7 +733,7 @@ function addArticleAliasInteraction() {
     request: '/mathe/funktionen/uebersicht-aller-artikel-zu-funktionen/parabel',
     response: {
       id: 1855,
-      source: '/entity/page/view/1855',
+      source: '/entity/view/1855',
       timestamp: Matchers.iso8601DateTime('2014-06-16T15:58:45Z'),
     },
   })
