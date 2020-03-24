@@ -17,7 +17,7 @@
     "lint:tsc": "tsc --noEmit",
     "start": "start-storybook -p 6006",
     "test": "jest",
-    "pacts": "jest --config jest-pacts.config.js",
+    "pacts": "jest --config jest.config-pacts.js",
     "pacts:publish": "ts-node scripts/publish-pacts",
     "wrangler:maintenance:kv:get": "wrangler kv:key get --binding=MAINTENANCE_KV",
     "wrangler:maintenance:kv:put": "wrangler kv:key put --binding=MAINTENANCE_KV",
