@@ -313,7 +313,7 @@ describe('Uuid', () => {
                   changes
                   article {
                     id
-                    license {
+                    currentRevision {
                       id
                     }
                   }
@@ -332,8 +332,8 @@ describe('Uuid', () => {
             changes: 'changes',
             article: {
               id: 1855,
-              license: {
-                id: 1,
+              currentRevision: {
+                id: 30674,
               },
             },
           },
@@ -448,6 +448,9 @@ describe('Uuid', () => {
                 id
                 title
                 content
+                page {
+                  id
+                }
               }
             }
           }
@@ -460,8 +463,49 @@ describe('Uuid', () => {
           id: 35476,
           title: 'title',
           content: 'content',
+          page: {
+            id: 19767,
+          },
         },
       })
+    })
+  })
+
+  test('by id (w/ page)', async () => {
+    await addPageRevisionInteraction()
+    await addPageUuidInteraction()
+    const response = await client.query({
+      query: gql`
+        {
+          uuid(id: 35476) {
+            __typename
+            ... on PageRevision {
+              id
+              title
+              content
+              page {
+                id
+                currentRevision {
+                  id
+                }
+              }
+            }
+          }
+        }
+      `,
+    })
+    expect(response.errors).toBe(undefined)
+    expect(response.data).toEqual({
+      uuid: {
+        __typename: 'PageRevision',
+        id: 35476,
+        title: 'title',
+        content: 'content',
+        page: {
+          id: 19767,
+          currentRevision: { id: 35476 },
+        },
+      },
     })
   })
 })
@@ -566,6 +610,7 @@ function addPageRevisionInteraction() {
     response: {
       id: 35476,
       discriminator: 'pageRevision',
+      repositoryId: 19767,
       title: Matchers.string('title'),
       content: Matchers.string('content'),
     },
