@@ -39,59 +39,49 @@ describe('Maintenance mode', () => {
     mockMaintenanceKV({})
     await handleRequest('https://de.serlo.org')
     expectFetchToHaveBeenCalledWithRequest({
-      url: 'https://de.serlo.org'
+      url: 'https://de.serlo.org',
     } as Request)
   })
 
   test('Disabled (before scheduled maintenance)', async () => {
     const value = {
-      start: DateTime.local()
-        .plus({ minutes: 10 })
-        .toISO(),
-      end: DateTime.local()
-        .plus({ minutes: 20 })
-        .toISO(),
-      subdomains: ['de']
+      start: DateTime.local().plus({ minutes: 10 }).toISO(),
+      end: DateTime.local().plus({ minutes: 20 }).toISO(),
+      subdomains: ['de'],
     }
     mockMaintenanceKV({
-      enabled: JSON.stringify(value)
+      enabled: JSON.stringify(value),
     })
     await handleRequest('https://de.serlo.org')
     expectFetchToHaveBeenCalledWithRequest({
-      url: 'https://de.serlo.org'
+      url: 'https://de.serlo.org',
     } as Request)
   })
 
   test('Disabled (after scheduled maintenance)', async () => {
     const value = {
-      start: DateTime.local()
-        .minus({ minutes: 20 })
-        .toISO(),
-      end: DateTime.local()
-        .minus({ minutes: 10 })
-        .toISO(),
-      subdomains: ['de']
+      start: DateTime.local().minus({ minutes: 20 }).toISO(),
+      end: DateTime.local().minus({ minutes: 10 }).toISO(),
+      subdomains: ['de'],
     }
     mockMaintenanceKV({
-      enabled: JSON.stringify(value)
+      enabled: JSON.stringify(value),
     })
     await handleRequest('https://de.serlo.org')
     expectFetchToHaveBeenCalledWithRequest({
-      url: 'https://de.serlo.org'
+      url: 'https://de.serlo.org',
     } as Request)
   })
 
   test('Enabled (de, w/ end)', async () => {
     const end = DateTime.local().plus({ minutes: 10 })
     const value = {
-      start: DateTime.local()
-        .minus({ minutes: 10 })
-        .toISO(),
+      start: DateTime.local().minus({ minutes: 10 }).toISO(),
       end: end.toISO(),
-      subdomains: ['de']
+      subdomains: ['de'],
     }
     mockMaintenanceKV({
-      enabled: JSON.stringify(value)
+      enabled: JSON.stringify(value),
     })
     const response = await handleRequest('https://de.serlo.org')
     expect(response.status).toEqual(503)
@@ -99,21 +89,19 @@ describe('Maintenance mode', () => {
     expect(response.headers.get('Retry-After')).toEqual(end.toHTTP())
     containsText(response, [
       'Wartungsmodus',
-      `gegen ${end.setLocale('de').toFormat('HH:mm (ZZZZ)')} wieder online`
+      `gegen ${end.setLocale('de').toFormat('HH:mm (ZZZZ)')} wieder online`,
     ])
   })
 
   test('Enabled (en, w/ end)', async () => {
     const end = DateTime.local().plus({ minutes: 10 })
     const value = {
-      start: DateTime.local()
-        .minus({ minutes: 10 })
-        .toISO(),
+      start: DateTime.local().minus({ minutes: 10 }).toISO(),
       end: end.toISO(),
-      subdomains: ['en']
+      subdomains: ['en'],
     }
     mockMaintenanceKV({
-      enabled: JSON.stringify(value)
+      enabled: JSON.stringify(value),
     })
     const response = await handleRequest('https://en.serlo.org')
     expect(response.status).toEqual(503)
@@ -121,79 +109,71 @@ describe('Maintenance mode', () => {
     expect(response.headers.get('Retry-After')).toEqual(end.toHTTP())
     containsText(response, [
       'Maintenance mode',
-      `We expect to be back by ${end.setLocale('en').toFormat('HH:mm (ZZZZ)')}`
+      `We expect to be back by ${end.setLocale('en').toFormat('HH:mm (ZZZZ)')}`,
     ])
   })
 
   test('Enabled (de, w/o end)', async () => {
     const value = {
-      start: DateTime.local()
-        .minus({ minutes: 10 })
-        .toISO(),
-      subdomains: ['de']
+      start: DateTime.local().minus({ minutes: 10 }).toISO(),
+      subdomains: ['de'],
     }
     mockMaintenanceKV({
-      enabled: JSON.stringify(value)
+      enabled: JSON.stringify(value),
     })
     const response = await handleRequest('https://de.serlo.org')
     expect(response.status).toEqual(503)
     contentTypeIsHtml(response)
     containsText(response, [
       'Wartungsmodus',
-      'in ein paar Stunden wieder online'
+      'in ein paar Stunden wieder online',
     ])
   })
 
   test('Enabled (en, w/o end)', async () => {
     const value = {
-      start: DateTime.local()
-        .minus({ minutes: 10 })
-        .toISO(),
-      subdomains: ['en']
+      start: DateTime.local().minus({ minutes: 10 }).toISO(),
+      subdomains: ['en'],
     }
     mockMaintenanceKV({
-      enabled: JSON.stringify(value)
+      enabled: JSON.stringify(value),
     })
     const response = await handleRequest('https://en.serlo.org')
     expect(response.status).toEqual(503)
     contentTypeIsHtml(response)
     containsText(response, [
       'Maintenance mode',
-      'We expect to be back in a couple of hours.'
+      'We expect to be back in a couple of hours.',
     ])
   })
 
   test('Enabled (different subdomain, w/ end)', async () => {
     const end = DateTime.local().plus({ minutes: 10 })
     const value = {
-      start: DateTime.local()
-        .minus({ minutes: 10 })
-        .toISO(),
+      start: DateTime.local().minus({ minutes: 10 }).toISO(),
       end: end.toISO(),
-      subdomains: ['en']
+      subdomains: ['en'],
     }
     mockMaintenanceKV({
-      enabled: JSON.stringify(value)
+      enabled: JSON.stringify(value),
     })
     await handleRequest('https://de.serlo.org')
     expectFetchToHaveBeenCalledWithRequest({
-      url: 'https://de.serlo.org'
+      url: 'https://de.serlo.org',
     } as Request)
   })
 
   test('Enabled (different subdomain, w/o end)', async () => {
     const value = {
-      start: DateTime.local()
-        .minus({ minutes: 10 })
-        .toISO(),
-      subdomains: ['en']
+      start: DateTime.local().minus({ minutes: 10 }).toISO(),
+      subdomains: ['en'],
     }
     mockMaintenanceKV({
-      enabled: JSON.stringify(value)
+      enabled: JSON.stringify(value),
     })
     await handleRequest('https://de.serlo.org')
     expectFetchToHaveBeenCalledWithRequest({
-      url: 'https://de.serlo.org'
+      url: 'https://de.serlo.org',
     } as Request)
   })
 })
@@ -207,7 +187,7 @@ function mockMaintenanceKV(values: Record<string, unknown>) {
   window['MAINTENANCE_KV'] = {
     async get(key: string) {
       return values[key] || null
-    }
+    },
   }
 }
 

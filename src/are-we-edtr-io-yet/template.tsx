@@ -11,11 +11,11 @@ export enum EntityType {
   mathPuzzle = 'math-puzzle',
   textExercise = 'text-exercise',
   textExerciseGroup = 'text-exercise-group',
-  video = 'video'
+  video = 'video',
 }
 
 export function AreWeEdtrIoYet({
-  data
+  data,
 }: {
   data: Record<EntityType, EntityProps['data']>
 }) {
@@ -26,7 +26,7 @@ export function AreWeEdtrIoYet({
       <CenteredContent>
         <table id="toc" class="table">
           <tbody>
-            {types.map(type => {
+            {types.map((type) => {
               const progress = getProgress(data[type])
               const done = progress.current === progress.max
 
@@ -43,7 +43,7 @@ export function AreWeEdtrIoYet({
             })}
           </tbody>
         </table>
-        {types.map(type => {
+        {types.map((type) => {
           return <Entity type={type} data={data[type]} />
         })}
       </CenteredContent>
@@ -70,7 +70,7 @@ function Entity(props: EntityProps) {
           <tbody>
             {data
               .sort((a, b) => (a.converted ? 1 : 0) - (b.converted ? 1 : 0))
-              .map(entity => {
+              .map((entity) => {
                 const icon = entity.converted
                   ? 'fa-check-circle-o'
                   : 'fa-circle-o'
@@ -114,12 +114,12 @@ function EntityProgress({ data }: EntityProps) {
 }
 
 function getProgress(data: EntityProps['data']) {
-  const convertedEntities = data.filter(entity => entity.converted)
+  const convertedEntities = data.filter((entity) => entity.converted)
   const ratio = data.length === 0 ? 1 : convertedEntities.length / data.length
   return {
     max: data.length,
     current: convertedEntities.length,
-    percent: `${ratio * 100}%`
+    percent: `${ratio * 100}%`,
   }
 }
 

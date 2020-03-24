@@ -33,18 +33,18 @@ export enum LanguageCode {
   Fr = 'fr',
   Ta = 'ta',
   Hi = 'hi',
-  Es = 'es'
+  Es = 'es',
 }
 
 export function isLanguageCode(code: string): code is LanguageCode {
-  return Object.values(LanguageCode).some(x => x === code)
+  return Object.values(LanguageCode).some((x) => x === code)
 }
 
 export function sanitizeHtml(html: string): string {
   return sanitize(html, {
     allowedTags: sanitize.defaults.allowedTags
-      .filter(x => x !== 'iframe')
-      .concat(['h1', 'h2'])
+      .filter((x) => x !== 'iframe')
+      .concat(['h1', 'h2']),
   }).trim()
 }
 
@@ -54,7 +54,7 @@ export function markdownToHtml(markdown: string): string {
 
 export async function fetchWithCache(url: string): Promise<Response> {
   return await fetch(url, ({
-    cf: { cacheTtl: 60 * 60 }
+    cf: { cacheTtl: 60 * 60 },
   } as unknown) as RequestInit)
 }
 
@@ -63,14 +63,14 @@ export function createPreactResponse(component: VNode, opt?: ResponseInit) {
     ...opt,
     headers: {
       ...opt?.headers,
-      'Content-Type': 'text/html;charset=utf-8'
-    }
+      'Content-Type': 'text/html;charset=utf-8',
+    },
   })
 }
 
 export function createJsonResponse(json: any) {
   return new Response(JSON.stringify(json), {
-    headers: { 'Content-Type': 'application/json' }
+    headers: { 'Content-Type': 'application/json' },
   })
 }
 

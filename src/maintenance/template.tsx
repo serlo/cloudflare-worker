@@ -5,7 +5,7 @@ import { Template, CenteredContent } from '../ui'
 
 export function Maintenance({
   lang,
-  end
+  end,
 }: {
   lang: 'de' | 'en'
   end?: DateTime
@@ -26,7 +26,7 @@ export function Maintenance({
             end
               ? `gegen ${end.setLocale('de').toFormat('HH:mm (ZZZZ)')}`
               : 'in ein paar Stunden'
-          } wieder online.`
+          } wieder online.`,
         }
       case 'en':
         return {
@@ -35,7 +35,7 @@ export function Maintenance({
             end
               ? `by ${end.setLocale('en').toFormat('HH:mm (ZZZZ)')}`
               : 'in a couple of hours.'
-          }`
+          }`,
         }
     }
   }

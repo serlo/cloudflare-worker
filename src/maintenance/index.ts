@@ -51,13 +51,13 @@ export async function maintenanceMode(request: Request) {
 
 function createMaintenanceResponse({
   lang,
-  end
+  end,
 }: {
   lang: 'de' | 'en'
   end?: DateTime
 }) {
   return createPreactResponse(Maintenance({ lang, end }), {
     status: 503,
-    headers: end ? { 'Retry-After': end.toHTTP() } : {}
+    headers: end ? { 'Retry-After': end.toHTTP() } : {},
   })
 }

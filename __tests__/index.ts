@@ -34,7 +34,7 @@ class ResponseMock {
 
   public get headers() {
     return {
-      set() {}
+      set() {},
     }
   }
 
@@ -42,7 +42,7 @@ class ResponseMock {
     return {
       __type__: 'redirect',
       url,
-      status
+      status,
     }
   }
 }
@@ -65,7 +65,7 @@ beforeEach(() => {
   window['MAINTENANCE_KV'] = {
     async get(key: string) {
       return null
-    }
+    },
   }
 })
 
@@ -78,14 +78,14 @@ describe('Enforce HTTPS', () => {
   test('HTTPS URL', async () => {
     await handleRequest('https://foo.serlo.local/bar')
     expectFetchToHaveBeenCalledWithRequest({
-      url: 'https://foo.serlo.local/bar'
+      url: 'https://foo.serlo.local/bar',
     } as Request)
   })
 
   test('Pact Broker', async () => {
     await handleRequest('http://pacts.serlo.local/bar')
     expectFetchToHaveBeenCalledWithRequest({
-      url: 'http://pacts.serlo.local/bar'
+      url: 'http://pacts.serlo.local/bar',
     } as Request)
   })
 })
@@ -138,21 +138,21 @@ describe('Semantic file names', () => {
   test('assets.serlo.org/meta/*', async () => {
     await handleRequest('https://assets.serlo.local/meta/foo')
     expectFetchToHaveBeenCalledWithRequest({
-      url: 'https://assets.serlo.org/meta/foo'
+      url: 'https://assets.serlo.org/meta/foo',
     } as Request)
   })
 
   test('assets.serlo.org/<hash>/<fileName>.<ext>', async () => {
     await handleRequest('https://assets.serlo.local/hash/fileName.ext')
     expectFetchToHaveBeenCalledWithRequest({
-      url: 'https://assets.serlo.org/hash.ext'
+      url: 'https://assets.serlo.org/hash.ext',
     } as Request)
   })
 
   test('assets.serlo.org/legacy/<hash>/<fileName>.<ext>', async () => {
     await handleRequest('https://assets.serlo.local/legacy/hash/fileName.ext')
     expectFetchToHaveBeenCalledWithRequest({
-      url: 'https://assets.serlo.org/legacy/hash.ext'
+      url: 'https://assets.serlo.org/legacy/hash.ext',
     } as Request)
   })
 })
@@ -160,21 +160,21 @@ describe('Semantic file names', () => {
 describe('Packages', () => {
   test('packages.serlo.org/<package>/<filePath>', async () => {
     mockPackagesKV({
-      foo: 'foo@1.0.0'
+      foo: 'foo@1.0.0',
     })
     const response = await handleRequest('https://packages.serlo.local/foo/bar')
     expectFetchToHaveBeenCalledWithRequest({
-      url: 'https://packages.serlo.org/foo@1.0.0/bar'
+      url: 'https://packages.serlo.org/foo@1.0.0/bar',
     } as Request)
   })
 
   test('packages.serlo.org/<package>/<filePath> (invalid)', async () => {
     mockPackagesKV({
-      foo: 'foo@1.0.0'
+      foo: 'foo@1.0.0',
     })
     await handleRequest('https://packages.serlo.local/foobar/bar')
     expectFetchToHaveBeenCalledWithRequest({
-      url: 'https://packages.serlo.org/foobar/bar'
+      url: 'https://packages.serlo.org/foobar/bar',
     } as Request)
   })
 })
@@ -189,7 +189,7 @@ function mockPackagesKV(packages: Record<string, unknown>) {
   window['PACKAGES_KV'] = {
     async get(key: string) {
       return packages[key] || null
-    }
+    },
   }
 }
 
@@ -211,6 +211,6 @@ function expectToBeRedirectTo(
   expect(response).toEqual({
     __type__: 'redirect',
     url,
-    status
+    status,
   })
 }

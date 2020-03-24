@@ -66,7 +66,7 @@ export const uuidResolvers: {
   }
 } = {
   Query: {
-    uuid
+    uuid,
   },
   Article: {
     async currentRevision(entity: Entity, _args, context, info) {
@@ -87,30 +87,30 @@ export const uuidResolvers: {
         context,
         info
       )
-    }
+    },
   },
   Entity: {
     __resolveType(entity: Entity) {
       return entity.__typename
-    }
+    },
   },
   Uuid: {
     __resolveType(uuid: Uuid) {
       return uuid.__typename
-    }
-  }
+    },
+  },
 }
 
 enum EntityType {
-  Article = 'Article'
+  Article = 'Article',
 }
 
 enum EntityRevisionType {
-  ArticleRevision = 'ArticleRevision'
+  ArticleRevision = 'ArticleRevision',
 }
 
 enum DiscriminatorType {
-  Page = 'Page'
+  Page = 'Page',
 }
 
 type UuidType = DiscriminatorType | EntityType | EntityRevisionType

@@ -9,7 +9,7 @@ export function createStaticComponent<P = {}>(Component: ComponentType<P>) {
     return (
       <div
         dangerouslySetInnerHTML={{
-          __html: `<style>#root { height: 100%; }</style>${html}`
+          __html: `<style>#root { height: 100%; }</style>${html}`,
         }}
         style="height: 100%"
       />

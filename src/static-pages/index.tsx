@@ -27,7 +27,7 @@ import {
   isLanguageCode,
   LanguageCode,
   markdownToHtml,
-  sanitizeHtml
+  sanitizeHtml,
 } from '../utils'
 import { getPathnameWithoutTrailingSlash, getSubdomain } from '../url-utils'
 import { Template } from '../ui'
@@ -42,7 +42,7 @@ import {
   titles,
   unrevisedConfig as defaultUnrevisedConfig,
   UnrevisedConfig,
-  UnrevisedType
+  UnrevisedType,
 } from './config'
 
 const defaultLanguage = LanguageCode.En
@@ -53,7 +53,7 @@ export {
   Spec,
   RevisedSpec,
   UnrevisedConfig,
-  RevisedConfig
+  RevisedConfig,
 } from './config'
 
 export interface Page extends Spec {
@@ -99,7 +99,7 @@ export async function handleRequest(
       const revisions = getRevisions(revisedConfig, lang, revisedType)
 
       if (revisions !== null) {
-        return createJsonResponse(revisions.map(x => x.revision))
+        return createJsonResponse(revisions.map((x) => x.revision))
       } else {
         return createNotFoundResponse()
       }
@@ -244,7 +244,7 @@ export function RevisionsOverview({ revisions }: { revisions: RevisedPage[] }) {
       <h1>{title}</h1>
       <p>{getDescription()}</p>
       <ul>
-        {revisions.map(rev => {
+        {revisions.map((rev) => {
           const link = `/${rev.revisedType}/archive/${rev.revision}`
           return (
             <li>
@@ -325,14 +325,14 @@ export function findRevisionById<A extends RevisedSpec>(
   revisions: A[],
   id: string
 ): A | null {
-  return revisions.find(x => x.revision === id) ?? null
+  return revisions.find((x) => x.revision === id) ?? null
 }
 
 export function getRevisions(
   config: RevisedConfig,
   lang: LanguageCode,
   revisedType: RevisedType,
-  getTitle: (revisedType: RevisedType) => string = x =>
+  getTitle: (revisedType: RevisedType) => string = (x) =>
     titles[x][lang] || titles[x][LanguageCode.En] || ''
 ): RevisedPage[] | null {
   const result = getSpecAndLanguage(config, lang, revisedType)
@@ -349,7 +349,7 @@ export function getRevisions(
         title: getTitle(revisedType),
         revisionDate: new Date(revision.revision),
         revisedType: revisedType,
-        isCurrentRevision: index === 0
+        isCurrentRevision: index === 0,
       }
     })
   }
@@ -359,7 +359,7 @@ export function getPage(
   config: UnrevisedConfig,
   lang: LanguageCode,
   unrevisedType: UnrevisedType,
-  getTitle: (unrevisedType: UnrevisedType) => string = x =>
+  getTitle: (unrevisedType: UnrevisedType) => string = (x) =>
     titles[x][lang] || titles[x][LanguageCode.En] || ''
 ): Page | null {
   const result = getSpecAndLanguage(config, lang, unrevisedType)

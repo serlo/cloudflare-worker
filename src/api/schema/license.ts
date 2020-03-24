@@ -36,8 +36,8 @@ export const licenseResolvers: {
   }
 } = {
   Query: {
-    license
-  }
+    license,
+  },
 }
 
 async function license(

@@ -17,7 +17,7 @@ export function CenteredContent({ children }: { children: ComponentChildren }) {
 export function Template({
   children,
   lang,
-  title
+  title,
 }: {
   children: ComponentChildren
   lang: string

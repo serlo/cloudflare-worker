@@ -26,7 +26,7 @@ import {
   hasOkStatus,
   containsText,
   contentTypeIsHtml,
-  withMockedFetch
+  withMockedFetch,
 } from './utils'
 import { LanguageCode } from '../src/utils'
 import {
@@ -43,18 +43,18 @@ import {
   Page,
   UnrevisedPage,
   RevisedPage,
-  RevisionsOverview
+  RevisionsOverview,
 } from '../src/static-pages'
 import { render } from '@testing-library/preact'
 
 describe('handleRequest()', () => {
   const unrevisedConfig: UnrevisedConfig = {
     en: {
-      imprint: { url: 'https://example.org/imprint.html' }
+      imprint: { url: 'https://example.org/imprint.html' },
     },
     de: {
-      terms: { url: 'https://example.org/terms.md' }
-    }
+      terms: { url: 'https://example.org/terms.md' },
+    },
   }
 
   const revisedConfig: RevisedConfig = {
@@ -62,9 +62,9 @@ describe('handleRequest()', () => {
     de: {
       privacy: [
         { url: 'http://example.org/1', revision: '2020-12-11' },
-        { url: 'http://example.org/2', revision: '1999-10-09' }
-      ]
-    }
+        { url: 'http://example.org/2', revision: '1999-10-09' },
+      ],
+    },
   }
 
   async function testHandleRequest(url: string): Promise<Response | null> {
@@ -75,8 +75,8 @@ describe('handleRequest()', () => {
     test.each([
       'https://en.serlo.org/imprint/',
       'https://de.serlo.org/imprint',
-      'https://fr.serlo.org/imprint/'
-    ])('URL is %p', async url => {
+      'https://fr.serlo.org/imprint/',
+    ])('URL is %p', async (url) => {
       await withMockedFetch('<p>Hello World</p>', async () => {
         const response = (await testHandleRequest(url)) as Response
 
@@ -107,7 +107,7 @@ describe('handleRequest()', () => {
       contentTypeIsHtml(response)
       await containsText(response, [
         '<p>Hello</p>',
-        'wirksam ab dem 12/11/2020'
+        'wirksam ab dem 12/11/2020',
       ])
     })
   })
@@ -132,7 +132,7 @@ describe('handleRequest()', () => {
     await containsText(response, [
       '<h1>Aktualisierungen: Datenschutzerklärung</h1>',
       'Aktuelle Version',
-      '10/9/1999'
+      '10/9/1999',
     ])
   })
 
@@ -154,8 +154,8 @@ describe('handleRequest()', () => {
       'https://fr.serlo.org/privacy/json',
       'https://en.serlo.org/privacy/json',
       'http://de.serlo.org/privacy/archive/2020-01-01',
-      'http://de.serlo.org/privacy/archive/1999-33-55'
-    ])('URL is %p', async url => {
+      'http://de.serlo.org/privacy/archive/1999-33-55',
+    ])('URL is %p', async (url) => {
       await isNotFoundResponse((await testHandleRequest(url)) as Response)
     })
   })
@@ -166,8 +166,8 @@ describe('handleRequest()', () => {
       'https://stats.fr.serlo.org/',
       'http://serlo.org',
       'http://gg.serlo.org/',
-      'http://deserlo.org/imprint'
-    ])('URL is %p', async url => {
+      'http://deserlo.org/imprint',
+    ])('URL is %p', async (url) => {
       expect(await testHandleRequest(url)).toBeNull()
     })
   })
@@ -177,8 +177,8 @@ describe('handleRequest()', () => {
       'https://en.serlo.org/imprint/foo',
       'https://fr.serlo.org/foo/imprint',
       'https://de.serlo.org/imprint/json',
-      'https://de.serlo.org/privacy/jsons'
-    ])(' URL is %p', async url => {
+      'https://de.serlo.org/privacy/jsons',
+    ])(' URL is %p', async (url) => {
       expect(await testHandleRequest(url)).toBeNull()
     })
   })
@@ -191,7 +191,7 @@ test('UnrevisedPage()', () => {
         lang: LanguageCode.De,
         title: 'Imprint',
         content: '<p>Hello World</p>',
-        url: ''
+        url: '',
       }}
     />
   )
@@ -213,7 +213,7 @@ test('RevisedPage()', () => {
         content: '<p>Hello World</p>',
         url: '',
         isCurrentRevision: true,
-        revisedType: 'privacy'
+        revisedType: 'privacy',
       }}
     />
   )
@@ -236,7 +236,7 @@ test('RevisionsOverview()', () => {
           lang: LanguageCode.En,
           url: '',
           revisedType: 'privacy',
-          isCurrentRevision: true
+          isCurrentRevision: true,
         },
         {
           revision: '1999-12-07',
@@ -245,8 +245,8 @@ test('RevisionsOverview()', () => {
           lang: LanguageCode.En,
           url: '',
           revisedType: 'privacy',
-          isCurrentRevision: false
-        }
+          isCurrentRevision: false,
+        },
       ]}
     />
   )
@@ -271,12 +271,12 @@ describe('fetchContent()', () => {
   const exampleSpec: Page = {
     lang: LanguageCode.En,
     title: 'Imprint',
-    url: 'http://example.org/'
+    url: 'http://example.org/',
   }
   const exampleSpecMarkdown: Page = {
     lang: LanguageCode.De,
     title: 'Imprint',
-    url: 'http://example.org/imprint.md'
+    url: 'http://example.org/imprint.md',
   }
 
   describe('returns page when url can be resolved', () => {
@@ -286,7 +286,7 @@ describe('fetchContent()', () => {
           lang: 'de',
           title: 'Imprint',
           content: '<h1>Hello World</h1>',
-          url: 'http://example.org/imprint.md'
+          url: 'http://example.org/imprint.md',
         })
       })
     })
@@ -297,7 +297,7 @@ describe('fetchContent()', () => {
           lang: 'en',
           title: 'Imprint',
           content: '<h1>Hello World</h1>',
-          url: 'http://example.org/'
+          url: 'http://example.org/',
         })
       })
     })
@@ -311,7 +311,7 @@ describe('fetchContent()', () => {
               lang: 'en',
               title: 'Imprint',
               content: '<h1>Hello World</h1>',
-              url: 'http://example.org/'
+              url: 'http://example.org/',
             })
           }
         )
@@ -325,7 +325,7 @@ describe('fetchContent()', () => {
               lang: 'de',
               title: 'Imprint',
               content: '<p>Hello</p>',
-              url: 'http://example.org/imprint.md'
+              url: 'http://example.org/imprint.md',
             })
           }
         )
@@ -342,7 +342,7 @@ describe('fetchContent()', () => {
             lang: 'en',
             title: 'Imprint',
             content: 'Click <a href="javascript:gaOptout();">here</a>',
-            url: 'http://example.org/'
+            url: 'http://example.org/',
           })
         }
       )
@@ -356,7 +356,7 @@ describe('fetchContent()', () => {
             lang: 'de',
             title: 'Imprint',
             content: '<p>Click <a href="javascript:gaOptout();">here</a></p>',
-            url: 'http://example.org/imprint.md'
+            url: 'http://example.org/imprint.md',
           })
         }
       )
@@ -364,7 +364,7 @@ describe('fetchContent()', () => {
   })
 
   describe('returns null when request on the url of the spec fails', () => {
-    test.each([301, 404, 500])('status code %p', async code => {
+    test.each([301, 404, 500])('status code %p', async (code) => {
       await withMockedFetch(new Response('', { status: code }), async () => {
         expect(await fetchContent(exampleSpec)).toBeNull()
       })
@@ -376,17 +376,17 @@ describe('findRevisionById()', () => {
   const revs: RevisedSpec[] = [
     { revision: '2020-01-01', url: '1' },
     { revision: '1999-12-31', url: '2' },
-    { revision: '2020-01-01', url: '3' }
+    { revision: '2020-01-01', url: '3' },
   ]
 
   test('returns first found revision with given id', () => {
     expect(findRevisionById(revs, '2020-01-01')).toEqual({
       revision: '2020-01-01',
-      url: '1'
+      url: '1',
     })
     expect(findRevisionById(revs, '1999-12-31')).toEqual({
       revision: '1999-12-31',
-      url: '2'
+      url: '2',
     })
   })
 
@@ -399,11 +399,11 @@ describe('findRevisionById()', () => {
 describe('getRevisions()', () => {
   const englishRevisions = [
     { url: 'bar', revision: '1995-12-17' },
-    { url: 'w.md', revision: '2009-12-17' }
+    { url: 'w.md', revision: '2009-12-17' },
   ]
   const exampleSpec: RevisedConfig = {
     en: { privacy: englishRevisions },
-    fr: { privacy: [] }
+    fr: { privacy: [] },
   }
 
   const target = [
@@ -414,7 +414,7 @@ describe('getRevisions()', () => {
       revisionDate: new Date('1995-12-17'),
       title: '#privacy#',
       revisedType: 'privacy',
-      isCurrentRevision: true
+      isCurrentRevision: true,
     },
     {
       url: 'w.md',
@@ -423,8 +423,8 @@ describe('getRevisions()', () => {
       revisionDate: new Date('2009-12-17'),
       title: '#privacy#',
       revisedType: 'privacy',
-      isCurrentRevision: false
-    }
+      isCurrentRevision: false,
+    },
   ]
 
   test('returns revisions if they exist in config', () => {
@@ -458,7 +458,7 @@ describe('getRevisions()', () => {
 describe('getPage()', () => {
   const exampleConfig: UnrevisedConfig = {
     en: { imprint: { url: 'http://e/' } },
-    de: { imprint: { url: 'http://g/' }, terms: { url: 'ftp://gt/' } }
+    de: { imprint: { url: 'http://g/' }, terms: { url: 'ftp://gt/' } },
   }
 
   test('returns Spec when it exists', () => {
@@ -467,7 +467,7 @@ describe('getPage()', () => {
     ).toEqual({
       url: 'http://e/',
       lang: 'en',
-      title: '#imprint#'
+      title: '#imprint#',
     })
 
     expect(
@@ -475,7 +475,7 @@ describe('getPage()', () => {
     ).toEqual({
       url: 'http://g/',
       lang: 'de',
-      title: '#imprint#'
+      title: '#imprint#',
     })
 
     expect(
@@ -483,7 +483,7 @@ describe('getPage()', () => {
     ).toEqual({
       url: 'ftp://gt/',
       lang: 'de',
-      title: '#terms#'
+      title: '#terms#',
     })
   })
 
@@ -493,7 +493,7 @@ describe('getPage()', () => {
     ).toEqual({
       url: 'http://e/',
       lang: 'en',
-      title: '#imprint#'
+      title: '#imprint#',
     })
   })
 

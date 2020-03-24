@@ -16,7 +16,7 @@ const pact = new Pact({
   consumer: 'api.serlo.org',
   provider: 'serlo.org',
   port: 9009,
-  dir: pactDir
+  dir: pactDir,
 })
 
 const server = createGraphQLServer()
@@ -41,8 +41,8 @@ describe('Page', () => {
       request: '/mathe',
       response: {
         id: 19767,
-        discriminator: 'page'
-      }
+        discriminator: 'page',
+      },
     })
     const response = await client.query({
       query: gql`
@@ -54,14 +54,14 @@ describe('Page', () => {
             }
           }
         }
-      `
+      `,
     })
     expect(response.errors).toBe(undefined)
     expect(response.data).toEqual({
       uuid: {
         __typename: 'Page',
-        id: 19767
-      }
+        id: 19767,
+      },
     })
   })
 
@@ -70,8 +70,8 @@ describe('Page', () => {
       request: 19767,
       response: {
         id: 19767,
-        discriminator: 'page'
-      }
+        discriminator: 'page',
+      },
     })
     const response = await client.query({
       query: gql`
@@ -83,14 +83,14 @@ describe('Page', () => {
             }
           }
         }
-      `
+      `,
     })
     expect(response.errors).toBe(undefined)
     expect(response.data).toEqual({
       uuid: {
         __typename: 'Page',
-        id: 19767
-      }
+        id: 19767,
+      },
     })
   })
 })
@@ -107,8 +107,8 @@ describe('Entity', () => {
           type: 'article',
           instance: 'de',
           currentRevisionId: Matchers.integer(30674),
-          licenseId: Matchers.integer(1)
-        }
+          licenseId: Matchers.integer(1),
+        },
       })
       const response = await client.query({
         query: gql`
@@ -132,7 +132,7 @@ describe('Entity', () => {
               }
             }
           }
-        `
+        `,
       })
       expect(response.errors).toBe(undefined)
       expect(response.data).toEqual({
@@ -141,12 +141,12 @@ describe('Entity', () => {
           id: 1855,
           instance: 'de',
           currentRevision: {
-            id: 30674
+            id: 30674,
           },
           license: {
-            id: 1
-          }
-        }
+            id: 1,
+          },
+        },
       })
     })
 
@@ -160,20 +160,20 @@ describe('Entity', () => {
           type: 'article',
           instance: 'de',
           currentRevisionId: Matchers.integer(30674),
-          licenseId: Matchers.integer(1)
-        }
+          licenseId: Matchers.integer(1),
+        },
       })
       await pact.addInteraction({
         state: `1 is a license`,
         uponReceiving: `resolve license 1`,
         withRequest: {
           method: 'GET',
-          path: '/api/license/1'
+          path: '/api/license/1',
         },
         willRespondWith: {
           status: 200,
           headers: {
-            'Content-Type': 'application/json; charset=utf-8'
+            'Content-Type': 'application/json; charset=utf-8',
           },
           body: {
             id: 1,
@@ -183,9 +183,9 @@ describe('Entity', () => {
             url: Matchers.string('url'),
             content: Matchers.string('content'),
             agreement: Matchers.string('agreement'),
-            iconHref: Matchers.string('iconHref')
-          }
-        }
+            iconHref: Matchers.string('iconHref'),
+          },
+        },
       })
       const response = await client.query({
         query: gql`
@@ -210,7 +210,7 @@ describe('Entity', () => {
               }
             }
           }
-        `
+        `,
       })
       expect(response.errors).toBe(undefined)
       expect(response.data).toEqual({
@@ -219,13 +219,13 @@ describe('Entity', () => {
           id: 1855,
           instance: 'de',
           currentRevision: {
-            id: 30674
+            id: 30674,
           },
           license: {
             id: 1,
-            title: 'title'
-          }
-        }
+            title: 'title',
+          },
+        },
       })
     })
 
@@ -239,8 +239,8 @@ describe('Entity', () => {
           type: 'article',
           instance: 'de',
           currentRevisionId: Matchers.integer(30674),
-          licenseId: Matchers.integer(1)
-        }
+          licenseId: Matchers.integer(1),
+        },
       })
       await addUuidInteraction({
         request: 30674,
@@ -251,9 +251,9 @@ describe('Entity', () => {
           fields: {
             title: Matchers.string('title'),
             content: Matchers.string('content'),
-            changes: Matchers.string('changes')
-          }
-        }
+            changes: Matchers.string('changes'),
+          },
+        },
       })
       const response = await client.query({
         query: gql`
@@ -277,7 +277,7 @@ describe('Entity', () => {
               }
             }
           }
-        `
+        `,
       })
       expect(response.errors).toBe(undefined)
       expect(response.data).toEqual({
@@ -289,9 +289,9 @@ describe('Entity', () => {
             id: 30674,
             title: 'title',
             content: 'content',
-            changes: 'changes'
-          }
-        }
+            changes: 'changes',
+          },
+        },
       })
     })
 
@@ -304,8 +304,8 @@ describe('Entity', () => {
           type: 'article',
           instance: 'de',
           currentRevisionId: 30674,
-          licenseId: 1
-        }
+          licenseId: 1,
+        },
       })
       const response = await client.query({
         query: gql`
@@ -324,7 +324,7 @@ describe('Entity', () => {
               }
             }
           }
-        `
+        `,
       })
       expect(response.errors).toBe(undefined)
       expect(response.data).toEqual({
@@ -333,12 +333,12 @@ describe('Entity', () => {
           id: 1855,
           instance: 'de',
           currentRevision: {
-            id: 30674
+            id: 30674,
           },
           license: {
-            id: 1
-          }
-        }
+            id: 1,
+          },
+        },
       })
     })
   })
@@ -355,9 +355,9 @@ describe('EntityRevision', () => {
         fields: {
           title: Matchers.string('title'),
           content: Matchers.string('content'),
-          changes: Matchers.string('changes')
-        }
-      }
+          changes: Matchers.string('changes'),
+        },
+      },
     })
     const response = await client.query({
       query: gql`
@@ -372,7 +372,7 @@ describe('EntityRevision', () => {
             }
           }
         }
-      `
+      `,
     })
     expect(response.errors).toBe(undefined)
     expect(response.data).toEqual({
@@ -381,8 +381,8 @@ describe('EntityRevision', () => {
         id: 30674,
         title: 'title',
         content: 'content',
-        changes: 'changes'
-      }
+        changes: 'changes',
+      },
     })
   })
 })
@@ -393,12 +393,12 @@ test('License', async () => {
     uponReceiving: `resolve license 1`,
     withRequest: {
       method: 'GET',
-      path: '/api/license/1'
+      path: '/api/license/1',
     },
     willRespondWith: {
       status: 200,
       headers: {
-        'Content-Type': 'application/json; charset=utf-8'
+        'Content-Type': 'application/json; charset=utf-8',
       },
       body: {
         id: 1,
@@ -408,9 +408,9 @@ test('License', async () => {
         url: Matchers.string('url'),
         content: Matchers.string('content'),
         agreement: Matchers.string('agreement'),
-        iconHref: Matchers.string('iconHref')
-      }
-    }
+        iconHref: Matchers.string('iconHref'),
+      },
+    },
   })
   const response = await client.query({
     query: gql`
@@ -426,7 +426,7 @@ test('License', async () => {
           iconHref
         }
       }
-    `
+    `,
   })
   expect(response.errors).toBe(undefined)
   expect(response.data).toEqual({
@@ -438,8 +438,8 @@ test('License', async () => {
       url: 'url',
       content: 'content',
       agreement: 'agreement',
-      iconHref: 'iconHref'
-    }
+      iconHref: 'iconHref',
+    },
   })
 })
 
@@ -452,15 +452,15 @@ async function addAliasInteraction<
     uponReceiving: `resolve de.serlo.org${request}`,
     withRequest: {
       method: 'GET',
-      path: `/api/alias${request}`
+      path: `/api/alias${request}`,
     },
     willRespondWith: {
       status: 200,
       headers: {
-        'Content-Type': 'application/json; charset=utf-8'
+        'Content-Type': 'application/json; charset=utf-8',
       },
-      body: response
-    }
+      body: response,
+    },
   })
 }
 
@@ -473,14 +473,14 @@ async function addUuidInteraction<
     uponReceiving: `resolve uuid ${request}`,
     withRequest: {
       method: 'GET',
-      path: `/api/uuid/${request}`
+      path: `/api/uuid/${request}`,
     },
     willRespondWith: {
       status: 200,
       headers: {
-        'Content-Type': 'application/json; charset=utf-8'
+        'Content-Type': 'application/json; charset=utf-8',
       },
-      body: response
-    }
+      body: response,
+    },
   })
 }

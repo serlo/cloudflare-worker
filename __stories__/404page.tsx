@@ -6,8 +6,8 @@ const NotFound = createStaticComponent(NotFoundOriginal)
 
 export default {
   component: NotFound,
-  title: '404page'
+  title: '404page',
 }
 export function PageNotFound() {
-  return <NotFound/>
+  return <NotFound />
 }
