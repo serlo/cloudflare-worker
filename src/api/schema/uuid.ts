@@ -325,12 +325,13 @@ interface AliasInput {
 
 async function uuid(
   _parent: unknown,
-  { alias, id }: { id?: number; alias?: AliasInput },
+  args: { id?: number; alias?: AliasInput },
   { dataSources }: Context
 ) {
-  const data = alias
-    ? await dataSources.serlo.getAlias(alias)
-    : await dataSources.serlo.getUuid(id as number)
+  const id = args.alias
+    ? (await dataSources.serlo.getAlias(args.alias)).id
+    : (args.id as number)
+  const data = await dataSources.serlo.getUuid(id)
 
   switch (data.discriminator) {
     case 'entity':

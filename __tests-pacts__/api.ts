@@ -94,6 +94,7 @@ describe('Uuid', () => {
     describe('Article', () => {
       test('by alias', async () => {
         await addArticleAliasInteraction()
+        await addArticleUuidInteraction()
         const response = await client.query({
           query: gql`
             {
@@ -140,6 +141,7 @@ describe('Uuid', () => {
 
       test('by alias (w/ license)', async () => {
         await addArticleAliasInteraction()
+        await addArticleUuidInteraction()
         await addLicenseInteraction()
         const response = await client.query({
           query: gql`
@@ -189,6 +191,7 @@ describe('Uuid', () => {
 
       test('by alias (w/ currentRevision)', async () => {
         await addArticleAliasInteraction()
+        await addArticleUuidInteraction()
         await addArticleRevisionInteraction()
         const response = await client.query({
           query: gql`
@@ -369,6 +372,7 @@ describe('Uuid', () => {
   describe('Page', () => {
     test('by alias', async () => {
       await addPageAliasInteraction()
+      await addPageUuidInteraction()
       const response = await client.query({
         query: gql`
           {
@@ -400,6 +404,7 @@ describe('Uuid', () => {
 
     test('by alias (w/ currentRevision)', async () => {
       await addPageAliasInteraction()
+      await addPageUuidInteraction()
       await addPageRevisionInteraction()
       const response = await client.query({
         query: gql`
@@ -580,13 +585,8 @@ function addArticleAliasInteraction() {
     request: '/mathe/funktionen/uebersicht-aller-artikel-zu-funktionen/parabel',
     response: {
       id: 1855,
-      trashed: false,
-      discriminator: 'entity',
-      type: 'article',
-      instance: 'de',
-      date: Matchers.iso8601DateTime('2014-03-01T20:45:56Z'),
-      currentRevisionId: Matchers.integer(30674),
-      licenseId: Matchers.integer(1),
+      source: '/entity/page/view/1855',
+      timestamp: Matchers.iso8601DateTime('2014-06-16T15:58:45Z'),
     },
   })
 }
@@ -631,9 +631,8 @@ function addPageAliasInteraction() {
     request: '/mathe',
     response: {
       id: 19767,
-      trashed: false,
-      discriminator: 'page',
-      currentRevisionId: Matchers.integer(35476),
+      source: '/page/view/19767',
+      timestamp: Matchers.iso8601DateTime('2014-05-25T10:25:44Z'),
     },
   })
 }
@@ -666,11 +665,11 @@ function addPageRevisionInteraction() {
 }
 
 async function addAliasInteraction<
-  T extends { discriminator: string; id: number }
+  T extends { id: number; source: string }
 >(payload: { request: string; response: T }) {
   const { request, response } = payload
   await pact.addInteraction({
-    state: `${request} is alias of (${response.discriminator}, ${response.id}) in instance de`,
+    state: `${request} is alias of ${response.source} in instance de`,
     uponReceiving: `resolve de.serlo.org${request}`,
     withRequest: {
       method: 'GET',
