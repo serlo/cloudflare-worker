@@ -479,6 +479,7 @@ describe('Uuid', () => {
                 trashed
                 title
                 content
+                date
                 page {
                   id
                 }
@@ -495,6 +496,7 @@ describe('Uuid', () => {
           id: 35476,
           title: 'title',
           content: 'content',
+          date: '2015-02-28T02:06:40Z',
           page: {
             id: 19767,
           },
@@ -516,6 +518,7 @@ describe('Uuid', () => {
               trashed
               title
               content
+              date
               page {
                 id
                 currentRevision {
@@ -534,6 +537,7 @@ describe('Uuid', () => {
         trashed: false,
         id: 35476,
         title: 'title',
+        date: '2015-02-28T02:06:40Z',
         content: 'content',
         page: {
           id: 19767,
@@ -653,9 +657,10 @@ function addPageRevisionInteraction() {
       id: 35476,
       trashed: false,
       discriminator: 'pageRevision',
-      repositoryId: 19767,
       title: Matchers.string('title'),
       content: Matchers.string('content'),
+      date: Matchers.iso8601DateTime('2015-02-28T02:06:40Z'),
+      repositoryId: 19767,
     },
   })
 }
