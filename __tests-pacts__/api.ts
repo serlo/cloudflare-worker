@@ -108,6 +108,7 @@ describe('Uuid', () => {
                   id
                   trashed
                   instance
+                  date
                   currentRevision {
                     id
                   }
@@ -126,6 +127,7 @@ describe('Uuid', () => {
             trashed: false,
             id: 1855,
             instance: 'de',
+            date: '2014-03-01T20:45:56Z',
             currentRevision: {
               id: 30674,
             },
@@ -153,6 +155,7 @@ describe('Uuid', () => {
                   id
                   trashed
                   instance
+                  date
                   currentRevision {
                     id
                   }
@@ -172,6 +175,7 @@ describe('Uuid', () => {
             trashed: false,
             id: 1855,
             instance: 'de',
+            date: '2014-03-01T20:45:56Z',
             currentRevision: {
               id: 30674,
             },
@@ -200,6 +204,7 @@ describe('Uuid', () => {
                   id
                   trashed
                   instance
+                  date
                   currentRevision {
                     id
                     title
@@ -218,6 +223,7 @@ describe('Uuid', () => {
             trashed: false,
             id: 1855,
             instance: 'de',
+            date: '2014-03-01T20:45:56Z',
             currentRevision: {
               id: 30674,
               title: 'title',
@@ -239,6 +245,7 @@ describe('Uuid', () => {
                   id
                   trashed
                   instance
+                  date
                   currentRevision {
                     id
                   }
@@ -257,6 +264,7 @@ describe('Uuid', () => {
             trashed: false,
             id: 1855,
             instance: 'de',
+            date: '2014-03-01T20:45:56Z',
             currentRevision: {
               id: 30674,
             },
@@ -568,6 +576,7 @@ function addArticleAliasInteraction() {
       discriminator: 'entity',
       type: 'article',
       instance: 'de',
+      date: Matchers.iso8601DateTime('2014-03-01T20:45:56Z'),
       currentRevisionId: Matchers.integer(30674),
       licenseId: Matchers.integer(1),
     },
@@ -583,6 +592,7 @@ function addArticleUuidInteraction() {
       discriminator: 'entity',
       type: 'article',
       instance: 'de',
+      date: Matchers.iso8601DateTime('2014-03-01T20:45:56Z'),
       currentRevisionId: 30674,
       licenseId: 1,
     },

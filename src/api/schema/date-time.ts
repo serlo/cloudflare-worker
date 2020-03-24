@@ -21,30 +21,8 @@
  */
 import { gql } from 'apollo-server-cloudflare'
 
-import { dateTimeTypeDefs } from './date-time'
-import { instanceTypeDefs } from './instance'
-import { licenseResolvers, licenseTypeDefs } from './license'
-import { uuidResolvers, uuidTypeDefs } from './uuid'
+export type DateTime = string
 
-export const schemaTypeDefs = gql`
-  type Query {
-    _version: String
-  }
+export const dateTimeTypeDefs = gql`
+  scalar DateTime
 `
-
-export const typeDefs = [
-  schemaTypeDefs,
-  dateTimeTypeDefs,
-  instanceTypeDefs,
-  licenseTypeDefs,
-  uuidTypeDefs,
-]
-
-export const resolvers = {
-  ...uuidResolvers,
-  ...licenseResolvers,
-  Query: {
-    ...uuidResolvers.Query,
-    ...licenseResolvers.Query,
-  },
-}
