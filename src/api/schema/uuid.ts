@@ -52,9 +52,14 @@ export const uuidTypeDefs = gql`
     currentRevision: ArticleRevision
   }
 
-  type ArticleRevision implements Uuid {
+  interface EntityRevision {
+    date: DateTime!
+  }
+
+  type ArticleRevision implements Uuid & EntityRevision {
     id: Int!
     trashed: Boolean!
+    date: DateTime!
     title: String!
     content: String!
     changes: String!
@@ -102,6 +107,9 @@ export const uuidResolvers: {
     currentRevision: Resolver<Article, {}, Partial<ArticleRevision>>
     license: Resolver<Entity, {}, Partial<License>>
   }
+  EntityRevision: {
+    __resolveType(entity: EntityRevision): EntityRevisionType
+  }
   ArticleRevision: {
     article: Resolver<ArticleRevision, {}, Partial<Article>>
   }
@@ -144,6 +152,11 @@ export const uuidResolvers: {
         context,
         info
       )
+    },
+  },
+  EntityRevision: {
+    __resolveType(entityRevision) {
+      return entityRevision.__typename
     },
   },
   ArticleRevision: {
@@ -230,14 +243,17 @@ class Article extends Entity {
 
 abstract class EntityRevision extends Uuid {
   public abstract __typename: EntityRevisionType
+  public date: string
   public repositoryId: number
 
   public constructor(payload: {
     id: number
+    date: DateTime
     trashed: boolean
     repositoryId: number
   }) {
     super(payload)
+    this.date = payload.date
     this.repositoryId = payload.repositoryId
   }
 }
@@ -250,6 +266,7 @@ class ArticleRevision extends EntityRevision {
 
   public constructor(payload: {
     id: number
+    date: DateTime
     trashed: boolean
     repositoryId: number
     title: string

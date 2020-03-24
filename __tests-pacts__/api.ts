@@ -289,6 +289,7 @@ describe('Uuid', () => {
                 ... on ArticleRevision {
                   id
                   trashed
+                  date
                   title
                   content
                   changes
@@ -305,6 +306,7 @@ describe('Uuid', () => {
           uuid: {
             __typename: 'ArticleRevision',
             trashed: false,
+            date: '2014-09-15T15:28:35Z',
             id: 30674,
             title: 'title',
             content: 'content',
@@ -327,6 +329,7 @@ describe('Uuid', () => {
                 ... on ArticleRevision {
                   id
                   trashed
+                  date
                   title
                   content
                   changes
@@ -345,8 +348,9 @@ describe('Uuid', () => {
         expect(response.data).toEqual({
           uuid: {
             __typename: 'ArticleRevision',
-            trashed: false,
             id: 30674,
+            trashed: false,
+            date: '2014-09-15T15:28:35Z',
             title: 'title',
             content: 'content',
             changes: 'changes',
@@ -606,6 +610,7 @@ function addArticleRevisionInteraction() {
       id: 30674,
       trashed: false,
       discriminator: 'entityRevision',
+      date: Matchers.iso8601DateTime('2014-09-15T15:28:35Z'),
       type: 'article',
       repositoryId: 1855,
       fields: {
