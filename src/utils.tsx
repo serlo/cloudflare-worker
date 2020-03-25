@@ -51,10 +51,20 @@ export function markdownToHtml(markdown: string): string {
   return marked(markdown, { headerIds: false }).trim()
 }
 
-export async function fetchWithCache(url: string): Promise<Response> {
+export async function fetchWithCache(
+  url: string,
+  init?: RequestInit
+): Promise<Response> {
   return await fetch(url, ({
     cf: { cacheTtl: 60 * 60 },
+    ...init,
   } as unknown) as RequestInit)
+}
+
+export function getBasicAuthHeaders(): Record<string, string> {
+  if (ENABLE_BASIC_AUTH !== 'true') return {}
+
+  return { Authorization: 'Basic c2VybG90ZWFtOnNlcmxvdGVhbQ==' }
 }
 
 export function createPreactResponse(component: VNode, opt?: ResponseInit) {

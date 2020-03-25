@@ -19,8 +19,14 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
+import { h } from 'preact'
+
 import { getSubdomain } from '../url-utils'
-import { createPreactResponse, fetchWithCache } from '../utils'
+import {
+  createPreactResponse,
+  fetchWithCache,
+  getBasicAuthHeaders,
+} from '../utils'
 import { AreWeEdtrIoYet } from './template'
 
 export async function edtrIoStats(request: Request) {
@@ -29,7 +35,9 @@ export async function edtrIoStats(request: Request) {
   const url = new URL(request.url)
   url.host = url.host.replace('are-we-edtr-io-yet.', 'de.')
   url.pathname = '/entities/are-we-edtr-io-yet'
-  const data = await fetchWithCache(url.href)
+  const data = await fetchWithCache(url.href, {
+    headers: getBasicAuthHeaders(),
+  })
 
-  return createPreactResponse(AreWeEdtrIoYet(await data.json()))
+  return createPreactResponse(<AreWeEdtrIoYet data={await data.json()} />)
 }

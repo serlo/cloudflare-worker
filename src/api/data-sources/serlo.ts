@@ -21,6 +21,7 @@
  */
 import { RESTDataSource } from 'apollo-datasource-rest'
 
+import { getBasicAuthHeaders } from '../../utils'
 import { Instance } from '../schema/instance'
 
 export class SerloDataSource extends RESTDataSource {
@@ -49,13 +50,9 @@ export class SerloDataSource extends RESTDataSource {
     const data = await super.get(
       `https://${instance}.${DOMAIN}/${path}`,
       undefined,
-      ENABLE_BASIC_AUTH === 'true'
-        ? {
-            headers: {
-              Authorization: 'Basic c2VybG90ZWFtOnNlcmxvdGVhbQ==',
-            },
-          }
-        : undefined
+      {
+        headers: getBasicAuthHeaders(),
+      }
     )
 
     await API_KV.put(cacheKey, JSON.stringify(data))

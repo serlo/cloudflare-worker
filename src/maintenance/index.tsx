@@ -20,6 +20,7 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 import { DateTime } from 'luxon'
+import { h } from 'preact'
 
 import { getSubdomain } from '../url-utils'
 import { createPreactResponse } from '../utils'
@@ -56,7 +57,7 @@ function createMaintenanceResponse({
   lang: 'de' | 'en'
   end?: DateTime
 }) {
-  return createPreactResponse(Maintenance({ lang, end }), {
+  return createPreactResponse(<Maintenance lang={lang} end={end} />, {
     status: 503,
     headers: end ? { 'Retry-After': end.toHTTP() } : {},
   })
