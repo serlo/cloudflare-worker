@@ -41,7 +41,7 @@ export class SerloDataSource extends RESTDataSource {
       return super.get(`http://localhost:9009/${path}`)
     }
 
-    const cacheKey = `${instance}.serlo.org/${path}`
+    const cacheKey = `${instance}.serlo.org${path}`
     const cache = await API_KV.get(cacheKey)
 
     if (cache) return JSON.parse(cache)
