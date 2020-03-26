@@ -715,6 +715,10 @@ describe('Uuid', () => {
                 name
                 description
                 weight
+
+                parent {
+                  id
+                }
               }
             }
           }
@@ -731,6 +735,9 @@ describe('Uuid', () => {
           name: 'mathe',
           description: null,
           weight: 16,
+          parent: {
+            id: 3,
+          },
         },
       })
     })
@@ -912,6 +919,7 @@ function addTaxonomyTermSubjectInteraction() {
       name: Matchers.string('mathe'),
       description: null,
       weight: Matchers.integer(16),
+      parentId: 3,
     },
   })
 }
@@ -928,6 +936,7 @@ function addTaxonomyTermCurriculumTopicInteraction() {
       name: Matchers.string('Natürliche Zahlen'),
       description: Matchers.string('description'),
       weight: Matchers.integer(1),
+      parentId: 16043,
     },
   })
 }
