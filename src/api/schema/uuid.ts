@@ -95,6 +95,7 @@ export const uuidTypeDefs = gql`
 
   type TaxonomyTerm implements Uuid {
     id: Int!
+    trashed: Boolean!
     type: TaxonomyTermType!
     instance: Instance!
     name: String!
@@ -103,17 +104,17 @@ export const uuidTypeDefs = gql`
   }
 
   enum TaxonomyTermType {
-    topic
-    topic-folder
-    subject
-    curriculum
-    locale
-    curriculum-topic
-    root
-    forum-category
-    forum
     blog
-    curriculum-topic-folder
+    curriculum
+    curriculumTopic
+    curriculumTopicFolder
+    forum
+    forumCategory
+    locale
+    root
+    subject
+    topic
+    topicFolder
   }
 
   input AliasInput {
@@ -254,19 +255,21 @@ enum DiscriminatorType {
   Page = 'Page',
   PageRevision = 'PageRevision',
   User = 'User',
-  TaxonomyTerm = 'TaxonomyTerm'
+  TaxonomyTerm = 'TaxonomyTerm',
 }
 
 enum TaxonomyTermType {
-  Topic = 'Topic',
-  TopicFolder = 'TopicFolder',
-  Subject = 'Subject',
-  Curriculum = 'Curriculum',
-  Root = 'Root',
-  ForumCategory = 'ForumCategory',
-  Forum = 'Forum',
-  Blog = 'Blog',
-  CurriculumTopicFolder = 'CurriculumTopicFolder'
+  Blog = 'blog',
+  Curriculum = 'curriculum',
+  CurriculumTopic = 'curriculumTopic',
+  CurriculumTopicFolder = 'curriculumTopicFolder',
+  Forum = 'forum',
+  ForumCategory = 'forumCategory',
+  Locale = 'locale',
+  Root = 'root',
+  Subject = 'subject',
+  Topic = 'topic',
+  TopicFolder = 'topicFolder',
 }
 
 type UuidType = DiscriminatorType | EntityType | EntityRevisionType
@@ -425,7 +428,7 @@ class TaxonomyTerm extends Uuid {
 
   public constructor(payload: {
     id: number
-    type: TaxonomyTermType
+    type: string
     trashed: boolean
     instance: Instance
     name: string
@@ -433,14 +436,24 @@ class TaxonomyTerm extends Uuid {
     weight: number
   }) {
     super(payload)
-    this.type = payload.type
+    this.type = toCamelCase(payload.type)
     this.instance = payload.instance
     this.name = payload.name
     this.description = payload.description
     this.weight = payload.weight
+
+    function toCamelCase(type: string) {
+      const segments = type.split('-')
+      const [firstSegment, ...remainingSegments] = segments
+      return [
+        firstSegment,
+        remainingSegments.map((segment) => {
+          return `${segment[0].toUpperCase()}${segment.substr(1)}`
+        }),
+      ].join('') as TaxonomyTermType
+    }
   }
 }
-
 
 interface AliasInput {
   instance: Instance
