@@ -41,11 +41,10 @@ export class SerloDataSource extends RESTDataSource {
     if (process.env.NODE_ENV === 'test') {
       return super.get(`http://localhost:9009/${path}`)
     }
-
-    const cacheKey = `${instance}.serlo.org${path}`
-    const cache = await API_KV.get(cacheKey)
-
-    if (cache) return JSON.parse(cache)
+    // const cacheKey = `${instance}.serlo.org${path}`
+    // const cache = await API_KV.get(cacheKey)
+    //
+    // if (cache) return JSON.parse(cache)
 
     const data = await super.get(
       `https://${instance}.${DOMAIN}/${path}`,
@@ -55,7 +54,8 @@ export class SerloDataSource extends RESTDataSource {
       }
     )
 
-    await API_KV.put(cacheKey, JSON.stringify(data))
     return data
+    // await API_KV.put(cacheKey, JSON.stringify(data))
+    // return data
   }
 }

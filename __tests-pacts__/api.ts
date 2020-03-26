@@ -237,6 +237,46 @@ describe('Uuid', () => {
         })
       })
 
+      test('by alias (w/ taxonomyTerms)', async () => {
+        await addArticleAliasInteraction()
+        await addArticleUuidInteraction()
+        await addTaxonomyTermSubjectInteraction()
+        const response = await client.query({
+          query: gql`
+            {
+              uuid(
+                alias: {
+                  instance: de
+                  path: "/mathe/funktionen/uebersicht-aller-artikel-zu-funktionen/parabel"
+                }
+              ) {
+                __typename
+                ... on Article {
+                  id
+                  trashed
+                  instance
+                  date
+                  taxonomyTerms {
+                    id
+                  }
+                }
+              }
+            }
+          `,
+        })
+        expect(response.errors).toBe(undefined)
+        expect(response.data).toEqual({
+          uuid: {
+            __typename: 'Article',
+            trashed: false,
+            id: 1855,
+            instance: 'de',
+            date: '2014-03-01T20:45:56Z',
+            taxonomyTerms: [{ id: 5 }],
+          },
+        })
+      })
+
       test('by id', async () => {
         await addArticleUuidInteraction()
         const response = await client.query({
@@ -499,6 +539,37 @@ describe('Uuid', () => {
       })
     })
 
+    test('by alias (w/ taxonomyTerms)', async () => {
+      await addPageAliasInteraction()
+      await addPageUuidInteraction()
+      await addTaxonomyTermSubjectInteraction()
+      const response = await client.query({
+        query: gql`
+          {
+            uuid(alias: { instance: de, path: "/mathe" }) {
+              __typename
+              ... on Page {
+                id
+                trashed
+                taxonomyTerms {
+                  id
+                }
+              }
+            }
+          }
+        `,
+      })
+      expect(response.errors).toBe(undefined)
+      expect(response.data).toEqual({
+        uuid: {
+          __typename: 'Page',
+          id: 19767,
+          trashed: false,
+          taxonomyTerms: [{ id: 5 }],
+        },
+      })
+    })
+
     test('by id', async () => {
       await addPageUuidInteraction()
       const response = await client.query({
@@ -701,6 +772,7 @@ describe('Uuid', () => {
   })
   describe('TaxonomyTerm', () => {
     test('by id (subject)', async () => {
+      await addTaxonomyTermCurriculumTopicInteraction()
       await addTaxonomyTermSubjectInteraction()
       const response = await client.query({
         query: gql`
@@ -717,6 +789,10 @@ describe('Uuid', () => {
                 weight
 
                 parent {
+                  id
+                }
+
+                children {
                   id
                 }
               }
@@ -738,6 +814,72 @@ describe('Uuid', () => {
           parent: {
             id: 3,
           },
+          children: [
+            {
+              id: 16048,
+            },
+          ],
+        },
+      })
+    })
+
+    test('by id (subject, w/ path)', async () => {
+      await addTaxonomyTermRootInteraction()
+      await addTaxonomyTermCurriculumTopicInteraction()
+      await addTaxonomyTermSubjectInteraction()
+      const response = await client.query({
+        query: gql`
+          {
+            uuid(id: 5) {
+              __typename
+              ... on TaxonomyTerm {
+                id
+                type
+                trashed
+                instance
+                name
+                description
+                weight
+
+                parent {
+                  id
+                }
+
+                children {
+                  id
+                }
+
+                path {
+                  id
+                }
+              }
+            }
+          }
+        `,
+      })
+      expect(response.errors).toBe(undefined)
+      expect(response.data).toEqual({
+        uuid: {
+          __typename: 'TaxonomyTerm',
+          type: 'subject',
+          trashed: false,
+          id: 5,
+          instance: 'de',
+          name: 'mathe',
+          description: null,
+          weight: 16,
+
+          parent: {
+            id: 3,
+          },
+
+          children: [
+            {
+              id: 16048,
+            },
+          ],
+
+          path: [{ id: 3 }, { id: 5 }],
         },
       })
     })
@@ -829,6 +971,7 @@ function addArticleUuidInteraction() {
       date: Matchers.iso8601DateTime('2014-03-01T20:45:56Z'),
       currentRevisionId: 30674,
       licenseId: 1,
+      taxonomyTermIds: Matchers.eachLike(Matchers.integer(5)),
     },
   })
 }
@@ -872,6 +1015,7 @@ function addPageUuidInteraction() {
       trashed: Matchers.boolean(false),
       discriminator: 'page',
       currentRevisionId: Matchers.integer(35476),
+      taxonomyTermIds: Matchers.eachLike(Matchers.integer(5)),
     },
   })
 }
@@ -907,7 +1051,25 @@ function addUserInteraction() {
   })
 }
 
-function addTaxonomyTermSubjectInteraction() {
+async function addTaxonomyTermRootInteraction() {
+  return addUuidInteraction({
+    request: 3,
+    response: {
+      id: 3,
+      trashed: Matchers.boolean(false),
+      discriminator: 'taxonomyTerm',
+      type: 'root',
+      instance: 'de',
+      name: Matchers.string('Root'),
+      description: null,
+      weight: Matchers.integer(1),
+      parentId: null,
+      childrenIds: Matchers.eachLike(Matchers.integer(5)),
+    },
+  })
+}
+
+async function addTaxonomyTermSubjectInteraction() {
   return addUuidInteraction({
     request: 5,
     response: {
@@ -920,6 +1082,7 @@ function addTaxonomyTermSubjectInteraction() {
       description: null,
       weight: Matchers.integer(16),
       parentId: 3,
+      childrenIds: Matchers.eachLike(Matchers.integer(16048)),
     },
   })
 }
@@ -937,6 +1100,7 @@ function addTaxonomyTermCurriculumTopicInteraction() {
       description: Matchers.string('description'),
       weight: Matchers.integer(1),
       parentId: 16043,
+      childrenIds: [],
     },
   })
 }

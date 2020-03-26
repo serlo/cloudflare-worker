@@ -41,6 +41,7 @@ export const uuidTypeDefs = gql`
     date: DateTime!
     instance: Instance!
     license: License!
+    taxonomyTerms: [TaxonomyTerm]!
   }
 
   type Article implements Uuid & Entity {
@@ -49,6 +50,7 @@ export const uuidTypeDefs = gql`
     instance: Instance!
     date: DateTime!
     license: License!
+    taxonomyTerms: [TaxonomyTerm]!
     currentRevision: ArticleRevision
   }
 
@@ -71,6 +73,7 @@ export const uuidTypeDefs = gql`
   type Page implements Uuid {
     id: Int!
     trashed: Boolean!
+    taxonomyTerms: [TaxonomyTerm]!
     currentRevision: PageRevision
   }
 
@@ -102,6 +105,8 @@ export const uuidTypeDefs = gql`
     description: String
     weight: Int!
     parent: TaxonomyTerm
+    children: [Uuid]!
+    path: [TaxonomyTerm]!
   }
 
   enum TaxonomyTermType {
@@ -144,6 +149,7 @@ export const uuidResolvers: {
   Article: {
     currentRevision: Resolver<Article, {}, Partial<ArticleRevision> | null>
     license: Resolver<Entity, {}, Partial<License>>
+    taxonomyTerms: Resolver<Article, {}, TaxonomyTerm[]>
   }
   EntityRevision: {
     __resolveType(entity: EntityRevision): EntityRevisionType
@@ -154,6 +160,7 @@ export const uuidResolvers: {
   }
   Page: {
     currentRevision: Resolver<Page, {}, Partial<PageRevision> | null>
+    taxonomyTerms: Resolver<Page, {}, TaxonomyTerm[]>
   }
   PageRevision: {
     author: Resolver<PageRevision, {}, Partial<User>>
@@ -161,6 +168,8 @@ export const uuidResolvers: {
   }
   TaxonomyTerm: {
     parent: Resolver<TaxonomyTerm, {}, Partial<TaxonomyTerm> | null>
+    children: Resolver<TaxonomyTerm, {}, Uuid[]>
+    path: Resolver<TaxonomyTerm, {}, Partial<TaxonomyTerm>[]>
   }
 } = {
   Query: {
@@ -197,6 +206,13 @@ export const uuidResolvers: {
         info
       )
     },
+    async taxonomyTerms(entity, _args, context) {
+      return Promise.all(
+        entity.taxonomyTermIds.map((id) => {
+          return uuid(undefined, { id }, context) as Promise<TaxonomyTerm>
+        })
+      )
+    },
   },
   EntityRevision: {
     __resolveType(entityRevision) {
@@ -228,6 +244,13 @@ export const uuidResolvers: {
       }
       return uuid(undefined, partialCurrentRevision, context)
     },
+    async taxonomyTerms(page, _args, context) {
+      return Promise.all(
+        page.taxonomyTermIds.map((id) => {
+          return uuid(undefined, { id }, context) as Promise<TaxonomyTerm>
+        })
+      )
+    },
   },
   PageRevision: {
     async author(pageRevision, _args, context, info) {
@@ -249,10 +272,32 @@ export const uuidResolvers: {
     async parent(taxonomyTerm, _args, context, info) {
       if (!taxonomyTerm.parentId) return null
       const partialParent = { id: taxonomyTerm.parentId }
-      if (requestsOnlyFields('Taxonomy', ['id'], info)) {
+      if (requestsOnlyFields('TaxonomyTerm', ['id'], info)) {
         return partialParent
       }
       return uuid(undefined, partialParent, context)
+    },
+    async children(taxonomyTerm, _args, context) {
+      return Promise.all(
+        taxonomyTerm.childrenIds.map((childrenId) => {
+          return uuid(undefined, { id: childrenId }, context) as Promise<Uuid>
+        })
+      )
+    },
+    async path(taxonomyTerm, _args, context) {
+      const path = [taxonomyTerm]
+      let current = taxonomyTerm
+
+      while (current.parentId !== null) {
+        current = (await uuid(
+          undefined,
+          { id: current.parentId },
+          context
+        )) as TaxonomyTerm
+        path.unshift(current)
+      }
+
+      return path
     },
   },
 }
@@ -304,6 +349,7 @@ abstract class Entity extends Uuid {
   public instance: Instance
   public date: string
   public licenseId: number
+  public taxonomyTermIds: number[]
   public currentRevisionId?: number
 
   public constructor(payload: {
@@ -312,12 +358,14 @@ abstract class Entity extends Uuid {
     date: DateTime
     instance: Instance
     licenseId: number
+    taxonomyTermIds: number[]
     currentRevisionId?: number
   }) {
     super(payload)
     this.instance = payload.instance
     this.date = payload.date
     this.licenseId = payload.licenseId
+    this.taxonomyTermIds = payload.taxonomyTermIds
     this.currentRevisionId = payload.currentRevisionId
   }
 }
@@ -371,14 +419,17 @@ class ArticleRevision extends EntityRevision {
 
 class Page extends Uuid {
   public __typename = DiscriminatorType.Page
+  public taxonomyTermIds: number[]
   public currentRevisionId?: number
 
   public constructor(payload: {
     id: number
     trashed: boolean
+    taxonomyTermIds: number[]
     currentRevisionId?: number
   }) {
     super(payload)
+    this.taxonomyTermIds = payload.taxonomyTermIds
     this.currentRevisionId = payload.currentRevisionId
   }
 }
@@ -440,6 +491,7 @@ class TaxonomyTerm extends Uuid {
   public description?: string
   public weight: number
   public parentId?: number
+  public childrenIds: number[]
 
   public constructor(payload: {
     id: number
@@ -450,6 +502,7 @@ class TaxonomyTerm extends Uuid {
     description?: string
     weight: number
     parentId?: number
+    childrenIds: number[]
   }) {
     super(payload)
     this.type = toCamelCase(payload.type)
@@ -458,6 +511,7 @@ class TaxonomyTerm extends Uuid {
     this.description = payload.description
     this.weight = payload.weight
     this.parentId = payload.parentId
+    this.childrenIds = payload.childrenIds
 
     function toCamelCase(type: string) {
       const segments = type.split('-')
