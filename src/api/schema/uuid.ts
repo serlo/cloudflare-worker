@@ -101,6 +101,7 @@ export const uuidTypeDefs = gql`
     name: String!
     description: String
     weight: Int!
+    parent: TaxonomyTerm
   }
 
   enum TaxonomyTermType {
@@ -157,6 +158,9 @@ export const uuidResolvers: {
   PageRevision: {
     author: Resolver<PageRevision, {}, Partial<User>>
     page: Resolver<PageRevision, {}, Partial<Page>>
+  }
+  TaxonomyTerm: {
+    parent: Resolver<TaxonomyTerm, {}, Partial<TaxonomyTerm> | null>
   }
 } = {
   Query: {
@@ -239,6 +243,16 @@ export const uuidResolvers: {
         return partialPage
       }
       return uuid(undefined, partialPage, context)
+    },
+  },
+  TaxonomyTerm: {
+    async parent(taxonomyTerm, _args, context, info) {
+      if (!taxonomyTerm.parentId) return null
+      const partialParent = { id: taxonomyTerm.parentId }
+      if (requestsOnlyFields('Taxonomy', ['id'], info)) {
+        return partialParent
+      }
+      return uuid(undefined, partialParent, context)
     },
   },
 }
@@ -425,6 +439,7 @@ class TaxonomyTerm extends Uuid {
   public name: string
   public description?: string
   public weight: number
+  public parentId?: number
 
   public constructor(payload: {
     id: number
@@ -434,6 +449,7 @@ class TaxonomyTerm extends Uuid {
     name: string
     description?: string
     weight: number
+    parentId?: number
   }) {
     super(payload)
     this.type = toCamelCase(payload.type)
@@ -441,6 +457,7 @@ class TaxonomyTerm extends Uuid {
     this.name = payload.name
     this.description = payload.description
     this.weight = payload.weight
+    this.parentId = payload.parentId
 
     function toCamelCase(type: string) {
       const segments = type.split('-')
