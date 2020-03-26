@@ -416,7 +416,7 @@ class User extends Uuid {
 }
 
 class TaxonomyTerm extends Uuid {
-  public __typename: DiscriminatorType.TaxonomyTerm
+  public __typename = DiscriminatorType.TaxonomyTerm
   public type: TaxonomyTermType
   public instance: Instance
   public name: string
