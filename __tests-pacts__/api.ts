@@ -700,12 +700,12 @@ describe('Uuid', () => {
     })
   })
   describe('TaxonomyTerm', () => {
-    test('by id', async () => {
-      await addTaxonomyTermInteraction()
+    test('by id (subject)', async () => {
+      await addTaxonomyTermSubjectInteraction()
       const response = await client.query({
         query: gql`
           {
-            uuid(id: 1) {
+            uuid(id: 5) {
               __typename
               ... on TaxonomyTerm {
                 id
@@ -724,13 +724,48 @@ describe('Uuid', () => {
       expect(response.data).toEqual({
         uuid: {
           __typename: 'TaxonomyTerm',
-          type: 'topic',
+          type: 'subject',
           trashed: false,
-          id: 1,
+          id: 5,
           instance: 'de',
           name: 'mathe',
           description: null,
-          weight: 13
+          weight: 16,
+        },
+      })
+    })
+
+    test('by id (curriculum-topic)', async () => {
+      await addTaxonomyTermCurriculumTopicInteraction()
+      const response = await client.query({
+        query: gql`
+          {
+            uuid(id: 16048) {
+              __typename
+              ... on TaxonomyTerm {
+                id
+                type
+                trashed
+                instance
+                name
+                description
+                weight
+              }
+            }
+          }
+        `,
+      })
+      expect(response.errors).toBe(undefined)
+      expect(response.data).toEqual({
+        uuid: {
+          __typename: 'TaxonomyTerm',
+          type: 'curriculumTopic',
+          trashed: false,
+          id: 16048,
+          instance: 'de',
+          name: 'Natürliche Zahlen',
+          description: 'description',
+          weight: 1,
         },
       })
     })
@@ -865,17 +900,34 @@ function addUserInteraction() {
   })
 }
 
-function addTaxonomyTermInteraction() {
+function addTaxonomyTermSubjectInteraction() {
   return addUuidInteraction({
-    request: 1,
+    request: 5,
     response: {
-      id: 1,
+      id: 5,
       trashed: Matchers.boolean(false),
-      discriminator: 'taxonomyterm',
-      type: 'topic',
+      discriminator: 'taxonomyTerm',
+      type: 'subject',
+      instance: 'de',
       name: Matchers.string('mathe'),
       description: null,
-      weight: Matchers.integer(13)
+      weight: Matchers.integer(16),
+    },
+  })
+}
+
+function addTaxonomyTermCurriculumTopicInteraction() {
+  return addUuidInteraction({
+    request: 16048,
+    response: {
+      id: 16048,
+      trashed: Matchers.boolean(false),
+      discriminator: 'taxonomyTerm',
+      type: 'curriculum-topic',
+      instance: 'de',
+      name: Matchers.string('Natürliche Zahlen'),
+      description: Matchers.string('description'),
+      weight: Matchers.integer(1),
     },
   })
 }
