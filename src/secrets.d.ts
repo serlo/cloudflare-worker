@@ -19,15 +19,4 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { GraphQLResolveInfo } from 'graphql'
-import { parseResolveInfo } from 'graphql-parse-resolve-info'
-import * as R from 'ramda'
-
-export function requestsOnlyFields(
-  type: string,
-  fields: string[],
-  info: GraphQLResolveInfo
-): boolean {
-  const res = parseResolveInfo(info)
-  return !res || R.isEmpty(R.omit(fields, res.fieldsByTypeName[type]))
-}
+declare let API_SECRET: string

@@ -19,58 +19,21 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { ApolloServer } from 'apollo-server-cloudflare'
-// eslint-disable-next-line import/no-internal-modules
-import { graphqlCloudflare } from 'apollo-server-cloudflare/dist/cloudflareApollo'
-import { Request as ApolloServerRequest } from 'apollo-server-env/dist/fetch'
+import jwt from 'jsonwebtoken'
 
 import { getPathname, getSubdomain } from '../url-utils'
-import { SerloDataSource } from './data-sources/serlo'
-import { graphiql } from './graphiql'
-import { typeDefs, resolvers } from './schema'
 
 export async function api(request: Request) {
   if (getSubdomain(request.url) !== 'api') return null
+  if (getPathname(request.url) !== '/graphql') return null
 
-  if (getPathname(request.url) === '/graphql') {
-    if (request.method === 'OPTIONS') {
-      const response = new Response('', { status: 204 })
-      setCorsHeaders(response)
-      return response
-    }
-
-    const server = createGraphQLServer()
-    const apolloServerRequest = (request as unknown) as ApolloServerRequest
-    const apolloServerResponse = await graphqlCloudflare(() => {
-      return server.createGraphQLServerOptions(apolloServerRequest)
-    })(apolloServerRequest)
-    const response = (apolloServerResponse as unknown) as Response
-    setCorsHeaders(response)
-    return response
-  }
-
-  if (getPathname(request.url) === '/___graphql') {
-    return new Response(graphiql, { headers: { 'Content-Type': 'text/html' } })
-  }
-}
-
-export function createGraphQLServer() {
-  return new ApolloServer({
-    typeDefs,
-    resolvers,
-    introspection: true,
-    dataSources() {
-      return {
-        serlo: new SerloDataSource(),
-      }
-    },
+  const token = jwt.sign({}, API_SECRET, {
+    expiresIn: '2h',
+    audience: 'api.serlo.org',
+    issuer: 'serlo.org-cloudflare-worker',
   })
-}
 
-function setCorsHeaders(response: Response) {
-  response.headers.set('Access-Control-Allow-Credentials', 'true')
-  response.headers.set('Access-Control-Allow-Headers', 'Content-type')
-  response.headers.set('Access-Control-Allow-Methods', 'GET, POST')
-  response.headers.set('Access-Control-Allow-Origin', '*')
-  response.headers.set('X-Content-Type-Options', 'nosniff')
+  const req = new Request(request)
+  req.headers.set('Authorization', `Serlo Service=${token}`)
+  return fetch(req)
 }
