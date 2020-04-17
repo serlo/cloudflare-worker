@@ -20,14 +20,14 @@ export async function handleRequest(
   return new Response('')
 }
 
-export function formatFrontendCookie(useFrontend: boolean) {
+export function formatFrontendUsageCookie(useFrontend: boolean) {
   return `useFrontend=${useFrontend}; path=/`
 }
 
 function createFrontendUsageResponse(body: string, useFrontend: boolean) {
   const response = new Response(body)
 
-  response.headers.set('Set-Cookie', formatFrontendCookie(useFrontend))
+  response.headers.set('Set-Cookie', formatFrontendUsageCookie(useFrontend))
 
   return response
 }
