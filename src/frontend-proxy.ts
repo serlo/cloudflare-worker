@@ -9,10 +9,12 @@ export async function handleRequest(
 
   const path = getPathname(url)
 
-  if (path === "/enable-frontend") {
-    const response = new Response("Enable frontend")
-    response.headers.set("Set-Cookie", formatFrontendCookie(true))
-    return response
+  if (path === '/enable-frontend') {
+    return createFrontendUsageResponse('Enable frontend', true)
+  }
+
+  if (path === '/disable-frontend') {
+    return createFrontendUsageResponse('Disable frontend', false)
   }
 
   return new Response('')
@@ -20,4 +22,12 @@ export async function handleRequest(
 
 export function formatFrontendCookie(useFrontend: boolean) {
   return `useFrontend=${useFrontend}; path=/`
+}
+
+function createFrontendUsageResponse(body: string, useFrontend: boolean) {
+  const response = new Response(body)
+
+  response.headers.set('Set-Cookie', formatFrontendCookie(useFrontend))
+
+  return response
 }
