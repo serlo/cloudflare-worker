@@ -7,3 +7,7 @@ export async function handleRequest(
 
   return new Response('')
 }
+
+export function formatFrontendCookie(useFrontend: boolean) {
+  return `useFrontend=${useFrontend}; path=/`
+}
