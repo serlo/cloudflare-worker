@@ -1,4 +1,4 @@
-import { handleRequest, formatFrontendCookie } from '../src/frontend-proxy'
+import { handleRequest, formatFrontendUsageCookie } from '../src/frontend-proxy'
 
 describe('handleRequest()', () => {
   describe('returns null if language tenant is not "de"', () => {
@@ -17,7 +17,7 @@ describe('handleRequest()', () => {
     const res = (await handleRequest(new Request(url))) as Response
 
     expect(res).not.toBeNull()
-    expect(res.headers.get('Set-Cookie')).toBe(formatFrontendCookie(true))
+    expect(res.headers.get('Set-Cookie')).toBe(formatFrontendUsageCookie(true))
     expect(await res.text()).toBe('Enable frontend')
   })
 
@@ -26,12 +26,12 @@ describe('handleRequest()', () => {
     const res = (await handleRequest(new Request(url))) as Response
 
     expect(res).not.toBeNull()
-    expect(res.headers.get('Set-Cookie')).toBe(formatFrontendCookie(false))
+    expect(res.headers.get('Set-Cookie')).toBe(formatFrontendUsageCookie(false))
     expect(await res.text()).toBe('Disable frontend')
   })
 })
 
-test('formatFrontendCookie()', () => {
-  expect(formatFrontendCookie(true)).toBe('useFrontend=true; path=/')
-  expect(formatFrontendCookie(false)).toBe('useFrontend=false; path=/')
+test('formatFrontendUsageCookie()', () => {
+  expect(formatFrontendUsageCookie(true)).toBe('useFrontend=true; path=/')
+  expect(formatFrontendUsageCookie(false)).toBe('useFrontend=false; path=/')
 })
