@@ -11,6 +11,15 @@ describe('handleRequest()', () => {
       expect(await handleRequest(new Request(url))).toBeNull()
     })
   })
+
+  test('requests to /enable-frontend enable use of frontend', async () => {
+    const url = 'https://de.serlo.org/enable-frontend'
+    const res = (await handleRequest(new Request(url))) as Response
+
+    expect(res).not.toBeNull()
+    expect(res.headers.get('Set-Cookie')).toBe(formatFrontendCookie(true))
+    expect(await res.text()).toBe('Enable frontend')
+  })
 })
 
 test('formatFrontendCookie()', () => {

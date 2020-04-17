@@ -1,9 +1,19 @@
-import { getSubdomain } from './url-utils'
+import { getSubdomain, getPathname } from './url-utils'
 
 export async function handleRequest(
   request: Request
 ): Promise<Response | null> {
-  if (getSubdomain(request.url) !== 'de') return null
+  const url = request.url
+
+  if (getSubdomain(url) !== 'de') return null
+
+  const path = getPathname(url)
+
+  if (path === "/enable-frontend") {
+    const response = new Response("Enable frontend")
+    response.headers.set("Set-Cookie", formatFrontendCookie(true))
+    return response
+  }
 
   return new Response('')
 }
