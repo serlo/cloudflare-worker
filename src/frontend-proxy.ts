@@ -12,32 +12,44 @@ export async function handleRequest(
   const path = getPathname(url)
 
   if (path === '/enable-frontend') {
-    return createFrontendUsageResponse('Enable frontend', true)
+    return createResponse('Enable frontend', true)
   }
 
   if (path === '/disable-frontend') {
-    return createFrontendUsageResponse('Disable frontend', false)
+    return createResponse('Disable frontend', false)
   }
 
-  if (path.startsWith('/_next')) {
-    const frontendUrl = `https://${FRONTEND_DOMAIN}${path}`
-    const frontendResponse = await fetch(frontendUrl)
+  const { useFrontend } = chooseBackend(request)
+  const backendRequest = useFrontend
+    ? new Request(`https://${FRONTEND_DOMAIN}${path}`)
+    : request
 
-    const response = new Response(frontendResponse.body)
-    return response
-  }
-
-  return new Response('')
+  return await fetch(backendRequest)
 }
 
-export function formatFrontendUsageCookie(useFrontend: boolean) {
-  return `useFrontend=${useFrontend}; path=/`
-}
-
-function createFrontendUsageResponse(body: string, useFrontend: boolean) {
+function createResponse(body: string, futureFrontendUse?: boolean) {
   const response = new Response(body)
 
-  response.headers.set('Set-Cookie', formatFrontendUsageCookie(useFrontend))
+  if (futureFrontendUse !== undefined) {
+    const cookie = `${formatCookie(futureFrontendUse)}; path=/`
+
+    response.headers.set('Set-Cookie', cookie)
+  }
 
   return response
+}
+
+function chooseBackend(req: Request): { useFrontend: boolean } {
+  const path = getPathname(req.url)
+  const cookies = req.headers.get('Cookie')
+
+  if (path.startsWith('/_next')) return { useFrontend: true }
+  if (cookies?.includes(formatCookie(true))) return { useFrontend: true }
+  if (cookies?.includes(formatCookie(false))) return { useFrontend: false }
+
+  return { useFrontend: false }
+}
+
+function formatCookie(useFrontend: boolean) {
+  return `useFrontend=${useFrontend}`
 }

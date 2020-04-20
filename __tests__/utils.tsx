@@ -152,7 +152,7 @@ export async function withMockedFetch(
     if (mockImplSpec instanceof Response) return mockImplSpec
 
     const request = typeof reqInfo === 'string' ? new Request(reqInfo) : reqInfo
-    return await mockImplSpec(request)
+    return mockImplSpec(request)
   }
 
   const fetch = jest.fn().mockImplementationOnce(mockedFetch)
