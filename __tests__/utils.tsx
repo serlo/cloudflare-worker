@@ -144,11 +144,18 @@ export async function isJsonResponse(response: Response, targetJson: unknown) {
 }
 
 export async function withMockedFetch(
-  response: Response | string,
+  mockImplSpec: string | Response | ((req: Request) => Promise<Response>),
   fn: () => Promise<void>
 ) {
-  const value = typeof response === 'string' ? new Response(response) : response
-  const fetch = jest.fn().mockReturnValueOnce(value)
+  async function mockedFetch(reqInfo: Request | string): Promise<Response> {
+    if (typeof mockImplSpec === 'string') return new Response(mockImplSpec)
+    if (mockImplSpec instanceof Response) return mockImplSpec
+
+    const request = typeof reqInfo === 'string' ? new Request(reqInfo) : reqInfo
+    return await mockImplSpec(request)
+  }
+
+  const fetch = jest.fn().mockImplementationOnce(mockedFetch)
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
