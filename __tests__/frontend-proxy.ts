@@ -17,6 +17,26 @@ describe('handleRequest()', () => {
     })
   })
 
+  describe('chooses backend based on probability', () => {
+    test.each([
+      [1, 'frontend', true],
+      [0, 'no-frontend', false],
+    ])(
+      'probability=%p',
+      async (probability, responseText, useFrontendCookie) => {
+        await withMockedFetch(checkFrontendRequest, async () => {
+          const req = new Request('https://de.serlo.org/example')
+          const res = (await handleRequest(req, probability)) as Response
+
+          expect(await res.text()).toBe(responseText)
+          expect(res.headers.get('Set-Cookie')).toBe(
+            `useFrontend=${useFrontendCookie}; path=/`
+          )
+        })
+      }
+    )
+  })
+
   describe('requests to /_next always resolve to frontend', () => {
     test.each([
       'https://de.serlo.org/_next/script.js',
@@ -37,7 +57,19 @@ describe('handleRequest()', () => {
       request.headers.set('Cookie', 'useFrontend=true;')
 
       const response = (await handleRequest(request)) as Response
+      expect(response.headers.get('Set-Cookie')).toBeNull()
       expect(await response.text()).toBe('frontend')
+    })
+  })
+
+  test('do not use fronted when it is disabled via cookie', async () => {
+    await withMockedFetch(checkFrontendRequest, async () => {
+      const request = new Request('https://de.serlo.org/example')
+      request.headers.set('Cookie', 'useFrontend=false;')
+
+      const response = (await handleRequest(request)) as Response
+      expect(response.headers.get('Set-Cookie')).toBeNull()
+      expect(await response.text()).toBe('no-frontend')
     })
   })
 
@@ -75,16 +107,6 @@ describe('handleRequest()', () => {
         const response = (await handleRequest(request)) as Response
         expect(response.headers.get('X-Header')).toBe('bar')
       })
-    })
-  })
-
-  test('do not use fronted when it is disabled via cookie', async () => {
-    await withMockedFetch(checkFrontendRequest, async () => {
-      const request = new Request('https://de.serlo.org/example')
-      request.headers.set('Cookie', 'useFrontend=false;')
-
-      const response = (await handleRequest(request)) as Response
-      expect(await response.text()).toBe('no-frontend')
     })
   })
 
