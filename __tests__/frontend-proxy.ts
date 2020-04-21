@@ -84,10 +84,13 @@ describe('handleRequest()', () => {
         expect(await response.text()).toBe('header-shown')
       })
 
-      async function checkRequestData(request: Request) {
-        return request.headers.get('X-Header') === 'foo'
-          ? new Response('header-shown')
-          : new Response('no-header')
+      function checkRequestData(req: Request) {
+        const res =
+          req.headers.get('X-Header') === 'foo'
+            ? new Response('header-shown')
+            : new Response('no-header')
+
+        return new Promise<Response>((resolve) => resolve(res))
       }
     })
   })
@@ -129,10 +132,11 @@ describe('handleRequest()', () => {
   })
 })
 
-async function checkFrontendRequest(req: Request): Promise<Response> {
-  if (new URL(req.url).hostname === FRONTEND_DOMAIN) {
-    return new Response('frontend')
-  } else {
-    return new Response('no-frontend')
-  }
+function checkFrontendRequest(req: Request) {
+  const res =
+    new URL(req.url).hostname === FRONTEND_DOMAIN
+      ? new Response('frontend')
+      : new Response('no-frontend')
+
+  return new Promise<Response>((resolve) => resolve(res))
 }
