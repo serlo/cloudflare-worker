@@ -21,7 +21,7 @@ export async function handleRequest(
 
   const { useFrontend } = chooseBackend(request)
   const backendRequest = useFrontend
-    ? new Request(`https://${FRONTEND_DOMAIN}${path}`)
+    ? new Request(`https://${FRONTEND_DOMAIN}${path}`, request)
     : request
 
   return await fetch(backendRequest)
