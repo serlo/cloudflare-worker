@@ -41,6 +41,43 @@ describe('handleRequest()', () => {
     })
   })
 
+  describe('transfers request meta data to backend', () => {
+    test.each([true, false])('useFrontend=%p', async (useFrontend) => {
+      await withMockedFetch(checkRequestData, async () => {
+        const request = new Request('https://de.serlo.org/example')
+        request.headers.set('Cookie', `useFrontend=${useFrontend};`)
+        request.headers.set('X-Header', 'foo')
+
+        const response = (await handleRequest(request)) as Response
+        expect(await response.text()).toBe('header-shown')
+      })
+
+      async function checkRequestData(request: Request) {
+        return request.headers.get('X-Header') === 'foo'
+          ? new Response('header-shown')
+          : new Response('no-header')
+      }
+    })
+  })
+
+  describe('transfers response meta data from backend', () => {
+    test.each([true, false])('useFrontend=%p', async (useFrontend) => {
+      const targetResponse = new Response('hello', {
+        headers: {
+          'X-Header': 'bar',
+        },
+      })
+
+      await withMockedFetch(targetResponse, async () => {
+        const request = new Request('https://de.serlo.org/example')
+        request.headers.set('Cookie', `useFrontend=${useFrontend};`)
+
+        const response = (await handleRequest(request)) as Response
+        expect(response.headers.get('X-Header')).toBe('bar')
+      })
+    })
+  })
+
   test('do not use fronted when it is disabled via cookie', async () => {
     await withMockedFetch(checkFrontendRequest, async () => {
       const request = new Request('https://de.serlo.org/example')
