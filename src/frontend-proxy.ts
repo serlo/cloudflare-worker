@@ -20,7 +20,8 @@ export async function handleRequest(
   if (path === '/disable-frontend')
     return createResponse('Disable frontend', probability, false)
 
-  if (path.startsWith('/_next')) return await fetchBackend(true, false)
+  if (path.startsWith('/_next/') || path.startsWith('/_assets/'))
+    return await fetchBackend(true, false)
 
   const typename = await queryTypename(path)
   if (typename === null || !allowedTypes.includes(typename)) return null

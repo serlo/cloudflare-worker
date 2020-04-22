@@ -7,7 +7,7 @@ import { createJsonResponse } from '../src/utils'
 import { withMockedFetch, hasOkStatus } from './utils'
 
 const TEST_ALLOWED_TYPES = ['User', 'Article']
-const testUrl = 'https://de.serlo.org/example-url'
+const testUrl = 'https://de.serlo.org/_nextexample-url'
 
 describe('handleRequest()', () => {
   describe('returns null if language tenant is not "de"', () => {
@@ -59,10 +59,12 @@ describe('handleRequest()', () => {
     })
   })
 
-  describe('requests to /_next always resolve to frontend', () => {
+  describe('requests to /_next and /_assets always resolve to frontend', () => {
     test.each([
       'https://de.serlo.org/_next/script.js',
       'https://de.serlo.org/_next/img/picture.svg',
+      'https://de.serlo.org/_assets/script.js',
+      'https://de.serlo.org/_assets/img/picture.svg',
     ])('URL is %p', async (url) => {
       await withMockedFetch([checkFrontendRequest], async () => {
         const response = await handleUrl(url)
