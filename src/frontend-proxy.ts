@@ -8,7 +8,7 @@ const FRONTEND_PROBABILITY = 0.1
 export async function handleRequest(
   request: Request,
   probability = FRONTEND_PROBABILITY,
-  allowdTypes = FRONTEND_ALLOWED_TYPES
+  allowedTypes = FRONTEND_ALLOWED_TYPES
 ): Promise<Response | null> {
   const url = request.url
   const path = getPathname(url)
@@ -23,7 +23,7 @@ export async function handleRequest(
   if (path.startsWith('/_next')) return await fetchBackend(true, false)
 
   const typename = await queryTypename(path)
-  if (typename === null || !allowdTypes.includes(typename)) return null
+  if (typename === null || !allowedTypes.includes(typename)) return null
 
   const cookies = request.headers.get('Cookie')
 
