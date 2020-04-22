@@ -7,7 +7,11 @@ import { createJsonResponse } from '../src/utils'
 import { withMockedFetch, hasOkStatus } from './utils'
 
 const TEST_ALLOWED_TYPES = ['User', 'Article']
-const testUrl = 'https://de.serlo.org/_nextexample-url'
+const TEST_URLS = [
+  'https://de.serlo.org/math',
+  'https://de.serlo.org/10',
+  'https://de.serlo.org/_nextexample-url',
+]
 
 describe('handleRequest()', () => {
   describe('returns null if language tenant is not "de"', () => {
@@ -22,40 +26,51 @@ describe('handleRequest()', () => {
   })
 
   describe('chooses backend based on probability', () => {
-    test.each([
-      [1, TEST_ALLOWED_TYPES[0], 'frontend', true],
-      [1, TEST_ALLOWED_TYPES[1], 'frontend', true],
-      [0, TEST_ALLOWED_TYPES[0], 'no-frontend', false],
-      [0, TEST_ALLOWED_TYPES[1], 'no-frontend', false],
-    ])(
-      'probability=%p',
-      async (probability, typename, responseText, useFrontendCookie) => {
-        await withMockedFetch(
-          [createApiResponse(typename), checkFrontendRequest],
-          async () => {
-            const res = await handleUrl(testUrl, probability)
+    describe.each(TEST_URLS)('url=%p', (url) => {
+      test.each([
+        [1, TEST_ALLOWED_TYPES[0], 'frontend', true],
+        [1, TEST_ALLOWED_TYPES[1], 'frontend', true],
+        [0, TEST_ALLOWED_TYPES[0], 'no-frontend', false],
+        [0, TEST_ALLOWED_TYPES[1], 'no-frontend', false],
+      ])(
+        'probability=%p',
+        async (probability, typename, responseText, useFrontendCookie) => {
+          await withMockedFetch(
+            [createApiResponse(typename), checkFrontendRequest],
+            async () => {
+              const res = await handleUrl(url, probability)
 
-            expect(await res.text()).toBe(responseText)
-            expect(res.headers.get('Set-Cookie')).toBe(
-              `useFrontend${probability * 100}=${useFrontendCookie}; path=/`
-            )
-          }
-        )
-      }
-    )
+              expect(await res.text()).toBe(responseText)
+              expect(res.headers.get('Set-Cookie')).toBe(
+                `useFrontend${probability * 100}=${useFrontendCookie}; path=/`
+              )
+            }
+          )
+        }
+      )
+    })
+  })
+
+  test('start page can be forwarded to frontend', async () => {
+    await withMockedFetch([checkFrontendRequest], async () => {
+      const res = await handleUrl('https://de.serlo.org/', 1)
+
+      expect(await res.text()).toBe('frontend')
+      expect(res.headers.get('Set-Cookie')).toBe(`useFrontend100=true; path=/`)
+    })
   })
 
   describe('returns null for not allowed taxonomy types', () => {
     test.each(['Page', 'TaxonomyTerm'])('typename=%p', async (typename) => {
       await withMockedFetch([createApiResponse(typename)], async () => {
-        expect(await handleUrl(testUrl, 1)).toBeNull()
+        expect(await handleUrl(TEST_URLS[0], 1)).toBeNull()
       })
     })
   })
 
   test('returns null for unknown paths', async () => {
     await withMockedFetch([createApiErrorResponse()], async () => {
-      expect(await handleUrl(testUrl, 1)).toBeNull()
+      expect(await handleUrl(TEST_URLS[0], 1)).toBeNull()
     })
   })
 
@@ -75,35 +90,39 @@ describe('handleRequest()', () => {
     })
   })
 
-  test('uses frontend when it is enabled via cookie', async () => {
-    await withMockedFetch(
-      [createApiResponse(), checkFrontendRequest],
-      async () => {
-        const res = await handleUrl(testUrl, 0, 'useFrontend0=true;')
+  describe('uses frontend when it is enabled via cookie', () => {
+    test.each(TEST_URLS)('URL=%p', async (url) => {
+      await withMockedFetch(
+        [createApiResponse(), checkFrontendRequest],
+        async () => {
+          const res = await handleUrl(url, 0, 'useFrontend0=true;')
 
-        expect(res.headers.get('Set-Cookie')).toBeNull()
-        expect(await res.text()).toBe('frontend')
-      }
-    )
+          expect(res.headers.get('Set-Cookie')).toBeNull()
+          expect(await res.text()).toBe('frontend')
+        }
+      )
+    })
   })
 
-  test('do not use fronted when it is disabled via cookie', async () => {
-    await withMockedFetch(
-      [createApiResponse(), checkFrontendRequest],
-      async () => {
-        const res = await handleUrl(testUrl, 1, 'useFrontend100=false;')
+  describe('do not use fronted when it is disabled via cookie', () => {
+    test.each(TEST_URLS)('URL=%p', async (url) => {
+      await withMockedFetch(
+        [createApiResponse(), checkFrontendRequest],
+        async () => {
+          const res = await handleUrl(url, 1, 'useFrontend100=false;')
 
-        expect(res.headers.get('Set-Cookie')).toBeNull()
-        expect(await res.text()).toBe('no-frontend')
-      }
-    )
+          expect(res.headers.get('Set-Cookie')).toBeNull()
+          expect(await res.text()).toBe('no-frontend')
+        }
+      )
+    })
   })
 
   test('creates new response object for calls to frontend', async () => {
     const frontendResponse = new Response('')
 
     await withMockedFetch([createApiResponse(), frontendResponse], async () => {
-      const res = await handleUrl(testUrl, 1)
+      const res = await handleUrl(TEST_URLS[0], 1)
       expect(res).not.toBe(frontendResponse)
     })
   })
@@ -114,7 +133,7 @@ describe('handleRequest()', () => {
         [createApiResponse(), checkRequestData],
         async () => {
           const cookie = `useFrontend20=${useFrontend};`
-          const response = await handleUrl(testUrl, 0.2, cookie, {
+          const response = await handleUrl(TEST_URLS[0], 0.2, cookie, {
             headers: { 'X-Header': 'foo' },
           })
 
@@ -141,7 +160,7 @@ describe('handleRequest()', () => {
 
       await withMockedFetch([createApiResponse(), targetResponse], async () => {
         const cookie = `useFrontend20=${useFrontend};`
-        const res = await handleUrl(testUrl, 0.2, cookie)
+        const res = await handleUrl(TEST_URLS[0], 0.2, cookie)
 
         expect(res.headers.get('X-Header')).toBe('bar')
       })
