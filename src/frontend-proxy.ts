@@ -2,7 +2,15 @@ import { getSubdomain, getPathname } from './url-utils'
 
 export const FRONTEND_DOMAIN = 'frontend-sooty-ten.now.sh'
 const API_ENDPOINT = 'https://api.serlo.org/graphql'
-const FRONTEND_ALLOWED_TYPES = ['Article', 'TaxonomyTerm']
+const FRONTEND_ALLOWED_TYPES = [
+  'Article',
+  'Applet',
+  'Course',
+  'CoursePage',
+  'Page',
+  'TaxonomyTerm',
+  'Video',
+]
 const FRONTEND_PROBABILITY = 0.1
 
 export async function handleRequest(
