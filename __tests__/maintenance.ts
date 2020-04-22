@@ -21,18 +21,14 @@
  */
 import { DateTime } from 'luxon'
 
-import { handleRequest } from '../src'
-import { createApiResponse } from './frontend-proxy'
-import { contentTypeIsHtml, containsText, withMockedFetch } from './utils'
+import { maintenanceMode } from '../src/maintenance'
+import { contentTypeIsHtml, containsText } from './utils'
 
 describe('Maintenance mode', () => {
   test('Disabled (no maintenance planned)', async () => {
     mockMaintenanceKV({})
 
-    await withMockedFetch([createApiResponse(), echoUrl], async () => {
-      const res = await handleUrl('https://de.serlo.org')
-      expect(await res.text()).toBe('https://de.serlo.org/')
-    })
+    expect(await handleUrl('https://de.serlo.org')).toBeNull()
   })
 
   test('Disabled (before scheduled maintenance)', async () => {
@@ -45,10 +41,7 @@ describe('Maintenance mode', () => {
       enabled: JSON.stringify(value),
     })
 
-    await withMockedFetch([createApiResponse(), echoUrl], async () => {
-      const res = await handleUrl('https://de.serlo.org')
-      expect(await res.text()).toBe('https://de.serlo.org/')
-    })
+    expect(await handleUrl('https://de.serlo.org')).toBeNull()
   })
 
   test('Disabled (after scheduled maintenance)', async () => {
@@ -61,10 +54,7 @@ describe('Maintenance mode', () => {
       enabled: JSON.stringify(value),
     })
 
-    await withMockedFetch([createApiResponse(), echoUrl], async () => {
-      const res = await handleUrl('https://de.serlo.org')
-      expect(await res.text()).toBe('https://de.serlo.org/')
-    })
+    expect(await handleUrl('https://de.serlo.org')).toBeNull()
   })
 
   test('Enabled (de, w/ end)', async () => {
@@ -156,10 +146,7 @@ describe('Maintenance mode', () => {
       enabled: JSON.stringify(value),
     })
 
-    await withMockedFetch([createApiResponse(), echoUrl], async () => {
-      const res = await handleUrl('https://de.serlo.org')
-      expect(await res.text()).toBe('https://de.serlo.org/')
-    })
+    expect(await handleUrl('https://de.serlo.org')).toBeNull()
   })
 
   test('Enabled (different subdomain, w/o end)', async () => {
@@ -171,19 +158,12 @@ describe('Maintenance mode', () => {
       enabled: JSON.stringify(value),
     })
 
-    await withMockedFetch([createApiResponse(), echoUrl], async () => {
-      const res = await handleUrl('https://de.serlo.org')
-      expect(await res.text()).toBe('https://de.serlo.org/')
-    })
+    expect(await handleUrl('https://de.serlo.org')).toBeNull()
   })
 })
 
 async function handleUrl(url: string): Promise<Response> {
-  return await handleRequest(new Request(url))
-}
-
-function echoUrl(req: Request): Promise<Response> {
-  return new Promise<Response>((resolve) => resolve(new Response(req.url)))
+  return (await maintenanceMode(new Request(url))) as Response
 }
 
 function mockMaintenanceKV(values: Record<string, unknown>) {
