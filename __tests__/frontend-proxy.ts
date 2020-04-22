@@ -192,7 +192,7 @@ async function handleUrl(
   return (await handleRequest(req, probability, TEST_ALLOWED_TYPES)) as Response
 }
 
-function createApiResponse(typename = TEST_ALLOWED_TYPES[0]) {
+export function createApiResponse(typename = TEST_ALLOWED_TYPES[0]) {
   return createJsonResponse({ data: { uuid: { __typename: typename } } })
 }
 
