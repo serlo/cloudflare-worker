@@ -78,7 +78,7 @@ describe('handleRequest()', () => {
       'https://de.serlo.org/imprint',
       'https://fr.serlo.org/imprint/',
     ])('URL is %p', async (url) => {
-      await withMockedFetch('<p>Hello World</p>', async () => {
+      await withMockedFetch(['<p>Hello World</p>'], async () => {
         const response = (await testHandleRequest(url)) as Response
 
         hasOkStatus(response)
@@ -89,7 +89,7 @@ describe('handleRequest()', () => {
   })
 
   test('returns unrevised page response at /terms (markdown specification)', async () => {
-    await withMockedFetch('# Terms of Use', async () => {
+    await withMockedFetch(['# Terms of Use'], async () => {
       const url = 'https://de.serlo.org/terms'
       const response = (await testHandleRequest(url)) as Response
 
@@ -100,7 +100,7 @@ describe('handleRequest()', () => {
   })
 
   test('returns current revision for requests at /privacy', async () => {
-    await withMockedFetch('<p>Hello</p>', async () => {
+    await withMockedFetch(['<p>Hello</p>'], async () => {
       const url = 'https://de.serlo.org/privacy/'
       const response = (await testHandleRequest(url)) as Response
 
@@ -114,7 +114,7 @@ describe('handleRequest()', () => {
   })
 
   test('returns archived revision for requests at /privacy/archive/<id>', async () => {
-    await withMockedFetch('<p>Hello</p>', async () => {
+    await withMockedFetch(['<p>Hello</p>'], async () => {
       const url = 'https://de.serlo.org/privacy/archive/1999-10-09'
       const response = (await testHandleRequest(url)) as Response
 
@@ -282,7 +282,7 @@ describe('fetchContent()', () => {
 
   describe('returns page when url can be resolved', () => {
     test('parses reponse as Markdown if url ends with `.md`', async () => {
-      await withMockedFetch('# Hello World', async () => {
+      await withMockedFetch(['# Hello World'], async () => {
         expect(await fetchContent(exampleSpecMarkdown)).toEqual({
           lang: 'de',
           title: 'Imprint',
@@ -293,7 +293,7 @@ describe('fetchContent()', () => {
     })
 
     test('returns response content when url does not end with `.md`', async () => {
-      await withMockedFetch('<h1>Hello World</h1>', async () => {
+      await withMockedFetch(['<h1>Hello World</h1>'], async () => {
         expect(await fetchContent(exampleSpec)).toEqual({
           lang: 'en',
           title: 'Imprint',
@@ -306,7 +306,7 @@ describe('fetchContent()', () => {
     describe('returned HTML is sanitized', () => {
       test('HTML response', async () => {
         await withMockedFetch(
-          '<h1>Hello World</h1><script>alert(42)</script>',
+          ['<h1>Hello World</h1><script>alert(42)</script>'],
           async () => {
             expect(await fetchContent(exampleSpec)).toEqual({
               lang: 'en',
@@ -320,7 +320,7 @@ describe('fetchContent()', () => {
 
       test('Markdown response', async () => {
         await withMockedFetch(
-          'Hello\n<iframe src="http://serlo.org/">',
+          ['Hello\n<iframe src="http://serlo.org/">'],
           async () => {
             expect(await fetchContent(exampleSpecMarkdown)).toEqual({
               lang: 'de',
@@ -337,7 +337,7 @@ describe('fetchContent()', () => {
   describe('support for __JS_GOOGLE_ANALYTICS_DEACTIVATE__', () => {
     test('HTML response', async () => {
       await withMockedFetch(
-        'Click <a href="__JS_GOOGLE_ANALYTICS_DEACTIVATE__">here</a>',
+        ['Click <a href="__JS_GOOGLE_ANALYTICS_DEACTIVATE__">here</a>'],
         async () => {
           expect(await fetchContent(exampleSpec)).toEqual({
             lang: 'en',
@@ -351,7 +351,7 @@ describe('fetchContent()', () => {
 
     test('Markdown response', async () => {
       await withMockedFetch(
-        'Click [here](__JS_GOOGLE_ANALYTICS_DEACTIVATE__)',
+        ['Click [here](__JS_GOOGLE_ANALYTICS_DEACTIVATE__)'],
         async () => {
           expect(await fetchContent(exampleSpecMarkdown)).toEqual({
             lang: 'de',
@@ -366,7 +366,7 @@ describe('fetchContent()', () => {
 
   describe('returns null when request on the url of the spec fails', () => {
     test.each([301, 404, 500])('status code %p', async (code) => {
-      await withMockedFetch(new Response('', { status: code }), async () => {
+      await withMockedFetch([new Response('', { status: code })], async () => {
         expect(await fetchContent(exampleSpec)).toBeNull()
       })
     })

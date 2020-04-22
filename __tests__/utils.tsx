@@ -98,7 +98,7 @@ test('NotFoundResponse', async () => {
 })
 
 test('fetchWithCache()', async () => {
-  const mockedFetch = await withMockedFetch('test', async () => {
+  const mockedFetch = await withMockedFetch(['test'], async () => {
     const response = await fetchWithCache('http://example.com')
 
     expect(await response.text()).toBe('test')
@@ -144,18 +144,13 @@ export async function isJsonResponse(response: Response, targetJson: unknown) {
 }
 
 export async function withMockedFetch(
-  mockImplSpec: string | Response | ((req: Request) => Promise<Response>),
+  specs: Array<string | Response | ((req: Request) => Promise<Response>)>,
   fn: () => Promise<void>
 ) {
-  async function mockedFetch(reqInfo: Request | string): Promise<Response> {
-    if (typeof mockImplSpec === 'string') return new Response(mockImplSpec)
-    if (mockImplSpec instanceof Response) return mockImplSpec
-
-    const request = typeof reqInfo === 'string' ? new Request(reqInfo) : reqInfo
-    return mockImplSpec(request)
-  }
-
-  const fetch = jest.fn().mockImplementationOnce(mockedFetch)
+  const fetch = specs.reduce(
+    (accFetch, spec) => accFetch.mockImplementationOnce(toMockedFetch(spec)),
+    jest.fn()
+  )
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
@@ -163,7 +158,19 @@ export async function withMockedFetch(
 
   await fn()
 
-  expect(fetch).toHaveBeenCalled()
+  expect(fetch).toHaveBeenCalledTimes(specs.length)
 
   return fetch
+}
+
+function toMockedFetch(
+  spec: string | Response | ((req: Request) => Promise<Response>)
+) {
+  return async (reqInfo: Request | string) => {
+    if (typeof spec === 'string') return new Response(spec)
+    if (spec instanceof Response) return spec
+
+    const request = typeof reqInfo === 'string' ? new Request(reqInfo) : reqInfo
+    return spec(request)
+  }
 }
