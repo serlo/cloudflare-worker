@@ -31,8 +31,10 @@ export async function handleRequest(
   if (path.startsWith('/_next/') || path.startsWith('/_assets/'))
     return await fetchBackend(true, false)
 
-  const typename = await queryTypename(path)
-  if (typename === null || !allowedTypes.includes(typename)) return null
+  if (path !== '/') {
+    const typename = await queryTypename(path)
+    if (typename === null || !allowedTypes.includes(typename)) return null
+  }
 
   const cookies = request.headers.get('Cookie')
 
