@@ -1,6 +1,6 @@
 import { getSubdomain, getPathname } from './url-utils'
 
-export const FRONTEND_DOMAIN = 'frontend-sooty-ten.now.sh'
+export const FRONTEND_DOMAIN = 'frontend.serlo.now.sh'
 const API_ENDPOINT = 'https://api.serlo.org/graphql'
 const FRONTEND_ALLOWED_TYPES = [
   'Article',
