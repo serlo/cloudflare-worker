@@ -98,12 +98,11 @@ test('NotFoundResponse', async () => {
 })
 
 test('fetchWithCache()', async () => {
-  const mockedFetch = await withMockedFetch(['test'], async () => {
-    const response = await fetchWithCache('http://example.com')
+  const mockedFetch = mockFetchReturning('test')
 
-    expect(await response.text()).toBe('test')
-  })
+  const response = await fetchWithCache('http://example.com')
 
+  expect(await response.text()).toBe('test')
   expect(mockedFetch).toHaveBeenCalledWith('http://example.com', {
     cf: { cacheTtl: 3600 },
   })
@@ -143,34 +142,21 @@ export async function isJsonResponse(response: Response, targetJson: unknown) {
   expect(JSON.parse(await response.text())).toEqual(targetJson)
 }
 
-export async function withMockedFetch(
-  specs: Array<string | Response | ((req: Request) => Promise<Response>)>,
-  fn: () => Promise<void>
-) {
-  const fetch = specs.reduce(
-    (accFetch, spec) => accFetch.mockImplementationOnce(toMockedFetch(spec)),
-    jest.fn()
-  )
+export function mockFetchReturning(...responseSpecs: Array<string | Response>) {
+  const mockedFetch = responseSpecs
+    .map(convertToResponse)
+    .reduce(
+      (accFetch, response) => accFetch.mockReturnValueOnce(response),
+      jest.fn()
+    )
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
-  global.fetch = fetch
+  global.fetch = mockedFetch
 
-  await fn()
-
-  expect(fetch).toHaveBeenCalledTimes(specs.length)
-
-  return fetch
+  return mockedFetch
 }
 
-function toMockedFetch(
-  spec: string | Response | ((req: Request) => Promise<Response>)
-) {
-  return async (reqInfo: Request | string) => {
-    if (typeof spec === 'string') return new Response(spec)
-    if (spec instanceof Response) return spec
-
-    const request = typeof reqInfo === 'string' ? new Request(reqInfo) : reqInfo
-    return spec(request)
-  }
+function convertToResponse(spec: string | Response): Response {
+  return typeof spec === 'string' ? new Response(spec) : spec
 }
