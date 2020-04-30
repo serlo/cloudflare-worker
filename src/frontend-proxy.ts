@@ -23,13 +23,24 @@ export async function handleRequest(
 
   if (getSubdomain(url) !== 'de') return null
 
-  if (path === '/enable-frontend')
-    return createResponse('Enable frontend', probability, true)
-  if (path === '/disable-frontend')
-    return createResponse('Disable frontend', probability, false)
+  if (path === '/enable-frontend') {
+    const response = new Response('Enable frontend')
+
+    setFrontendUseCookie(response, true)
+
+    return response
+  }
+
+  if (path === '/disable-frontend') {
+    const response = new Response('Disable frontend')
+
+    setFrontendUseCookie(response, false)
+
+    return response
+  }
 
   if (path.startsWith('/_next/') || path.startsWith('/_assets/'))
-    return await fetchBackend(true, false)
+    return await fetchBackend({ useFrontend: true, setCookie: false })
 
   if (path !== '/') {
     const typename = await queryTypename(path)
@@ -38,26 +49,40 @@ export async function handleRequest(
 
   const cookies = request.headers.get('Cookie')
 
-  if (cookies?.includes(formatCookie(true, probability)))
-    return fetchBackend(true, false)
-  if (cookies?.includes(formatCookie(false, probability)))
-    return await fetchBackend(false, false)
+  if (cookies?.includes(formatCookie(true)))
+    return fetchBackend({ useFrontend: true, setCookie: false })
+  if (cookies?.includes(formatCookie(false)))
+    return await fetchBackend({ useFrontend: false, setCookie: false })
 
-  return await fetchBackend(Math.random() < probability, true)
+  return await fetchBackend({
+    useFrontend: Math.random() < probability,
+    setCookie: true,
+  })
 
-  async function fetchBackend(useFrontend: boolean, setCookie?: boolean) {
+  async function fetchBackend({
+    useFrontend,
+    setCookie,
+  }: {
+    useFrontend: boolean
+    setCookie: boolean
+  }) {
+    const frontendUrl = `https://${FRONTEND_DOMAIN}${getPathname(request.url)}`
     const backendRequest = useFrontend
-      ? new Request(
-          `https://${FRONTEND_DOMAIN}${getPathname(request.url)}`,
-          request
-        )
+      ? new Request(frontendUrl, request)
       : request
+    const response = (await fetch(backendRequest)).clone()
 
-    return await createResponse(
-      await fetch(backendRequest),
-      probability,
-      setCookie ? useFrontend : undefined
-    )
+    if (setCookie) setFrontendUseCookie(response, useFrontend)
+
+    return response
+  }
+
+  function setFrontendUseCookie(res: Response, useFrontend: boolean) {
+    res.headers.set('Set-Cookie', `${formatCookie(useFrontend)}; path=/`)
+  }
+
+  function formatCookie(useFrontend: boolean) {
+    return `useFrontend${Math.floor(probability * 100)}=${useFrontend}`
   }
 }
 
@@ -80,26 +105,4 @@ export function createApiQuery(path: string): string {
     : `alias: { instance: de, path: "/${pathWithoutSlash}" }`
 
   return `{ uuid(${query}) { __typename } }`
-}
-
-async function createResponse(
-  resInfo: string | Response,
-  probability: number,
-  futureFrontendUse?: boolean
-) {
-  const body = typeof resInfo === 'string' ? resInfo : await resInfo.text()
-  const init = typeof resInfo === 'string' ? undefined : resInfo
-  const response = new Response(body, init)
-
-  if (futureFrontendUse !== undefined) {
-    const cookie = `${formatCookie(futureFrontendUse, probability)}; path=/`
-
-    response.headers.set('Set-Cookie', cookie)
-  }
-
-  return response
-}
-
-function formatCookie(useFrontend: boolean, probability: number) {
-  return `useFrontend${Math.floor(probability * 100)}=${useFrontend}`
 }
