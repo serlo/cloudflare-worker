@@ -61,9 +61,10 @@ export async function handleRequest(
     const frontendUrl = `https://${frontendDomain}${getPathname(request.url)}`
     const backendRequest = useFrontend
       ? new Request(frontendUrl, request)
-      : request
-    const response = (await fetch(backendRequest)).clone()
+      : request.clone()
+    backendRequest.headers.set('X-SERLO-API', apiEndpoint)
 
+    const response = (await fetch(backendRequest)).clone()
     if (setCookie) setCookieUseFrontend(response, useFrontend)
 
     return response
