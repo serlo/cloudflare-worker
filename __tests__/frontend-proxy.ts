@@ -1,12 +1,15 @@
-import {
-  handleRequest,
-  FRONTEND_DOMAIN,
-  createApiQuery,
-} from '../src/frontend-proxy'
+import { handleRequest, createApiQuery } from '../src/frontend-proxy'
 import { createJsonResponse } from '../src/utils'
 import { hasOkStatus, mockFetchReturning } from './utils'
 
 describe('handleRequest()', () => {
+  beforeEach(() => {
+    process.env.FRONTEND_DOMAIN = 'frontend.domain'
+    process.env.API_ENDPOINT = 'api.endpoint'
+    process.env.FRONTEND_PROBABILITY = '0.1'
+    process.env.FRONTEND_ALLOWED_TYPES = '[]'
+  })
+
   describe('returns null if language tenant is not "de"', () => {
     test.each([
       'https://serlo.org/',
@@ -27,14 +30,16 @@ describe('handleRequest()', () => {
       'https://de.serlo.org/_nextexample-url',
     ])('url=%p', async (url) => {
       const mockedFetch = mockFetchReturning(createApiResponse('User'), '')
+      process.env.FRONTEND_PROBABILITY = '1'
+      process.env.FRONTEND_ALLOWED_TYPES = '["User"]'
 
       const request = new Request(url)
-      const response = (await handleRequest(request, 1, ['User']))!
+      const response = await handleRequest(request)
 
-      const targetUrl = url.replace('de.serlo.org', FRONTEND_DOMAIN)
+      const targetUrl = url.replace('de.serlo.org', 'frontend.domain')
       expect(getBackendUrl(mockedFetch)).toBe(targetUrl)
 
-      const cookieHeader = response.headers.get('Set-Cookie')
+      const cookieHeader = response!.headers.get('Set-Cookie')
       expect(cookieHeader).toBe('useFrontend100=true; path=/')
     })
   })
@@ -46,24 +51,27 @@ describe('handleRequest()', () => {
       'https://de.serlo.org/_nextexample-url',
     ])('url=%p', async (url) => {
       const mockedFetch = mockFetchReturning(createApiResponse('User'), '')
+      process.env.FRONTEND_PROBABILITY = '0'
+      process.env.FRONTEND_ALLOWED_TYPES = '["User"]'
 
       const request = new Request(url)
-      const response = (await handleRequest(request, 0, ['User']))!
+      const response = await handleRequest(request)
 
       expect(getBackendUrl(mockedFetch)).toBe(url)
 
-      const cookieHeader = response.headers.get('Set-Cookie')
+      const cookieHeader = response!.headers.get('Set-Cookie')
       expect(cookieHeader).toBe('useFrontend0=false; path=/')
     })
   })
 
   test('type of start page is not checked', async () => {
     const mockedFetch = mockFetchReturning('')
+    process.env.FRONTEND_PROBABILITY = '1'
 
     const request = new Request('https://de.serlo.org/')
-    const response = (await handleRequest(request, 1))!
+    const response = (await handleRequest(request))!
 
-    expect(getBackendUrl(mockedFetch)).toBe(`https://${FRONTEND_DOMAIN}/`)
+    expect(getBackendUrl(mockedFetch)).toBe('https://frontend.domain/')
     expect(response.headers.get('Set-Cookie')).toBe(
       `useFrontend100=true; path=/`
     )
@@ -72,9 +80,11 @@ describe('handleRequest()', () => {
   describe('returns null for not allowed taxonomy types', () => {
     test.each(['Page', 'TaxonomyTerm'])('typename=%p', async (typename) => {
       mockFetchReturning(createApiResponse(typename))
+      process.env.FRONTEND_PROBABILITY = '1'
+      process.env.FRONTEND_ALLOWED_TYPES = '["User", "Article"]'
 
       const request = new Request('https://de.serlo.org/math')
-      const response = await handleRequest(request, 1, ['User', 'Article'])
+      const response = await handleRequest(request)
 
       expect(response).toBeNull()
     })
@@ -98,11 +108,11 @@ describe('handleRequest()', () => {
     ])('URL is %p', async (url) => {
       const mockedFetch = mockFetchReturning('')
 
-      const response = (await handleRequest(new Request(url)))!
+      const response = await handleRequest(new Request(url))
 
-      const targetUrl = url.replace('de.serlo.org', FRONTEND_DOMAIN)
+      const targetUrl = url.replace('de.serlo.org', 'frontend.domain')
       expect(getBackendUrl(mockedFetch)).toBe(targetUrl)
-      expect(response.headers.get('Set-Cookie')).toBeNull()
+      expect(response!.headers.get('Set-Cookie')).toBeNull()
     })
   })
 
@@ -113,13 +123,15 @@ describe('handleRequest()', () => {
       'https://de.serlo.org/_nextexample-url',
     ])('URL=%p', async (url) => {
       const mockedFetch = mockFetchReturning(createApiResponse('User'), '')
+      process.env.FRONTEND_PROBABILITY = '0'
+      process.env.FRONTEND_ALLOWED_TYPES = '["User"]'
 
       const request = new Request(url, {
         headers: { Cookie: 'useFrontend0=true;' },
       })
-      const response = await handleRequest(request, 0, ['User'])
+      const response = await handleRequest(request)
 
-      const targetUrl = url.replace('de.serlo.org', FRONTEND_DOMAIN)
+      const targetUrl = url.replace('de.serlo.org', 'frontend.domain')
       expect(getBackendUrl(mockedFetch)).toBe(targetUrl)
       expect(response!.headers.get('Set-Cookie')).toBeNull()
     })
@@ -132,11 +144,13 @@ describe('handleRequest()', () => {
       'https://de.serlo.org/_nextexample-url',
     ])('URL=%p', async (url) => {
       const mockedFetch = mockFetchReturning(createApiResponse('User'), '')
+      process.env.FRONTEND_PROBABILITY = '1'
+      process.env.FRONTEND_ALLOWED_TYPES = '["User"]'
 
       const request = new Request(url, {
         headers: { Cookie: 'useFrontend100=false;' },
       })
-      const response = await handleRequest(request, 1, ['User'])
+      const response = await handleRequest(request)
 
       expect(getBackendUrl(mockedFetch)).toBe(url)
       expect(response!.headers.get('Set-Cookie')).toBeNull()
@@ -146,19 +160,21 @@ describe('handleRequest()', () => {
   test('creates a copy of backend responses (otherwise there is an error in cloudflare)', async () => {
     const backendResponse = new Response('')
     mockFetchReturning(backendResponse)
+    process.env.FRONTEND_PROBABILITY = '1'
 
-    const res = (await handleRequest(new Request('https://de.serlo.org'), 1))!
+    const response = await handleRequest(new Request('https://de.serlo.org'))
 
-    expect(res).not.toBe(backendResponse)
+    expect(response).not.toBe(backendResponse)
   })
 
   describe('transfers request meta data to backend', () => {
     test.each([1, 0])('useFrontendProbability=%p', async (probability) => {
       const mockedFetch = mockFetchReturning('')
+      process.env.FRONTEND_PROBABILITY = probability.toString()
 
-      const req = new Request('https://de.serlo.org/')
-      req.headers.set('X-Header', 'foo')
-      await handleRequest(req, probability)
+      const request = new Request('https://de.serlo.org/')
+      request.headers.set('X-Header', 'foo')
+      await handleRequest(request)
 
       const backendRequest = mockedFetch.mock.calls[0][0]
 
@@ -171,33 +187,54 @@ describe('handleRequest()', () => {
   describe('transfers response meta data from backend', () => {
     test.each([1, 0])('useFrontendProbability=%p', async (probability) => {
       mockFetchReturning(new Response('', { headers: { 'X-Header': 'bar' } }))
+      process.env.FRONTEND_PROBABILITY = probability.toString()
 
       const request = new Request('https://de.serlo.org')
-      const response = (await handleRequest(request, probability))!
+      const response = await handleRequest(request)
 
       expect(response).not.toBeNull()
-      expect(response.headers.get('X-Header')).toBe('bar')
+      expect(response!.headers.get('X-Header')).toBe('bar')
 
       // TODO: Authentication Cookie
     })
   })
 
   test('requests to /enable-frontend enable use of frontend', async () => {
-    const url = 'https://de.serlo.org/enable-frontend'
-    const res = (await handleRequest(new Request(url), 0.15))!
+    process.env.FRONTEND_PROBABILITY = '0.15'
 
-    hasOkStatus(res)
-    expect(res.headers.get('Set-Cookie')).toBe('useFrontend15=true; path=/')
-    expect(await res.text()).toBe('Enable frontend')
+    const url = 'https://de.serlo.org/enable-frontend'
+    const res = await handleRequest(new Request(url))
+
+    hasOkStatus(res!)
+    expect(res!.headers.get('Set-Cookie')).toBe('useFrontend15=true; path=/')
+    expect(await res!.text()).toBe('Enable frontend')
   })
 
   test('requests to /disable-frontend disable use of frontend', async () => {
-    const url = 'https://de.serlo.org/disable-frontend'
-    const res = (await handleRequest(new Request(url), 0.15))!
+    process.env.FRONTEND_PROBABILITY = '0.15'
 
-    hasOkStatus(res)
-    expect(res.headers.get('Set-Cookie')).toBe('useFrontend15=false; path=/')
-    expect(await res.text()).toBe('Disable frontend')
+    const url = 'https://de.serlo.org/disable-frontend'
+    const res = await handleRequest(new Request(url))
+
+    hasOkStatus(res!)
+    expect(res!.headers.get('Set-Cookie')).toBe('useFrontend15=false; path=/')
+    expect(await res!.text()).toBe('Disable frontend')
+  })
+
+  describe('throws error when necessary environment variable is undefined', () => {
+    test.each([
+      'API_ENDPOINT',
+      'FRONTEND_DOMAIN',
+      'FRONTEND_PROBABILITY',
+      'FRONTEND_ALLOWED_TYPES',
+    ])('variable: %p', async (envName) => {
+      delete process.env[envName]
+
+      const request = new Request('https://de.serlo.org/')
+      const responsePromise = handleRequest(request)
+
+      await expect(responsePromise).rejects.toThrow(`${envName} is not set`)
+    })
   })
 })
 
