@@ -56,16 +56,18 @@ export async function handleRequest(
     useFrontend: boolean
     setCookie: boolean
   }) {
-    const frontendUrl = `https://${frontendDomain}${getPathname(request.url)}`
-    const backendRequest = useFrontend
-      ? new Request(frontendUrl, request)
-      : request.clone()
-    backendRequest.headers.set('X-SERLO-API', apiEndpoint)
+    const backendUrl = useFrontend
+      ? `https://${global.FRONTEND_DOMAIN}${getPathname(request.url)}`
+      : request.url
+    const backendRequest = new Request(backendUrl, request)
+    backendRequest.headers.set('X-SERLO-API', global.API_ENDPOINT)
 
-    const response = (await fetch(backendRequest)).clone()
-    if (setCookie) setCookieUseFrontend(response, useFrontend)
+    const response = await fetch(backendRequest)
 
-    return response
+    const clonedResponse = new Response(response.body, response)
+    if (setCookie) setCookieUseFrontend(clonedResponse, useFrontend)
+
+    return clonedResponse
   }
 
   function setCookieUseFrontend(res: Response, useFrontend: boolean) {
