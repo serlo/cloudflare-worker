@@ -13,6 +13,12 @@ describe('handleRequest()', () => {
     mockKV('FRONTEND_CACHE_TYPES', {})
   })
 
+  const randomCopy = Math.random
+
+  afterEach(() => {
+    Math.random = randomCopy
+  })
+
   describe('returns null if language tenant is not "de"', () => {
     test.each([
       'https://serlo.org/',
@@ -33,7 +39,8 @@ describe('handleRequest()', () => {
       'https://de.serlo.org/_nextexample-url',
     ])('url=%p', async (url) => {
       const mockedFetch = mockFetchReturning(createApiResponse('User'), '')
-      global.FRONTEND_PROBABILITY = '1'
+      Math.random = jest.fn().mockReturnValueOnce(0.25)
+      global.FRONTEND_PROBABILITY = '0.5'
       global.FRONTEND_ALLOWED_TYPES = '["User"]'
 
       const request = new Request(url)
@@ -43,7 +50,7 @@ describe('handleRequest()', () => {
       expect(getBackendUrl(mockedFetch)).toBe(targetUrl)
 
       const cookieHeader = response.headers.get('Set-Cookie')
-      expect(cookieHeader).toBe('useFrontend100=true; path=/')
+      expect(cookieHeader).toBe('useFrontend=0.25; path=/')
 
       expect(getHeaderApiEndpoint(mockedFetch)).toBe('api.endpoint')
       const cachedType = await global.FRONTEND_CACHE_TYPES.get(getPathname(url))
@@ -58,7 +65,8 @@ describe('handleRequest()', () => {
       'https://de.serlo.org/_nextexample-url',
     ])('url=%p', async (url) => {
       const mockedFetch = mockFetchReturning(createApiResponse('User'), '')
-      global.FRONTEND_PROBABILITY = '0'
+      Math.random = jest.fn().mockReturnValueOnce(0.66)
+      global.FRONTEND_PROBABILITY = '0.5'
       global.FRONTEND_ALLOWED_TYPES = '["User"]'
 
       const request = new Request(url)
@@ -67,7 +75,7 @@ describe('handleRequest()', () => {
       expect(getBackendUrl(mockedFetch)).toBe(url)
 
       const cookieHeader = response.headers.get('Set-Cookie')
-      expect(cookieHeader).toBe('useFrontend0=false; path=/')
+      expect(cookieHeader).toBe('useFrontend=0.66; path=/')
 
       expect(getHeaderApiEndpoint(mockedFetch)).toBe('api.endpoint')
 
@@ -91,15 +99,14 @@ describe('handleRequest()', () => {
 
   test('type of start page is not checked', async () => {
     const mockedFetch = mockFetchReturning('')
+    Math.random = jest.fn().mockReturnValueOnce(0.25)
     global.FRONTEND_PROBABILITY = '1'
 
     const request = new Request('https://de.serlo.org/')
     const response = (await handleRequest(request))!
 
     expect(getBackendUrl(mockedFetch)).toBe('https://frontend.domain/')
-    expect(response.headers.get('Set-Cookie')).toBe(
-      `useFrontend100=true; path=/`
-    )
+    expect(response.headers.get('Set-Cookie')).toBe(`useFrontend=0.25; path=/`)
     expect(getHeaderApiEndpoint(mockedFetch)).toBe('api.endpoint')
     expect(await global.FRONTEND_CACHE_TYPES.get('/')).toBeNull()
   })
@@ -147,52 +154,56 @@ describe('handleRequest()', () => {
     })
   })
 
-  describe('uses frontend when it is enabled via cookie', () => {
-    test.each([
-      'https://de.serlo.org/math',
-      'https://de.serlo.org/10',
-      'https://de.serlo.org/_nextexample-url',
-    ])('URL=%p', async (url) => {
-      const mockedFetch = mockFetchReturning(createApiResponse('User'), '')
-      global.FRONTEND_PROBABILITY = '0'
-      global.FRONTEND_ALLOWED_TYPES = '["User"]'
+  describe('uses cookie value to determine backend', () => {
+    describe.each([
+      ['https://de.serlo.org/math', '0.5'],
+      ['https://de.serlo.org/10', '0.00001'],
+      ['https://de.serlo.org/_nextexample-url', '0.9999999'],
+    ])('URL=%p Cookie=%p', (url, cookieValue) => {
+      test('frontend backend', async () => {
+        const mockedFetch = mockFetchReturning(createApiResponse('User'), '')
+        Math.random = jest.fn().mockReturnValueOnce(1)
+        global.FRONTEND_PROBABILITY = '1'
+        global.FRONTEND_ALLOWED_TYPES = '["User"]'
 
-      const request = new Request(url, {
-        headers: { Cookie: 'useFrontend0=true;' },
+        const request = new Request(url, {
+          headers: { Cookie: `useFrontend=${cookieValue};` },
+        })
+        const response = (await handleRequest(request))!
+
+        const targetUrl = url.replace('de.serlo.org', 'frontend.domain')
+        expect(getBackendUrl(mockedFetch)).toBe(targetUrl)
+        expect(response.headers.get('Set-Cookie')).toBeNull()
+        expect(getHeaderApiEndpoint(mockedFetch)).toBe('api.endpoint')
+
+        expect(Math.random).not.toHaveBeenCalled()
+
+        const path = getPathname(url)
+        const cachedType = await global.FRONTEND_CACHE_TYPES.get(path)
+        expect(cachedType).toBe('User')
       })
-      const response = (await handleRequest(request))!
 
-      const targetUrl = url.replace('de.serlo.org', 'frontend.domain')
-      expect(getBackendUrl(mockedFetch)).toBe(targetUrl)
-      expect(response.headers.get('Set-Cookie')).toBeNull()
-      expect(getHeaderApiEndpoint(mockedFetch)).toBe('api.endpoint')
+      test('standard backend', async () => {
+        const mockedFetch = mockFetchReturning(createApiResponse('User'), '')
+        Math.random = jest.fn().mockReturnValueOnce(0)
+        global.FRONTEND_PROBABILITY = '0'
+        global.FRONTEND_ALLOWED_TYPES = '["User"]'
 
-      const cachedType = await global.FRONTEND_CACHE_TYPES.get(getPathname(url))
-      expect(cachedType).toBe('User')
-    })
-  })
+        const request = new Request(url, {
+          headers: { Cookie: `useFrontend=${cookieValue};` },
+        })
+        const response = (await handleRequest(request))!
 
-  describe('does not use frontend when it is disabled via cookie', () => {
-    test.each([
-      'https://de.serlo.org/math',
-      'https://de.serlo.org/10',
-      'https://de.serlo.org/_nextexample-url',
-    ])('URL=%p', async (url) => {
-      const mockedFetch = mockFetchReturning(createApiResponse('User'), '')
-      global.FRONTEND_PROBABILITY = '1'
-      global.FRONTEND_ALLOWED_TYPES = '["User"]'
+        expect(Math.random).not.toHaveBeenCalled()
 
-      const request = new Request(url, {
-        headers: { Cookie: 'useFrontend100=false;' },
+        expect(getBackendUrl(mockedFetch)).toBe(url)
+        expect(response.headers.get('Set-Cookie')).toBeNull()
+        expect(getHeaderApiEndpoint(mockedFetch)).toBe('api.endpoint')
+
+        const path = getPathname(url)
+        const cachedType = await global.FRONTEND_CACHE_TYPES.get(path)
+        expect(cachedType).toBe('User')
       })
-      const response = (await handleRequest(request))!
-
-      expect(getBackendUrl(mockedFetch)).toBe(url)
-      expect(response.headers.get('Set-Cookie')).toBeNull()
-      expect(getHeaderApiEndpoint(mockedFetch)).toBe('api.endpoint')
-
-      const cachedType = await global.FRONTEND_CACHE_TYPES.get(getPathname(url))
-      expect(cachedType).toBe('User')
     })
   })
 
@@ -233,6 +244,7 @@ describe('handleRequest()', () => {
           },
         })
       )
+      Math.random = jest.fn().mockReturnValueOnce(0.5)
       global.FRONTEND_PROBABILITY = probability.toString()
 
       const request = new Request('https://de.serlo.org')
@@ -241,36 +253,30 @@ describe('handleRequest()', () => {
       expect(response).not.toBeNull()
       expect(response.headers.get('X-Header')).toBe('bar')
 
-      const cookieFrontendName = `useFrontend${probability * 100}`
-      const cookieFrontendValue = Boolean(probability)
       // FIXME: Use getAll() after https://github.com/whatwg/fetch/issues/973
       // got implemented. See also
       // https://community.cloudflare.com/t/dont-fold-set-cookie-headers-with-headers-append/165934/3
       expect(response.headers.get('Set-Cookie')).toBe(
-        `token=123456; path=/, ${cookieFrontendName}=${cookieFrontendValue}; path=/`
+        `token=123456; path=/, useFrontend=0.5; path=/`
       )
     })
   })
 
   test('requests to /enable-frontend enable use of frontend', async () => {
-    global.FRONTEND_PROBABILITY = '0.15'
-
     const url = 'https://de.serlo.org/enable-frontend'
     const res = (await handleRequest(new Request(url)))!
 
     hasOkStatus(res)
-    expect(res.headers.get('Set-Cookie')).toBe('useFrontend15=true; path=/')
+    expect(res.headers.get('Set-Cookie')).toBe('useFrontend=0; path=/')
     expect(await res.text()).toBe('Enable frontend')
   })
 
   test('requests to /disable-frontend disable use of frontend', async () => {
-    global.FRONTEND_PROBABILITY = '0.15'
-
     const url = 'https://de.serlo.org/disable-frontend'
     const res = (await handleRequest(new Request(url)))!
 
     hasOkStatus(res)
-    expect(res.headers.get('Set-Cookie')).toBe('useFrontend15=false; path=/')
+    expect(res.headers.get('Set-Cookie')).toBe('useFrontend=1; path=/')
     expect(await res.text()).toBe('Disable frontend')
   })
 })
