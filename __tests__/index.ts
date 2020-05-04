@@ -52,10 +52,10 @@ class RequestMock {
 }
 
 beforeAll(() => {
-  process.env.FRONTEND_DOMAIN = 'frontend.domain'
-  process.env.API_ENDPOINT = 'api.endpoint'
-  process.env.FRONTEND_PROBABILITY = '1'
-  process.env.FRONTEND_ALLOWED_TYPES = '[]'
+  global.FRONTEND_DOMAIN = 'frontend.domain'
+  global.API_ENDPOINT = 'api.endpoint'
+  global.FRONTEND_PROBABILITY = '1'
+  global.FRONTEND_ALLOWED_TYPES = '[]'
 })
 
 beforeEach(() => {
