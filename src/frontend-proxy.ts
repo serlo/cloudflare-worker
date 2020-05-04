@@ -3,8 +3,6 @@ import { getSubdomain, getPathname } from './url-utils'
 export async function handleRequest(
   request: Request
 ): Promise<Response | null> {
-  if (global.FRONTEND_DOMAIN === undefined) throw new Error('Test')
-
   const probability = Number(global.FRONTEND_PROBABILITY)
   const allowedTypes = JSON.parse(global.FRONTEND_ALLOWED_TYPES)
 
@@ -16,7 +14,7 @@ export async function handleRequest(
   if (path === '/enable-frontend') {
     const response = new Response('Enable frontend')
 
-    setCookieUseFrontend(response, true)
+    setCookieUseFrontend(response, 0)
 
     return response
   }
@@ -24,13 +22,13 @@ export async function handleRequest(
   if (path === '/disable-frontend') {
     const response = new Response('Disable frontend')
 
-    setCookieUseFrontend(response, false)
+    setCookieUseFrontend(response, 1)
 
     return response
   }
 
   if (path.startsWith('/_next/') || path.startsWith('/_assets/'))
-    return await fetchBackend({ useFrontend: true, setCookie: false })
+    return await fetchBackend({ useFrontend: 0, setCookie: false })
 
   if (path !== '/') {
     const typename = await queryTypename(path)
@@ -38,27 +36,25 @@ export async function handleRequest(
   }
 
   const cookies = request.headers.get('Cookie')
+  const cookieUseFrontend = cookies?.match(/useFrontend=(\d(\.\d+)?);/)
+  const useFrontend = cookieUseFrontend
+    ? Number(cookieUseFrontend[1])
+    : Math.random()
+  const setCookie = !cookieUseFrontend
 
-  if (cookies?.includes(formatCookie(true)))
-    return fetchBackend({ useFrontend: true, setCookie: false })
-  if (cookies?.includes(formatCookie(false)))
-    return await fetchBackend({ useFrontend: false, setCookie: false })
-
-  return await fetchBackend({
-    useFrontend: Math.random() < probability,
-    setCookie: true,
-  })
+  return await fetchBackend({ useFrontend, setCookie })
 
   async function fetchBackend({
     useFrontend,
     setCookie,
   }: {
-    useFrontend: boolean
+    useFrontend: number
     setCookie: boolean
   }) {
-    const backendUrl = useFrontend
-      ? `https://${global.FRONTEND_DOMAIN}${getPathname(request.url)}`
-      : request.url
+    const backendUrl =
+      useFrontend < probability
+        ? `https://${global.FRONTEND_DOMAIN}${getPathname(request.url)}`
+        : request.url
     const backendRequest = new Request(backendUrl, request)
     backendRequest.headers.set('X-SERLO-API', global.API_ENDPOINT)
 
@@ -70,12 +66,8 @@ export async function handleRequest(
     return clonedResponse
   }
 
-  function setCookieUseFrontend(res: Response, useFrontend: boolean) {
-    res.headers.append('Set-Cookie', `${formatCookie(useFrontend)}; path=/`)
-  }
-
-  function formatCookie(useFrontend: boolean) {
-    return `useFrontend${Math.floor(probability * 100)}=${useFrontend}`
+  function setCookieUseFrontend(res: Response, useFrontend: number) {
+    res.headers.append('Set-Cookie', `useFrontend=${useFrontend}; path=/`)
   }
 
   async function queryTypename(path: string): Promise<string | null> {
