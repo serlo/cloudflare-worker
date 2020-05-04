@@ -62,9 +62,9 @@ export async function fetchWithCache(
 }
 
 export function getBasicAuthHeaders(): Record<string, string> {
-  if (ENABLE_BASIC_AUTH !== 'true') return {}
-
-  return { Authorization: 'Basic c2VybG90ZWFtOnNlcmxvdGVhbQ==' }
+  return global.ENABLE_BASIC_AUTH === 'true'
+    ? { Authorization: 'Basic c2VybG90ZWFtOnNlcmxvdGVhbQ==' }
+    : {}
 }
 
 export function createPreactResponse(component: VNode, opt?: ResponseInit) {

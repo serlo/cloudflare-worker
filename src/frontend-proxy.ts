@@ -3,12 +3,10 @@ import { getSubdomain, getPathname } from './url-utils'
 export async function handleRequest(
   request: Request
 ): Promise<Response | null> {
-  const frontendDomain = getEnvironmentVariable('FRONTEND_DOMAIN')
-  const apiEndpoint = getEnvironmentVariable('API_ENDPOINT')
-  const probability = Number(getEnvironmentVariable('FRONTEND_PROBABILITY'))
-  const allowedTypes = JSON.parse(
-    getEnvironmentVariable('FRONTEND_ALLOWED_TYPES')
-  )
+  if (global.FRONTEND_DOMAIN === undefined) throw new Error('Test')
+
+  const probability = Number(global.FRONTEND_PROBABILITY)
+  const allowedTypes = JSON.parse(global.FRONTEND_ALLOWED_TYPES)
 
   const url = request.url
   const path = getPathname(url)
@@ -79,10 +77,10 @@ export async function handleRequest(
   }
 
   async function queryTypename(path: string): Promise<string | null> {
-    const cachedType = await FRONTEND_CACHE_TYPES.get(path)
+    const cachedType = await global.FRONTEND_CACHE_TYPES.get(path)
     if (cachedType !== null) return cachedType
 
-    const apiResponse = await fetch(apiEndpoint, {
+    const apiResponse = await fetch(global.API_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query: createApiQuery(path) }),
@@ -91,7 +89,9 @@ export async function handleRequest(
     const typename = apiResult?.data?.uuid?.__typename ?? null
 
     if (typename !== null)
-      await FRONTEND_CACHE_TYPES.put(path, typename, { expirationTtl: 60 * 60 })
+      await global.FRONTEND_CACHE_TYPES.put(path, typename, {
+        expirationTtl: 60 * 60,
+      })
 
     return typename
   }
@@ -104,12 +104,4 @@ export function createApiQuery(path: string): string {
     : `alias: { instance: de, path: "/${pathWithoutSlash}" }`
 
   return `{ uuid(${query}) { __typename } }`
-}
-
-function getEnvironmentVariable(envName: string): string {
-  const value = process.env[envName]
-
-  if (value === undefined) throw new TypeError(`${envName} is not set`)
-
-  return value
 }
