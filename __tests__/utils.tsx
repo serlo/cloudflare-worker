@@ -160,3 +160,19 @@ export function mockFetchReturning(...responseSpecs: Array<string | Response>) {
 function convertToResponse(spec: string | Response): Response {
   return typeof spec === 'string' ? new Response(spec) : spec
 }
+
+export function mockKV(name: string, values: Record<string, unknown>) {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
+  window[name] = {
+    // eslint-disable-next-line @typescript-eslint/require-await
+    async get(key: string) {
+      return values[key] ?? null
+    },
+
+    // eslint-disable-next-line @typescript-eslint/require-await
+    async put(key: string, value: unknown, _?: { expirationTtl: number }) {
+      values[key] = value
+    },
+  }
+}

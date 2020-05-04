@@ -22,11 +22,11 @@
 import { DateTime } from 'luxon'
 
 import { maintenanceMode } from '../src/maintenance'
-import { contentTypeIsHtml, containsText } from './utils'
+import { contentTypeIsHtml, containsText, mockKV } from './utils'
 
 describe('Maintenance mode', () => {
   test('Disabled (no maintenance planned)', async () => {
-    mockMaintenanceKV({})
+    mockKV('MAINTENANCE_KV', {})
 
     expect(await handleUrl('https://de.serlo.org')).toBeNull()
   })
@@ -37,7 +37,7 @@ describe('Maintenance mode', () => {
       end: DateTime.local().plus({ minutes: 20 }).toISO(),
       subdomains: ['de'],
     }
-    mockMaintenanceKV({
+    mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
 
@@ -50,7 +50,7 @@ describe('Maintenance mode', () => {
       end: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['de'],
     }
-    mockMaintenanceKV({
+    mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
 
@@ -64,7 +64,7 @@ describe('Maintenance mode', () => {
       end: end.toISO(),
       subdomains: ['de'],
     }
-    mockMaintenanceKV({
+    mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
 
@@ -85,7 +85,7 @@ describe('Maintenance mode', () => {
       end: end.toISO(),
       subdomains: ['en'],
     }
-    mockMaintenanceKV({
+    mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
 
@@ -104,7 +104,7 @@ describe('Maintenance mode', () => {
       start: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['de'],
     }
-    mockMaintenanceKV({
+    mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
 
@@ -122,7 +122,7 @@ describe('Maintenance mode', () => {
       start: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['en'],
     }
-    mockMaintenanceKV({
+    mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
 
@@ -142,7 +142,7 @@ describe('Maintenance mode', () => {
       end: end.toISO(),
       subdomains: ['en'],
     }
-    mockMaintenanceKV({
+    mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
 
@@ -154,7 +154,7 @@ describe('Maintenance mode', () => {
       start: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['en'],
     }
-    mockMaintenanceKV({
+    mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
 
@@ -164,15 +164,4 @@ describe('Maintenance mode', () => {
 
 async function handleUrl(url: string): Promise<Response> {
   return (await maintenanceMode(new Request(url))) as Response
-}
-
-function mockMaintenanceKV(values: Record<string, unknown>) {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore
-  window['MAINTENANCE_KV'] = {
-    // eslint-disable-next-line @typescript-eslint/require-await
-    async get(key: string) {
-      return values[key] || null
-    },
-  }
 }

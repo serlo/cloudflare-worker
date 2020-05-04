@@ -52,7 +52,7 @@ export function markdownToHtml(markdown: string): string {
 }
 
 export async function fetchWithCache(
-  url: string,
+  url: string | Request,
   init?: RequestInit
 ): Promise<Response> {
   return await fetch(url, ({

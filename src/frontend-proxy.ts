@@ -79,15 +79,21 @@ export async function handleRequest(
   }
 
   async function queryTypename(path: string): Promise<string | null> {
-    const apiRequest = new Request(apiEndpoint, {
+    const cachedType = await FRONTEND_CACHE_TYPES.get(path)
+    if (cachedType !== null) return cachedType
+
+    const apiResponse = await fetch(apiEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query: createApiQuery(path) }),
     })
-    const apiResponse = await fetch(apiRequest)
     const apiResult = await apiResponse.json()
+    const typename = apiResult?.data?.uuid?.__typename ?? null
 
-    return apiResult?.data?.uuid?.__typename ?? null
+    if (typename !== null)
+      await FRONTEND_CACHE_TYPES.put(path, typename, { expirationTtl: 60 * 60 })
+
+    return typename
   }
 }
 

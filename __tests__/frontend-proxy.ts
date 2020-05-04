@@ -1,6 +1,7 @@
 import { handleRequest, createApiQuery } from '../src/frontend-proxy'
+import { getPathname } from '../src/url-utils'
 import { createJsonResponse } from '../src/utils'
-import { hasOkStatus, mockFetchReturning } from './utils'
+import { hasOkStatus, mockFetchReturning, mockKV } from './utils'
 
 describe('handleRequest()', () => {
   beforeEach(() => {
@@ -8,6 +9,8 @@ describe('handleRequest()', () => {
     process.env.API_ENDPOINT = 'api.endpoint'
     process.env.FRONTEND_PROBABILITY = '0.1'
     process.env.FRONTEND_ALLOWED_TYPES = '[]'
+
+    mockKV('FRONTEND_CACHE_TYPES', {})
   })
 
   describe('returns null if language tenant is not "de"', () => {
@@ -43,6 +46,7 @@ describe('handleRequest()', () => {
       expect(cookieHeader).toBe('useFrontend100=true; path=/')
 
       expect(getHeaderApiEndpoint(mockedFetch)).toBe('api.endpoint')
+      expect(await FRONTEND_CACHE_TYPES.get(getPathname(url))).toBe('User')
     })
   })
 
@@ -65,7 +69,21 @@ describe('handleRequest()', () => {
       expect(cookieHeader).toBe('useFrontend0=false; path=/')
 
       expect(getHeaderApiEndpoint(mockedFetch)).toBe('api.endpoint')
+      expect(await FRONTEND_CACHE_TYPES.get(getPathname(url))).toBe('User')
     })
+  })
+
+  test('Uses cache to determine the type of an path', async () => {
+    const mockedFetch = mockFetchReturning('')
+    process.env.FRONTEND_PROBABILITY = '1'
+    process.env.FRONTEND_ALLOWED_TYPES = '["Page"]'
+    await FRONTEND_CACHE_TYPES.put('/math', 'Page')
+
+    const request = new Request('https://de.serlo.org/math')
+    await handleRequest(request)
+
+    expect(getBackendUrl(mockedFetch)).toBe('https://frontend.domain/math')
+    expect(await FRONTEND_CACHE_TYPES.get('/math')).toBe('Page')
   })
 
   test('type of start page is not checked', async () => {
@@ -80,6 +98,7 @@ describe('handleRequest()', () => {
       `useFrontend100=true; path=/`
     )
     expect(getHeaderApiEndpoint(mockedFetch)).toBe('api.endpoint')
+    expect(await FRONTEND_CACHE_TYPES.get('/')).toBeNull()
   })
 
   describe('returns null for not allowed taxonomy types', () => {
@@ -92,6 +111,7 @@ describe('handleRequest()', () => {
       const response = await handleRequest(request)
 
       expect(response).toBeNull()
+      expect(await FRONTEND_CACHE_TYPES.get('/math')).toBe(typename)
     })
   })
 
@@ -102,6 +122,7 @@ describe('handleRequest()', () => {
     const response = await handleRequest(request)
 
     expect(response).toBeNull()
+    expect(await FRONTEND_CACHE_TYPES.get('/math')).toBeNull()
   })
 
   describe('requests to /_next and /_assets always resolve to frontend', () => {
@@ -119,6 +140,7 @@ describe('handleRequest()', () => {
       expect(getBackendUrl(mockedFetch)).toBe(targetUrl)
       expect(response.headers.get('Set-Cookie')).toBeNull()
       expect(getHeaderApiEndpoint(mockedFetch)).toBe('api.endpoint')
+      expect(await FRONTEND_CACHE_TYPES.get(getPathname(url))).toBeNull()
     })
   })
 
@@ -141,6 +163,7 @@ describe('handleRequest()', () => {
       expect(getBackendUrl(mockedFetch)).toBe(targetUrl)
       expect(response.headers.get('Set-Cookie')).toBeNull()
       expect(getHeaderApiEndpoint(mockedFetch)).toBe('api.endpoint')
+      expect(await FRONTEND_CACHE_TYPES.get(getPathname(url))).toBe('User')
     })
   })
 
@@ -162,6 +185,7 @@ describe('handleRequest()', () => {
       expect(getBackendUrl(mockedFetch)).toBe(url)
       expect(response.headers.get('Set-Cookie')).toBeNull()
       expect(getHeaderApiEndpoint(mockedFetch)).toBe('api.endpoint')
+      expect(await FRONTEND_CACHE_TYPES.get(getPathname(url))).toBe('User')
     })
   })
 
