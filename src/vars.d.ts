@@ -19,5 +19,15 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
+interface KV<ValueType> {
+  get: (key: string) => Promise<ValueType | null>
+  put: (
+    key: string,
+    value: ValueType,
+    options?: { expirationTtl: number }
+  ) => Promise<void>
+}
+
 declare let DOMAIN: string
 declare let ENABLE_BASIC_AUTH: 'true' | 'false'
+declare const FRONTEND_CACHE_TYPES: KV<string>
