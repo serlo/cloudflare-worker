@@ -213,19 +213,26 @@ describe('handleRequest()', () => {
 
       const request = new Request('https://de.serlo.org/')
       request.headers.set('X-Header', 'foo')
+      request.headers.set('Cookie', 'token=12345;')
       await handleRequest(request)
 
       const backendRequest = mockedFetch.mock.calls[0][0]
 
       expect(backendRequest.headers.get('X-Header')).toBe('foo')
-
-      // TODO: Authentication Cookie
+      expect(backendRequest.headers.get('Cookie')).toBe('token=12345;')
     })
   })
 
   describe('transfers response meta data from backend', () => {
     test.each([1, 0])('useFrontendProbability=%p', async (probability) => {
-      mockFetchReturning(new Response('', { headers: { 'X-Header': 'bar' } }))
+      mockFetchReturning(
+        new Response('', {
+          headers: {
+            'X-Header': 'bar',
+            'Set-Cookie': 'token=123456; path=/',
+          },
+        })
+      )
       global.FRONTEND_PROBABILITY = probability.toString()
 
       const request = new Request('https://de.serlo.org')
@@ -234,7 +241,14 @@ describe('handleRequest()', () => {
       expect(response).not.toBeNull()
       expect(response.headers.get('X-Header')).toBe('bar')
 
-      // TODO: Authentication Cookie
+      const cookieFrontendName = `useFrontend${probability * 100}`
+      const cookieFrontendValue = Boolean(probability)
+      // FIXME: Use getAll() after https://github.com/whatwg/fetch/issues/973
+      // got implemented. See also
+      // https://community.cloudflare.com/t/dont-fold-set-cookie-headers-with-headers-append/165934/3
+      expect(response.headers.get('Set-Cookie')).toBe(
+        `token=123456; path=/, ${cookieFrontendName}=${cookieFrontendValue}; path=/`
+      )
     })
   })
 

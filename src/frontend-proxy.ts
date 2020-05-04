@@ -71,7 +71,7 @@ export async function handleRequest(
   }
 
   function setCookieUseFrontend(res: Response, useFrontend: boolean) {
-    res.headers.set('Set-Cookie', `${formatCookie(useFrontend)}; path=/`)
+    res.headers.append('Set-Cookie', `${formatCookie(useFrontend)}; path=/`)
   }
 
   function formatCookie(useFrontend: boolean) {
