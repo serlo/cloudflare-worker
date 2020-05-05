@@ -27,7 +27,11 @@ export async function handleRequest(
     return response
   }
 
-  if (path.startsWith('/_next/') || path.startsWith('/_assets/'))
+  if (
+    path.startsWith('/_next/') ||
+    path.startsWith('/_assets/') ||
+    path.startsWith('/api/frontend/')
+  )
     return await fetchBackend({ useFrontend: 0, setCookie: false })
 
   if (path !== '/') {

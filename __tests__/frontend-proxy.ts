@@ -135,12 +135,14 @@ describe('handleRequest()', () => {
     expect(await global.FRONTEND_CACHE_TYPES.get('/math')).toBeNull()
   })
 
-  describe('requests to /_next and /_assets always resolve to frontend', () => {
+  describe('requests to /_next, /api/frontend and /_assets always resolve to frontend', () => {
     test.each([
       'https://de.serlo.org/_next/script.js',
       'https://de.serlo.org/_next/img/picture.svg',
       'https://de.serlo.org/_assets/script.js',
       'https://de.serlo.org/_assets/img/picture.svg',
+      'https://de.serlo.org/api/frontend/script.js',
+      'https://de.serlo.org/api/frontend/img/picture.svg',
     ])('URL is %p', async (url) => {
       const mockedFetch = mockFetchReturning('')
 
