@@ -160,7 +160,7 @@ describe('handleRequest()', () => {
     describe.each([
       ['https://de.serlo.org/math', '0.5'],
       ['https://de.serlo.org/10', '0.00001'],
-      ['https://de.serlo.org/_nextexample-url', '0.9999999'],
+      ['https://de.serlo.org/_nextexample-url', '1'],
     ])('URL=%p Cookie=%p', (url, cookieValue) => {
       test('frontend backend', async () => {
         const mockedFetch = mockFetchReturning(createApiResponse('User'), '')
