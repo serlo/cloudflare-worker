@@ -53,5 +53,5 @@ API_ENDPOINT = "https://api.serlo.org/graphql"
 DOMAIN = "serlo.org"
 ENABLE_BASIC_AUTH = "false"
 FRONTEND_DOMAIN = "frontend.serlo.now.sh"
-FRONTEND_PROBABILITY = "0.10"
+FRONTEND_PROBABILITY = "0"
 FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "Page", "TaxonomyTerm", "Video"]'
