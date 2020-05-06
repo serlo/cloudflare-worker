@@ -56,7 +56,7 @@ export async function handleRequest(
     setCookie: boolean
   }) {
     const backendUrl =
-      useFrontend < probability
+      useFrontend <= probability
         ? `https://${global.FRONTEND_DOMAIN}${getPathname(request.url)}`
         : request.url
     const backendRequest = new Request(backendUrl, request)
