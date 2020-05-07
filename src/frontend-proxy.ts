@@ -32,42 +32,38 @@ export async function handleRequest(
     path.startsWith('/_assets/') ||
     path.startsWith('/api/frontend/')
   )
-    return await fetchBackend({ useFrontend: 0, setCookie: false })
+    return await fetchBackend(true)
+
+  const cookies = request.headers.get('Cookie')
+
+  if (cookies?.includes('authenticated=1')) return await fetchBackend(false)
 
   if (path !== '/') {
     const typename = await queryTypename(path)
     if (typename === null || !allowedTypes.includes(typename)) return null
   }
 
-  const cookies = request.headers.get('Cookie')
   const cookieUseFrontend = cookies?.match(/useFrontend=(\d(\.\d+)?);/)
-  const useFrontend = cookieUseFrontend
+  const useFrontendNumber = cookieUseFrontend
     ? Number(cookieUseFrontend[1])
     : Math.random()
   const setCookie = !cookieUseFrontend
 
-  return await fetchBackend({ useFrontend, setCookie })
+  const response = await fetchBackend(useFrontendNumber <= probability)
+  if (setCookie) setCookieUseFrontend(response, useFrontendNumber)
 
-  async function fetchBackend({
-    useFrontend,
-    setCookie,
-  }: {
-    useFrontend: number
-    setCookie: boolean
-  }) {
-    const backendUrl =
-      useFrontend <= probability
-        ? `https://${global.FRONTEND_DOMAIN}${getPathname(request.url)}`
-        : request.url
+  return response
+
+  async function fetchBackend(useFrontend: boolean) {
+    const backendUrl = useFrontend
+      ? `https://${global.FRONTEND_DOMAIN}${getPathname(request.url)}`
+      : request.url
     const backendRequest = new Request(backendUrl, request)
     backendRequest.headers.set('X-SERLO-API', global.API_ENDPOINT)
 
     const response = await fetch(backendRequest)
 
-    const clonedResponse = new Response(response.body, response)
-    if (setCookie) setCookieUseFrontend(clonedResponse, useFrontend)
-
-    return clonedResponse
+    return new Response(response.body, response)
   }
 
   function setCookieUseFrontend(res: Response, useFrontend: number) {

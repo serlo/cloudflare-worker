@@ -84,6 +84,23 @@ describe('handleRequest()', () => {
     })
   })
 
+  test('uses standard backend for authenticated user', async () => {
+    const mockedFetch = mockFetchReturning('')
+    global.FRONTEND_PROBABILITY = '1'
+    global.FRONTEND_ALLOWED_TYPES = '["Page"]'
+
+    const request = new Request('https://de.serlo.org/math')
+    request.headers.set('Cookie', 'authenticated=1')
+    const response = (await handleRequest(request))!
+
+    expect(getBackendUrl(mockedFetch)).toBe('https://de.serlo.org/math')
+    expect(response.headers.get('Set-Cookie')).toBeNull()
+    expect(getHeaderApiEndpoint(mockedFetch)).toBe('api.endpoint')
+
+    const cachedType = await global.FRONTEND_CACHE_TYPES.get('/math')
+    expect(cachedType).toBeNull()
+  })
+
   test('Uses cache to determine the type of an path', async () => {
     const mockedFetch = mockFetchReturning('')
     global.FRONTEND_PROBABILITY = '1'
