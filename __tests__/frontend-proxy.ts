@@ -185,8 +185,9 @@ describe('handleRequest()', () => {
         global.FRONTEND_PROBABILITY = '1'
         global.FRONTEND_ALLOWED_TYPES = '["User"]'
 
+        // TODO: With with multiple Cookies
         const request = new Request(url, {
-          headers: { Cookie: `useFrontend=${cookieValue};` },
+          headers: { Cookie: `useFrontend=${cookieValue}` },
         })
         const response = (await handleRequest(request))!
 

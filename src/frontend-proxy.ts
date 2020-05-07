@@ -43,7 +43,7 @@ export async function handleRequest(
     if (typename === null || !allowedTypes.includes(typename)) return null
   }
 
-  const cookieUseFrontend = cookies?.match(/useFrontend=(\d(\.\d+)?);/)
+  const cookieUseFrontend = cookies?.match(/useFrontend=(\d(\.\d+)?)/)
   const useFrontendNumber = cookieUseFrontend
     ? Number(cookieUseFrontend[1])
     : Math.random()
