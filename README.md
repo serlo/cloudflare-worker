@@ -19,7 +19,15 @@ The content of the static pages are automatically sanatized (e.g. potentially ma
 In case you need a link which deactivates Google Analytics use the string `__JS_GOOGLE_ANALYTICS_DEACTIVATE__` as the `href` attribute:
 
 ```html
-<a href="__JS_GOOGLE_ANALYTICS_DEACTIVATE__"
-  >Click here to deactivate Google Analytics</a
->
+<a href="__JS_GOOGLE_ANALYTICS_DEACTIVATE__">
+  Click here to deactivate Google Analytics
+</a>
+```
+
+To include an iframe where the user can opt out from Matomo use the string `MATOMO-OPT-OUT-FORM`:
+
+```markdown
+Use the following form to opt out from Matomo:
+
+MATOMO-OPT-OUT-FORM
 ```

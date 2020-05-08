@@ -311,10 +311,12 @@ export async function fetchContent<A extends Page>(
     const text = await response.text()
     const rawContent = page.url.endsWith('.md') ? markdownToHtml(text) : text
     const sanitizedContent = sanitizeHtml(rawContent)
-    const content = sanitizedContent.replace(
-      '__JS_GOOGLE_ANALYTICS_DEACTIVATE__',
-      'javascript:gaOptout();'
-    )
+    const content = sanitizedContent
+      .replace('__JS_GOOGLE_ANALYTICS_DEACTIVATE__', 'javascript:gaOptout();')
+      .replace(
+        'MATOMO-OPT-OUT-FORM',
+        `<iframe style="width: 100%; height: 130px; border: none;" src="https://analytics.serlo-development.dev/index.php?module=CoreAdminHome&action=optOut&language=${page.lang}&fontSize=16px&fontFamily=Open%20Sans,sans-serif"></iframe>`
+      )
 
     return { ...page, content }
   } else {

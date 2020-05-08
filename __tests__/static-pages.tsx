@@ -364,6 +364,32 @@ describe('fetchContent()', () => {
     })
   })
 
+  describe('support for MATOMO-OPT-OUT-FORM', () => {
+    test('HTML response with English opt out', async () => {
+      await withMockedFetch('<p>Opt out:</p> MATOMO-OPT-OUT-FORM', async () => {
+        expect(await fetchContent(exampleSpec)).toEqual({
+          lang: 'en',
+          title: 'Imprint',
+          content:
+            '<p>Opt out:</p> <iframe style="width: 100%; height: 130px; border: none;" src="https://analytics.serlo-development.dev/index.php?module=CoreAdminHome&action=optOut&language=en&fontSize=16px&fontFamily=Open%20Sans,sans-serif"></iframe>',
+          url: 'http://example.org/',
+        })
+      })
+    })
+
+    test('Markdown response with German opt out', async () => {
+      await withMockedFetch('Opt out:\n\nMATOMO-OPT-OUT-FORM', async () => {
+        expect(await fetchContent(exampleSpecMarkdown)).toEqual({
+          lang: 'de',
+          title: 'Imprint',
+          content:
+            '<p>Opt out:</p>\n<p><iframe style="width: 100%; height: 130px; border: none;" src="https://analytics.serlo-development.dev/index.php?module=CoreAdminHome&action=optOut&language=de&fontSize=16px&fontFamily=Open%20Sans,sans-serif"></iframe></p>',
+          url: 'http://example.org/imprint.md',
+        })
+      })
+    })
+  })
+
   describe('returns null when request on the url of the spec fails', () => {
     test.each([301, 404, 500])('status code %p', async (code) => {
       await withMockedFetch(new Response('', { status: code }), async () => {
