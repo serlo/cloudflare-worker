@@ -334,10 +334,10 @@ describe('fetchContent()', () => {
     })
   })
 
-  describe('support for __JS_GOOGLE_ANALYTICS_DEACTIVATE__', () => {
+  describe('support for JS-GOOGLE-ANALYTICS-DEACTIVATE', () => {
     test('HTML response', async () => {
       await withMockedFetch(
-        'Click <a href="__JS_GOOGLE_ANALYTICS_DEACTIVATE__">here</a>',
+        'Click <a href="JS-GOOGLE-ANALYTICS-DEACTIVATE">here</a>',
         async () => {
           expect(await fetchContent(exampleSpec)).toEqual({
             lang: 'en',
@@ -351,7 +351,7 @@ describe('fetchContent()', () => {
 
     test('Markdown response', async () => {
       await withMockedFetch(
-        'Click [here](__JS_GOOGLE_ANALYTICS_DEACTIVATE__)',
+        'Click [here](JS-GOOGLE-ANALYTICS-DEACTIVATE)',
         async () => {
           expect(await fetchContent(exampleSpecMarkdown)).toEqual({
             lang: 'de',
