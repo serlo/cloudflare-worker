@@ -10,7 +10,7 @@ describe('handleRequest()', () => {
     global.FRONTEND_PROBABILITY = '0.1'
     global.FRONTEND_ALLOWED_TYPES = '[]'
 
-    mockKV('FRONTEND_CACHE_TYPES', {})
+    mockKV('FRONTEND_CACHE_TYPES_KV', {})
   })
 
   const randomCopy = Math.random
@@ -53,7 +53,9 @@ describe('handleRequest()', () => {
       expect(cookieHeader).toBe('useFrontend=0.25; path=/')
 
       expect(getHeaderApiEndpoint(mockedFetch)).toBe('api.endpoint')
-      const cachedType = await global.FRONTEND_CACHE_TYPES.get(getPathname(url))
+      const cachedType = await global.FRONTEND_CACHE_TYPES_KV.get(
+        getPathname(url)
+      )
       expect(cachedType).toBe('User')
     })
   })
@@ -79,7 +81,9 @@ describe('handleRequest()', () => {
 
       expect(getHeaderApiEndpoint(mockedFetch)).toBe('api.endpoint')
 
-      const cachedType = await global.FRONTEND_CACHE_TYPES.get(getPathname(url))
+      const cachedType = await global.FRONTEND_CACHE_TYPES_KV.get(
+        getPathname(url)
+      )
       expect(cachedType).toBe('User')
     })
   })
@@ -97,7 +101,7 @@ describe('handleRequest()', () => {
     expect(response.headers.get('Set-Cookie')).toBeNull()
     expect(getHeaderApiEndpoint(mockedFetch)).toBe('api.endpoint')
 
-    const cachedType = await global.FRONTEND_CACHE_TYPES.get('/math')
+    const cachedType = await global.FRONTEND_CACHE_TYPES_KV.get('/math')
     expect(cachedType).toBeNull()
   })
 
@@ -105,13 +109,13 @@ describe('handleRequest()', () => {
     const mockedFetch = mockFetchReturning('')
     global.FRONTEND_PROBABILITY = '1'
     global.FRONTEND_ALLOWED_TYPES = '["Page"]'
-    await global.FRONTEND_CACHE_TYPES.put('/math', 'Page')
+    await global.FRONTEND_CACHE_TYPES_KV.put('/math', 'Page')
 
     const request = new Request('https://de.serlo.org/math')
     await handleRequest(request)
 
     expect(getBackendUrl(mockedFetch)).toBe('https://frontend.domain/math')
-    expect(await global.FRONTEND_CACHE_TYPES.get('/math')).toBe('Page')
+    expect(await global.FRONTEND_CACHE_TYPES_KV.get('/math')).toBe('Page')
   })
 
   test('type of start page is not checked', async () => {
@@ -125,7 +129,7 @@ describe('handleRequest()', () => {
     expect(getBackendUrl(mockedFetch)).toBe('https://frontend.domain/')
     expect(response.headers.get('Set-Cookie')).toBe(`useFrontend=0.25; path=/`)
     expect(getHeaderApiEndpoint(mockedFetch)).toBe('api.endpoint')
-    expect(await global.FRONTEND_CACHE_TYPES.get('/')).toBeNull()
+    expect(await global.FRONTEND_CACHE_TYPES_KV.get('/')).toBeNull()
   })
 
   describe('returns null for not allowed taxonomy types', () => {
@@ -138,7 +142,7 @@ describe('handleRequest()', () => {
       const response = await handleRequest(request)
 
       expect(response).toBeNull()
-      expect(await global.FRONTEND_CACHE_TYPES.get('/math')).toBe(typename)
+      expect(await global.FRONTEND_CACHE_TYPES_KV.get('/math')).toBe(typename)
     })
   })
 
@@ -149,7 +153,7 @@ describe('handleRequest()', () => {
     const response = await handleRequest(request)
 
     expect(response).toBeNull()
-    expect(await global.FRONTEND_CACHE_TYPES.get('/math')).toBeNull()
+    expect(await global.FRONTEND_CACHE_TYPES_KV.get('/math')).toBeNull()
   })
 
   describe('requests to /_next, /api/frontend and /_assets always resolve to frontend', () => {
@@ -169,7 +173,9 @@ describe('handleRequest()', () => {
       expect(getBackendUrl(mockedFetch)).toBe(targetUrl)
       expect(response.headers.get('Set-Cookie')).toBeNull()
       expect(getHeaderApiEndpoint(mockedFetch)).toBe('api.endpoint')
-      expect(await global.FRONTEND_CACHE_TYPES.get(getPathname(url))).toBeNull()
+      expect(
+        await global.FRONTEND_CACHE_TYPES_KV.get(getPathname(url))
+      ).toBeNull()
     })
   })
 
@@ -199,7 +205,7 @@ describe('handleRequest()', () => {
         expect(Math.random).not.toHaveBeenCalled()
 
         const path = getPathname(url)
-        const cachedType = await global.FRONTEND_CACHE_TYPES.get(path)
+        const cachedType = await global.FRONTEND_CACHE_TYPES_KV.get(path)
         expect(cachedType).toBe('User')
       })
 
@@ -221,7 +227,7 @@ describe('handleRequest()', () => {
         expect(getHeaderApiEndpoint(mockedFetch)).toBe('api.endpoint')
 
         const path = getPathname(url)
-        const cachedType = await global.FRONTEND_CACHE_TYPES.get(path)
+        const cachedType = await global.FRONTEND_CACHE_TYPES_KV.get(path)
         expect(cachedType).toBe('User')
       })
     })

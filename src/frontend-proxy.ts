@@ -71,7 +71,7 @@ export async function handleRequest(
   }
 
   async function queryTypename(path: string): Promise<string | null> {
-    const cachedType = await global.FRONTEND_CACHE_TYPES.get(path)
+    const cachedType = await global.FRONTEND_CACHE_TYPES_KV.get(path)
     if (cachedType !== null) return cachedType
 
     const apiResponse = await fetch(global.API_ENDPOINT, {
@@ -83,7 +83,7 @@ export async function handleRequest(
     const typename = apiResult?.data?.uuid?.__typename ?? null
 
     if (typename !== null)
-      await global.FRONTEND_CACHE_TYPES.put(path, typename, {
+      await global.FRONTEND_CACHE_TYPES_KV.put(path, typename, {
         expirationTtl: 60 * 60,
       })
 

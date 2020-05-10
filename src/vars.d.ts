@@ -25,18 +25,7 @@ declare namespace NodeJS {
     DOMAIN: string
     ENABLE_BASIC_AUTH: 'true' | 'false'
     FRONTEND_ALLOWED_TYPES: string
-    FRONTEND_CACHE_TYPES: KV<string>
     FRONTEND_DOMAIN: string
     FRONTEND_PROBABILITY: string
   }
-}
-
-declare
-interface KV<ValueType> {
-  get: (key: string) => Promise<ValueType | null>
-  put: (
-    key: string,
-    value: ValueType,
-    options?: { expirationTtl: number }
-  ) => Promise<void>
 }
