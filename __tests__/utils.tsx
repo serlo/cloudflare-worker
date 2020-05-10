@@ -164,7 +164,7 @@ function convertToResponse(spec: string | Response): Response {
 export function mockKV(name: string, values: Record<string, unknown>) {
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
-  window[name] = {
+  global[name] = {
     // eslint-disable-next-line @typescript-eslint/require-await
     async get(key: string) {
       return values[key] ?? null
