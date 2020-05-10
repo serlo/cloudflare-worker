@@ -307,18 +307,16 @@ describe('handleRequest()', () => {
   })
 })
 
-test('createApiQuery()', () => {
-  expect(createApiQuery('/math')).toBe(
-    '{ uuid(alias: { instance: de, path: "/math" }) { __typename } }'
-  )
-  expect(createApiQuery('hello')).toBe(
-    '{ uuid(alias: { instance: de, path: "/hello" }) { __typename } }'
-  )
-  expect(createApiQuery('/266/')).toBe(
-    '{ uuid(alias: { instance: de, path: "/266/" }) { __typename } }'
-  )
-  expect(createApiQuery('/266')).toBe('{ uuid(id: 266) { __typename } }')
-  expect(createApiQuery('/874329')).toBe('{ uuid(id: 874329) { __typename } }')
+describe('createApiQuery()', () => {
+  test('alias path', () => {
+    expect(createApiQuery('/math')).toBe(
+      '{ uuid(alias: { instance: de, path: "/math" }) { __typename } }'
+    )
+  })
+
+  test('path with uuid', () => {
+    expect(createApiQuery('/266')).toBe('{ uuid(id: 266) { __typename } }')
+  })
 })
 
 function createApiResponse(typename: string) {
