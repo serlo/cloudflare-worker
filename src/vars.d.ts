@@ -27,5 +27,6 @@ declare namespace NodeJS {
     FRONTEND_ALLOWED_TYPES: string
     FRONTEND_DOMAIN: string
     FRONTEND_PROBABILITY: string
+    fetch: typeof fetch
   }
 }

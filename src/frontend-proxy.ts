@@ -43,14 +43,15 @@ export async function handleRequest(
     if (typename === null || !allowedTypes.includes(typename)) return null
   }
 
-  const cookieUseFrontend = cookies?.match(/useFrontend=(\d(\.\d+)?)/)
-  const useFrontendNumber = cookieUseFrontend
-    ? Number(cookieUseFrontend[1])
-    : Math.random()
-  const setCookie = !cookieUseFrontend
+  const cookieUseFrontend = cookies?.match(/useFrontend=([^;]+)/)?.[1]
+  const convertedCookieValue = Number(cookieUseFrontend)
+  const useFrontendNumber = Number.isNaN(convertedCookieValue)
+    ? Math.random()
+    : convertedCookieValue
 
   const response = await fetchBackend(useFrontendNumber <= probability)
-  if (setCookie) setCookieUseFrontend(response, useFrontendNumber)
+  if (Number.isNaN(convertedCookieValue))
+    setCookieUseFrontend(response, useFrontendNumber)
 
   return response
 

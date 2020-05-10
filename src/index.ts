@@ -139,7 +139,7 @@ async function packages(request: Request) {
 
   const pkg = match[1]
 
-  const resolvedPackage = await PACKAGES_KV.get(pkg)
+  const resolvedPackage = await global.PACKAGES_KV.get(pkg)
   if (!resolvedPackage) return fetch(url.href, request)
 
   url.pathname = url.pathname.replace(`/${pkg}/`, `/${resolvedPackage}/`)
