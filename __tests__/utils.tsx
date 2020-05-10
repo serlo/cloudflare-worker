@@ -98,7 +98,7 @@ test('NotFoundResponse', async () => {
 })
 
 test('fetchWithCache()', async () => {
-  const mockedFetch = mockFetchReturning('test')
+  const mockedFetch = mockFetch({ 'http://example.com': 'test' })
 
   const response = await fetchWithCache('http://example.com')
 
@@ -142,16 +142,18 @@ export async function isJsonResponse(response: Response, targetJson: unknown) {
   expect(JSON.parse(await response.text())).toEqual(targetJson)
 }
 
-export function mockFetchReturning(...responseSpecs: Array<string | Response>) {
-  const mockedFetch = responseSpecs
-    .map(convertToResponse)
-    .reduce(
-      (accFetch, response) => accFetch.mockReturnValueOnce(response),
-      jest.fn()
-    )
+export function mockFetch(spec: Record<string, string | Response>) {
+  function mockedFetchImpl(reqInfo: Request | string): Promise<Response> {
+    const url = typeof reqInfo === 'string' ? reqInfo : reqInfo.url
+    const responseSpec = spec[url]
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore
+    return responseSpec === undefined
+      ? Promise.reject(new Error(`URL ${url} not defined in mocked fetch`))
+      : Promise.resolve(convertToResponse(responseSpec))
+  }
+
+  const mockedFetch = jest.fn().mockImplementation(mockedFetchImpl)
+
   global.fetch = mockedFetch
 
   return mockedFetch
@@ -165,13 +167,11 @@ export function mockKV(name: string, values: Record<string, unknown>) {
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   global[name] = {
-    // eslint-disable-next-line @typescript-eslint/require-await
     async get(key: string) {
-      return values[key] ?? null
+      return Promise.resolve(values[key] ?? null)
     },
 
-    // eslint-disable-next-line @typescript-eslint/require-await
-    async put(key: string, value: unknown, _?: { expirationTtl: number }) {
+    put(key: string, value: unknown, _?: { expirationTtl: number }) {
       values[key] = value
     },
   }
