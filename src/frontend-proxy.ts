@@ -92,10 +92,9 @@ export async function handleRequest(
 }
 
 export function createApiQuery(path: string): string {
-  const pathWithoutSlash = path.startsWith('/') ? path.slice(1) : path
-  const query = /^\/?\d+$/.test(pathWithoutSlash)
-    ? `id: ${pathWithoutSlash}`
-    : `alias: { instance: de, path: "/${pathWithoutSlash}" }`
+  const query = /^\/\d+$/.test(path)
+    ? `id: ${path.slice(1)}`
+    : `alias: { instance: de, path: "${path}" }`
 
   return `{ uuid(${query}) { __typename } }`
 }
