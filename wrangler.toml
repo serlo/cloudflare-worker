@@ -13,7 +13,7 @@ kv-namespaces = [
 ]
 
 [env.dev.vars]
-API_ENDPOINT = "https://api.serlo.org/graphql"
+API_ENDPOINT = "https://api.serlo-development.dev/graphql"
 DOMAIN = "serlo-development.dev"
 FRONTEND_DOMAIN = "frontend.serlo.now.sh"
 FRONTEND_PROBABILITY = "0.50"
@@ -31,7 +31,7 @@ kv-namespaces = [
 ]
 
 [env.staging.vars]
-API_ENDPOINT = "https://api.serlo.org/graphql"
+API_ENDPOINT = "https://api.serlo-staging.dev/graphql"
 DOMAIN = "serlo-staging.dev"
 FRONTEND_DOMAIN = "frontend.serlo.now.sh"
 FRONTEND_PROBABILITY = "0.50"

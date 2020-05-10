@@ -237,7 +237,7 @@ describe('handleRequest()', () => {
     expect(response).not.toBe(backendResponse)
   })
 
-  describe('transfers request meta data to backend', () => {
+  describe('transfers request headers to backend', () => {
     test.each([1, 0])('useFrontendProbability=%p', async (probability) => {
       const mockedFetch = mockFetchReturning('')
       global.FRONTEND_PROBABILITY = probability.toString()
@@ -254,7 +254,7 @@ describe('handleRequest()', () => {
     })
   })
 
-  describe('transfers response meta data from backend', () => {
+  describe('transfers response headers from backend', () => {
     test.each([1, 0])('useFrontendProbability=%p', async (probability) => {
       mockFetchReturning(
         new Response('', {
