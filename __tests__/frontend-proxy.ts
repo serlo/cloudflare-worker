@@ -7,6 +7,7 @@ describe('handleRequest()', () => {
   beforeEach(() => {
     global.FRONTEND_DOMAIN = 'frontend.serlo.org'
     global.API_ENDPOINT = 'https://api.serlo.org/'
+    global.API_SECRET = 'secret'
     global.FRONTEND_PROBABILITY = '0.1'
     global.FRONTEND_ALLOWED_TYPES = '[]'
 
@@ -238,7 +239,7 @@ describe('handleRequest()', () => {
       expect(await getCachedType(getPathname(url))).toBeNull()
     })
 
-    describe('secial paths need to have a trailing slash in their prefix', () => {
+    describe('special paths need to have a trailing slash in their prefix', () => {
       test.each([
         'https://de.serlo.org/api/frontend-alternative',
         'https://de.serlo.org/_next-alias',
@@ -257,6 +258,18 @@ describe('handleRequest()', () => {
         expect(getBackendUrl(mockedFetch)).toBe(url)
         expect(await getCachedType(getPathname(url))).toBe('Article')
       })
+    })
+
+    test('requests to /spenden always resolve to default backend', async () => {
+      const url = 'https://de.serlo.org/spenden'
+      const mockedFetch = mockFetch({
+        'https://de.serlo.org/spenden': '',
+      })
+
+      await handleRequest(new Request(url))
+
+      expect(getBackendUrl(mockedFetch)).toBe(url)
+      expect(await getCachedType(getPathname(url))).toBeNull()
     })
   })
 
@@ -375,10 +388,10 @@ function createApiErrorResponse() {
 }
 
 function getHeaderApiEndpoint(mockedFetch: jest.Mock) {
-  const backendRequest =
+  const apiRequest =
     mockedFetch.mock.calls[mockedFetch.mock.calls.length - 1][0]
 
-  return backendRequest.headers.get('X-SERLO-API')
+  return apiRequest.headers.get('X-SERLO-API')
 }
 
 function getBackendUrl(mockedFetch: jest.Mock) {
