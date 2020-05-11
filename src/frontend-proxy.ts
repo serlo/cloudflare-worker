@@ -1,3 +1,4 @@
+import { fetchApi } from './api'
 import { getSubdomain, getPathname } from './url-utils'
 
 export async function handleRequest(
@@ -75,7 +76,7 @@ export async function handleRequest(
     const cachedType = await global.FRONTEND_CACHE_TYPES_KV.get(path)
     if (cachedType !== null) return cachedType
 
-    const apiResponse = await fetch(global.API_ENDPOINT, {
+    const apiResponse = await fetchApi(global.API_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query: createApiQuery(path) }),
