@@ -27,7 +27,7 @@ import { createPreactResponse } from '../utils'
 import { Maintenance } from './template'
 
 export async function maintenanceMode(request: Request) {
-  const enabled = await MAINTENANCE_KV.get('enabled')
+  const enabled = await global.MAINTENANCE_KV.get('enabled')
   if (!enabled) return null
   const { start: startISO, end: endISO, subdomains = [] } = JSON.parse(enabled)
   if (!subdomains.includes(getSubdomain(request.url))) return null

@@ -98,12 +98,11 @@ test('NotFoundResponse', async () => {
 })
 
 test('fetchWithCache()', async () => {
-  const mockedFetch = await withMockedFetch('test', async () => {
-    const response = await fetchWithCache('http://example.com')
+  const mockedFetch = mockFetch({ 'http://example.com': 'test' })
 
-    expect(await response.text()).toBe('test')
-  })
+  const response = await fetchWithCache('http://example.com')
 
+  expect(await response.text()).toBe('test')
   expect(mockedFetch).toHaveBeenCalledWith('http://example.com', {
     cf: { cacheTtl: 3600 },
   })
@@ -143,20 +142,37 @@ export async function isJsonResponse(response: Response, targetJson: unknown) {
   expect(JSON.parse(await response.text())).toEqual(targetJson)
 }
 
-export async function withMockedFetch(
-  response: Response | string,
-  fn: () => Promise<void>
-) {
-  const value = typeof response === 'string' ? new Response(response) : response
-  const fetch = jest.fn().mockReturnValueOnce(value)
+export function mockFetch(spec: Record<string, string | Response>) {
+  function mockedFetchImpl(reqInfo: Request | string): Promise<Response> {
+    const url = typeof reqInfo === 'string' ? reqInfo : reqInfo.url
+    const responseSpec = spec[url]
 
+    return responseSpec === undefined
+      ? Promise.reject(new Error(`URL ${url} not defined in mocked fetch`))
+      : Promise.resolve(convertToResponse(responseSpec))
+  }
+
+  const mockedFetch = jest.fn().mockImplementation(mockedFetchImpl)
+
+  global.fetch = mockedFetch
+
+  return mockedFetch
+}
+
+function convertToResponse(spec: string | Response): Response {
+  return typeof spec === 'string' ? new Response(spec) : spec
+}
+
+export function mockKV(name: string, values: Record<string, unknown>) {
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
-  global.fetch = fetch
+  global[name] = {
+    async get(key: string) {
+      return Promise.resolve(values[key] ?? null)
+    },
 
-  await fn()
-
-  expect(fetch).toHaveBeenCalled()
-
-  return fetch
+    put(key: string, value: unknown, _?: { expirationTtl: number }) {
+      values[key] = value
+    },
+  }
 }

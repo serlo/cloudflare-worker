@@ -19,5 +19,14 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-declare let DOMAIN: string
-declare let ENABLE_BASIC_AUTH: 'true' | 'false'
+declare namespace NodeJS {
+  interface Global {
+    API_ENDPOINT: string
+    DOMAIN: string
+    ENABLE_BASIC_AUTH: 'true' | 'false'
+    FRONTEND_ALLOWED_TYPES: string
+    FRONTEND_DOMAIN: string
+    FRONTEND_PROBABILITY: string
+    fetch: typeof fetch
+  }
+}
