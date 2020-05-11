@@ -9,7 +9,7 @@ route = "*serlo-development.dev/*"
 kv-namespaces = [
     { binding = "MAINTENANCE_KV", id = "d5f281b897f643b8824881cfe2a24dd2" },
     { binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be" },
-    { binding = "FRONTEND_CACHE_TYPES", id="802462c937f24f268bb523fa855ee4a1" },
+    { binding = "FRONTEND_CACHE_TYPES_KV", id="802462c937f24f268bb523fa855ee4a1" },
 ]
 
 [env.dev.vars]
@@ -27,7 +27,7 @@ route = "*serlo-staging.dev/*"
 kv-namespaces = [
     { binding = "MAINTENANCE_KV", id = "3c3c25aba0b94b7e99f855f013f5b09c" },
     { binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be" },
-    { binding = "FRONTEND_CACHE_TYPES", id="a323aa5ec11a4940abe7fb5ab5d95a39" },
+    { binding = "FRONTEND_CACHE_TYPES_KV", id="a323aa5ec11a4940abe7fb5ab5d95a39" },
 ]
 
 [env.staging.vars]
@@ -45,7 +45,7 @@ route = "*serlo.org/*"
 kv-namespaces = [
     { binding = "MAINTENANCE_KV", id = "b1f17ebbe39c4fd9b49d1368ce225faa" },
     { binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be" },
-    { binding = "FRONTEND_CACHE_TYPES", id="fc4c18a77146456884675bd2776a8102" },
+    { binding = "FRONTEND_CACHE_TYPES_KV", id="fc4c18a77146456884675bd2776a8102" },
 ]
 
 [env.production.vars]
