@@ -36,8 +36,8 @@ export async function handleRequest(
     return await fetchBackend(true)
 
   const cookies = request.headers.get('Cookie')
-
-  if (cookies?.includes('authenticated=1')) return await fetchBackend(false)
+  if (path === '/spenden' || cookies?.includes('authenticated=1'))
+    return await fetchBackend(false)
 
   if (path !== '/') {
     const typename = await queryTypename(path)
