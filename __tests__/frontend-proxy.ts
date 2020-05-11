@@ -239,7 +239,7 @@ describe('handleRequest()', () => {
       expect(await getCachedType(getPathname(url))).toBeNull()
     })
 
-    describe('secial paths need to have a trailing slash in their prefix', () => {
+    describe('special paths need to have a trailing slash in their prefix', () => {
       test.each([
         'https://de.serlo.org/api/frontend-alternative',
         'https://de.serlo.org/_next-alias',
@@ -258,6 +258,18 @@ describe('handleRequest()', () => {
         expect(getBackendUrl(mockedFetch)).toBe(url)
         expect(await getCachedType(getPathname(url))).toBe('Article')
       })
+    })
+
+    test('requests to /spenden always resolve to default backend', async () => {
+      const url = 'https://de.serlo.org/spenden'
+      const mockedFetch = mockFetch({
+        'https://de.serlo.org/spenden': '',
+      })
+
+      await handleRequest(new Request(url))
+
+      expect(getBackendUrl(mockedFetch)).toBe(url)
+      expect(await getCachedType(getPathname(url))).toBeNull()
     })
   })
 
