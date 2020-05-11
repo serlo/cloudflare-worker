@@ -21,6 +21,7 @@
  */
 import { api } from './api'
 import { edtrIoStats } from './are-we-edtr-io-yet'
+import { handleRequest as frontendProxy } from './frontend-proxy'
 import { maintenanceMode } from './maintenance'
 import { handleRequest as staticPages } from './static-pages'
 import { getPathnameWithoutTrailingSlash, getSubdomain } from './url-utils'
@@ -40,6 +41,7 @@ export async function handleRequest(request: Request) {
     (await semanticFileNames(request)) ||
     (await packages(request)) ||
     (await api(request)) ||
+    (await frontendProxy(request)) ||
     (await fetch(request))
   )
 }
@@ -137,7 +139,7 @@ async function packages(request: Request) {
 
   const pkg = match[1]
 
-  const resolvedPackage = await PACKAGES_KV.get(pkg)
+  const resolvedPackage = await global.PACKAGES_KV.get(pkg)
   if (!resolvedPackage) return fetch(url.href, request)
 
   url.pathname = url.pathname.replace(`/${pkg}/`, `/${resolvedPackage}/`)

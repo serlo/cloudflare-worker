@@ -21,27 +21,14 @@
  */
 import { DateTime } from 'luxon'
 
-import { handleRequest as f } from '../src'
-import { contentTypeIsHtml, containsText } from './utils'
-
-let fetchMock: jest.Mock
-
-beforeEach(() => {
-  fetchMock = jest.fn(() => {
-    return true
-  })
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore
-  window['fetch'] = fetchMock
-})
+import { maintenanceMode } from '../src/maintenance'
+import { contentTypeIsHtml, containsText, mockKV } from './utils'
 
 describe('Maintenance mode', () => {
   test('Disabled (no maintenance planned)', async () => {
-    mockMaintenanceKV({})
-    await handleRequest('https://de.serlo.org')
-    expectFetchToHaveBeenCalledWithRequest({
-      url: 'https://de.serlo.org',
-    } as Request)
+    mockKV('MAINTENANCE_KV', {})
+
+    expect(await handleUrl('https://de.serlo.org')).toBeNull()
   })
 
   test('Disabled (before scheduled maintenance)', async () => {
@@ -50,13 +37,11 @@ describe('Maintenance mode', () => {
       end: DateTime.local().plus({ minutes: 20 }).toISO(),
       subdomains: ['de'],
     }
-    mockMaintenanceKV({
+    mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
-    await handleRequest('https://de.serlo.org')
-    expectFetchToHaveBeenCalledWithRequest({
-      url: 'https://de.serlo.org',
-    } as Request)
+
+    expect(await handleUrl('https://de.serlo.org')).toBeNull()
   })
 
   test('Disabled (after scheduled maintenance)', async () => {
@@ -65,13 +50,11 @@ describe('Maintenance mode', () => {
       end: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['de'],
     }
-    mockMaintenanceKV({
+    mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
-    await handleRequest('https://de.serlo.org')
-    expectFetchToHaveBeenCalledWithRequest({
-      url: 'https://de.serlo.org',
-    } as Request)
+
+    expect(await handleUrl('https://de.serlo.org')).toBeNull()
   })
 
   test('Enabled (de, w/ end)', async () => {
@@ -81,10 +64,11 @@ describe('Maintenance mode', () => {
       end: end.toISO(),
       subdomains: ['de'],
     }
-    mockMaintenanceKV({
+    mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
-    const response = await handleRequest('https://de.serlo.org')
+
+    const response = await handleUrl('https://de.serlo.org')
     expect(response.status).toEqual(503)
     contentTypeIsHtml(response)
     expect(response.headers.get('Retry-After')).toEqual(end.toHTTP())
@@ -101,10 +85,11 @@ describe('Maintenance mode', () => {
       end: end.toISO(),
       subdomains: ['en'],
     }
-    mockMaintenanceKV({
+    mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
-    const response = await handleRequest('https://en.serlo.org')
+
+    const response = await handleUrl('https://en.serlo.org')
     expect(response.status).toEqual(503)
     contentTypeIsHtml(response)
     expect(response.headers.get('Retry-After')).toEqual(end.toHTTP())
@@ -119,10 +104,11 @@ describe('Maintenance mode', () => {
       start: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['de'],
     }
-    mockMaintenanceKV({
+    mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
-    const response = await handleRequest('https://de.serlo.org')
+
+    const response = await handleUrl('https://de.serlo.org')
     expect(response.status).toEqual(503)
     contentTypeIsHtml(response)
     await containsText(response, [
@@ -136,10 +122,11 @@ describe('Maintenance mode', () => {
       start: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['en'],
     }
-    mockMaintenanceKV({
+    mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
-    const response = await handleRequest('https://en.serlo.org')
+
+    const response = await handleUrl('https://en.serlo.org')
     expect(response.status).toEqual(503)
     contentTypeIsHtml(response)
     await containsText(response, [
@@ -155,13 +142,11 @@ describe('Maintenance mode', () => {
       end: end.toISO(),
       subdomains: ['en'],
     }
-    mockMaintenanceKV({
+    mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
-    await handleRequest('https://de.serlo.org')
-    expectFetchToHaveBeenCalledWithRequest({
-      url: 'https://de.serlo.org',
-    } as Request)
+
+    expect(await handleUrl('https://de.serlo.org')).toBeNull()
   })
 
   test('Enabled (different subdomain, w/o end)', async () => {
@@ -169,37 +154,14 @@ describe('Maintenance mode', () => {
       start: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['en'],
     }
-    mockMaintenanceKV({
+    mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
-    await handleRequest('https://de.serlo.org')
-    expectFetchToHaveBeenCalledWithRequest({
-      url: 'https://de.serlo.org',
-    } as Request)
+
+    expect(await handleUrl('https://de.serlo.org')).toBeNull()
   })
 })
 
-async function handleRequest(url: string): Promise<Response> {
-  return await f({ url } as Request)
-}
-
-function mockMaintenanceKV(values: Record<string, unknown>) {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore
-  window['MAINTENANCE_KV'] = {
-    // eslint-disable-next-line @typescript-eslint/require-await
-    async get(key: string) {
-      return values[key] || null
-    },
-  }
-}
-
-function expectFetchToHaveBeenCalledWithRequest(request: Request) {
-  expect(fetchMock).toHaveBeenCalledTimes(1)
-  const [arg1, arg2] = fetchMock.mock.calls[0]
-  if (typeof arg1 === 'string') {
-    expect({ ...arg2, url: arg1 }).toEqual(request)
-  } else {
-    expect(arg1).toEqual(request)
-  }
+async function handleUrl(url: string): Promise<Response> {
+  return (await maintenanceMode(new Request(url))) as Response
 }

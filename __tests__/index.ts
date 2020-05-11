@@ -51,6 +51,13 @@ class RequestMock {
   constructor(public url: string) {}
 }
 
+beforeAll(() => {
+  global.FRONTEND_DOMAIN = 'frontend.domain'
+  global.API_ENDPOINT = 'api.endpoint'
+  global.FRONTEND_PROBABILITY = '1'
+  global.FRONTEND_ALLOWED_TYPES = '[]'
+})
+
 beforeEach(() => {
   fetchMock = jest.fn(() => {
     return true
@@ -82,6 +89,7 @@ describe('Enforce HTTPS', () => {
 
   test('HTTPS URL', async () => {
     await handleRequest('https://foo.serlo.local/bar')
+
     expectFetchToHaveBeenCalledWithRequest({
       url: 'https://foo.serlo.local/bar',
     } as Request)
@@ -89,6 +97,7 @@ describe('Enforce HTTPS', () => {
 
   test('Pact Broker', async () => {
     await handleRequest('http://pacts.serlo.local/bar')
+
     expectFetchToHaveBeenCalledWithRequest({
       url: 'http://pacts.serlo.local/bar',
     } as Request)
