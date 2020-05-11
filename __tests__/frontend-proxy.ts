@@ -7,6 +7,7 @@ describe('handleRequest()', () => {
   beforeEach(() => {
     global.FRONTEND_DOMAIN = 'frontend.serlo.org'
     global.API_ENDPOINT = 'https://api.serlo.org/'
+    global.API_SECRET = 'secret'
     global.FRONTEND_PROBABILITY = '0.1'
     global.FRONTEND_ALLOWED_TYPES = '[]'
 
@@ -375,10 +376,10 @@ function createApiErrorResponse() {
 }
 
 function getHeaderApiEndpoint(mockedFetch: jest.Mock) {
-  const backendRequest =
+  const apiRequest =
     mockedFetch.mock.calls[mockedFetch.mock.calls.length - 1][0]
 
-  return backendRequest.headers.get('X-SERLO-API')
+  return apiRequest.headers.get('X-SERLO-API')
 }
 
 function getBackendUrl(mockedFetch: jest.Mock) {
