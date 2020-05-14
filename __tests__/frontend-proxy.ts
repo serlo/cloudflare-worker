@@ -1,13 +1,12 @@
 import { handleRequest, createApiQuery } from '../src/frontend-proxy'
 import { getPathname } from '../src/url-utils'
 import { createJsonResponse } from '../src/utils'
-import { hasOkStatus, mockFetch, mockKV } from './utils'
+import { hasOkStatus, mockFetch, mockKV } from './_helper'
 
 describe('handleRequest()', () => {
   beforeEach(() => {
     global.FRONTEND_DOMAIN = 'frontend.serlo.org'
     global.API_ENDPOINT = 'https://api.serlo.org/'
-    global.API_SECRET = 'secret'
     global.FRONTEND_PROBABILITY = '0.1'
     global.FRONTEND_ALLOWED_TYPES = '[]'
 
