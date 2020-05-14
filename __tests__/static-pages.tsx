@@ -45,7 +45,7 @@ import {
   hasOkStatus,
   containsText,
   contentTypeIsHtml,
-  withMockedFetch,
+  mockFetch,
 } from './utils'
 
 describe('handleRequest()', () => {
@@ -62,8 +62,8 @@ describe('handleRequest()', () => {
     fr: { privacy: [] },
     de: {
       privacy: [
-        { url: 'http://example.org/1', revision: '2020-12-11' },
-        { url: 'http://example.org/2', revision: '1999-10-09' },
+        { url: 'http://example.org/privacy-current', revision: '2020-12-11' },
+        { url: 'http://example.org/privacy-old', revision: '1999-10-09' },
       ],
     },
   }
@@ -78,50 +78,47 @@ describe('handleRequest()', () => {
       'https://de.serlo.org/imprint',
       'https://fr.serlo.org/imprint/',
     ])('URL is %p', async (url) => {
-      await withMockedFetch('<p>Hello World</p>', async () => {
-        const response = (await testHandleRequest(url)) as Response
+      mockFetch({ 'https://example.org/imprint.html': '<p>Hello World</p>' })
 
-        hasOkStatus(response)
-        contentTypeIsHtml(response)
-        await containsText(response, ['<p>Hello World</p>'])
-      })
+      const response = (await testHandleRequest(url))!
+
+      hasOkStatus(response)
+      contentTypeIsHtml(response)
+      await containsText(response, ['<p>Hello World</p>'])
     })
   })
 
   test('returns unrevised page response at /terms (markdown specification)', async () => {
-    await withMockedFetch('# Terms of Use', async () => {
-      const url = 'https://de.serlo.org/terms'
-      const response = (await testHandleRequest(url)) as Response
+    mockFetch({ 'https://example.org/terms.md': '# Terms of Use' })
 
-      hasOkStatus(response)
-      contentTypeIsHtml(response)
-      await containsText(response, ['<h1>Terms of Use</h1>'])
-    })
+    const url = 'https://de.serlo.org/terms'
+    const response = (await testHandleRequest(url))!
+
+    hasOkStatus(response)
+    contentTypeIsHtml(response)
+    await containsText(response, ['<h1>Terms of Use</h1>'])
   })
 
   test('returns current revision for requests at /privacy', async () => {
-    await withMockedFetch('<p>Hello</p>', async () => {
-      const url = 'https://de.serlo.org/privacy/'
-      const response = (await testHandleRequest(url)) as Response
+    const url = 'https://de.serlo.org/privacy/'
+    mockFetch({ 'http://example.org/privacy-current': '<p>Hello</p>' })
 
-      hasOkStatus(response)
-      contentTypeIsHtml(response)
-      await containsText(response, [
-        '<p>Hello</p>',
-        'wirksam ab dem 12/11/2020',
-      ])
-    })
+    const response = (await testHandleRequest(url))!
+
+    hasOkStatus(response)
+    contentTypeIsHtml(response)
+    await containsText(response, ['<p>Hello</p>', 'wirksam ab dem 12/11/2020'])
   })
 
   test('returns archived revision for requests at /privacy/archive/<id>', async () => {
-    await withMockedFetch('<p>Hello</p>', async () => {
-      const url = 'https://de.serlo.org/privacy/archive/1999-10-09'
-      const response = (await testHandleRequest(url)) as Response
+    mockFetch({ 'http://example.org/privacy-old': '<p>Hello</p>' })
 
-      hasOkStatus(response)
-      contentTypeIsHtml(response)
-      await containsText(response, ['<p>Hello</p>', 'wirksam ab dem 10/9/1999'])
-    })
+    const url = 'https://de.serlo.org/privacy/archive/1999-10-09'
+    const response = (await testHandleRequest(url)) as Response
+
+    hasOkStatus(response)
+    contentTypeIsHtml(response)
+    await containsText(response, ['<p>Hello</p>', 'wirksam ab dem 10/9/1999'])
   })
 
   test('returns overview of revisions for requests at /privacy/archive', async () => {
@@ -282,18 +279,34 @@ describe('fetchContent()', () => {
 
   describe('returns page when url can be resolved', () => {
     test('parses reponse as Markdown if url ends with `.md`', async () => {
-      await withMockedFetch('# Hello World', async () => {
-        expect(await fetchContent(exampleSpecMarkdown)).toEqual({
-          lang: 'de',
-          title: 'Imprint',
-          content: '<h1>Hello World</h1>',
-          url: 'http://example.org/imprint.md',
-        })
+      mockFetch({ 'http://example.org/imprint.md': '# Hello World' })
+
+      expect(await fetchContent(exampleSpecMarkdown)).toEqual({
+        lang: 'de',
+        title: 'Imprint',
+        content: '<h1>Hello World</h1>',
+        url: 'http://example.org/imprint.md',
       })
     })
 
     test('returns response content when url does not end with `.md`', async () => {
-      await withMockedFetch('<h1>Hello World</h1>', async () => {
+      mockFetch({ 'http://example.org/': '<h1>Hello World</h1>' })
+
+      expect(await fetchContent(exampleSpec)).toEqual({
+        lang: 'en',
+        title: 'Imprint',
+        content: '<h1>Hello World</h1>',
+        url: 'http://example.org/',
+      })
+    })
+
+    describe('returned HTML is sanitized', () => {
+      test('HTML response', async () => {
+        mockFetch({
+          'http://example.org/':
+            '<h1>Hello World</h1><script>alert(42)</script>',
+        })
+
         expect(await fetchContent(exampleSpec)).toEqual({
           lang: 'en',
           title: 'Imprint',
@@ -301,100 +314,85 @@ describe('fetchContent()', () => {
           url: 'http://example.org/',
         })
       })
-    })
-
-    describe('returned HTML is sanitized', () => {
-      test('HTML response', async () => {
-        await withMockedFetch(
-          '<h1>Hello World</h1><script>alert(42)</script>',
-          async () => {
-            expect(await fetchContent(exampleSpec)).toEqual({
-              lang: 'en',
-              title: 'Imprint',
-              content: '<h1>Hello World</h1>',
-              url: 'http://example.org/',
-            })
-          }
-        )
-      })
 
       test('Markdown response', async () => {
-        await withMockedFetch(
-          'Hello\n<iframe src="http://serlo.org/">',
-          async () => {
-            expect(await fetchContent(exampleSpecMarkdown)).toEqual({
-              lang: 'de',
-              title: 'Imprint',
-              content: '<p>Hello</p>',
-              url: 'http://example.org/imprint.md',
-            })
-          }
-        )
+        mockFetch({
+          'http://example.org/imprint.md':
+            'Hello\n<iframe src="http://serlo.org/">',
+        })
+
+        expect(await fetchContent(exampleSpecMarkdown)).toEqual({
+          lang: 'de',
+          title: 'Imprint',
+          content: '<p>Hello</p>',
+          url: 'http://example.org/imprint.md',
+        })
       })
     })
   })
 
   describe('support for JS-GOOGLE-ANALYTICS-DEACTIVATE', () => {
     test('HTML response', async () => {
-      await withMockedFetch(
-        'Click <a href="JS-GOOGLE-ANALYTICS-DEACTIVATE">here</a>',
-        async () => {
-          expect(await fetchContent(exampleSpec)).toEqual({
-            lang: 'en',
-            title: 'Imprint',
-            content: 'Click <a href="javascript:gaOptout();">here</a>',
-            url: 'http://example.org/',
-          })
-        }
-      )
+      mockFetch({
+        'http://example.org/':
+          'Click <a href="JS-GOOGLE-ANALYTICS-DEACTIVATE">here</a>',
+      })
+
+      expect(await fetchContent(exampleSpec)).toEqual({
+        lang: 'en',
+        title: 'Imprint',
+        content: 'Click <a href="javascript:gaOptout();">here</a>',
+        url: 'http://example.org/',
+      })
     })
 
     test('Markdown response', async () => {
-      await withMockedFetch(
-        'Click [here](JS-GOOGLE-ANALYTICS-DEACTIVATE)',
-        async () => {
-          expect(await fetchContent(exampleSpecMarkdown)).toEqual({
-            lang: 'de',
-            title: 'Imprint',
-            content: '<p>Click <a href="javascript:gaOptout();">here</a></p>',
-            url: 'http://example.org/imprint.md',
-          })
-        }
-      )
+      mockFetch({
+        'http://example.org/imprint.md':
+          'Click [here](JS-GOOGLE-ANALYTICS-DEACTIVATE)',
+      })
+
+      expect(await fetchContent(exampleSpecMarkdown)).toEqual({
+        lang: 'de',
+        title: 'Imprint',
+        content: '<p>Click <a href="javascript:gaOptout();">here</a></p>',
+        url: 'http://example.org/imprint.md',
+      })
     })
   })
 
   describe('support for MATOMO-OPT-OUT-FORM', () => {
     test('HTML response with English opt out', async () => {
-      await withMockedFetch('<p>Opt out:</p> MATOMO-OPT-OUT-FORM', async () => {
-        expect(await fetchContent(exampleSpec)).toEqual({
-          lang: 'en',
-          title: 'Imprint',
-          content:
-            '<p>Opt out:</p> <iframe style="width: 100%; height: 130px; border: none;" src="https://analytics.serlo-development.dev/index.php?module=CoreAdminHome&action=optOut&language=en&fontSize=16px&fontFamily=Open%20Sans,sans-serif"></iframe>',
-          url: 'http://example.org/',
-        })
+      mockFetch({
+        'http://example.org/': '<p>Opt out:</p> MATOMO-OPT-OUT-FORM',
+      })
+
+      expect(await fetchContent(exampleSpec)).toEqual({
+        lang: 'en',
+        title: 'Imprint',
+        content: '<p>Opt out:</p> ',
+        url: 'http://example.org/',
       })
     })
 
     test('Markdown response with German opt out', async () => {
-      await withMockedFetch('Opt out:\n\nMATOMO-OPT-OUT-FORM', async () => {
-        expect(await fetchContent(exampleSpecMarkdown)).toEqual({
-          lang: 'de',
-          title: 'Imprint',
-          content:
-            '<p>Opt out:</p>\n<p><iframe style="width: 100%; height: 130px; border: none;" src="https://analytics.serlo-development.dev/index.php?module=CoreAdminHome&action=optOut&language=de&fontSize=16px&fontFamily=Open%20Sans,sans-serif"></iframe></p>',
-          url: 'http://example.org/imprint.md',
-        })
+      mockFetch({
+        'http://example.org/imprint.md': 'Opt out:\n\nMATOMO-OPT-OUT-FORM',
+      })
+      expect(await fetchContent(exampleSpecMarkdown)).toEqual({
+        lang: 'de',
+        title: 'Imprint',
+        content: '<p>Opt out:</p>\n<p></p>',
+        url: 'http://example.org/imprint.md',
       })
     })
   })
 
   describe('returns null when request on the url of the spec fails', () => {
     test.each([301, 404, 500])('status code %p', async (code) => {
-      await withMockedFetch(new Response('', { status: code }), async () => {
-        expect(await fetchContent(exampleSpec)).toBeNull()
-      })
+      mockFetch({ 'http://example.org/': new Response('', { status: code }) })
+
+      expect(await fetchContent(exampleSpec)).toBeNull()
     })
   })
 })

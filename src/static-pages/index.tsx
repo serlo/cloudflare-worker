@@ -313,10 +313,8 @@ export async function fetchContent<A extends Page>(
     const sanitizedContent = sanitizeHtml(rawContent)
     const content = sanitizedContent
       .replace('JS-GOOGLE-ANALYTICS-DEACTIVATE', 'javascript:gaOptout();')
-      .replace(
-        'MATOMO-OPT-OUT-FORM',
-        `<iframe style="width: 100%; height: 130px; border: none;" src="https://analytics.serlo-development.dev/index.php?module=CoreAdminHome&action=optOut&language=${page.lang}&fontSize=16px&fontFamily=Open%20Sans,sans-serif"></iframe>`
-      )
+      // TODO: disabled until Matomo is live
+      .replace('MATOMO-OPT-OUT-FORM', '')
 
     return { ...page, content }
   } else {

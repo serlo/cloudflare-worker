@@ -19,9 +19,19 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-declare const MAINTENANCE_KV: {
-  get(key: 'enabled'): Promise<string | null>
+declare namespace NodeJS {
+  interface Global {
+    MAINTENANCE_KV: KV<'enabled'>
+    PACKAGES_KV: KV<string>
+    FRONTEND_CACHE_TYPES_KV: KV<string>
+  }
 }
-declare const PACKAGES_KV: {
-  get(key: string): Promise<string | null>
+
+declare interface KV<Keys extends string> {
+  get: (key: string) => Promise<string | null>
+  put: (
+    key: string,
+    value: string,
+    options?: { expirationTtl: number }
+  ) => Promise<void>
 }

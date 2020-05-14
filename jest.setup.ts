@@ -23,6 +23,14 @@
 import '@testing-library/jest-dom'
 import { Response, Request } from 'node-fetch'
 
+const fetchCopy = global.fetch
+const randomCopy = Math.random
+
+afterEach(() => {
+  Math.random = randomCopy
+  global.fetch = fetchCopy
+})
+
 global.Response = Response
 global.Request = Request
 

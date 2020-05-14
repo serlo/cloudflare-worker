@@ -27,13 +27,18 @@ export async function api(request: Request) {
   if (getSubdomain(request.url) !== 'api') return null
   if (getPathname(request.url) !== '/graphql') return null
 
-  const token = jwt.sign({}, API_SECRET, {
+  return await fetchApi(request)
+}
+
+export async function fetchApi(resource: RequestInfo, init?: RequestInit) {
+  const token = jwt.sign({}, global.API_SECRET, {
     expiresIn: '2h',
     audience: 'api.serlo.org',
     issuer: 'serlo.org-cloudflare-worker',
   })
 
-  const req = new Request(request)
-  req.headers.set('Authorization', `Serlo Service=${token}`)
-  return fetch(req)
+  const request = new Request(resource, init)
+  request.headers.set('Authorization', `Serlo Service=${token}`)
+
+  return await fetch(request)
 }
