@@ -46,7 +46,7 @@ import {
   containsText,
   contentTypeIsHtml,
   mockFetch,
-} from './utils'
+} from './_helper'
 
 describe('handleRequest()', () => {
   const unrevisedConfig: UnrevisedConfig = {

@@ -19,214 +19,144 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { handleRequest as f } from '../src'
-
-let fetchMock: jest.Mock
-class ResponseMock {
-  constructor(
-    public html: string,
-    public init?: {
-      headers?: Record<string, string>
-      status?: number
-      statusText?: string
-    }
-  ) {}
-
-  public get headers() {
-    return {
-      set() {},
-    }
-  }
-
-  static redirect(url: string, status?: number) {
-    return {
-      __type__: 'redirect',
-      url,
-      status,
-    }
-  }
-}
-
-class RequestMock {
-  constructor(public url: string) {}
-}
-
-beforeAll(() => {
-  global.FRONTEND_DOMAIN = 'frontend.domain'
-  global.API_ENDPOINT = 'api.endpoint'
-  global.FRONTEND_PROBABILITY = '1'
-  global.FRONTEND_ALLOWED_TYPES = '[]'
-})
-
-beforeEach(() => {
-  fetchMock = jest.fn(() => {
-    return true
-  })
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore
-  window['fetch'] = fetchMock
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore
-  window['Response'] = ResponseMock
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore
-  window['Request'] = RequestMock
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore
-  window['MAINTENANCE_KV'] = {
-    // eslint-disable-next-line @typescript-eslint/require-await
-    async get(_Key: string) {
-      return null
-    },
-  }
-})
+import { handleRequest } from '../src'
+import { mockKV, mockFetch } from './_helper'
 
 describe('Enforce HTTPS', () => {
   test('HTTP URL', async () => {
-    const response = await handleRequest('http://foo.serlo.local/bar')
-    expectToBeRedirectTo(response, 'https://foo.serlo.local/bar')
+    const response = await handleUrl('http://foo.serlo.local/bar')
+
+    expectToBeRedirectTo(response, 'https://foo.serlo.local/bar', 302)
   })
 
   test('HTTPS URL', async () => {
-    await handleRequest('https://foo.serlo.local/bar')
+    const mockedFetch = mockFetch({ 'https://foo.serlo.local/bar': '' })
 
-    expectFetchToHaveBeenCalledWithRequest({
-      url: 'https://foo.serlo.local/bar',
-    } as Request)
+    await handleUrl('https://foo.serlo.local/bar')
+
+    expectToHaveBeenCalledWith(mockedFetch, 'https://foo.serlo.local/bar')
   })
 
   test('Pact Broker', async () => {
-    await handleRequest('http://pacts.serlo.local/bar')
+    const mockedFetch = mockFetch({ 'http://pacts.serlo.local/bar': '' })
 
-    expectFetchToHaveBeenCalledWithRequest({
-      url: 'http://pacts.serlo.local/bar',
-    } as Request)
+    await handleUrl('http://pacts.serlo.local/bar')
+
+    expectToHaveBeenCalledWith(mockedFetch, 'http://pacts.serlo.local/bar')
   })
 })
 
 describe('Redirects', () => {
   test('start.serlo.org', async () => {
-    const response = await handleRequest('https://start.serlo.local/')
-    expectToBeRedirectTo(
-      response,
-      'https://docs.google.com/document/d/1qsgkXWNwC-mcgroyfqrQPkZyYqn7m1aimw2gwtDTmpM/',
-      301
-    )
+    const response = await handleUrl('https://start.serlo.local/')
+
+    const target =
+      'https://docs.google.com/document/d/1qsgkXWNwC-mcgroyfqrQPkZyYqn7m1aimw2gwtDTmpM/'
+    expectToBeRedirectTo(response, target, 301)
   })
 
   test('de.serlo.org/labschool', async () => {
-    const response = await handleRequest('https://de.serlo.local/labschool')
+    const response = await handleUrl('https://de.serlo.local/labschool')
+
     expectToBeRedirectTo(response, 'https://labschool.serlo.local/', 301)
   })
 
   test('de.serlo.org/hochschule', async () => {
-    const response = await handleRequest('https://de.serlo.local/hochschule')
-    expectToBeRedirectTo(
-      response,
-      'https://de.serlo.local/mathe/universitaet/44323',
-      301
-    )
+    const response = await handleUrl('https://de.serlo.local/hochschule')
+
+    const target = 'https://de.serlo.local/mathe/universitaet/44323'
+    expectToBeRedirectTo(response, target, 301)
   })
 
   test('de.serlo.org/beitreten', async () => {
-    const response = await handleRequest('https://de.serlo.local/beitreten')
-    expectToBeRedirectTo(
-      response,
-      'https://docs.google.com/forms/d/e/1FAIpQLSdEoyCcDVP_G_-G_u642S768e_sxz6wO6rJ3tad4Hb9z7Slwg/viewform',
-      301
-    )
+    const response = await handleUrl('https://de.serlo.local/beitreten')
+
+    const target =
+      'https://docs.google.com/forms/d/e/1FAIpQLSdEoyCcDVP_G_-G_u642S768e_sxz6wO6rJ3tad4Hb9z7Slwg/viewform'
+    expectToBeRedirectTo(response, target, 301)
   })
 
   test('serlo.org/*', async () => {
-    const response = await handleRequest('https://serlo.local/foo')
-    expectToBeRedirectTo(response, 'https://de.serlo.local/foo')
+    const response = await handleUrl('https://serlo.local/foo')
+
+    expectToBeRedirectTo(response, 'https://de.serlo.local/foo', 302)
   })
 
   test('www.serlo.org/*', async () => {
-    const response = await handleRequest('https://www.serlo.local/foo')
-    expectToBeRedirectTo(response, 'https://de.serlo.local/foo')
+    const response = await handleUrl('https://www.serlo.local/foo')
+
+    expectToBeRedirectTo(response, 'https://de.serlo.local/foo', 302)
   })
 })
 
 describe('Semantic file names', () => {
   test('assets.serlo.org/meta/*', async () => {
-    await handleRequest('https://assets.serlo.local/meta/foo')
-    expectFetchToHaveBeenCalledWithRequest({
-      url: 'https://assets.serlo.org/meta/foo',
-    } as Request)
+    const mockedFetch = mockFetch({ 'https://assets.serlo.org/meta/foo': '' })
+
+    await handleUrl('https://assets.serlo.local/meta/foo')
+
+    expectToHaveBeenCalledWith(mockedFetch, 'https://assets.serlo.org/meta/foo')
   })
 
   test('assets.serlo.org/<hash>/<fileName>.<ext>', async () => {
-    await handleRequest('https://assets.serlo.local/hash/fileName.ext')
-    expectFetchToHaveBeenCalledWithRequest({
-      url: 'https://assets.serlo.org/hash.ext',
-    } as Request)
+    const mockedFetch = mockFetch({ 'https://assets.serlo.org/hash.ext': '' })
+
+    await handleUrl('https://assets.serlo.local/hash/fileName.ext')
+
+    expectToHaveBeenCalledWith(mockedFetch, 'https://assets.serlo.org/hash.ext')
   })
 
   test('assets.serlo.org/legacy/<hash>/<fileName>.<ext>', async () => {
-    await handleRequest('https://assets.serlo.local/legacy/hash/fileName.ext')
-    expectFetchToHaveBeenCalledWithRequest({
-      url: 'https://assets.serlo.org/legacy/hash.ext',
-    } as Request)
+    const mockedFetch = mockFetch({
+      'https://assets.serlo.org/legacy/hash.ext': '',
+    })
+
+    await handleUrl('https://assets.serlo.local/legacy/hash/fileName.ext')
+
+    const target = 'https://assets.serlo.org/legacy/hash.ext'
+    expectToHaveBeenCalledWith(mockedFetch, target)
   })
 })
 
 describe('Packages', () => {
   test('packages.serlo.org/<package>/<filePath>', async () => {
-    mockPackagesKV({
-      foo: 'foo@1.0.0',
+    const mockedFetch = mockFetch({
+      'https://packages.serlo.org/foo@1.0.0/bar': '',
     })
-    await handleRequest('https://packages.serlo.local/foo/bar')
-    expectFetchToHaveBeenCalledWithRequest({
-      url: 'https://packages.serlo.org/foo@1.0.0/bar',
-    } as Request)
+    mockKV('PACKAGES_KV', { foo: 'foo@1.0.0' })
+
+    await handleUrl('https://packages.serlo.local/foo/bar')
+
+    const target = 'https://packages.serlo.org/foo@1.0.0/bar'
+    expectToHaveBeenCalledWith(mockedFetch, target)
   })
 
   test('packages.serlo.org/<package>/<filePath> (invalid)', async () => {
-    mockPackagesKV({
-      foo: 'foo@1.0.0',
+    const mockedFetch = mockFetch({
+      'https://packages.serlo.org/foobar/bar': '',
     })
-    await handleRequest('https://packages.serlo.local/foobar/bar')
-    expectFetchToHaveBeenCalledWithRequest({
-      url: 'https://packages.serlo.org/foobar/bar',
-    } as Request)
+    mockKV('PACKAGES_KV', { foo: 'foo@1.0.0' })
+
+    await handleUrl('https://packages.serlo.local/foobar/bar')
+
+    const target = 'https://packages.serlo.org/foobar/bar'
+    expectToHaveBeenCalledWith(mockedFetch, target)
   })
 })
 
-async function handleRequest(url: string): Promise<ResponseMock> {
-  const response = await f({ url } as Request)
-  return (response as unknown) as ResponseMock
+async function handleUrl(url: string): Promise<Response> {
+  return await handleRequest(new Request(url))
 }
 
-function mockPackagesKV(packages: Record<string, unknown>) {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore
-  window['PACKAGES_KV'] = {
-    // eslint-disable-next-line @typescript-eslint/require-await
-    async get(key: string) {
-      return packages[key] || null
-    },
-  }
+function expectToHaveBeenCalledWith(mockedFetch: jest.Mock, targetUrl: string) {
+  expect(mockedFetch).toHaveBeenCalledTimes(1)
+
+  const arg = mockedFetch.mock.calls[0][0] as string | Request
+  const url = typeof arg === 'string' ? arg : arg.url
+  expect(url).toBe(targetUrl)
 }
 
-function expectFetchToHaveBeenCalledWithRequest(request: Request) {
-  expect(fetchMock).toHaveBeenCalledTimes(1)
-  const [arg1, arg2] = fetchMock.mock.calls[0]
-  if (typeof arg1 === 'string') {
-    expect({ ...arg2, url: arg1 }).toEqual(request)
-  } else {
-    expect(arg1).toEqual(request)
-  }
-}
-
-function expectToBeRedirectTo(
-  response: ResponseMock,
-  url: string,
-  status?: number
-) {
-  expect(response).toEqual({
-    __type__: 'redirect',
-    url,
-    status,
-  })
+function expectToBeRedirectTo(response: Response, url: string, status: number) {
+  expect(response.headers.get('Location')).toBe(url)
+  expect(response.status).toBe(status)
 }

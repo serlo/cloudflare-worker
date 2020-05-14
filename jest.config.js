@@ -22,5 +22,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires,import/no-commonjs */
 module.exports = {
   preset: 'ts-jest',
+  testRegex: '/__tests__/[^_].*\\.[jt]sx?$',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
 }

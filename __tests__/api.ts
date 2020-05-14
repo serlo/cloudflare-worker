@@ -1,5 +1,5 @@
 import { fetchApi } from '../src/api'
-import { mockFetch } from './utils'
+import { mockFetch } from './_helper'
 
 describe('fetchApi()', () => {
   beforeAll(() => {
