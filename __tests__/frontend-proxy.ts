@@ -9,6 +9,7 @@ describe('handleRequest()', () => {
     global.API_ENDPOINT = 'https://api.serlo.org/'
     global.FRONTEND_PROBABILITY = '0.1'
     global.FRONTEND_ALLOWED_TYPES = '[]'
+      Math.random = jest.fn().mockReturnValueOnce(0.5)
 
     mockKV('FRONTEND_CACHE_TYPES_KV', {})
   })
@@ -23,8 +24,7 @@ describe('handleRequest()', () => {
     global.FRONTEND_PROBABILITY = '0.5'
     global.FRONTEND_ALLOWED_TYPES = '["Subject"]'
 
-    const request = new Request(url)
-    const response = (await handleRequest(request))!
+    const response = await handleUrl(url)
 
     const targetUrl = url.replace('de.serlo.org', 'frontend.serlo.org')
     expect(getBackendUrl(mockedFetch)).toBe(targetUrl)
@@ -46,8 +46,7 @@ describe('handleRequest()', () => {
     global.FRONTEND_PROBABILITY = '0.5'
     global.FRONTEND_ALLOWED_TYPES = '["Subject"]'
 
-    const request = new Request(url)
-    const response = (await handleRequest(request))!
+    const response = await handleUrl(url)
 
     expect(getBackendUrl(mockedFetch)).toBe(url)
 
@@ -63,11 +62,10 @@ describe('handleRequest()', () => {
       'https://de.serlo.org/math': '',
     })
     global.FRONTEND_PROBABILITY = '1'
-    global.FRONTEND_ALLOWED_TYPES = '["Page"]'
 
     const request = new Request('https://de.serlo.org/math')
     request.headers.set('Cookie', 'authenticated=1')
-    const response = (await handleRequest(request))!
+    const response = await handleRequest(request) as Response
 
     expect(getBackendUrl(mockedFetch)).toBe('https://de.serlo.org/math')
     expect(response.headers.get('Set-Cookie')).toBeNull()
@@ -96,20 +94,17 @@ describe('handleRequest()', () => {
         'https://api.serlo.org/': createApiResponse('Page'),
         [backendUrl]: '',
       })
-      Math.random = jest.fn().mockReturnValueOnce(1)
       global.FRONTEND_PROBABILITY = '0.5'
       global.FRONTEND_ALLOWED_TYPES = '["Page"]'
 
       const request = new Request(url, { headers: { Cookie: cookieValue } })
-      const response = (await handleRequest(request))!
+      const response = await handleRequest(request) as Response
 
       expect(Math.random).not.toHaveBeenCalled()
 
       expect(getBackendUrl(mockedFetch)).toBe(backendUrl)
-      expect(getHeaderApiEndpoint(mockedFetch)).toBe('https://api.serlo.org/')
 
       expect(response.headers.get('Set-Cookie')).toBeNull()
-      expect(await getCachedType('/math')).toBe('Page')
     })
 
     test('ignore wrong formated cookie values', async () => {
@@ -118,14 +113,13 @@ describe('handleRequest()', () => {
         'https://api.serlo.org/': createApiResponse('Page'),
         'https://frontend.serlo.org/math': '',
       })
-      Math.random = jest.fn().mockReturnValueOnce(0.5)
       global.FRONTEND_PROBABILITY = '1'
       global.FRONTEND_ALLOWED_TYPES = '["Page"]'
 
       const request = new Request(url, {
         headers: { Cookie: 'useFrontend=foo' },
       })
-      const response = (await handleRequest(request))!
+      const response = await handleRequest(request) as Response
 
       expect(Math.random).toHaveBeenCalled()
       expect(getBackendUrl(mockedFetch)).toBe('https://frontend.serlo.org/math')
@@ -142,8 +136,7 @@ describe('handleRequest()', () => {
       global.FRONTEND_ALLOWED_TYPES = '["Page"]'
       await global.FRONTEND_CACHE_TYPES_KV.put('/math', 'Page')
 
-      const request = new Request('https://de.serlo.org/math')
-      await handleRequest(request)
+      await handleUrl('https://de.serlo.org/math')
 
       expect(getBackendUrl(mockedFetch)).toBe('https://frontend.serlo.org/math')
       expect(await getCachedType('/math')).toBe('Page')
@@ -151,15 +144,13 @@ describe('handleRequest()', () => {
 
     test('type of start page is not checked', async () => {
       const mockedFetch = mockFetch({ 'https://frontend.serlo.org/': '' })
-      Math.random = jest.fn().mockReturnValueOnce(0.25)
       global.FRONTEND_PROBABILITY = '1'
 
-      const request = new Request('https://de.serlo.org/')
-      const response = (await handleRequest(request))!
+      const response = await handleUrl('https://de.serlo.org/')
 
       expect(getBackendUrl(mockedFetch)).toBe('https://frontend.serlo.org/')
       expect(response.headers.get('Set-Cookie')).toBe(
-        `useFrontend=0.25; path=/`
+        `useFrontend=0.5; path=/`
       )
       expect(getHeaderApiEndpoint(mockedFetch)).toBe('https://api.serlo.org/')
       expect(await getCachedType('/')).toBeNull()
@@ -172,8 +163,7 @@ describe('handleRequest()', () => {
       global.FRONTEND_PROBABILITY = '1'
       global.FRONTEND_ALLOWED_TYPES = '["Page", "Article"]'
 
-      const request = new Request('https://de.serlo.org/42')
-      const response = await handleRequest(request)
+      const response = await handleUrl('https://de.serlo.org/42')
 
       expect(response).toBeNull()
       expect(await getCachedType('/42')).toBe('TaxonomyTerm')
@@ -184,11 +174,10 @@ describe('handleRequest()', () => {
         'https://api.serlo.org/': createApiErrorResponse(),
       })
 
-      const request = new Request('https://de.serlo.org/math')
-      const response = await handleRequest(request)
+      const response = await handleUrl('https://de.serlo.org/unknown')
 
       expect(response).toBeNull()
-      expect(await getCachedType('/math')).toBeNull()
+      expect(await getCachedType('/unknown')).toBeNull()
     })
   })
 
@@ -199,7 +188,7 @@ describe('handleRequest()', () => {
         'https://frontend.serlo.org/api/frontend/privacy/json': '',
       })
 
-      const response = (await handleRequest(new Request(url)))!
+      const response = await handleUrl(url)
 
       const targetUrl = url.replace('de.serlo.org', 'frontend.serlo.org')
       expect(getBackendUrl(mockedFetch)).toBe(targetUrl)
@@ -214,7 +203,7 @@ describe('handleRequest()', () => {
         'https://frontend.serlo.org/_next/script.js': '',
       })
 
-      const response = (await handleRequest(new Request(url)))!
+      const response = await handleUrl(url)
 
       const targetUrl = url.replace('de.serlo.org', 'frontend.serlo.org')
       expect(getBackendUrl(mockedFetch)).toBe(targetUrl)
@@ -229,7 +218,7 @@ describe('handleRequest()', () => {
         'https://frontend.serlo.org/_assets/img/picture.svg': '',
       })
 
-      const response = (await handleRequest(new Request(url)))!
+      const response = await handleUrl(url)
 
       const targetUrl = url.replace('de.serlo.org', 'frontend.serlo.org')
       expect(getBackendUrl(mockedFetch)).toBe(targetUrl)
@@ -252,7 +241,7 @@ describe('handleRequest()', () => {
         global.FRONTEND_PROBABILITY = '0.5'
         global.FRONTEND_ALLOWED_TYPES = '["Article"]'
 
-        await handleRequest(new Request(url))
+        await handleUrl(url)
 
         expect(getBackendUrl(mockedFetch)).toBe(url)
         expect(await getCachedType(getPathname(url))).toBe('Article')
@@ -265,7 +254,7 @@ describe('handleRequest()', () => {
         'https://de.serlo.org/spenden': '',
       })
 
-      await handleRequest(new Request(url))
+      await handleUrl(url)
 
       expect(getBackendUrl(mockedFetch)).toBe(url)
       expect(await getCachedType(getPathname(url))).toBeNull()
@@ -273,14 +262,17 @@ describe('handleRequest()', () => {
   })
 
   describe('returns null if language tenant is not "de"', () => {
-    test.each(['https://serlo.org/', 'http://en.serlo.org/math'])(
-      'URL is %p',
-      async (url) => {
-        const response = await handleRequest(new Request(url))
+    test("URL without subdomain", async () => {
+      const response = await handleUrl('https://serlo.org/')
 
-        expect(response).toBeNull()
-      }
-    )
+      expect(response).toBeNull()
+    })
+
+    test('URL with subdomain different from "de"', async () => {
+      const response = await handleUrl('https://en.serlo.org/')
+
+      expect(response).toBeNull()
+    })
   })
 
   test('creates a copy of backend responses (otherwise there is an error in cloudflare)', async () => {
@@ -288,7 +280,7 @@ describe('handleRequest()', () => {
     mockFetch({ 'https://frontend.serlo.org/': backendResponse })
     global.FRONTEND_PROBABILITY = '1'
 
-    const response = await handleRequest(new Request('https://de.serlo.org'))
+    const response = await handleUrl('https://de.serlo.org/')
 
     expect(response).not.toBe(backendResponse)
   })
@@ -326,15 +318,11 @@ describe('handleRequest()', () => {
       })
 
       mockFetch({ [backendUrl]: backendResponse })
-      Math.random = jest.fn().mockReturnValueOnce(0.5)
       global.FRONTEND_PROBABILITY = probability.toString()
 
-      const request = new Request('https://de.serlo.org')
-      const response = (await handleRequest(request))!
+      const response = await handleUrl('https://de.serlo.org')
 
-      expect(response).not.toBeNull()
       expect(response.headers.get('X-Header')).toBe('bar')
-
       // FIXME: Use getAll() after https://github.com/whatwg/fetch/issues/973
       // got implemented. See also
       // https://community.cloudflare.com/t/dont-fold-set-cookie-headers-with-headers-append/165934/3
@@ -345,21 +333,19 @@ describe('handleRequest()', () => {
   })
 
   test('requests to /enable-frontend enable use of frontend', async () => {
-    const url = 'https://de.serlo.org/enable-frontend'
-    const res = (await handleRequest(new Request(url)))!
+    const res = await handleUrl('https://de.serlo.org/enable-frontend')
 
     hasOkStatus(res)
     expect(res.headers.get('Set-Cookie')).toBe('useFrontend=0; path=/')
-    expect(await res.text()).toBe('Enable frontend')
+    expect(await res.text()).toBe('Enabled: Use of new frontend')
   })
 
   test('requests to /disable-frontend disable use of frontend', async () => {
-    const url = 'https://de.serlo.org/disable-frontend'
-    const res = (await handleRequest(new Request(url)))!
+    const res = await handleUrl('https://de.serlo.org/disable-frontend')
 
     hasOkStatus(res)
     expect(res.headers.get('Set-Cookie')).toBe('useFrontend=1; path=/')
-    expect(await res.text()).toBe('Disable frontend')
+    expect(await res.text()).toBe('Disabled: Use of new frontend')
   })
 })
 
@@ -370,10 +356,14 @@ describe('createApiQuery()', () => {
     )
   })
 
-  test('path with uuid', () => {
+  test('uuid path', () => {
     expect(createApiQuery('/266')).toBe('{ uuid(id: 266) { __typename } }')
   })
 })
+
+async function handleUrl(url: string): Promise<Response> {
+  return await handleRequest(new Request(url)) as Response
+}
 
 function createApiResponse(typename: string) {
   return createJsonResponse({ data: { uuid: { __typename: typename } } })
