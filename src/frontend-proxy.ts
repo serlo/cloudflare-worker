@@ -13,7 +13,7 @@ export async function handleRequest(
   if (getSubdomain(url) !== 'de') return null
 
   if (path === '/enable-frontend') {
-    const response = new Response('Enable frontend')
+    const response = new Response('Enabled: Use of new frontend')
 
     setCookieUseFrontend(response, 0)
 
@@ -21,7 +21,7 @@ export async function handleRequest(
   }
 
   if (path === '/disable-frontend') {
-    const response = new Response('Disable frontend')
+    const response = new Response('Disabled: Use of new frontend')
 
     setCookieUseFrontend(response, 1)
 

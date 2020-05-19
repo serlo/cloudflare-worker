@@ -56,7 +56,7 @@ declare global {
   }
 }
 
-// TODO: Delete the following mock, when node-fetch is available in version 3.0.0
+// FIXME: Delete the following mock, when node-fetch is available in version 3.0.0
 // See https://github.com/node-fetch/node-fetch/commit/0959ca9739850bbd24e0721cc1296e7a0aa5c2bd#diff-d0f5704ae0738a7bd1f54aff42ddcb41
 // eslint-disable-next-line @typescript-eslint/unbound-method
 Response.redirect = function (url: string, status = 302) {
