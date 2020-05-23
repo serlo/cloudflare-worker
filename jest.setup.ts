@@ -23,7 +23,10 @@
 import '@testing-library/jest-dom'
 import { Response, Request } from 'node-fetch'
 
+import { extendExpect } from './__tests__/_extend-jest'
 import { mockKV } from './__tests__/_helper'
+
+extendExpect()
 
 const fetchCopy = global.fetch
 const randomCopy = Math.random

@@ -20,7 +20,13 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 import { handleRequest } from '../src'
-import { mockKV, mockFetch } from './_helper'
+import { mockKV, mockFetch, FetchMock } from './_helper'
+
+let fetch: FetchMock
+
+beforeEach(() => {
+  fetch = mockFetch()
+})
 
 describe('Enforce HTTPS', () => {
   test('HTTP URL', async () => {
@@ -30,19 +36,19 @@ describe('Enforce HTTPS', () => {
   })
 
   test('HTTPS URL', async () => {
-    const mockedFetch = mockFetch({ 'https://foo.serlo.local/bar': '' })
+    fetch.addResponseFor('https://foo.serlo.local/bar')
 
     await handleUrl('https://foo.serlo.local/bar')
 
-    expectToHaveBeenCalledWith(mockedFetch, 'https://foo.serlo.local/bar')
+    expect(fetch).toHaveBeenCalledOnceFor('https://foo.serlo.local/bar')
   })
 
   test('Pact Broker', async () => {
-    const mockedFetch = mockFetch({ 'http://pacts.serlo.local/bar': '' })
+    fetch.addResponseFor('http://pacts.serlo.local/bar')
 
     await handleUrl('http://pacts.serlo.local/bar')
 
-    expectToHaveBeenCalledWith(mockedFetch, 'http://pacts.serlo.local/bar')
+    expect(fetch).toHaveBeenCalledOnceFor('http://pacts.serlo.local/bar')
   })
 })
 
@@ -91,69 +97,55 @@ describe('Redirects', () => {
 
 describe('Semantic file names', () => {
   test('assets.serlo.org/meta/*', async () => {
-    const mockedFetch = mockFetch({ 'https://assets.serlo.org/meta/foo': '' })
+    fetch.addResponseFor('https://assets.serlo.org/meta/foo')
 
     await handleUrl('https://assets.serlo.local/meta/foo')
 
-    expectToHaveBeenCalledWith(mockedFetch, 'https://assets.serlo.org/meta/foo')
+    expect(fetch).toHaveBeenCalledOnceFor('https://assets.serlo.org/meta/foo')
   })
 
   test('assets.serlo.org/<hash>/<fileName>.<ext>', async () => {
-    const mockedFetch = mockFetch({ 'https://assets.serlo.org/hash.ext': '' })
+    fetch.addResponseFor('https://assets.serlo.org/hash.ext')
 
     await handleUrl('https://assets.serlo.local/hash/fileName.ext')
 
-    expectToHaveBeenCalledWith(mockedFetch, 'https://assets.serlo.org/hash.ext')
+    expect(fetch).toHaveBeenCalledOnceFor('https://assets.serlo.org/hash.ext')
   })
 
   test('assets.serlo.org/legacy/<hash>/<fileName>.<ext>', async () => {
-    const mockedFetch = mockFetch({
-      'https://assets.serlo.org/legacy/hash.ext': '',
-    })
+    fetch.addResponseFor('https://assets.serlo.org/legacy/hash.ext')
 
     await handleUrl('https://assets.serlo.local/legacy/hash/fileName.ext')
 
     const target = 'https://assets.serlo.org/legacy/hash.ext'
-    expectToHaveBeenCalledWith(mockedFetch, target)
+    expect(fetch).toHaveBeenCalledOnceFor(target)
   })
 })
 
 describe('Packages', () => {
   test('packages.serlo.org/<package>/<filePath>', async () => {
-    const mockedFetch = mockFetch({
-      'https://packages.serlo.org/foo@1.0.0/bar': '',
-    })
     mockKV('PACKAGES_KV', { foo: 'foo@1.0.0' })
+    fetch.addResponseFor('https://packages.serlo.org/foo@1.0.0/bar')
 
     await handleUrl('https://packages.serlo.local/foo/bar')
 
     const target = 'https://packages.serlo.org/foo@1.0.0/bar'
-    expectToHaveBeenCalledWith(mockedFetch, target)
+    expect(fetch).toHaveBeenCalledOnceFor(target)
   })
 
   test('packages.serlo.org/<package>/<filePath> (invalid)', async () => {
-    const mockedFetch = mockFetch({
-      'https://packages.serlo.org/foobar/bar': '',
-    })
     mockKV('PACKAGES_KV', { foo: 'foo@1.0.0' })
+    fetch.addResponseFor('https://packages.serlo.org/foobar/bar')
 
     await handleUrl('https://packages.serlo.local/foobar/bar')
 
     const target = 'https://packages.serlo.org/foobar/bar'
-    expectToHaveBeenCalledWith(mockedFetch, target)
+    expect(fetch).toHaveBeenCalledOnceFor(target)
   })
 })
 
 async function handleUrl(url: string): Promise<Response> {
   return await handleRequest(new Request(url))
-}
-
-function expectToHaveBeenCalledWith(mockedFetch: jest.Mock, targetUrl: string) {
-  expect(mockedFetch).toHaveBeenCalledTimes(1)
-
-  const arg = mockedFetch.mock.calls[0][0] as string | Request
-  const url = typeof arg === 'string' ? arg : arg.url
-  expect(url).toBe(targetUrl)
 }
 
 function expectToBeRedirectTo(response: Response, url: string, status: number) {
