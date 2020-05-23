@@ -105,13 +105,23 @@ test('NotFoundResponse', async () => {
   await isNotFoundResponse(createNotFoundResponse())
 })
 
-test('fetchWithCache()', async () => {
-  const mockedFetch = mockFetch({ 'http://example.com': 'test' })
+describe('fetchWithCache()', () => {
+  test('returns the result of fetch()', async () => {
+    mockFetch({ 'http://example.com/': 'test' })
 
-  const response = await fetchWithCache('http://example.com')
+    const response = await fetchWithCache('http://example.com/')
 
-  expect(await response.text()).toBe('test')
-  expect(mockedFetch).toHaveBeenCalledWith('http://example.com', {
-    cf: { cacheTtl: 3600 },
+    expect(await response.text()).toBe('test')
+  })
+
+  test('responses are cached for 1 hour', async () => {
+    const mockedFetch = mockFetch({ 'http://example.com/': '' })
+
+    await fetchWithCache('http://example.com/')
+
+    expect(mockedFetch.getCallArgumentsFor('http://example.com/')).toEqual([
+      'http://example.com/',
+      { cf: { cacheTtl: 3600 } },
+    ])
   })
 })

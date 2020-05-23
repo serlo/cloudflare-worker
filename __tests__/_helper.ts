@@ -53,25 +53,72 @@ export async function isJsonResponse(response: Response, targetJson: unknown) {
   expect(JSON.parse(await response.text())).toEqual(targetJson)
 }
 
-export function mockFetch(spec: Record<string, string | Response>) {
-  function mockedFetchImpl(reqInfo: Request | string): Promise<Response> {
-    const url = typeof reqInfo === 'string' ? reqInfo : reqInfo.url
-    const responseSpec = spec[url]
+type FetchSpec = Record<string, string | Response>
 
-    return responseSpec === undefined
-      ? Promise.reject(new Error(`URL ${url} not defined in mocked fetch`))
-      : Promise.resolve(convertToResponse(responseSpec))
-  }
+export function mockFetch(spec: FetchSpec = {}): FetchMock {
+  const mockedFetch = jest.fn()
+  const mockedInternet = new FetchMock(spec, mockedFetch)
 
-  const mockedFetch = jest.fn().mockImplementation(mockedFetchImpl)
+  mockedFetch.mockImplementation((reqInfo) => mockedInternet.fetch(reqInfo))
 
   global.fetch = mockedFetch
 
-  return mockedFetch
+  return mockedInternet
 }
 
-function convertToResponse(spec: string | Response): Response {
-  return typeof spec === 'string' ? new Response(spec) : spec
+export class FetchMock {
+  private specs: FetchSpec
+  private mockedFetch: jest.Mock
+
+  constructor(specs: FetchSpec, mockedFetch: jest.Mock) {
+    this.specs = specs
+    this.mockedFetch = mockedFetch
+  }
+
+  fetch(reqInfo: Request | string) {
+    const url = typeof reqInfo === 'string' ? reqInfo : reqInfo.url
+    const responseSpec = this.specs[url]
+    const errorMessage = `Response for URL ${url} is not defined in mocked fetch`
+
+    return responseSpec === undefined
+      ? Promise.reject(new Error(errorMessage))
+      : Promise.resolve(FetchMock.convertToResponse(responseSpec))
+  }
+
+  addResponseFor(url: string, spec: string | Response = '') {
+    this.specs[url] = spec
+  }
+
+  getAllCallArgumentsFor(url: string) {
+    return this.mockedFetch.mock.calls.filter(
+      ([req]) => FetchMock.getUrl(req) === url
+    )
+  }
+
+  getCallArgumentsFor(url: string) {
+    const argsList = this.getAllCallArgumentsFor(url)
+
+    if (argsList.length === 0) throw new Error(`URL ${url} was never fetched`)
+    if (argsList.length > 1)
+      throw new Error(`URL ${url} was fetched more than one time`)
+
+    return argsList[0]
+  }
+
+  getRequestFor(url: string): Request {
+    return this.getCallArgumentsFor(url)[0]
+  }
+
+  getAllRequestsFor(url: string): Request[] {
+    return this.getAllCallArgumentsFor(url).map((x) => x[0])
+  }
+
+  static getUrl(req: Request | string): string {
+    return typeof req === 'string' ? req : req.url
+  }
+  static convertToResponse(spec: string | Response): Response {
+    return typeof spec === 'string' ? new Response(spec) : spec
+  }
 }
 
 export function mockKV(name: string, values: Record<string, unknown>) {
