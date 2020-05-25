@@ -75,6 +75,10 @@ export class FetchMock {
     this.mockedFetch = mockedFetch
   }
 
+  get mock() {
+    return this.mockedFetch
+  }
+
   fetch(reqInfo: Request | string) {
     const url = typeof reqInfo === 'string' ? reqInfo : reqInfo.url
     const responseSpec = this.specs[url]
