@@ -289,6 +289,27 @@ describe('handleRequest()', () => {
         expect(await getCachedType(getPathname(url))).toBe('Article')
       })
     })
+
+    describe('forwards authentication requests to default backend', () => {
+      test.each([
+        'https://de.serlo.org/auth/login',
+        'https://de.serlo.org/auth/logout',
+        'https://de.serlo.org/auth/activate/:token',
+        'https://de.serlo.org/auth/password/change',
+        'https://de.serlo.org/auth/password/restore/:token',
+        'https://de.serlo.org/auth/hydra/login',
+        'https://de.serlo.org/auth/hydra/consent',
+        'https://de.serlo.org/user/register',
+      ])('URL = %p', async (url) => {
+        const mockedFetch = mockFetch({ [url]: '' })
+
+        const response = (await handleRequest(new Request(url)))!
+
+        expect(getBackendUrl(mockedFetch)).toBe(url)
+        expect(response.headers.get('Set-Cookie')).toBeNull()
+        expect(await getCachedType(getPathname(url))).toBeNull()
+      })
+    })
   })
 
   describe('returns null if language tenant is not "de"', () => {
