@@ -253,6 +253,43 @@ describe('handleRequest()', () => {
       )
     })
 
+    test('requests to /search always resolve to frontend', async () => {
+      fetch.addResponseFor('https://frontend.serlo.org/search')
+
+      await handleUrl('https://de.serlo.org/search')
+
+      expect(fetch).toHaveBeenCalledOnceFor('https://frontend.serlo.org/search')
+    })
+
+    test('requests to /spenden always resolve to frontend', async () => {
+      fetch.addResponseFor('https://frontend.serlo.org/spenden')
+
+      await handleUrl('https://de.serlo.org/spenden')
+
+      expect(fetch).toHaveBeenCalledOnceFor(
+        'https://frontend.serlo.org/spenden'
+      )
+    })
+
+    describe('forwards authentication requests to default backend', () => {
+      test.each([
+        'https://de.serlo.org/auth/login',
+        'https://de.serlo.org/auth/logout',
+        'https://de.serlo.org/auth/activate/:token',
+        'https://de.serlo.org/auth/password/change',
+        'https://de.serlo.org/auth/password/restore/:token',
+        'https://de.serlo.org/auth/hydra/login',
+        'https://de.serlo.org/auth/hydra/consent',
+        'https://de.serlo.org/user/register',
+      ])('URL = %p', async (url) => {
+        fetch.addResponseFor(url)
+
+        await handleUrl(url)
+
+        expect(fetch).toHaveBeenCalledOnceFor(url)
+      })
+    })
+
     describe('special paths need to have a trailing slash in their prefix', () => {
       test.each([
         'https://de.serlo.org/api/frontend-alternative',
@@ -268,21 +305,22 @@ describe('handleRequest()', () => {
       })
     })
 
-    test('requests to /spenden always resolve to default backend', async () => {
-      fetch.addResponseFor('https://de.serlo.org/spenden')
-
-      await handleUrl('https://de.serlo.org/spenden')
-
-      expect(fetch).toHaveBeenCalledOnceFor('https://de.serlo.org/spenden')
-    })
-
     describe('type of special paths is not checked nor cached', () => {
       test.each([
         'https://de.serlo.org/',
         'https://de.serlo.org/spenden',
+        'https://de.serlo.org/search',
         'https://de.serlo.org/_next/script.js',
         'https://de.serlo.org/_assets/image.png',
         'https://de.serlo.org/api/frontend/',
+        'https://de.serlo.org/auth/login',
+        'https://de.serlo.org/auth/logout',
+        'https://de.serlo.org/auth/activate/:token',
+        'https://de.serlo.org/auth/password/change',
+        'https://de.serlo.org/auth/password/restore/:token',
+        'https://de.serlo.org/auth/hydra/login',
+        'https://de.serlo.org/auth/hydra/consent',
+        'https://de.serlo.org/user/register',
       ])('URL = %p', async (url) => {
         fetch.addResponseFor(getUrlFor(Backend.Frontend, url))
         fetch.addResponseFor(getUrlFor(Backend.DefaultBackend, url))
@@ -297,9 +335,18 @@ describe('handleRequest()', () => {
     describe('Predetermined special paths do not set a cookie', () => {
       test.each([
         'https://de.serlo.org/spenden',
+        'https://de.serlo.org/search',
         'https://de.serlo.org/_next/script.js',
         'https://de.serlo.org/_assets/image.png',
         'https://de.serlo.org/api/frontend/',
+        'https://de.serlo.org/auth/login',
+        'https://de.serlo.org/auth/logout',
+        'https://de.serlo.org/auth/activate/:token',
+        'https://de.serlo.org/auth/password/change',
+        'https://de.serlo.org/auth/password/restore/:token',
+        'https://de.serlo.org/auth/hydra/login',
+        'https://de.serlo.org/auth/hydra/consent',
+        'https://de.serlo.org/user/register',
       ])('URL = %p', async (url) => {
         fetch.addResponseFor(getUrlFor(Backend.Frontend, url))
         fetch.addResponseFor(getUrlFor(Backend.DefaultBackend, url))
