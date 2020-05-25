@@ -239,6 +239,21 @@ describe('handleRequest()', () => {
       expect(await getCachedType(getPathname(url))).toBeNull()
     })
 
+    test('requests to /search always resolve to frontend', async () => {
+      const url = 'https://de.serlo.org/search'
+      const mockedFetch = mockFetch({
+        'https://frontend.serlo.org/search': '',
+      })
+
+      const response = (await handleRequest(new Request(url)))!
+
+      const targetUrl = url.replace('de.serlo.org', 'frontend.serlo.org')
+      expect(getBackendUrl(mockedFetch)).toBe(targetUrl)
+      expect(getHeaderApiEndpoint(mockedFetch)).toBe('https://api.serlo.org/')
+      expect(response.headers.get('Set-Cookie')).toBeNull()
+      expect(await getCachedType(getPathname(url))).toBeNull()
+    })
+
     describe('special paths need to have a trailing slash in their prefix', () => {
       test.each([
         'https://de.serlo.org/api/frontend-alternative',

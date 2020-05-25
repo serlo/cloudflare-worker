@@ -31,7 +31,8 @@ export async function handleRequest(
   if (
     path.startsWith('/_next/') ||
     path.startsWith('/_assets/') ||
-    path.startsWith('/api/frontend/')
+    path.startsWith('/api/frontend/') ||
+    path === '/search'
   )
     return await fetchBackend(true)
 
