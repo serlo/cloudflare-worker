@@ -32,13 +32,13 @@ export async function handleRequest(
     path.startsWith('/_next/') ||
     path.startsWith('/_assets/') ||
     path.startsWith('/api/frontend/') ||
-    path === '/search'
+    path === '/search' ||
+    path === '/spenden'
   )
     return await fetchBackend(true)
 
   const cookies = request.headers.get('Cookie')
-  if (path === '/spenden' || cookies?.includes('authenticated=1'))
-    return await fetchBackend(false)
+  if (cookies?.includes('authenticated=1')) return await fetchBackend(false)
 
   if (path !== '/') {
     const typename = await queryTypename(path)
