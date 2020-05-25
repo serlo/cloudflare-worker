@@ -38,7 +38,19 @@ export async function handleRequest(
     return await fetchBackend(true)
 
   const cookies = request.headers.get('Cookie')
-  if (cookies?.includes('authenticated=1')) return await fetchBackend(false)
+
+  if (
+    path === '/auth/login' ||
+    path === '/auth/logout' ||
+    path.startsWith('/auth/activate/') ||
+    path === '/auth/password/change' ||
+    path.startsWith('/auth/password/restore/') ||
+    path === '/auth/hydra/login' ||
+    path === '/auth/hydra/consent' ||
+    path === '/user/register' ||
+    cookies?.includes('authenticated=1')
+  )
+    return await fetchBackend(false)
 
   if (path !== '/') {
     const typename = await queryTypename(path)
