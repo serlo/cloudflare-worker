@@ -31,12 +31,25 @@ export async function handleRequest(
   if (
     path.startsWith('/_next/') ||
     path.startsWith('/_assets/') ||
-    path.startsWith('/api/frontend/')
+    path.startsWith('/api/frontend/') ||
+    path === '/search' ||
+    path === '/spenden'
   )
     return await fetchBackend(true)
 
   const cookies = request.headers.get('Cookie')
-  if (path === '/spenden' || cookies?.includes('authenticated=1'))
+
+  if (
+    path === '/auth/login' ||
+    path === '/auth/logout' ||
+    path.startsWith('/auth/activate/') ||
+    path === '/auth/password/change' ||
+    path.startsWith('/auth/password/restore/') ||
+    path === '/auth/hydra/login' ||
+    path === '/auth/hydra/consent' ||
+    path === '/user/register' ||
+    cookies?.includes('authenticated=1')
+  )
     return await fetchBackend(false)
 
   if (path !== '/') {
