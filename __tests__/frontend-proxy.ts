@@ -239,6 +239,36 @@ describe('handleRequest()', () => {
       expect(await getCachedType(getPathname(url))).toBeNull()
     })
 
+    test('requests to /search always resolve to frontend', async () => {
+      const url = 'https://de.serlo.org/search'
+      const mockedFetch = mockFetch({
+        'https://frontend.serlo.org/search': '',
+      })
+
+      const response = (await handleRequest(new Request(url)))!
+
+      const targetUrl = url.replace('de.serlo.org', 'frontend.serlo.org')
+      expect(getBackendUrl(mockedFetch)).toBe(targetUrl)
+      expect(getHeaderApiEndpoint(mockedFetch)).toBe('https://api.serlo.org/')
+      expect(response.headers.get('Set-Cookie')).toBeNull()
+      expect(await getCachedType(getPathname(url))).toBeNull()
+    })
+
+    test('requests to /spenden always resolve to frontend', async () => {
+      const url = 'https://de.serlo.org/spenden'
+      const mockedFetch = mockFetch({
+        'https://frontend.serlo.org/spenden': '',
+      })
+
+      const response = (await handleRequest(new Request(url)))!
+
+      const targetUrl = url.replace('de.serlo.org', 'frontend.serlo.org')
+      expect(getBackendUrl(mockedFetch)).toBe(targetUrl)
+      expect(getHeaderApiEndpoint(mockedFetch)).toBe('https://api.serlo.org/')
+      expect(response.headers.get('Set-Cookie')).toBeNull()
+      expect(await getCachedType(getPathname(url))).toBeNull()
+    })
+
     describe('special paths need to have a trailing slash in their prefix', () => {
       test.each([
         'https://de.serlo.org/api/frontend-alternative',
@@ -260,16 +290,25 @@ describe('handleRequest()', () => {
       })
     })
 
-    test('requests to /spenden always resolve to default backend', async () => {
-      const url = 'https://de.serlo.org/spenden'
-      const mockedFetch = mockFetch({
-        'https://de.serlo.org/spenden': '',
+    describe('forwards authentication requests to default backend', () => {
+      test.each([
+        'https://de.serlo.org/auth/login',
+        'https://de.serlo.org/auth/logout',
+        'https://de.serlo.org/auth/activate/:token',
+        'https://de.serlo.org/auth/password/change',
+        'https://de.serlo.org/auth/password/restore/:token',
+        'https://de.serlo.org/auth/hydra/login',
+        'https://de.serlo.org/auth/hydra/consent',
+        'https://de.serlo.org/user/register',
+      ])('URL = %p', async (url) => {
+        const mockedFetch = mockFetch({ [url]: '' })
+
+        const response = (await handleRequest(new Request(url)))!
+
+        expect(getBackendUrl(mockedFetch)).toBe(url)
+        expect(response.headers.get('Set-Cookie')).toBeNull()
+        expect(await getCachedType(getPathname(url))).toBeNull()
       })
-
-      await handleRequest(new Request(url))
-
-      expect(getBackendUrl(mockedFetch)).toBe(url)
-      expect(await getCachedType(getPathname(url))).toBeNull()
     })
   })
 
