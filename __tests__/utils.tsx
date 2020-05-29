@@ -32,6 +32,14 @@ import {
   createJsonResponse,
   createNotFoundResponse,
 } from '../src/utils'
+import {
+  mockFetch,
+  expectContainsText,
+  expectHasOkStatus,
+  expectContentTypeIsHtml,
+  expectIsJsonResponse,
+  expectIsNotFoundResponse,
+} from './_helper'
 
 describe('isLanguageCode()', () => {
   expect(isLanguageCode('de')).toBe(true)
@@ -68,9 +76,9 @@ describe('markdownToHtml()', () => {
 test('PreactResponse', async () => {
   const hello = createPreactResponse(<h1>Hello</h1>)
 
-  hasOkStatus(hello)
-  contentTypeIsHtml(hello)
-  await containsText(hello, ['<h1>Hello</h1>'])
+  expectHasOkStatus(hello)
+  expectContentTypeIsHtml(hello)
+  await expectContainsText(hello, ['<h1>Hello</h1>'])
 
   const template = (
     <Template title="not modified" lang="en">
@@ -81,8 +89,8 @@ test('PreactResponse', async () => {
   const notModified = createPreactResponse(template, { status: 304 })
 
   expect(notModified.status).toBe(304)
-  contentTypeIsHtml(notModified)
-  await containsText(notModified, [
+  expectContentTypeIsHtml(notModified)
+  await expectContainsText(notModified, [
     '<p>Not Modified</p>',
     '<title>Serlo - not modified</title>',
   ])
@@ -90,89 +98,30 @@ test('PreactResponse', async () => {
 
 test('JsonResponse', () => {
   const response = createJsonResponse({ foo: [1, 2, 3] })
-  isJsonResponse(response, { foo: [1, 2, 3] })
+  expectIsJsonResponse(response, { foo: [1, 2, 3] })
 })
 
 test('NotFoundResponse', async () => {
-  await isNotFoundResponse(createNotFoundResponse())
+  await expectIsNotFoundResponse(createNotFoundResponse())
 })
 
-test('fetchWithCache()', async () => {
-  const mockedFetch = mockFetch({ 'http://example.com': 'test' })
+describe('fetchWithCache()', () => {
+  test('returns the result of fetch()', async () => {
+    mockFetch({ 'http://example.com/': 'test' })
 
-  const response = await fetchWithCache('http://example.com')
+    const response = await fetchWithCache('http://example.com/')
 
-  expect(await response.text()).toBe('test')
-  expect(mockedFetch).toHaveBeenCalledWith('http://example.com', {
-    cf: { cacheTtl: 3600 },
+    expect(await response.text()).toBe('test')
+  })
+
+  test('responses are cached for 1 hour', async () => {
+    const mockedFetch = mockFetch({ 'http://example.com/': '' })
+
+    await fetchWithCache('http://example.com/')
+
+    expect(mockedFetch.getCallArgumentsFor('http://example.com/')).toEqual([
+      'http://example.com/',
+      { cf: { cacheTtl: 3600 } },
+    ])
   })
 })
-
-export async function containsText(response: Response, texts: string[]) {
-  expect(response).not.toBeNull()
-
-  const responseText = await response.text()
-  texts.forEach((text) =>
-    expect(responseText).toEqual(expect.stringContaining(text))
-  )
-}
-
-export function contentTypeIsHtml(response: Response): void {
-  expect(response.headers.get('Content-Type')).toBe('text/html;charset=utf-8')
-}
-
-export function hasOkStatus(response: Response): void {
-  expect(response).not.toBeNull()
-  expect(response.status).toBe(200)
-  expect(response.statusText).toBe('OK')
-}
-
-export async function isNotFoundResponse(response: Response): Promise<void> {
-  expect(response).not.toBeNull()
-  expect(response.status).toBe(404)
-  expect(response.statusText).toBe('Not Found')
-  expect(await response.text()).toEqual(
-    expect.stringContaining('Page not found')
-  )
-}
-
-export async function isJsonResponse(response: Response, targetJson: unknown) {
-  hasOkStatus(response)
-  expect(response.headers.get('Content-Type')).toBe('application/json')
-  expect(JSON.parse(await response.text())).toEqual(targetJson)
-}
-
-export function mockFetch(spec: Record<string, string | Response>) {
-  function mockedFetchImpl(reqInfo: Request | string): Promise<Response> {
-    const url = typeof reqInfo === 'string' ? reqInfo : reqInfo.url
-    const responseSpec = spec[url]
-
-    return responseSpec === undefined
-      ? Promise.reject(new Error(`URL ${url} not defined in mocked fetch`))
-      : Promise.resolve(convertToResponse(responseSpec))
-  }
-
-  const mockedFetch = jest.fn().mockImplementation(mockedFetchImpl)
-
-  global.fetch = mockedFetch
-
-  return mockedFetch
-}
-
-function convertToResponse(spec: string | Response): Response {
-  return typeof spec === 'string' ? new Response(spec) : spec
-}
-
-export function mockKV(name: string, values: Record<string, unknown>) {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore
-  global[name] = {
-    async get(key: string) {
-      return Promise.resolve(values[key] ?? null)
-    },
-
-    put(key: string, value: unknown, _?: { expirationTtl: number }) {
-      values[key] = value
-    },
-  }
-}

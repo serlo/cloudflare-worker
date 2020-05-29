@@ -23,12 +23,27 @@
 import '@testing-library/jest-dom'
 import { Response, Request } from 'node-fetch'
 
+import { extendExpect } from './__tests__/_extend-jest'
+import { mockKV } from './__tests__/_helper'
+
+extendExpect()
+
 const fetchCopy = global.fetch
 const randomCopy = Math.random
 
 afterEach(() => {
   Math.random = randomCopy
   global.fetch = fetchCopy
+})
+
+beforeEach(() => {
+  global.API_ENDPOINT = 'https://api.serlo.org'
+  global.API_SECRET = 'secret'
+  global.FRONTEND_DOMAIN = 'frontend.serlo.org'
+  global.FRONTEND_PROBABILITY = '1'
+  global.FRONTEND_ALLOWED_TYPES = '[]'
+
+  mockKV('MAINTENANCE_KV', {})
 })
 
 global.Response = Response
@@ -42,4 +57,11 @@ declare global {
       Request: typeof Request
     }
   }
+}
+
+// FIXME: Delete the following mock, when node-fetch is available in version 3.0.0
+// See https://github.com/node-fetch/node-fetch/commit/0959ca9739850bbd24e0721cc1296e7a0aa5c2bd#diff-d0f5704ae0738a7bd1f54aff42ddcb41
+// eslint-disable-next-line @typescript-eslint/unbound-method
+Response.redirect = function (url: string, status = 302) {
+  return new Response('', { status, headers: { location: url } })
 }
