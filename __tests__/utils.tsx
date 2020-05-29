@@ -34,11 +34,11 @@ import {
 } from '../src/utils'
 import {
   mockFetch,
-  containsText,
-  hasOkStatus,
-  contentTypeIsHtml,
-  isJsonResponse,
-  isNotFoundResponse,
+  expectContainsText,
+  expectHasOkStatus,
+  expectContentTypeIsHtml,
+  expectIsJsonResponse,
+  expectIsNotFoundResponse,
 } from './_helper'
 
 describe('isLanguageCode()', () => {
@@ -76,9 +76,9 @@ describe('markdownToHtml()', () => {
 test('PreactResponse', async () => {
   const hello = createPreactResponse(<h1>Hello</h1>)
 
-  hasOkStatus(hello)
-  contentTypeIsHtml(hello)
-  await containsText(hello, ['<h1>Hello</h1>'])
+  expectHasOkStatus(hello)
+  expectContentTypeIsHtml(hello)
+  await expectContainsText(hello, ['<h1>Hello</h1>'])
 
   const template = (
     <Template title="not modified" lang="en">
@@ -89,8 +89,8 @@ test('PreactResponse', async () => {
   const notModified = createPreactResponse(template, { status: 304 })
 
   expect(notModified.status).toBe(304)
-  contentTypeIsHtml(notModified)
-  await containsText(notModified, [
+  expectContentTypeIsHtml(notModified)
+  await expectContainsText(notModified, [
     '<p>Not Modified</p>',
     '<title>Serlo - not modified</title>',
   ])
@@ -98,11 +98,11 @@ test('PreactResponse', async () => {
 
 test('JsonResponse', () => {
   const response = createJsonResponse({ foo: [1, 2, 3] })
-  isJsonResponse(response, { foo: [1, 2, 3] })
+  expectIsJsonResponse(response, { foo: [1, 2, 3] })
 })
 
 test('NotFoundResponse', async () => {
-  await isNotFoundResponse(createNotFoundResponse())
+  await expectIsNotFoundResponse(createNotFoundResponse())
 })
 
 describe('fetchWithCache()', () => {

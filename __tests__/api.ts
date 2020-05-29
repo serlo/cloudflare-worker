@@ -5,8 +5,7 @@ describe('api()', () => {
   let fetchApi: FetchMock
 
   beforeEach(() => {
-    fetchApi = mockFetch()
-    fetchApi.addResponseFor('https://api.serlo.org/graphql', '<api-result>')
+    fetchApi = mockFetch({ 'https://api.serlo.org/graphql': '<api-result>' })
   })
 
   test('uses fetchApi() for requests to the serlo api', async () => {
@@ -14,7 +13,7 @@ describe('api()', () => {
     const response = (await api(req, fetchApi.mock)) as Response
 
     expect(await response.text()).toBe('<api-result>')
-    expect(fetchApi).toHaveBeenCalledOnceFor('https://api.serlo.org/graphql')
+    expect(fetchApi).toHaveExactlyOneRequestTo('https://api.serlo.org/graphql')
   })
 
   describe('returns null if subdomain is not "api"', () => {
@@ -59,13 +58,13 @@ describe('fetchApi()', () => {
   })
 
   test('transfers meta data to fetch()', () => {
-    const apiRequest = fetch.getRequestFor('https://api.serlo.org/')
+    const apiRequest = fetch.getRequestTo('https://api.serlo.org/')
 
     expect(apiRequest.headers.get('Content-Type')).toBe('application/json')
   })
 
   test('sets authorization header', () => {
-    const apiRequest = fetch.getRequestFor('https://api.serlo.org/')
+    const apiRequest = fetch.getRequestTo('https://api.serlo.org/')
 
     expect(apiRequest.headers.get('Authorization')).toMatch(/^Serlo Service=ey/)
   })

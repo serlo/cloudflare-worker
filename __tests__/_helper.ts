@@ -19,7 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-export async function containsText(response: Response, texts: string[]) {
+export async function expectContainsText(response: Response, texts: string[]) {
   expect(response).not.toBeNull()
 
   const responseText = await response.text()
@@ -28,17 +28,19 @@ export async function containsText(response: Response, texts: string[]) {
   )
 }
 
-export function contentTypeIsHtml(response: Response): void {
+export function expectContentTypeIsHtml(response: Response): void {
   expect(response.headers.get('Content-Type')).toBe('text/html;charset=utf-8')
 }
 
-export function hasOkStatus(response: Response): void {
+export function expectHasOkStatus(response: Response): void {
   expect(response).not.toBeNull()
   expect(response.status).toBe(200)
   expect(response.statusText).toBe('OK')
 }
 
-export async function isNotFoundResponse(response: Response): Promise<void> {
+export async function expectIsNotFoundResponse(
+  response: Response
+): Promise<void> {
   expect(response).not.toBeNull()
   expect(response.status).toBe(404)
   expect(response.statusText).toBe('Not Found')
@@ -47,13 +49,17 @@ export async function isNotFoundResponse(response: Response): Promise<void> {
   )
 }
 
-export async function isJsonResponse(response: Response, targetJson: unknown) {
-  hasOkStatus(response)
+export async function expectIsJsonResponse(
+  response: Response,
+  targetJson: unknown
+) {
+  expectHasOkStatus(response)
   expect(response.headers.get('Content-Type')).toBe('application/json')
   expect(JSON.parse(await response.text())).toEqual(targetJson)
 }
 
-type FetchSpec = Record<string, string | Response>
+type ResponseSpec = string | Response
+type FetchSpec = Record<string, ResponseSpec>
 
 export function mockFetch(spec: FetchSpec = {}): FetchMock {
   const mockedFetch = jest.fn()
@@ -89,8 +95,8 @@ export class FetchMock {
       : Promise.resolve(FetchMock.convertToResponse(responseSpec))
   }
 
-  addResponseFor(url: string, spec: string | Response = '') {
-    this.specs[url] = spec
+  mockRequest({ to, response = '' }: { to: string; response?: ResponseSpec }) {
+    this.specs[to] = response
   }
 
   getAllCallArgumentsFor(url: string) {
@@ -109,18 +115,18 @@ export class FetchMock {
     return argsList[0]
   }
 
-  getRequestFor(url: string): Request {
+  getRequestTo(url: string): Request {
     return this.getCallArgumentsFor(url)[0]
   }
 
-  getAllRequestsFor(url: string): Request[] {
+  getAllRequestsTo(url: string): Request[] {
     return this.getAllCallArgumentsFor(url).map((x) => x[0])
   }
 
   static getUrl(req: Request | string): string {
     return typeof req === 'string' ? req : req.url
   }
-  static convertToResponse(spec: string | Response): Response {
+  static convertToResponse(spec: ResponseSpec): Response {
     return typeof spec === 'string' ? new Response(spec) : spec
   }
 }

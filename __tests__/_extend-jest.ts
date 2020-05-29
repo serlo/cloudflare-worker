@@ -1,15 +1,15 @@
 import { FetchMock } from './_helper'
 
 export function extendExpect() {
-  expect.extend({ toHaveBeenCalledFor, toHaveBeenCalledOnceFor })
+  expect.extend({ toHaveRequestsTo, toHaveExactlyOneRequestTo })
 }
 
-function toHaveBeenCalledFor(
+function toHaveRequestsTo(
   this: jest.MatcherUtils,
   mockedFetch: FetchMock,
   url: string
 ): jest.CustomMatcherResult {
-  const numberOfCalls = mockedFetch.getAllRequestsFor(url).length
+  const numberOfCalls = mockedFetch.getAllRequestsTo(url).length
 
   return {
     pass: numberOfCalls > 0,
@@ -17,12 +17,12 @@ function toHaveBeenCalledFor(
   }
 }
 
-function toHaveBeenCalledOnceFor(
+function toHaveExactlyOneRequestTo(
   this: jest.MatcherUtils,
   mockedFetch: FetchMock,
   url: string
 ): jest.CustomMatcherResult {
-  const numberOfCalls = mockedFetch.getAllRequestsFor(url).length
+  const numberOfCalls = mockedFetch.getAllRequestsTo(url).length
 
   return {
     pass: numberOfCalls === 1,
@@ -34,8 +34,8 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
     interface Matchers<R> {
-      toHaveBeenCalledFor(url: string): R
-      toHaveBeenCalledOnceFor(url: string): R
+      toHaveRequestsTo(url: string): R
+      toHaveExactlyOneRequestTo(url: string): R
     }
   }
 }
