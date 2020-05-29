@@ -40,13 +40,13 @@ import {
 } from '../src/static-pages'
 import { LanguageCode } from '../src/utils'
 import {
-  isNotFoundResponse,
-  isJsonResponse,
-  hasOkStatus,
-  containsText,
-  contentTypeIsHtml,
+  expectIsNotFoundResponse,
+  expectIsJsonResponse,
+  expectHasOkStatus,
+  expectContainsText,
+  expectContentTypeIsHtml,
   mockFetch,
-} from './utils'
+} from './_helper'
 
 describe('handleRequest()', () => {
   const unrevisedConfig: UnrevisedConfig = {
@@ -82,9 +82,9 @@ describe('handleRequest()', () => {
 
       const response = (await testHandleRequest(url))!
 
-      hasOkStatus(response)
-      contentTypeIsHtml(response)
-      await containsText(response, ['<p>Hello World</p>'])
+      expectHasOkStatus(response)
+      expectContentTypeIsHtml(response)
+      await expectContainsText(response, ['<p>Hello World</p>'])
     })
   })
 
@@ -94,9 +94,9 @@ describe('handleRequest()', () => {
     const url = 'https://de.serlo.org/terms'
     const response = (await testHandleRequest(url))!
 
-    hasOkStatus(response)
-    contentTypeIsHtml(response)
-    await containsText(response, ['<h1>Terms of Use</h1>'])
+    expectHasOkStatus(response)
+    expectContentTypeIsHtml(response)
+    await expectContainsText(response, ['<h1>Terms of Use</h1>'])
   })
 
   test('returns current revision for requests at /privacy', async () => {
@@ -105,9 +105,12 @@ describe('handleRequest()', () => {
 
     const response = (await testHandleRequest(url))!
 
-    hasOkStatus(response)
-    contentTypeIsHtml(response)
-    await containsText(response, ['<p>Hello</p>', 'wirksam ab dem 12/11/2020'])
+    expectHasOkStatus(response)
+    expectContentTypeIsHtml(response)
+    await expectContainsText(response, [
+      '<p>Hello</p>',
+      'wirksam ab dem 12/11/2020',
+    ])
   })
 
   test('returns archived revision for requests at /privacy/archive/<id>', async () => {
@@ -116,18 +119,21 @@ describe('handleRequest()', () => {
     const url = 'https://de.serlo.org/privacy/archive/1999-10-09'
     const response = (await testHandleRequest(url)) as Response
 
-    hasOkStatus(response)
-    contentTypeIsHtml(response)
-    await containsText(response, ['<p>Hello</p>', 'wirksam ab dem 10/9/1999'])
+    expectHasOkStatus(response)
+    expectContentTypeIsHtml(response)
+    await expectContainsText(response, [
+      '<p>Hello</p>',
+      'wirksam ab dem 10/9/1999',
+    ])
   })
 
   test('returns overview of revisions for requests at /privacy/archive', async () => {
     const url = 'https://de.serlo.org/privacy/archive'
     const response = (await testHandleRequest(url)) as Response
 
-    hasOkStatus(response)
-    contentTypeIsHtml(response)
-    await containsText(response, [
+    expectHasOkStatus(response)
+    expectContentTypeIsHtml(response)
+    await expectContainsText(response, [
       '<h1>Aktualisierungen: Datenschutzerklärung</h1>',
       'Aktuelle Version',
       '10/9/1999',
@@ -138,7 +144,7 @@ describe('handleRequest()', () => {
     const url = 'https://de.serlo.org/privacy/json'
     const response = (await testHandleRequest(url)) as Response
 
-    isJsonResponse(response, ['2020-12-11', '1999-10-09'])
+    expectIsJsonResponse(response, ['2020-12-11', '1999-10-09'])
   })
 
   describe('returns 404 reponse if requested page and its default is not configured', () => {
@@ -154,7 +160,7 @@ describe('handleRequest()', () => {
       'http://de.serlo.org/privacy/archive/2020-01-01',
       'http://de.serlo.org/privacy/archive/1999-33-55',
     ])('URL is %p', async (url) => {
-      await isNotFoundResponse((await testHandleRequest(url)) as Response)
+      await expectIsNotFoundResponse((await testHandleRequest(url)) as Response)
     })
   })
 
