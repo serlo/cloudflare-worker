@@ -22,7 +22,7 @@
 import { DateTime } from 'luxon'
 
 import { maintenanceMode } from '../src/maintenance'
-import { contentTypeIsHtml, containsText, mockKV } from './_helper'
+import { expectContentTypeIsHtml, expectContainsText, mockKV } from './_helper'
 
 describe('Maintenance mode', () => {
   test('Disabled (no maintenance planned)', async () => {
@@ -70,9 +70,9 @@ describe('Maintenance mode', () => {
 
     const response = await handleUrl('https://de.serlo.org')
     expect(response.status).toEqual(503)
-    contentTypeIsHtml(response)
+    expectContentTypeIsHtml(response)
     expect(response.headers.get('Retry-After')).toEqual(end.toHTTP())
-    await containsText(response, [
+    await expectContainsText(response, [
       'Wartungsmodus',
       `gegen ${end.setLocale('de').toFormat('HH:mm (ZZZZ)')} wieder online`,
     ])
@@ -91,9 +91,9 @@ describe('Maintenance mode', () => {
 
     const response = await handleUrl('https://en.serlo.org')
     expect(response.status).toEqual(503)
-    contentTypeIsHtml(response)
+    expectContentTypeIsHtml(response)
     expect(response.headers.get('Retry-After')).toEqual(end.toHTTP())
-    await containsText(response, [
+    await expectContainsText(response, [
       'Maintenance mode',
       `We expect to be back by ${end.setLocale('en').toFormat('HH:mm (ZZZZ)')}`,
     ])
@@ -110,8 +110,8 @@ describe('Maintenance mode', () => {
 
     const response = await handleUrl('https://de.serlo.org')
     expect(response.status).toEqual(503)
-    contentTypeIsHtml(response)
-    await containsText(response, [
+    expectContentTypeIsHtml(response)
+    await expectContainsText(response, [
       'Wartungsmodus',
       'in ein paar Stunden wieder online',
     ])
@@ -128,8 +128,8 @@ describe('Maintenance mode', () => {
 
     const response = await handleUrl('https://en.serlo.org')
     expect(response.status).toEqual(503)
-    contentTypeIsHtml(response)
-    await containsText(response, [
+    expectContentTypeIsHtml(response)
+    await expectContainsText(response, [
       'Maintenance mode',
       'We expect to be back in a couple of hours.',
     ])

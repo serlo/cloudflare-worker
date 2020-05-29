@@ -36,19 +36,19 @@ describe('Enforce HTTPS', () => {
   })
 
   test('HTTPS URL', async () => {
-    fetch.addResponseFor('https://foo.serlo.local/bar')
+    fetch.mockRequest({ to: 'https://foo.serlo.local/bar' })
 
     await handleUrl('https://foo.serlo.local/bar')
 
-    expect(fetch).toHaveBeenCalledOnceFor('https://foo.serlo.local/bar')
+    expect(fetch).toHaveExactlyOneRequestTo('https://foo.serlo.local/bar')
   })
 
   test('Pact Broker', async () => {
-    fetch.addResponseFor('http://pacts.serlo.local/bar')
+    fetch.mockRequest({ to: 'http://pacts.serlo.local/bar' })
 
     await handleUrl('http://pacts.serlo.local/bar')
 
-    expect(fetch).toHaveBeenCalledOnceFor('http://pacts.serlo.local/bar')
+    expect(fetch).toHaveExactlyOneRequestTo('http://pacts.serlo.local/bar')
   })
 })
 
@@ -97,50 +97,50 @@ describe('Redirects', () => {
 
 describe('Semantic file names', () => {
   test('assets.serlo.org/meta/*', async () => {
-    fetch.addResponseFor('https://assets.serlo.org/meta/foo')
+    fetch.mockRequest({ to: 'https://assets.serlo.org/meta/foo' })
 
     await handleUrl('https://assets.serlo.local/meta/foo')
 
-    expect(fetch).toHaveBeenCalledOnceFor('https://assets.serlo.org/meta/foo')
+    expect(fetch).toHaveExactlyOneRequestTo('https://assets.serlo.org/meta/foo')
   })
 
   test('assets.serlo.org/<hash>/<fileName>.<ext>', async () => {
-    fetch.addResponseFor('https://assets.serlo.org/hash.ext')
+    fetch.mockRequest({ to: 'https://assets.serlo.org/hash.ext' })
 
     await handleUrl('https://assets.serlo.local/hash/fileName.ext')
 
-    expect(fetch).toHaveBeenCalledOnceFor('https://assets.serlo.org/hash.ext')
+    expect(fetch).toHaveExactlyOneRequestTo('https://assets.serlo.org/hash.ext')
   })
 
   test('assets.serlo.org/legacy/<hash>/<fileName>.<ext>', async () => {
-    fetch.addResponseFor('https://assets.serlo.org/legacy/hash.ext')
+    fetch.mockRequest({ to: 'https://assets.serlo.org/legacy/hash.ext' })
 
     await handleUrl('https://assets.serlo.local/legacy/hash/fileName.ext')
 
     const target = 'https://assets.serlo.org/legacy/hash.ext'
-    expect(fetch).toHaveBeenCalledOnceFor(target)
+    expect(fetch).toHaveExactlyOneRequestTo(target)
   })
 })
 
 describe('Packages', () => {
   test('packages.serlo.org/<package>/<filePath>', async () => {
     mockKV('PACKAGES_KV', { foo: 'foo@1.0.0' })
-    fetch.addResponseFor('https://packages.serlo.org/foo@1.0.0/bar')
+    fetch.mockRequest({ to: 'https://packages.serlo.org/foo@1.0.0/bar' })
 
     await handleUrl('https://packages.serlo.local/foo/bar')
 
     const target = 'https://packages.serlo.org/foo@1.0.0/bar'
-    expect(fetch).toHaveBeenCalledOnceFor(target)
+    expect(fetch).toHaveExactlyOneRequestTo(target)
   })
 
   test('packages.serlo.org/<package>/<filePath> (invalid)', async () => {
     mockKV('PACKAGES_KV', { foo: 'foo@1.0.0' })
-    fetch.addResponseFor('https://packages.serlo.org/foobar/bar')
+    fetch.mockRequest({ to: 'https://packages.serlo.org/foobar/bar' })
 
     await handleUrl('https://packages.serlo.local/foobar/bar')
 
     const target = 'https://packages.serlo.org/foobar/bar'
-    expect(fetch).toHaveBeenCalledOnceFor(target)
+    expect(fetch).toHaveExactlyOneRequestTo(target)
   })
 })
 
