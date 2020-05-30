@@ -1,5 +1,5 @@
 import { fetchApi } from './api'
-import { getSubdomain, getPathname } from './url-utils'
+import { getSubdomain, getPathname, hasContentApiParameters } from './url-utils'
 
 export async function handleRequest(
   request: Request
@@ -48,6 +48,7 @@ export async function handleRequest(
     path === '/auth/hydra/login' ||
     path === '/auth/hydra/consent' ||
     path === '/user/register' ||
+    hasContentApiParameters(url) ||
     cookies?.includes('authenticated=1')
   )
     return await fetchBackend(false)

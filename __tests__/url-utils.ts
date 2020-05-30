@@ -23,6 +23,7 @@ import {
   getPathname,
   getPathnameWithoutTrailingSlash,
   getSubdomain,
+  hasContentApiParameters,
 } from '../src/url-utils'
 
 describe('getPathname()', () => {
@@ -66,5 +67,50 @@ describe('getSubdomain()', () => {
 
   test('returns null for url without subdomain', () => {
     expect(getSubdomain('https://serlo.local')).toBeNull()
+  })
+})
+
+describe('hasContentApiParamaters()', () => {
+  describe('returns true when url contains a parameter of the content api', () => {
+    test.each([
+      'contentOnly',
+      'hideTopbar',
+      'hideLeftSidebar',
+      'hideRightSidebar',
+      'hideBreadcrumbs',
+      'hideDiscussions',
+      'hideBanner',
+      'hideHorizon',
+      'hideFooter',
+      'fullWidth',
+    ])('API Parameter = %p', (parameter) => {
+      const url = `http://serlo.org/article?${parameter}`
+
+      expect(hasContentApiParameters(url)).toBe(true)
+    })
+  })
+
+  test('returns true when content api parameter has a value', () => {
+    const url = 'http://serlo.org/article?contentOnly=true'
+
+    expect(hasContentApiParameters(url)).toBe(true)
+  })
+
+  test('returns true when next to content api also other parameters are defined', () => {
+    const url = 'http://serlo.org/article?contentOnly&fontcolor=blue'
+
+    expect(hasContentApiParameters(url)).toBe(true)
+  })
+
+  test('returns false when no query parameters are defined', () => {
+    const url = 'http://serlo.org/article'
+
+    expect(hasContentApiParameters(url)).toBe(false)
+  })
+
+  test('returns false when no query parameter is a content api parameter', () => {
+    const url = 'http://serlo.org/article?fontcolor=blue&searchterm=hello'
+
+    expect(hasContentApiParameters(url)).toBe(false)
   })
 })

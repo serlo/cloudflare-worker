@@ -119,6 +119,31 @@ describe('handleRequest()', () => {
     })
   })
 
+  describe('when request contains content api parameter', () => {
+    const url = 'https://de.serlo.org/math?contentOnly'
+    let response: Response
+
+    beforeEach(async () => {
+      setupProbabilityFor(Backend.Frontend)
+      fetch.mockRequest({ to: url })
+
+      response = await handleUrl(url)
+    })
+
+    test('chooses standard backend', () => {
+      expect(fetch).toHaveExactlyOneRequestTo(url)
+    })
+
+    test('does not set cookie with random number', () => {
+      expect(response.headers.get('Set-Cookie')).toBeNull()
+    })
+
+    test('does not check the path type', async () => {
+      expect(fetch).not.toHaveRequestsTo('https://api.serlo.org/')
+      expect(await getCachedType('/math')).toBeNull()
+    })
+  })
+
   describe('uses cookie "useFrontend" to determine backend', () => {
     describe.each([
       {
