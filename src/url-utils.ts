@@ -19,6 +19,19 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
+const contentApiParameters = [
+  'contentOnly',
+  'hideTopbar',
+  'hideLeftSidebar',
+  'hideRightSidebar',
+  'hideBreadcrumbs',
+  'hideDiscussions',
+  'hideBanner',
+  'hideHorizon',
+  'hideFooter',
+  'fullWidth',
+]
+
 export function getPathname(url: string): string {
   return new URL(url).pathname
 }
@@ -37,4 +50,12 @@ export function getSubdomain(url: string): string | null {
   return hostnameParts.length <= 2
     ? null
     : hostnameParts.splice(0, hostnameParts.length - 2).join('.')
+}
+
+export function hasContentApiParameters(url: string) {
+  return new URL(url).search
+    .slice(1)
+    .split('&')
+    .map((parameterWithValue) => parameterWithValue.split('=')[0])
+    .some((queryParameter) => contentApiParameters.includes(queryParameter))
 }
