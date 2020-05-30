@@ -76,23 +76,6 @@ describe('handleRequest()', () => {
     )
   })
 
-  describe('sets X-SERLO-API header in the backend request', () => {
-    test.each([Backend.Frontend, Backend.DefaultBackend])(
-      '%p',
-      async (backend) => {
-        const backendUrl = getUrlFor(backend, 'https://de.serlo.org/math')
-
-        setupProbabilityFor(backend)
-        fetch.mockRequest({ to: backendUrl })
-
-        await handleUrl('https://de.serlo.org/math')
-
-        const apiReq = fetch.getRequestTo(backendUrl)
-        expect(apiReq.headers.get('X-SERLO-API')).toBe('https://api.serlo.org/')
-      }
-    )
-  })
-
   describe('when user is authenticated', () => {
     let response: Response
 
