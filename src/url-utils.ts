@@ -19,21 +19,43 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-export function getSubdomain(url: string): string | null {
-  const u = new URL(url)
-  const hostnameParts = u.hostname.split('.')
-  if (hostnameParts.length <= 2) return null
-  return hostnameParts.splice(0, hostnameParts.length - 2).join('.')
-}
+const contentApiParameters = [
+  'contentOnly',
+  'hideTopbar',
+  'hideLeftSidebar',
+  'hideRightSidebar',
+  'hideBreadcrumbs',
+  'hideDiscussions',
+  'hideBanner',
+  'hideHorizon',
+  'hideFooter',
+  'fullWidth',
+]
 
 export function getPathname(url: string): string {
-  const u = new URL(url)
-  return u.pathname
+  return new URL(url).pathname
 }
 
 export function getPathnameWithoutTrailingSlash(url: string): string {
   const pathname = getPathname(url)
+
   return pathname.endsWith('/')
     ? pathname.substr(0, pathname.length - 1)
     : pathname
+}
+
+export function getSubdomain(url: string): string | null {
+  const hostnameParts = new URL(url).hostname.split('.')
+
+  return hostnameParts.length <= 2
+    ? null
+    : hostnameParts.splice(0, hostnameParts.length - 2).join('.')
+}
+
+export function hasContentApiParameters(url: string) {
+  return new URL(url).search
+    .slice(1)
+    .split('&')
+    .map((parameterWithValue) => parameterWithValue.split('=')[0])
+    .some((queryParameter) => contentApiParameters.includes(queryParameter))
 }

@@ -19,14 +19,98 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { getSubdomain } from '../src/url-utils'
+import {
+  getPathname,
+  getPathnameWithoutTrailingSlash,
+  getSubdomain,
+  hasContentApiParameters,
+} from '../src/url-utils'
 
-describe('getSubdomain', () => {
-  test('https://de.serlo.org', () => {
+describe('getPathname()', () => {
+  test('returns the pathname of the url', () => {
+    expect(getPathname('http://serlo.org/math')).toBe('/math')
+  })
+
+  test('returns "/" when url does not end with "/"', () => {
+    expect(getPathname('http://de.serlo.org')).toBe('/')
+  })
+})
+
+describe('getPathnameWithoutTrailingSlash()', () => {
+  test('returns pathname without trailing slash', () => {
+    const path = getPathnameWithoutTrailingSlash('http://serlo.org/math/')
+
+    expect(path).toBe('/math')
+  })
+
+  test('returns pathname when it has no trailing slash', () => {
+    const path = getPathnameWithoutTrailingSlash('http://serlo.org/math')
+
+    expect(path).toBe('/math')
+  })
+
+  test('returns empty string when url request root path', () => {
+    const path = getPathnameWithoutTrailingSlash('http://serlo.org')
+
+    expect(path).toBe('')
+  })
+})
+
+describe('getSubdomain()', () => {
+  test('returns subdomain of given url', () => {
     expect(getSubdomain('https://de.serlo.local')).toEqual('de')
   })
 
-  test('https://serlo.org', () => {
-    expect(getSubdomain('https://serlo.local')).toEqual(null)
+  test('returns second and lower level domains combined with dots', () => {
+    expect(getSubdomain('https://stats.en.serlo.org/')).toBe('stats.en')
+  })
+
+  test('returns null for url without subdomain', () => {
+    expect(getSubdomain('https://serlo.local')).toBeNull()
+  })
+})
+
+describe('hasContentApiParamaters()', () => {
+  describe('returns true when url contains a parameter of the content api', () => {
+    test.each([
+      'contentOnly',
+      'hideTopbar',
+      'hideLeftSidebar',
+      'hideRightSidebar',
+      'hideBreadcrumbs',
+      'hideDiscussions',
+      'hideBanner',
+      'hideHorizon',
+      'hideFooter',
+      'fullWidth',
+    ])('API Parameter = %p', (parameter) => {
+      const url = `http://serlo.org/article?${parameter}`
+
+      expect(hasContentApiParameters(url)).toBe(true)
+    })
+  })
+
+  test('returns true when content api parameter has a value', () => {
+    const url = 'http://serlo.org/article?contentOnly=true'
+
+    expect(hasContentApiParameters(url)).toBe(true)
+  })
+
+  test('returns true when next to content api also other parameters are defined', () => {
+    const url = 'http://serlo.org/article?contentOnly&fontcolor=blue'
+
+    expect(hasContentApiParameters(url)).toBe(true)
+  })
+
+  test('returns false when no query parameters are defined', () => {
+    const url = 'http://serlo.org/article'
+
+    expect(hasContentApiParameters(url)).toBe(false)
+  })
+
+  test('returns false when no query parameter is a content api parameter', () => {
+    const url = 'http://serlo.org/article?fontcolor=blue&searchterm=hello'
+
+    expect(hasContentApiParameters(url)).toBe(false)
   })
 })
