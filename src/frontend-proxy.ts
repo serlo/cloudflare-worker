@@ -1,5 +1,5 @@
 import { fetchApi } from './api'
-import { getSubdomain, getPathname } from './url-utils'
+import { getSubdomain, getPathname, hasContentApiParameters } from './url-utils'
 
 export async function handleRequest(
   request: Request
@@ -48,6 +48,7 @@ export async function handleRequest(
     path === '/auth/hydra/login' ||
     path === '/auth/hydra/consent' ||
     path === '/user/register' ||
+    hasContentApiParameters(url) ||
     cookies?.includes('authenticated=1')
   )
     return await fetchBackend(false)
@@ -73,10 +74,7 @@ export async function handleRequest(
     const backendUrl = useFrontend
       ? `https://${global.FRONTEND_DOMAIN}${getPathname(request.url)}`
       : request.url
-    const backendRequest = new Request(backendUrl, request)
-    backendRequest.headers.set('X-SERLO-API', global.API_ENDPOINT)
-
-    const response = await fetch(backendRequest)
+    const response = await fetch(new Request(backendUrl, request))
 
     return new Response(response.body, response)
   }

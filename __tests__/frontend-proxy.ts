@@ -76,23 +76,6 @@ describe('handleRequest()', () => {
     )
   })
 
-  describe('sets X-SERLO-API header in the backend request', () => {
-    test.each([Backend.Frontend, Backend.DefaultBackend])(
-      '%p',
-      async (backend) => {
-        const backendUrl = getUrlFor(backend, 'https://de.serlo.org/math')
-
-        setupProbabilityFor(backend)
-        fetch.mockRequest({ to: backendUrl })
-
-        await handleUrl('https://de.serlo.org/math')
-
-        const apiReq = fetch.getRequestTo(backendUrl)
-        expect(apiReq.headers.get('X-SERLO-API')).toBe('https://api.serlo.org/')
-      }
-    )
-  })
-
   describe('when user is authenticated', () => {
     let response: Response
 
@@ -107,6 +90,31 @@ describe('handleRequest()', () => {
 
     test('chooses standard backend', () => {
       expect(fetch).toHaveExactlyOneRequestTo('https://de.serlo.org/math')
+    })
+
+    test('does not set cookie with random number', () => {
+      expect(response.headers.get('Set-Cookie')).toBeNull()
+    })
+
+    test('does not check the path type', async () => {
+      expect(fetch).not.toHaveRequestsTo('https://api.serlo.org/')
+      expect(await getCachedType('/math')).toBeNull()
+    })
+  })
+
+  describe('when request contains content api parameter', () => {
+    const url = 'https://de.serlo.org/math?contentOnly'
+    let response: Response
+
+    beforeEach(async () => {
+      setupProbabilityFor(Backend.Frontend)
+      fetch.mockRequest({ to: url })
+
+      response = await handleUrl(url)
+    })
+
+    test('chooses standard backend', () => {
+      expect(fetch).toHaveExactlyOneRequestTo(url)
     })
 
     test('does not set cookie with random number', () => {
