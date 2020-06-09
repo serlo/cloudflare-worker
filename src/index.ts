@@ -19,6 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
+import { handleRequest as activeDonors } from './active-donors'
 import { api } from './api'
 import { edtrIoStats } from './are-we-edtr-io-yet'
 import { handleRequest as frontendProxy } from './frontend-proxy'
@@ -40,6 +41,7 @@ export async function handleRequest(request: Request) {
     (await staticPages(request)) ||
     (await semanticFileNames(request)) ||
     (await packages(request)) ||
+    (await activeDonors(request)) ||
     (await api(request)) ||
     (await frontendProxy(request)) ||
     (await fetch(request))

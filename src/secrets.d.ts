@@ -22,5 +22,6 @@
 declare namespace NodeJS {
   interface Global {
     API_SECRET: string
+    GOOGLE_API_KEY: string
   }
 }

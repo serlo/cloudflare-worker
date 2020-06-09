@@ -28,5 +28,6 @@ declare namespace NodeJS {
     FRONTEND_DOMAIN: string
     FRONTEND_PROBABILITY: string
     fetch: typeof fetch
+    SPREADSHEET_ID_ACTIVE_DONORS: string
   }
 }

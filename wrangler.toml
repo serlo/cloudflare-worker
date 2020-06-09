@@ -15,10 +15,11 @@ kv-namespaces = [
 [env.dev.vars]
 API_ENDPOINT = "https://api.serlo-development.dev/graphql"
 DOMAIN = "serlo-development.dev"
+ENABLE_BASIC_AUTH = "true"
 FRONTEND_DOMAIN = "frontend.serlo.now.sh"
 FRONTEND_PROBABILITY = "0.50"
 FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "Page", "TaxonomyTerm", "Video"]'
-ENABLE_BASIC_AUTH = "true"
+SPREADSHEET_ID_ACTIVE_DONORS = "1t2hIPx6eJVQrS1Tmj7PqfkNZcp5GlsXEX41yhpmVXhs"
 
 [env.staging]
 name = "serlo-staging"
@@ -33,10 +34,11 @@ kv-namespaces = [
 [env.staging.vars]
 API_ENDPOINT = "https://api.serlo-staging.dev/graphql"
 DOMAIN = "serlo-staging.dev"
+ENABLE_BASIC_AUTH = "true"
 FRONTEND_DOMAIN = "frontend.serlo.now.sh"
 FRONTEND_PROBABILITY = "0.50"
 FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "Page", "TaxonomyTerm", "Video"]'
-ENABLE_BASIC_AUTH = "true"
+SPREADSHEET_ID_ACTIVE_DONORS = "1t2hIPx6eJVQrS1Tmj7PqfkNZcp5GlsXEX41yhpmVXhs"
 
 [env.production]
 name = "serlo-production"
@@ -55,3 +57,4 @@ ENABLE_BASIC_AUTH = "false"
 FRONTEND_DOMAIN = "frontend.serlo.org"
 FRONTEND_PROBABILITY = "0.1"
 FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "Page", "TaxonomyTerm", "Video"]'
+SPREADSHEET_ID_ACTIVE_DONORS = "16I02_MTn-RGTs0FHtim2nF31QjzaWwDK2SkFOf8TVVU"
