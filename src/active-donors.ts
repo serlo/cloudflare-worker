@@ -1,21 +1,34 @@
+/**
+ * This file is part of Serlo.org Cloudflare Worker.
+ *
+ * Copyright (c) 2020 Serlo Education e.V.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License")
+ * you may not use this file except in compliance with the License
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @copyright Copyright (c) 2020 Serlo Education e.V.
+ * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
+ * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
+ */
+import { fetchSheet, MajorDimension, Sheet } from './google-api-utils'
 import { getPathname, getSubdomain } from './url-utils'
-import { createJsonResponse } from './utils'
+import { convertTo, createJsonResponse, isNotNullable } from './utils'
 
 // See https://www.everythingfrontend.com/posts/newtype-in-typescript.html
 type UserId = string & { readonly __tag: unique symbol }
 
-interface Sheet {
-  values: unknown[][]
-}
-
 export interface Options {
   spreadsheetId?: string
   apiKey?: string
-}
-
-export enum MajorDimension {
-  Rows = 'ROWS',
-  Columns = 'COLUMNS',
 }
 
 export async function handleRequest(
@@ -33,8 +46,8 @@ export async function handleRequest(
 
   const sheet = await fetchSheet({
     spreadsheetId,
+    apiKey,
     range: 'Tabellenblatt1!A:A',
-    key: apiKey,
     majorDimension: MajorDimension.Columns,
   })
 
@@ -43,67 +56,13 @@ export async function handleRequest(
   return createJsonResponse(userIds ?? [])
 }
 
-export async function fetchSheet({
-  spreadsheetId,
-  range,
-  key = global.GOOGLE_API_KEY,
-  majorDimension = MajorDimension.Rows,
-}: {
-  spreadsheetId: string
-  range: string
-  key?: string
-  majorDimension?: MajorDimension
-}): Promise<Sheet | null> {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?majorDimension=${majorDimension}&key=${key}`
-  const response = await fetch(url)
-  let data
-
-  try {
-    data = await response.json()
-  } catch (error) {
-    return null
-  }
-
-  return to(isSheet, data)
-}
-
 export function extractUserIdsFromSheet(sheet: Sheet): UserId[] | null {
-  const column = sheet !== null ? sheet.values[0].slice(1) : null
-  const userIds =
-    column !== null
-      ? column.map((entry) => to(isUserId, entry)).filter(notEmpty)
-      : null
-
-  return userIds
-}
-
-export function to<A>(
-  typeGuard: (value: unknown) => value is A,
-  data: unknown
-): A | null {
-  return typeGuard(data) ? data : null
-}
-
-export function isObject(value: unknown): value is object {
-  return typeof value === 'object' && value != null
-}
-
-export function isSheet(data: unknown): data is Sheet {
-  return (
-    isObject(data) &&
-    //@ts-ignore
-    Array.isArray(data.values) &&
-    //@ts-ignore
-    Array.isArray(data.values[0]) &&
-    //@ts-ignore
-    data.values[0].length > 0
-  )
+  return (sheet.values[0] ?? [])
+    .slice(1)
+    .map((entry) => convertTo(isUserId, entry))
+    .filter(isNotNullable)
 }
 
 export function isUserId(value: unknown): value is UserId {
   return typeof value === 'string' && /^\d+$/.test(value)
-}
-
-function notEmpty<A>(value: A | null): value is A {
-  return value != null
 }

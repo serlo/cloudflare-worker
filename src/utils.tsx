@@ -22,6 +22,7 @@
 import marked from 'marked'
 import { h, VNode } from 'preact'
 import renderToString from 'preact-render-to-string'
+import * as R from 'ramda'
 import sanitize from 'sanitize-html'
 
 import { NotFound } from './ui'
@@ -35,8 +36,19 @@ export enum LanguageCode {
   Es = 'es',
 }
 
+export function convertTo<A>(
+  typeGuard: (value: unknown) => value is A,
+  data: unknown
+): A | null {
+  return typeGuard(data) ? data : null
+}
+
 export function isLanguageCode(code: string): code is LanguageCode {
   return Object.values(LanguageCode).some((x) => x === code)
+}
+
+export function isNotNullable<A>(value: A): value is NonNullable<A> {
+  return !R.isNil(value)
 }
 
 export function sanitizeHtml(html: string): string {

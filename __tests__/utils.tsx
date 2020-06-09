@@ -24,10 +24,12 @@ import { h } from 'preact'
 
 import { Template } from '../src/ui'
 import {
+  convertTo,
   sanitizeHtml,
   markdownToHtml,
   fetchWithCache,
   isLanguageCode,
+  isNotNullable,
   createPreactResponse,
   createJsonResponse,
   createNotFoundResponse,
@@ -123,5 +125,39 @@ describe('fetchWithCache()', () => {
       'http://example.com/',
       { cf: { cacheTtl: 3600 } },
     ])
+  })
+})
+
+describe('convertTo()', () => {
+  type Foo = 'foo'
+
+  function isFoo(value: unknown): value is Foo {
+    return value === 'foo'
+  }
+
+  test('returns argument if it fulfills the type guard', () => {
+    expect(convertTo(isFoo, 'foo')).toBe('foo')
+  })
+
+  test('returns null if argument does not fulfill the type guard', () => {
+    expect(convertTo(isFoo, 'bar')).toBeNull()
+  })
+})
+
+describe('isNotNullable()', () => {
+  test('returns false for null', () => {
+    expect(isNotNullable(null)).toBe(false)
+  })
+
+  test('returns false for undefined', () => {
+    expect(isNotNullable(undefined)).toBe(false)
+  })
+
+  test('returns true for all other values', () => {
+    expect(isNotNullable([])).toBe(true)
+    expect(isNotNullable({})).toBe(true)
+    expect(isNotNullable('')).toBe(true)
+    expect(isNotNullable(true)).toBe(true)
+    expect(isNotNullable(1)).toBe(true)
   })
 })
