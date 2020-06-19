@@ -31,3 +31,14 @@ Use the following form to opt out from Matomo:
 
 MATOMO-OPT-OUT-FORM
 ```
+
+## Frontend Proxy
+
+The cloudflare worker also provides an A-B-testing for the new frontend.
+The following variables define the behavior:
+
+- `FRONTEND_ALLOWED_TYPES`: List of resource types given by the Serlo API which can be redirected to the new frontend.
+- `FRONTEND_DOMAIN`: The domain of the new frontend.
+- `FRONTEND_PROBABILITY`: The percentage of user which shall be redirected to the new frontend.
+
+With the cookie `frontendDomain` you can override the variable of `FRONTEND_DOMAIN`.
