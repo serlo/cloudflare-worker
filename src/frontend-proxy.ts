@@ -28,6 +28,10 @@ export async function handleRequest(
     return response
   }
 
+  const cookies = request.headers.get('Cookie')
+  const frontendDomain =
+    cookies?.match(/frontendDomain=([^;]+)/)?.[1] ?? global.FRONTEND_DOMAIN
+
   if (
     path.startsWith('/_next/') ||
     path.startsWith('/_assets/') ||
@@ -36,8 +40,6 @@ export async function handleRequest(
     path === '/spenden'
   )
     return await fetchBackend(true)
-
-  const cookies = request.headers.get('Cookie')
 
   if (
     path === '/auth/login' ||
@@ -72,7 +74,7 @@ export async function handleRequest(
 
   async function fetchBackend(useFrontend: boolean) {
     const backendUrl = useFrontend
-      ? `https://${global.FRONTEND_DOMAIN}${getPathname(request.url)}`
+      ? `https://${frontendDomain}${getPathname(request.url)}`
       : request.url
     const response = await fetch(new Request(backendUrl, request))
 
