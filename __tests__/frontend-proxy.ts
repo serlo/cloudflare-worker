@@ -165,6 +165,17 @@ describe('handleRequest()', () => {
     })
   })
 
+  test('uses cookie "frontendUrl" to determine the url of the frontend', async () => {
+    setupProbabilityFor(Backend.Frontend)
+    fetch.mockRequest({ to: 'https://myfrontend.org/math' })
+
+    const request = new Request('https://de.serlo.org/math')
+    request.headers.set('Cookie', 'frontendDomain=myfrontend.org')
+    await handleRequest(request)
+
+    expect(fetch).toHaveExactlyOneRequestTo('https://myfrontend.org/math')
+  })
+
   test('ignore wrong formated cookie values', async () => {
     setupProbabilityFor(Backend.Frontend)
     fetch.mockRequest({ to: 'https://frontend.serlo.org/math' })
