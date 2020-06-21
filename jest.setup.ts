@@ -46,7 +46,9 @@ beforeEach(() => {
   mockKV('MAINTENANCE_KV', {})
 })
 
+// @ts-expect-error
 global.Response = Response
+// @ts-expect-error
 global.Request = Request
 
 declare global {
