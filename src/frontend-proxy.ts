@@ -1,5 +1,6 @@
 import { fetchApi } from './api'
 import { getSubdomain, getPathname, hasContentApiParameters } from './url-utils'
+import { getCookieValue } from './utils'
 
 export async function handleRequest(
   request: Request
@@ -28,6 +29,10 @@ export async function handleRequest(
     return response
   }
 
+  const cookies = request.headers.get('Cookie')
+  const frontendDomain =
+    getCookieValue('frontendDomain', cookies) ?? global.FRONTEND_DOMAIN
+
   if (
     path.startsWith('/_next/') ||
     path.startsWith('/_assets/') ||
@@ -36,8 +41,6 @@ export async function handleRequest(
     path === '/spenden'
   )
     return await fetchBackend(true)
-
-  const cookies = request.headers.get('Cookie')
 
   if (
     path === '/auth/login' ||
@@ -49,7 +52,7 @@ export async function handleRequest(
     path === '/auth/hydra/consent' ||
     path === '/user/register' ||
     hasContentApiParameters(url) ||
-    cookies?.includes('authenticated=1')
+    getCookieValue('authenticated', cookies) === '1'
   )
     return await fetchBackend(false)
 
@@ -58,21 +61,20 @@ export async function handleRequest(
     if (typename === null || !allowedTypes.includes(typename)) return null
   }
 
-  const cookieUseFrontend = cookies?.match(/useFrontend=([^;]+)/)?.[1]
-  const convertedCookieValue = Number(cookieUseFrontend)
-  const useFrontendNumber = Number.isNaN(convertedCookieValue)
+  const cookieValue = Number(getCookieValue('useFrontend', cookies) ?? 'NaN')
+  const useFrontendNumber = Number.isNaN(cookieValue)
     ? Math.random()
-    : convertedCookieValue
+    : cookieValue
 
   const response = await fetchBackend(useFrontendNumber <= probability)
-  if (Number.isNaN(convertedCookieValue))
+  if (Number.isNaN(cookieValue))
     setCookieUseFrontend(response, useFrontendNumber)
 
   return response
 
   async function fetchBackend(useFrontend: boolean) {
     const backendUrl = useFrontend
-      ? `https://${global.FRONTEND_DOMAIN}${getPathname(request.url)}`
+      ? `https://${frontendDomain}${getPathname(request.url)}`
       : request.url
     const response = await fetch(new Request(backendUrl, request))
 

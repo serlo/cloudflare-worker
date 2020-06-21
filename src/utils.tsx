@@ -35,6 +35,19 @@ export enum LanguageCode {
   Es = 'es',
 }
 
+export function getCookieValue(
+  name: string,
+  cookieHeader: string | null
+): string | null {
+  return cookieHeader === null
+    ? null
+    : cookieHeader
+        .split(';')
+        .map((c) => c.trim())
+        .filter((c) => c.startsWith(`${name}=`))
+        .map((c) => c.substring(name.length + 1))[0] ?? null
+}
+
 export function isLanguageCode(code: string): code is LanguageCode {
   return Object.values(LanguageCode).some((x) => x === code)
 }
