@@ -27,7 +27,7 @@ import {
   RevisedConfig,
   RevisedType,
   UnrevisedType,
-  handleRequest,
+  staticPages,
   getPage,
   getRevisions,
   findRevisionById,
@@ -69,7 +69,7 @@ describe('handleRequest()', () => {
   }
 
   async function testHandleRequest(url: string): Promise<Response | null> {
-    return handleRequest(new Request(url), unrevisedConfig, revisedConfig)
+    return staticPages(new Request(url), unrevisedConfig, revisedConfig)
   }
 
   describe('returns unrevised page response at /imprint (html specification)', () => {
