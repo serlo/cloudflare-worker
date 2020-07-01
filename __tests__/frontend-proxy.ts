@@ -441,7 +441,7 @@ describe('handleRequest()', () => {
         request.headers.set('Cookie', 'token=12345;')
         await handleRequest(request)
 
-        const backendRequest = fetch.getRequestTo(backendUrl)
+        const backendRequest = fetch.getRequestTo(backendUrl) as Request
         expect(backendRequest.headers.get('X-Header')).toBe('foo')
         expect(backendRequest.headers.get('Cookie')).toBe('token=12345;')
       }

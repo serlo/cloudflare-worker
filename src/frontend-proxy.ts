@@ -6,7 +6,7 @@ export async function handleRequest(
   request: Request
 ): Promise<Response | null> {
   const probability = Number(global.FRONTEND_PROBABILITY)
-  const allowedTypes = JSON.parse(global.FRONTEND_ALLOWED_TYPES)
+  const allowedTypes = JSON.parse(global.FRONTEND_ALLOWED_TYPES) as string[]
 
   const url = request.url
   const path = getPathname(url)
@@ -94,7 +94,13 @@ export async function handleRequest(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query: createApiQuery(path) }),
     })
-    const apiResult = await apiResponse.json()
+    const apiResult = (await apiResponse.json()) as {
+      data: {
+        uuid: {
+          __typename: string
+        } | null
+      } | null
+    } | null
     const typename = apiResult?.data?.uuid?.__typename ?? null
 
     if (typename !== null)

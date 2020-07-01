@@ -29,8 +29,10 @@ import { Maintenance } from './template'
 export async function maintenanceMode(request: Request) {
   const enabled = await global.MAINTENANCE_KV.get('enabled')
   if (!enabled) return null
-  const { start: startISO, end: endISO, subdomains = [] } = JSON.parse(enabled)
-  if (!subdomains.includes(getSubdomain(request.url))) return null
+  const { start: startISO, end: endISO, subdomains = [] } = JSON.parse(
+    enabled
+  ) as { start: string; end: string; subdomains?: string[] }
+  if (!subdomains.includes(getSubdomain(request.url) ?? '')) return null
   if (!startISO) return null
   const now = DateTime.local()
   const start = DateTime.fromISO(startISO)

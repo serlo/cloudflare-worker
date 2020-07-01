@@ -27,7 +27,7 @@ import {
   fetchWithCache,
   getBasicAuthHeaders,
 } from '../utils'
-import { AreWeEdtrIoYet } from './template'
+import { AreWeEdtrIoYet, AreWeEdtrIoYetProps } from './template'
 
 export async function edtrIoStats(request: Request) {
   if (getSubdomain(request.url) !== 'are-we-edtr-io-yet') return null
@@ -39,5 +39,7 @@ export async function edtrIoStats(request: Request) {
     headers: getBasicAuthHeaders(),
   })
 
-  return createPreactResponse(<AreWeEdtrIoYet data={await data.json()} />)
+  return createPreactResponse(
+    <AreWeEdtrIoYet data={(await data.json()) as AreWeEdtrIoYetProps['data']} />
+  )
 }

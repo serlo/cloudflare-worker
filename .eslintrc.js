@@ -8,8 +8,6 @@ module.exports = {
   },
   extends: [
     'eslint:recommended',
-    'plugin:@typescript-eslint/eslint-recommended',
-    'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:react/recommended',
     'prettier/@typescript-eslint',
@@ -17,7 +15,7 @@ module.exports = {
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: ['tsconfig.json'],
+    project: ['tsconfig.json', 'tsconfig.eslint.json'],
   },
   plugins: ['@typescript-eslint', 'import', 'react'],
   rules: {
@@ -26,7 +24,7 @@ module.exports = {
     'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
 
     // @typescript-eslint/eslint-plugin
-    '@typescript-eslint/ban-ts-ignore': 'warn',
+    '@typescript-eslint/ban-ts-comment': 'warn',
     '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-empty-function': 'off',
@@ -43,16 +41,18 @@ module.exports = {
       },
     ],
     '@typescript-eslint/no-useless-constructor': 'error',
+    '@typescript-eslint/prefer-ts-expect-error': 'error',
 
     // eslint-plugin-import
     'import/export': 'error',
-    'import/extensions': ['error', 'never'],
+    'import/extensions': ['error', 'never', { json: 'always' }],
     'import/first': 'error',
     'import/newline-after-import': 'error',
     'import/no-absolute-path': 'error',
     'import/no-commonjs': 'error',
     'import/no-cycle': 'error',
     'import/no-default-export': 'error',
+    'import/prefer-default-export': 'off',
     'import/no-deprecated': 'error',
     'import/no-extraneous-dependencies': [
       'error',
@@ -95,6 +95,7 @@ module.exports = {
     // eslint-plugin-react
     'react/jsx-boolean-value': 'error',
     'react/jsx-curly-brace-presence': 'error',
+    'react/jsx-fragments': ['error', 'syntax'],
     'react/prop-types': 'off',
   },
   settings: {
