@@ -112,18 +112,17 @@ async function semanticFileNames(request: Request) {
   const url = new URL(request.url)
   url.host = 'assets.serlo.org'
 
-  if (url.pathname.startsWith('/meta')) return fetch(url.href, request)
   const re = /^\/(legacy\/|)((?!legacy)\w+)\/([\w\-+]+)\.(\w+)$/
   const match = re.exec(url.pathname)
 
-  if (!match) return fetch(url.href, request)
+  if (!url.pathname.startsWith('/meta') && match) {
+    const prefix = match[1]
+    const hash = match[2]
+    const extension = match[4]
 
-  const prefix = match[1]
-  const hash = match[2]
-  const extension = match[4]
-
-  url.pathname = `${prefix}${hash}.${extension}`
-  return fetch(url.href, request)
+    url.pathname = `${prefix}${hash}.${extension}`
+  }
+  return await fetch(url.href, request)
 }
 
 async function packages(request: Request) {
