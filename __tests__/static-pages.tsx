@@ -19,7 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { render } from '@testing-library/preact'
+import { render, RenderResult } from '@testing-library/preact'
 import { h } from 'preact'
 
 import {
@@ -143,8 +143,7 @@ describe('handleRequest()', () => {
   test('returns list of revision ids for requests at /privacy/json', async () => {
     const url = 'https://de.serlo.org/privacy/json'
     const response = (await testHandleRequest(url)) as Response
-
-    expectIsJsonResponse(response, ['2020-12-11', '1999-10-09'])
+    await expectIsJsonResponse(response, ['2020-12-11', '1999-10-09'])
   })
 
   describe('returns 404 reponse if requested page and its default is not configured', () => {
@@ -515,7 +514,7 @@ function getTitle(typeName: RevisedType | UnrevisedType): string {
   return '#' + typeName + '#'
 }
 
-function hasLangAttribute(html: ReturnType<typeof render>, lang: string): void {
+function hasLangAttribute(html: RenderResult, lang: string): void {
   const htmlElement = html.getByText(/.*/, { selector: 'html' })
   expect(htmlElement).toHaveAttribute('lang', lang)
 }

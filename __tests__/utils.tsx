@@ -135,9 +135,9 @@ test('PreactResponse', async () => {
   ])
 })
 
-test('JsonResponse', () => {
+test('JsonResponse', async () => {
   const response = createJsonResponse({ foo: [1, 2, 3] })
-  expectIsJsonResponse(response, { foo: [1, 2, 3] })
+  await expectIsJsonResponse(response, { foo: [1, 2, 3] })
 })
 
 test('NotFoundResponse', async () => {

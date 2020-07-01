@@ -58,14 +58,12 @@ describe('fetchApi()', () => {
   })
 
   test('transfers meta data to fetch()', () => {
-    const apiRequest = fetch.getRequestTo('https://api.serlo.org/')
-
+    const apiRequest = fetch.getRequestTo('https://api.serlo.org/') as Request
     expect(apiRequest.headers.get('Content-Type')).toBe('application/json')
   })
 
   test('sets authorization header', () => {
-    const apiRequest = fetch.getRequestTo('https://api.serlo.org/')
-
+    const apiRequest = fetch.getRequestTo('https://api.serlo.org/') as Request
     expect(apiRequest.headers.get('Authorization')).toMatch(/^Serlo Service=ey/)
   })
 })

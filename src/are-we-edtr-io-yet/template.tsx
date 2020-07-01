@@ -35,11 +35,11 @@ export enum EntityType {
   video = 'video',
 }
 
-export function AreWeEdtrIoYet({
-  data,
-}: {
+export interface AreWeEdtrIoYetProps {
   data: Record<EntityType, EntityProps['data']>
-}) {
+}
+
+export function AreWeEdtrIoYet({ data }: AreWeEdtrIoYetProps) {
   const types = Object.values(EntityType)
 
   return (

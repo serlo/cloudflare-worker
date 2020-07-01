@@ -73,19 +73,16 @@ export function mockFetch(spec: FetchSpec = {}): FetchMock {
 }
 
 export class FetchMock {
-  private specs: FetchSpec
-  private mockedFetch: jest.Mock
-
-  constructor(specs: FetchSpec, mockedFetch: jest.Mock) {
-    this.specs = specs
-    this.mockedFetch = mockedFetch
-  }
+  constructor(
+    private specs: FetchSpec,
+    private mockedFetch: jest.Mock<any, [RequestInfo, RequestInit | undefined]>
+  ) {}
 
   get mock() {
     return this.mockedFetch
   }
 
-  fetch(reqInfo: Request | string) {
+  fetch(reqInfo: RequestInfo) {
     const url = typeof reqInfo === 'string' ? reqInfo : reqInfo.url
     const responseSpec = this.specs[url]
     const errorMessage = `Response for URL ${url} is not defined in mocked fetch`
@@ -115,15 +112,15 @@ export class FetchMock {
     return argsList[0]
   }
 
-  getRequestTo(url: string): Request {
+  getRequestTo(url: string): RequestInfo {
     return this.getCallArgumentsFor(url)[0]
   }
 
-  getAllRequestsTo(url: string): Request[] {
+  getAllRequestsTo(url: string): RequestInfo[] {
     return this.getAllCallArgumentsFor(url).map((x) => x[0])
   }
 
-  static getUrl(req: Request | string): string {
+  static getUrl(req: RequestInfo): string {
     return typeof req === 'string' ? req : req.url
   }
   static convertToResponse(spec: ResponseSpec): Response {
@@ -132,8 +129,7 @@ export class FetchMock {
 }
 
 export function mockKV(name: string, values: Record<string, unknown>) {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore
+  // @ts-expect-error
   global[name] = {
     async get(key: string) {
       return Promise.resolve(values[key] ?? null)
