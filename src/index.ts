@@ -21,9 +21,10 @@
  */
 import { api } from './api'
 import { edtrIoStats } from './are-we-edtr-io-yet'
-import { handleRequest as frontendProxy } from './frontend-proxy'
+import { authFrontendSectorIdentifierUriValidation } from './auth'
+import { frontendProxy } from './frontend-proxy'
 import { maintenanceMode } from './maintenance'
-import { handleRequest as staticPages } from './static-pages'
+import { staticPages } from './static-pages'
 import { getPathnameWithoutTrailingSlash, getSubdomain } from './url-utils'
 
 addEventListener('fetch', (event: Event) => {
@@ -33,6 +34,7 @@ addEventListener('fetch', (event: Event) => {
 
 export async function handleRequest(request: Request) {
   return (
+    authFrontendSectorIdentifierUriValidation(request) ||
     (await edtrIoStats(request)) ||
     (await maintenanceMode(request)) ||
     (await enforceHttps(request)) ||

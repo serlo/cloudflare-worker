@@ -70,7 +70,7 @@ export interface RevisedPage extends Page, RevisedSpec {
 
 export type WithContent<A extends Spec> = A & { content: string }
 
-export async function handleRequest(
+export async function staticPages(
   request: Request,
   unrevisedConfig = defaultUnrevisedConfig,
   revisedConfig = defaultRevisedConfig
