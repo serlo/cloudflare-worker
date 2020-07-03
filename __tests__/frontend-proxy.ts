@@ -43,17 +43,17 @@ describe('handleRequest()', () => {
       expect(fetch).toHaveExactlyOneRequestTo('https://frontend.serlo.org/math')
     })
 
-    test('choosed default backend for random number > probability', async () => {
+    test('chose legacy backend for random number > probability', async () => {
       global.FRONTEND_PROBABILITY = '0.5'
       Math.random = jest.fn().mockReturnValue(0.75)
       fetch.mockRequest({
         to: 'https://de.serlo.org/math',
-        response: 'default backend',
+        response: 'legacy backend',
       })
 
       const response = await handleUrl('https://de.serlo.org/math')
 
-      expect(await response.text()).toBe('default backend')
+      expect(await response.text()).toBe('legacy backend')
       expect(fetch).toHaveExactlyOneRequestTo('https://de.serlo.org/math')
     })
   })
@@ -192,7 +192,7 @@ describe('handleRequest()', () => {
     expect(fetch).toHaveExactlyOneRequestTo('https://myfrontend.org/math')
   })
 
-  test('ignore wrong formated cookie values', async () => {
+  test('ignore wrongly formatted cookie values', async () => {
     setupProbabilityFor(Backend.Frontend)
     fetch.mockRequest({ to: 'https://frontend.serlo.org/math' })
 
@@ -203,7 +203,7 @@ describe('handleRequest()', () => {
     expect(Math.random).toHaveBeenCalled()
   })
 
-  describe('handles types of requested ressource', () => {
+  describe('handles types of requested resource', () => {
     test('saves type in cache', async () => {
       fetch.mockRequest({
         to: global.API_ENDPOINT,
@@ -276,6 +276,22 @@ describe('handleRequest()', () => {
   })
 
   describe('special paths', () => {
+    test('requests to /user/profile/... resolve to legacy backend when `User` is not in FRONTEND_ALLOWED_TYPES', async () => {
+      global.FRONTEND_ALLOWED_TYPES = '[]'
+      const backendUrl = 'https://de.serlo.org/user/profile/inyono'
+      fetch.mockRequest({ to: backendUrl })
+      const response = await handleUrl(backendUrl)
+      expect(response).toBeNull()
+    })
+
+    test('requests to /user/profile/... resolve to frontend when `User` is in FRONTEND_ALLOWED_TYPES', async () => {
+      global.FRONTEND_ALLOWED_TYPES = '["User"]'
+      const backendUrl = 'https://frontend.serlo.org/user/profile/inyono'
+      fetch.mockRequest({ to: backendUrl })
+      await handleUrl('https://de.serlo.org/user/profile/inyono')
+      expect(fetch).toHaveExactlyOneRequestTo(backendUrl)
+    })
+
     test('requests to /api/auth/... always resolve to frontend', async () => {
       const backendUrl = 'https://frontend.serlo.org/api/auth/callback'
 
@@ -338,7 +354,7 @@ describe('handleRequest()', () => {
       )
     })
 
-    describe('forwards authentication requests to default backend', () => {
+    describe('forwards authentication requests to legacy backend', () => {
       test.each([
         'https://de.serlo.org/auth/login',
         'https://de.serlo.org/auth/logout',

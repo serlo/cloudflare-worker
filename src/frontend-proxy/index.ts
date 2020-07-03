@@ -95,6 +95,10 @@ export async function frontendProxy(
   }
 
   async function queryTypename(path: string): Promise<string | null> {
+    if (path.startsWith('/user/profile/')) {
+      return 'User'
+    }
+
     const cachedType = await global.FRONTEND_CACHE_TYPES_KV.get(path)
     if (cachedType !== null) return cachedType
 
