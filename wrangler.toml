@@ -19,6 +19,7 @@ FRONTEND_DOMAIN = "frontend.serlo.now.sh"
 FRONTEND_PROBABILITY = "0.50"
 FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "Page", "TaxonomyTerm", "Video"]'
 ENABLE_BASIC_AUTH = "true"
+REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = "false"
 
 [env.staging]
 name = "serlo-staging"
@@ -37,6 +38,7 @@ FRONTEND_DOMAIN = "frontend.serlo.now.sh"
 FRONTEND_PROBABILITY = "0.50"
 FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "Page", "TaxonomyTerm", "Video"]'
 ENABLE_BASIC_AUTH = "true"
+REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = "false"
 
 [env.production]
 name = "serlo-production"
@@ -55,3 +57,4 @@ ENABLE_BASIC_AUTH = "false"
 FRONTEND_DOMAIN = "frontend.serlo.org"
 FRONTEND_PROBABILITY = "0.1"
 FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "Page", "TaxonomyTerm", "Video"]'
+REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = "true"

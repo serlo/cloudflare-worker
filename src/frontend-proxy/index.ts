@@ -1,8 +1,13 @@
-import { fetchApi } from './api'
-import { getSubdomain, getPathname, hasContentApiParameters } from './url-utils'
-import { getCookieValue } from './utils'
+import { fetchApi } from '../api'
+import {
+  getSubdomain,
+  getPathname,
+  hasContentApiParameters,
+  getQueryString,
+} from '../url-utils'
+import { getCookieValue } from '../utils'
 
-export async function handleRequest(
+export async function frontendProxy(
   request: Request
 ): Promise<Response | null> {
   const probability = Number(global.FRONTEND_PROBABILITY)
@@ -36,6 +41,7 @@ export async function handleRequest(
   if (
     path.startsWith('/_next/') ||
     path.startsWith('/_assets/') ||
+    path.startsWith('/api/auth/') ||
     path.startsWith('/api/frontend/') ||
     path === '/search' ||
     path === '/spenden'
@@ -52,7 +58,8 @@ export async function handleRequest(
     path === '/auth/hydra/consent' ||
     path === '/user/register' ||
     hasContentApiParameters(url) ||
-    getCookieValue('authenticated', cookies) === '1'
+    (global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND === 'true' &&
+      getCookieValue('authenticated', cookies) === '1')
   )
     return await fetchBackend(false)
 
@@ -74,7 +81,9 @@ export async function handleRequest(
 
   async function fetchBackend(useFrontend: boolean) {
     const backendUrl = useFrontend
-      ? `https://${frontendDomain}${getPathname(request.url)}`
+      ? `https://${frontendDomain}${getPathname(request.url)}${getQueryString(
+          request.url
+        )}`
       : request.url
     const response = await fetch(new Request(backendUrl, request))
 

@@ -32,6 +32,12 @@ export function expectContentTypeIsHtml(response: Response): void {
   expect(response.headers.get('Content-Type')).toBe('text/html;charset=utf-8')
 }
 
+export function expectContentTypeIsJson(response: Response): void {
+  expect(response.headers.get('Content-Type')).toBe(
+    'application/json;charset=utf-8'
+  )
+}
+
 export function expectHasOkStatus(response: Response): void {
   expect(response).not.toBeNull()
   expect(response.status).toBe(200)
