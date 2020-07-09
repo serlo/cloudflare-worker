@@ -20,6 +20,7 @@ FRONTEND_PROBABILITY = "0.50"
 FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "Page", "TaxonomyTerm", "Video"]'
 ENABLE_BASIC_AUTH = "true"
 REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = "false"
+ALLOW_AUTH_FROM_LOCALHOST = "true"
 
 [env.staging]
 name = "serlo-staging"
@@ -39,6 +40,7 @@ FRONTEND_PROBABILITY = "0.50"
 FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "Page", "TaxonomyTerm", "Video"]'
 ENABLE_BASIC_AUTH = "true"
 REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = "false"
+ALLOW_AUTH_FROM_LOCALHOST = "true"
 
 [env.production]
 name = "serlo-production"
@@ -58,3 +60,4 @@ FRONTEND_DOMAIN = "frontend.serlo.org"
 FRONTEND_PROBABILITY = "0.1"
 FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "Page", "TaxonomyTerm", "Video"]'
 REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = "true"
+ALLOW_AUTH_FROM_LOCALHOST = "false"
