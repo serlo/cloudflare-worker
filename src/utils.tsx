@@ -27,12 +27,12 @@ import sanitize from 'sanitize-html'
 import { NotFound } from './ui'
 
 export enum LanguageCode {
-  En = 'en',
   De = 'de',
-  Fr = 'fr',
-  Ta = 'ta',
-  Hi = 'hi',
+  En = 'en',
   Es = 'es',
+  Fr = 'fr',
+  Hi = 'hi',
+  Ta = 'ta',
 }
 
 export function getCookieValue(
