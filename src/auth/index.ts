@@ -1,5 +1,5 @@
-import { LanguageCode } from '../utils'
 import { getPathnameWithoutTrailingSlash, getSubdomain } from '../url-utils'
+import { LanguageCode, createJsonResponse } from '../utils'
 
 export function authFrontendSectorIdentifierUriValidation(
   request: Request
@@ -19,9 +19,6 @@ export function authFrontendSectorIdentifierUriValidation(
       ? ['http://localhost:3000/api/auth/callback']
       : []),
   ]
-  return new Response(JSON.stringify(redirectUris), {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
+
+  return createJsonResponse(redirectUris)
 }
