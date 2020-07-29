@@ -28,14 +28,16 @@ import {
 } from '../src/url-utils'
 
 describe('getQueryString', () => {
-  test('returns the query string', () =>{
-    expect(getQueryString('https://de.serlo.org/url?foo=bar&bar=8')).toBe("?foo=bar&bar=8")
+  test('returns the query string of an url', () => {
+    expect(getQueryString('https://de.serlo.org/url?foo=bar&bar=8')).toBe(
+      '?foo=bar&bar=8'
+    )
   })
-  test('returns empty query string', () =>{
-    expect(getQueryString('https://de.serlo.org/url')).toBe("")
+  test('returns empty string when url does not have a query string', () => {
+    expect(getQueryString('https://de.serlo.org/url')).toBe('')
   })
-  test('returns empty query string', () =>{
-    expect(getQueryString('https://de.serlo.org/url?')).toBe("")
+  test('returns empty string when url ends with "?"', () => {
+    expect(getQueryString('https://de.serlo.org/url?')).toBe('')
   })
 })
 
@@ -120,7 +122,7 @@ describe('hasContentApiParamaters()', () => {
 
     expect(hasContentApiParameters(url)).toBe(false)
   })
-  
+
   test('returns false when no query parameter is a content api parameter', () => {
     const url = 'http://serlo.org/article?fontcolor=blue&searchterm=hello'
 
