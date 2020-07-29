@@ -20,11 +20,24 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 import {
+  getQueryString,
   getPathname,
   getPathnameWithoutTrailingSlash,
   getSubdomain,
   hasContentApiParameters,
 } from '../src/url-utils'
+
+describe('getQueryString', () => {
+  test('returns the query string', () =>{
+    expect(getQueryString('https://de.serlo.org/url?foo=bar&bar=8')).toBe("?foo=bar&bar=8")
+  })
+  test('returns empty query string', () =>{
+    expect(getQueryString('https://de.serlo.org/url')).toBe("")
+  })
+  test('returns empty query string', () =>{
+    expect(getQueryString('https://de.serlo.org/url?')).toBe("")
+  })
+})
 
 describe('getPathname()', () => {
   test('returns the pathname of the url', () => {
@@ -107,7 +120,7 @@ describe('hasContentApiParamaters()', () => {
 
     expect(hasContentApiParameters(url)).toBe(false)
   })
-
+  
   test('returns false when no query parameter is a content api parameter', () => {
     const url = 'http://serlo.org/article?fontcolor=blue&searchterm=hello'
 
