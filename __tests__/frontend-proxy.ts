@@ -1,6 +1,6 @@
 import { frontendProxy, createApiQuery } from '../src/frontend-proxy'
 import { getPathname, getQueryString } from '../src/url-utils'
-import { createJsonResponse } from '../src/utils'
+import { createJsonResponse, LanguageCode } from '../src/utils'
 import { expectHasOkStatus, mockFetch, mockKV, FetchMock } from './_helper'
 
 enum Backend {
@@ -14,6 +14,7 @@ describe('handleRequest()', () => {
   beforeEach(() => {
     global.FRONTEND_DOMAIN = 'frontend.serlo.org'
     global.API_ENDPOINT = 'https://api.serlo.org/'
+    global.FRONTEND_PREPEND_LANGUAGE_CODE = 'false'
 
     global.FRONTEND_PROBABILITY = '0.5'
     Math.random = jest.fn().mockReturnValue(0.5)
@@ -71,6 +72,24 @@ describe('handleRequest()', () => {
       const cookieHeader = response.headers.get('Set-Cookie')
       expect(cookieHeader).toBe('useFrontend=0.25; path=/')
     })
+  })
+
+  describe('prepends language code when FRONTEND_PREPEND_LANGUAGE_CODE is "true"', () => {
+    test.each(Object.values(LanguageCode))(
+      'language code = %p',
+      async (lang) => {
+        global.FRONTEND_PREPEND_LANGUAGE_CODE = 'true'
+
+        setupProbabilityFor(Backend.Frontend)
+        fetch.mockRequest({ to: `https://frontend.serlo.org/${lang}/math` })
+
+        await handleUrl(`https://${lang}.serlo.org/math`)
+
+        expect(fetch).toHaveExactlyOneRequestTo(
+          `https://frontend.serlo.org/${lang}/math`
+        )
+      }
+    )
   })
 
   describe('when user is authenticated', () => {
