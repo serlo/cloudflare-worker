@@ -5,7 +5,7 @@ import {
   hasContentApiParameters,
   getQueryString,
 } from '../url-utils'
-import { getCookieValue } from '../utils'
+import { getCookieValue, isLanguageCode, LanguageCode } from '../utils'
 
 export async function frontendProxy(
   request: Request
@@ -15,8 +15,15 @@ export async function frontendProxy(
 
   const url = request.url
   const path = getPathname(url)
+  const lang = getSubdomain(url)
 
-  if (getSubdomain(url) !== 'de') return null
+  if (lang === null || !isLanguageCode(lang)) return null
+
+  if (
+    global.FRONTEND_PREPEND_LANGUAGE_CODE !== 'true' &&
+    lang !== LanguageCode.De
+  )
+    return null
 
   if (path === '/enable-frontend') {
     const response = new Response('Enabled: Use of new frontend')
@@ -46,7 +53,7 @@ export async function frontendProxy(
     path === '/search' ||
     path === '/spenden'
   )
-    return await fetchBackend(true)
+    return await fetchBackend(true, lang)
 
   if (
     path === '/auth/login' ||
@@ -61,7 +68,7 @@ export async function frontendProxy(
     (global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND === 'true' &&
       getCookieValue('authenticated', cookies) === '1')
   )
-    return await fetchBackend(false)
+    return await fetchBackend(false, lang)
 
   if (path !== '/') {
     const typename = await queryTypename(path)
@@ -73,17 +80,18 @@ export async function frontendProxy(
     ? Math.random()
     : cookieValue
 
-  const response = await fetchBackend(useFrontendNumber <= probability)
+  const response = await fetchBackend(useFrontendNumber <= probability, lang)
   if (Number.isNaN(cookieValue))
     setCookieUseFrontend(response, useFrontendNumber)
 
   return response
 
-  async function fetchBackend(useFrontend: boolean) {
+  async function fetchBackend(useFrontend: boolean, lang: string) {
+    const pathPrefix =
+      global.FRONTEND_PREPEND_LANGUAGE_CODE === 'true' ? `/${lang}` : ''
     const backendUrl = useFrontend
-      ? `https://${frontendDomain}${getPathname(request.url)}${getQueryString(
-          request.url
-        )}`
+      ? `https://${frontendDomain}${pathPrefix}${getPathname(request.url)}` +
+        getQueryString(request.url)
       : request.url
     const response = await fetch(new Request(backendUrl, request))
 
