@@ -24,6 +24,7 @@ declare namespace NodeJS {
     MAINTENANCE_KV: KV<'enabled'>
     PACKAGES_KV: KV<string>
     FRONTEND_CACHE_TYPES_KV: KV<string>
+    PATH_INFO_KV: KV<string>
   }
 }
 
