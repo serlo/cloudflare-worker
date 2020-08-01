@@ -32,6 +32,8 @@ import {
   createPreactResponse,
   createJsonResponse,
   createNotFoundResponse,
+  getPathInfo,
+  LanguageCode,
 } from '../src/utils'
 import {
   mockFetch,
@@ -40,6 +42,7 @@ import {
   expectContentTypeIsHtml,
   expectIsJsonResponse,
   expectIsNotFoundResponse,
+  mockKV,
 } from './_helper'
 
 describe('getCookieValue()', () => {
@@ -77,6 +80,231 @@ describe('getCookieValue()', () => {
 
   test('return null if cookie header string is null', () => {
     expect(getCookieValue('foo', null)).toBeNull()
+  })
+})
+
+describe('getPathInfo()', () => {
+  beforeEach(() => {
+    global.API_ENDPOINT = 'https://api.serlo.org/graphql'
+    mockKV('PATH_INFO_KV', {})
+  })
+
+  test('returns typename and currentPath from api.serlo.org', async () => {
+    mockFetch({
+      'https://api.serlo.org/graphql': createJsonResponse({
+        data: { uuid: { __typename: 'Article', alias: '/current-path' } },
+      }),
+    })
+
+    const pathInfo = await getPathInfo(LanguageCode.En, '/path')
+
+    expect(pathInfo).toEqual({
+      typename: 'Article',
+      currentPath: '/current-path',
+    })
+  })
+
+  test('"currentPath" is given path when it does not refer to an entity', async () => {
+    mockFetch({
+      'https://api.serlo.org/graphql': createJsonResponse({
+        data: { uuid: { __typename: 'ArticleRevision' } },
+      }),
+    })
+
+    const pathInfo = await getPathInfo(LanguageCode.En, '/path')
+
+    expect(pathInfo).toEqual(expect.objectContaining({ currentPath: '/path' }))
+  })
+
+  describe('request to the api endpoint', () => {
+    test('is signed', async () => {
+      const apiRequest = await getApiRequest(LanguageCode.En, '/path')
+
+      expect(apiRequest.headers.get('Authorization')).toMatch(/^Serlo Service/)
+    })
+
+    test('contains right query when path is an uuid', async () => {
+      const apiRequest = await getApiRequest(LanguageCode.En, '/12345')
+
+      expect(await apiRequest.text()).toEqual(
+        expect.stringContaining('uuid(id: 12345)')
+      )
+    })
+
+    describe('contains right query when path is an uuid', () => {
+      test.each([LanguageCode.En, LanguageCode.De])(
+        'lang = %p',
+        async (lang) => {
+          const apiRequest = await getApiRequest(lang, '/path')
+
+          expect(await apiRequest.text()).toEqual(
+            expect.stringContaining(
+              `uuid(alias: { instance: ${lang}, path: \\"/path\\" })`
+            )
+          )
+        }
+      )
+    })
+
+    async function getApiRequest(lang: LanguageCode, path: string) {
+      const fetch = mockFetch({
+        'https://api.serlo.org/graphql': createJsonResponse({
+          data: { uuid: { __typename: 'Article', alias: path } },
+        }),
+      })
+
+      await getPathInfo(lang, path)
+
+      return fetch.getRequestTo('https://api.serlo.org/graphql') as Request
+    }
+  })
+
+  describe('returns null', () => {
+    test('when there was an error with the api call', async () => {
+      mockFetch({
+        'https://api.serlo.org/graphql': new Response('', { status: 403 }),
+      })
+
+      const pathInfo = await getPathInfo(LanguageCode.En, '/path')
+
+      expect(pathInfo).toBeNull()
+    })
+
+    test('when api response is malformed JSON', async () => {
+      mockFetch({
+        'https://api.serlo.org/graphql': 'malformed json',
+      })
+
+      const pathInfo = await getPathInfo(LanguageCode.En, '/path')
+
+      expect(pathInfo).toBeNull()
+    })
+
+    describe('when the response is not valid', () => {
+      test.each([null, {}, { data: { uuid: {} } }])(
+        'response = %p',
+        async (response) => {
+          mockFetch({
+            'https://api.serlo.org/graphql': createJsonResponse(response),
+          })
+
+          const pathInfo = await getPathInfo(LanguageCode.En, '/path')
+
+          expect(pathInfo).toBeNull()
+        }
+      )
+    })
+  })
+
+  describe('when path is a course', () => {
+    test('"currentPath" is path of first course page', async () => {
+      mockFetch({
+        'https://api.serlo.org/graphql': createJsonResponse({
+          data: {
+            uuid: {
+              __typename: 'Course',
+              alias: '/course',
+              pages: [{ alias: '/course-page1' }, { alias: '/course-page2' }],
+            },
+          },
+        }),
+      })
+
+      const pathInfo = await getPathInfo(LanguageCode.En, '/course')
+
+      expect(pathInfo).toEqual({
+        typename: 'Course',
+        currentPath: '/course-page1',
+      })
+    })
+
+    test('"currentPath" is path of course when list of course pages is empty', async () => {
+      mockFetch({
+        'https://api.serlo.org/graphql': createJsonResponse({
+          data: {
+            uuid: { __typename: 'Course', alias: '/course', pages: [] },
+          },
+        }),
+      })
+
+      const pathInfo = await getPathInfo(LanguageCode.En, '/course')
+
+      expect(pathInfo).toEqual({
+        typename: 'Course',
+        currentPath: '/course',
+      })
+    })
+  })
+
+  describe('uses PATH_INFO_KV as a cache', () => {
+    test('use value in cache', async () => {
+      const cacheValue = JSON.stringify({
+        typename: 'Article',
+        currentPath: '/current-path',
+      })
+      await global.PATH_INFO_KV.put('/en/path', cacheValue)
+
+      const pathInfo = await getPathInfo(LanguageCode.En, '/path')
+
+      expect(pathInfo).toEqual({
+        typename: 'Article',
+        currentPath: '/current-path',
+      })
+    })
+
+    test('saves values in cache for 1 hour', async () => {
+      mockFetch({
+        'https://api.serlo.org/graphql': createJsonResponse({
+          data: { uuid: { __typename: 'Article', alias: '/current-path' } },
+        }),
+      })
+
+      await getPathInfo(LanguageCode.En, '/path')
+
+      expect(await global.PATH_INFO_KV.get('/en/path')).toEqual(
+        JSON.stringify({
+          typename: 'Article',
+          currentPath: '/current-path',
+        })
+      )
+    })
+
+    describe('ignores malformed cache values', () => {
+      const target = { typename: 'Article', currentPath: '/current-path' }
+
+      beforeEach(() => {
+        mockFetch({
+          'https://api.serlo.org/graphql': createJsonResponse({
+            data: { uuid: { __typename: 'Article', alias: '/current-path' } },
+          }),
+        })
+      })
+
+      test('when cached value is malformed JSON', async () => {
+        await global.PATH_INFO_KV.put('/en/path', 'malformed json')
+
+        const pathInfo = await getPathInfo(LanguageCode.En, '/path')
+
+        expect(pathInfo).toEqual(target)
+        expect(await global.PATH_INFO_KV.get('/en/path')).toEqual(
+          JSON.stringify(target)
+        )
+      })
+
+      test('when cached value is no PathInfo', async () => {
+        await global.PATH_INFO_KV.put(
+          '/en/path',
+          JSON.stringify({ typename: 'Course' })
+        )
+
+        const pathInfo = await getPathInfo(LanguageCode.En, '/path')
+
+        expect(pathInfo).toEqual(target)
+        expect(await global.PATH_INFO_KV.get('/en/path')).toEqual(
+          JSON.stringify(target)
+        )
+      })
+    })
   })
 })
 

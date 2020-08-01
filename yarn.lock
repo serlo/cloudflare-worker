@@ -5124,6 +5124,11 @@ forwarded@~0.1.2:
   resolved "https://registry.yarnpkg.com/forwarded/-/forwarded-0.1.2.tgz#98c23dab1175657b8c0573e8ceccd91b0ff18c84"
   integrity sha1-mMI9qxF1ZXuMBXPozszZGw/xjIQ=
 
+fp-ts@^2.7.1:
+  version "2.7.1"
+  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-2.7.1.tgz#7bd754f3362f4b9bc4d272a97c0658e9a1bc16bc"
+  integrity sha512-rYy41jF1gVhBNYbPwup50dtyT686OKOoa86PXwh8aKpBRfmvPhnBh2zUkOYj84GIMSCsgY+oJ/RVhVKRvWNPTA==
+
 fragment-cache@^0.2.1:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/fragment-cache/-/fragment-cache-0.2.1.tgz#4290fad27f13e89be7f33799c6bc5a0abfff0d19"
@@ -5947,6 +5952,11 @@ invariant@^2.2.2, invariant@^2.2.3, invariant@^2.2.4:
   integrity sha512-phJfQVBuaJM5raOpJjSfkiD6BpbCE4Ns//LaXl6wGYtUBY83nWS6Rf9tXm2e8VaK60JEjYldbPif/A2B1C2gNA==
   dependencies:
     loose-envify "^1.0.0"
+
+io-ts@^2.2.9:
+  version "2.2.9"
+  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-2.2.9.tgz#9a427512926462f20415099917a31dbf409ff2b0"
+  integrity sha512-Q9ob1VnpwyNoMam/BO6hm2dF4uu+to8NWSZNsRW6Q2Ni38PadgLZSQDo0hW7CJFgpJkQw4BXGwXzjr7c47c+fw==
 
 ip-regex@^2.1.0:
   version "2.1.0"
