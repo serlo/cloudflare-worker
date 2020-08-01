@@ -25,7 +25,12 @@ import { authFrontendSectorIdentifierUriValidation } from './auth'
 import { frontendProxy } from './frontend-proxy'
 import { maintenanceMode } from './maintenance'
 import { staticPages } from './static-pages'
-import { getPathnameWithoutTrailingSlash, getSubdomain } from './url-utils'
+import {
+  getPathnameWithoutTrailingSlash,
+  getSubdomain,
+  getPathname,
+} from './url-utils'
+import { getPathInfo, isLanguageCode } from './utils'
 
 addEventListener('fetch', (event: Event) => {
   const e = event as FetchEvent
@@ -57,54 +62,68 @@ async function enforceHttps(request: Request) {
   return Response.redirect(url.href)
 }
 
-// eslint-disable-next-line @typescript-eslint/require-await
 async function redirects(request: Request) {
-  if (getSubdomain(request.url) === 'start') {
+  const subdomain = getSubdomain(request.url)
+  const path = getPathname(request.url)
+  const pathWithoutSlash = getPathnameWithoutTrailingSlash(request.url)
+
+  if (subdomain === 'start') {
     return Response.redirect(
       'https://docs.google.com/document/d/1qsgkXWNwC-mcgroyfqrQPkZyYqn7m1aimw2gwtDTmpM/',
       301
     )
   }
 
-  if (
-    getSubdomain(request.url) === 'de' &&
-    getPathnameWithoutTrailingSlash(request.url) === '/labschool'
-  ) {
+  if (subdomain === 'de' && pathWithoutSlash === '/labschool') {
     const url = new URL(request.url)
+
     url.host = url.host.replace('de.', 'labschool.')
     url.pathname = '/'
+
     return Response.redirect(url.href, 301)
   }
 
-  if (
-    getSubdomain(request.url) === 'de' &&
-    getPathnameWithoutTrailingSlash(request.url) === '/hochschule'
-  ) {
+  if (subdomain === 'de' && pathWithoutSlash === '/hochschule') {
     const url = new URL(request.url)
+
     url.pathname = '/mathe/universitaet/44323'
+
     return Response.redirect(url.href, 301)
   }
 
-  if (
-    getSubdomain(request.url) === 'de' &&
-    getPathnameWithoutTrailingSlash(request.url) === '/beitreten'
-  ) {
+  if (subdomain === 'de' && pathWithoutSlash === '/beitreten') {
     return Response.redirect(
       'https://docs.google.com/forms/d/e/1FAIpQLSdEoyCcDVP_G_-G_u642S768e_sxz6wO6rJ3tad4Hb9z7Slwg/viewform',
       301
     )
   }
 
-  if (getSubdomain(request.url) === 'www') {
+  if (subdomain === 'www') {
     const url = new URL(request.url)
+
     url.host = url.host.replace('www.', 'de.')
+
     return Response.redirect(url.href)
   }
 
-  if (getSubdomain(request.url) === null) {
+  if (subdomain === null) {
     const url = new URL(request.url)
+
     url.host = `de.${url.host}`
+
     return Response.redirect(url.href)
+  }
+
+  if (isLanguageCode(subdomain)) {
+    const pathInfo = await getPathInfo(subdomain, path)
+
+    if (pathInfo !== null && path != pathInfo.currentPath) {
+      const url = new URL(request.url)
+
+      url.pathname = pathInfo.currentPath
+
+      return Response.redirect(url.href, 301)
+    }
   }
 }
 
