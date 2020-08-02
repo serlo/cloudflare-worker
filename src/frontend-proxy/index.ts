@@ -1,11 +1,10 @@
-import { fetchApi } from '../api'
 import {
   getSubdomain,
   getPathname,
   hasContentApiParameters,
   getQueryString,
 } from '../url-utils'
-import { getCookieValue, isLanguageCode, LanguageCode } from '../utils'
+import { getCookieValue, isLanguageCode, LanguageCode, getPathInfo } from '../utils'
 
 export async function frontendProxy(
   request: Request
@@ -71,7 +70,7 @@ export async function frontendProxy(
     return await fetchBackend(false, lang)
 
   if (path !== '/') {
-    const typename = await queryTypename(path)
+    const typename = await queryTypename(lang, path)
     if (typename === null || !allowedTypes.includes(typename)) return null
   }
 
@@ -102,41 +101,13 @@ export async function frontendProxy(
     res.headers.append('Set-Cookie', `useFrontend=${useFrontend}; path=/`)
   }
 
-  async function queryTypename(path: string): Promise<string | null> {
+  async function queryTypename(lang: LanguageCode, path: string): Promise<string | null> {
     if (path.startsWith('/user/profile/')) {
       return 'User'
     }
 
-    const cachedType = await global.FRONTEND_CACHE_TYPES_KV.get(path)
-    if (cachedType !== null) return cachedType
+    const pathInfo = await getPathInfo(lang, path)
 
-    const apiResponse = await fetchApi(global.API_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: createApiQuery(path) }),
-    })
-    const apiResult = (await apiResponse.json()) as {
-      data: {
-        uuid: {
-          __typename: string
-        } | null
-      } | null
-    } | null
-    const typename = apiResult?.data?.uuid?.__typename ?? null
-
-    if (typename !== null)
-      await global.FRONTEND_CACHE_TYPES_KV.put(path, typename, {
-        expirationTtl: 60 * 60,
-      })
-
-    return typename
+    return pathInfo?.typename ?? null
   }
-}
-
-export function createApiQuery(path: string): string {
-  const query = /^\/\d+$/.test(path)
-    ? `id: ${path.slice(1)}`
-    : `alias: { instance: de, path: "${path}" }`
-
-  return `{ uuid(${query}) { __typename } }`
 }
