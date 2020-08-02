@@ -1,5 +1,4 @@
 import { frontendProxy } from '../src/frontend-proxy'
-import { getQueryString } from '../src/url-utils'
 import { createJsonResponse, LanguageCode } from '../src/utils'
 import { expectHasOkStatus, mockFetch, mockKV, FetchMock } from './_helper'
 
@@ -451,7 +450,8 @@ describe('handleRequest()', () => {
       await frontendProxy(request)
 
       const backendRequest = fetch.getRequestTo(backendUrl) as Request
-      expect(getQueryString(backendRequest.url)).toEqual('?foo=bar')
+      const queryString = new URL(backendRequest.url).search
+      expect(queryString).toEqual('?foo=bar')
     })
   })
 
