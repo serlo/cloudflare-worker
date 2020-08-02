@@ -14,7 +14,7 @@ describe('handleRequest()', () => {
   beforeEach(() => {
     global.FRONTEND_DOMAIN = 'frontend.serlo.org'
     global.API_ENDPOINT = 'https://api.serlo.org/'
-    global.FRONTEND_PREPEND_LANGUAGE_CODE = 'false'
+    global.FRONTEND_SUPPORT_INTERNATIONALIZATION = 'false'
 
     global.FRONTEND_PROBABILITY = '0.5'
     Math.random = jest.fn().mockReturnValue(0.5)
@@ -74,11 +74,11 @@ describe('handleRequest()', () => {
     })
   })
 
-  describe('prepends language code when FRONTEND_PREPEND_LANGUAGE_CODE is "true"', () => {
+  describe('prepends language code when FRONTEND_SUPPORT_INTERNATIONALIZATION is "true"', () => {
     test.each(Object.values(LanguageCode))(
       'language code = %p',
       async (lang) => {
-        global.FRONTEND_PREPEND_LANGUAGE_CODE = 'true'
+        global.FRONTEND_SUPPORT_INTERNATIONALIZATION = 'true'
 
         setupProbabilityFor(Backend.Frontend)
         fetch.mockRequest({ to: `https://frontend.serlo.org/${lang}/math` })

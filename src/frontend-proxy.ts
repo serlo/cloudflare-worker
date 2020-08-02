@@ -1,9 +1,4 @@
-import {
-  getSubdomain,
-  getPathname,
-  hasContentApiParameters,
-  getQueryString,
-} from './url-utils'
+import { getSubdomain, getPathname, hasContentApiParameters } from './url-utils'
 import {
   getCookieValue,
   isLanguageCode,
@@ -16,6 +11,8 @@ export async function frontendProxy(
 ): Promise<Response | null> {
   const probability = Number(global.FRONTEND_PROBABILITY)
   const allowedTypes = JSON.parse(global.FRONTEND_ALLOWED_TYPES) as string[]
+  const supportInternationalization =
+    global.FRONTEND_SUPPORT_INTERNATIONALIZATION === 'true'
 
   const url = request.url
   const path = getPathname(url)
@@ -23,11 +20,7 @@ export async function frontendProxy(
 
   if (lang === null || !isLanguageCode(lang)) return null
 
-  if (
-    global.FRONTEND_PREPEND_LANGUAGE_CODE !== 'true' &&
-    lang !== LanguageCode.De
-  )
-    return null
+  if (!supportInternationalization && lang !== LanguageCode.De) return null
 
   if (path === '/enable-frontend') {
     const response = new Response('Enabled: Use of new frontend')
@@ -92,14 +85,17 @@ export async function frontendProxy(
 
   return response
 
-  async function fetchBackend(useFrontend: boolean, lang: string) {
-    const pathPrefix =
-      global.FRONTEND_PREPEND_LANGUAGE_CODE === 'true' ? `/${lang}` : ''
-    const backendUrl = useFrontend
-      ? `https://${frontendDomain}${pathPrefix}${getPathname(request.url)}` +
-        getQueryString(request.url)
-      : request.url
-    const response = await fetch(new Request(backendUrl, request))
+  async function fetchBackend(useFrontend: boolean, lang: LanguageCode) {
+    const backendUrl = new URL(request.url)
+
+    if (useFrontend) {
+      backendUrl.hostname = frontendDomain
+
+      if (supportInternationalization)
+        backendUrl.pathname = `/${lang}${backendUrl.pathname}`
+    }
+
+    const response = await fetch(new Request(backendUrl.href, request))
 
     return new Response(response.body, response)
   }
