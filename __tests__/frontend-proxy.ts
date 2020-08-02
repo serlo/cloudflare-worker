@@ -1,5 +1,5 @@
 import { frontendProxy } from '../src/frontend-proxy'
-import { getPathname, getQueryString } from '../src/url-utils'
+import { getQueryString } from '../src/url-utils'
 import { createJsonResponse, LanguageCode } from '../src/utils'
 import { expectHasOkStatus, mockFetch, mockKV, FetchMock } from './_helper'
 
@@ -114,7 +114,7 @@ describe('handleRequest()', () => {
         expect(response.headers.get('Set-Cookie')).toBeNull()
       })
 
-      test('does not check the path type', async () => {
+      test('does not check the path type', () => {
         expect(fetch).not.toHaveRequestsTo('https://api.serlo.org/')
       })
     })
@@ -155,7 +155,7 @@ describe('handleRequest()', () => {
       expect(response.headers.get('Set-Cookie')).toBeNull()
     })
 
-    test('does not check the path type', async () => {
+    test('does not check the path type', () => {
       expect(fetch).not.toHaveRequestsTo('https://api.serlo.org/')
     })
   })

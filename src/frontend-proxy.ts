@@ -3,8 +3,13 @@ import {
   getPathname,
   hasContentApiParameters,
   getQueryString,
-} from '../url-utils'
-import { getCookieValue, isLanguageCode, LanguageCode, getPathInfo } from '../utils'
+} from './url-utils'
+import {
+  getCookieValue,
+  isLanguageCode,
+  LanguageCode,
+  getPathInfo,
+} from './utils'
 
 export async function frontendProxy(
   request: Request
