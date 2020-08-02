@@ -70,7 +70,9 @@ export async function frontendProxy(
     return await fetchBackend(false, lang)
 
   if (path !== '/') {
-    const typename = await queryTypename(lang, path)
+    const pathInfo = await getPathInfo(lang, path)
+    const typename = pathInfo?.typename ?? null
+
     if (typename === null || !allowedTypes.includes(typename)) return null
   }
 
@@ -99,15 +101,5 @@ export async function frontendProxy(
 
   function setCookieUseFrontend(res: Response, useFrontend: number) {
     res.headers.append('Set-Cookie', `useFrontend=${useFrontend}; path=/`)
-  }
-
-  async function queryTypename(lang: LanguageCode, path: string): Promise<string | null> {
-    if (path.startsWith('/user/profile/')) {
-      return 'User'
-    }
-
-    const pathInfo = await getPathInfo(lang, path)
-
-    return pathInfo?.typename ?? null
   }
 }

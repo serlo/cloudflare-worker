@@ -74,8 +74,10 @@ export async function getPathInfo(
   lang: LanguageCode,
   path: string
 ): Promise<PathInfo | null> {
-  const cacheKey = `/${lang}${path}`
+  if (path.startsWith('/user/profile'))
+    return { typename: 'User', currentPath: path }
 
+  const cacheKey = `/${lang}${path}`
   const cachedValue = await global.PATH_INFO_KV.get(cacheKey)
 
   if (cachedValue !== null) {
