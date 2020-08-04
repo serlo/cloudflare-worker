@@ -50,7 +50,7 @@ export async function frontendProxy(
     path === '/search' ||
     path === '/spenden'
   )
-    return await fetchBackend(true, lang)
+    return await fetchBackend({ useFrontend: true, lang })
 
   if (
     path === '/auth/login' ||
@@ -65,7 +65,7 @@ export async function frontendProxy(
     (global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND === 'true' &&
       getCookieValue('authenticated', cookies) === '1')
   )
-    return await fetchBackend(false, lang)
+    return await fetchBackend({ useFrontend: false, lang })
 
   if (path !== '/') {
     const pathInfo = await getPathInfo(lang, path)
@@ -79,13 +79,22 @@ export async function frontendProxy(
     ? Math.random()
     : cookieValue
 
-  const response = await fetchBackend(useFrontendNumber <= probability, lang)
+  const response = await fetchBackend({
+    useFrontend: useFrontendNumber <= probability,
+    lang,
+  })
   if (Number.isNaN(cookieValue))
     setCookieUseFrontend(response, useFrontendNumber)
 
   return response
 
-  async function fetchBackend(useFrontend: boolean, lang: LanguageCode) {
+  async function fetchBackend({
+    useFrontend,
+    lang,
+  }: {
+    useFrontend: boolean
+    lang: LanguageCode
+  }) {
     const backendUrl = new URL(request.url)
 
     if (useFrontend) {

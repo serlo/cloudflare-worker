@@ -73,22 +73,41 @@ describe('handleRequest()', () => {
     })
   })
 
-  describe('prepends language code when FRONTEND_SUPPORT_INTERNATIONALIZATION is "true"', () => {
-    test.each(Object.values(LanguageCode))(
-      'language code = %p',
-      async (lang) => {
-        global.FRONTEND_SUPPORT_INTERNATIONALIZATION = 'true'
+  describe('when FRONTEND_SUPPORT_INTERNATIONALIZATION is "true"', () => {
+    describe('prepends language code to path when backend is frontend', () => {
+      test.each([LanguageCode.En, LanguageCode.En])(
+        'language code = %p',
+        async (lang) => {
+          global.FRONTEND_SUPPORT_INTERNATIONALIZATION = 'true'
 
-        setupProbabilityFor(Backend.Frontend)
-        fetch.mockRequest({ to: `https://frontend.serlo.org/${lang}/math` })
+          setupProbabilityFor(Backend.Frontend)
+          fetch.mockRequest({ to: `https://frontend.serlo.org/${lang}/math` })
 
-        await handleUrl(`https://${lang}.serlo.org/math`)
+          await handleUrl(`https://${lang}.serlo.org/math`)
 
-        expect(fetch).toHaveExactlyOneRequestTo(
-          `https://frontend.serlo.org/${lang}/math`
-        )
-      }
-    )
+          expect(fetch).toHaveExactlyOneRequestTo(
+            `https://frontend.serlo.org/${lang}/math`
+          )
+        }
+      )
+    })
+
+    describe('does not change path when backend is legacy backend', () => {
+      test.each([LanguageCode.En, LanguageCode.De])(
+        'language code = %p',
+        async (lang) => {
+          const url = `https://${lang}.serlo.org/math`
+          global.FRONTEND_SUPPORT_INTERNATIONALIZATION = 'true'
+
+          setupProbabilityFor(Backend.Legacy)
+          fetch.mockRequest({ to: url })
+
+          await handleUrl(url)
+
+          expect(fetch).toHaveExactlyOneRequestTo(url)
+        }
+      )
+    })
   })
 
   describe('when user is authenticated', () => {
