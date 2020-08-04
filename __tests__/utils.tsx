@@ -137,10 +137,9 @@ describe('getPathInfo()', () => {
 
     test('contains right query when path is an uuid', async () => {
       const apiRequest = await getApiRequest(LanguageCode.En, '/12345')
+      const apiBody = (await apiRequest.json()) as { variables: unknown }
 
-      expect(await apiRequest.text()).toEqual(
-        expect.stringContaining('uuid(id: 12345)')
-      )
+      expect(apiBody.variables).toEqual({ id: 12345, alias: null })
     })
 
     describe('contains right query when path is an uuid', () => {
@@ -148,12 +147,12 @@ describe('getPathInfo()', () => {
         'lang = %p',
         async (lang) => {
           const apiRequest = await getApiRequest(lang, '/path')
+          const apiBody = (await apiRequest.json()) as { variables: unknown }
 
-          expect(await apiRequest.text()).toEqual(
-            expect.stringContaining(
-              `uuid(alias: { instance: ${lang}, path: \\"/path\\" })`
-            )
-          )
+          expect(apiBody.variables).toEqual({
+            alias: { instance: lang, path: '/path' },
+            id: null,
+          })
         }
       )
     })

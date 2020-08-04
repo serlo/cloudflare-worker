@@ -90,12 +90,9 @@ export async function getPathInfo(
     }
   }
 
-  const queryArg = /^\/\d+$/.test(path)
-    ? `id: ${path.slice(1)}`
-    : `alias: { instance: ${lang}, path: "${path}" }`
   const query = `
-    {
-      uuid(${queryArg}) {
+    query TypenameAndCurrentPath($alias: AliasInput, $id: Int) {
+      uuid(alias: $alias, id: $id) {
         __typename
         ... on Entity {
           alias
@@ -107,6 +104,9 @@ export async function getPathInfo(
         }
       }
     }`
+  const variables = /^\/\d+$/.test(path)
+    ? { alias: null, id: Number(path.slice(1)) }
+    : { alias: { instance: lang, path }, id: null }
 
   let apiResponseBody: unknown
 
@@ -114,7 +114,7 @@ export async function getPathInfo(
     const apiResponse = await fetchApi(global.API_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query }),
+      body: JSON.stringify({ query, variables }),
     })
 
     apiResponseBody = (await apiResponse.json()) as unknown
