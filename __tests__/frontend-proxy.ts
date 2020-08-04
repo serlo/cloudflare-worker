@@ -75,7 +75,7 @@ describe('handleRequest()', () => {
 
   describe('when FRONTEND_SUPPORT_INTERNATIONALIZATION is "true"', () => {
     describe('prepends language code to path when backend is frontend', () => {
-      test.each([LanguageCode.En, LanguageCode.En])(
+      test.each([LanguageCode.En, LanguageCode.De])(
         'language code = %p',
         async (lang) => {
           global.FRONTEND_SUPPORT_INTERNATIONALIZATION = 'true'
