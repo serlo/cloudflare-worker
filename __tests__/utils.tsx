@@ -105,6 +105,21 @@ describe('getPathInfo()', () => {
   })
 
   test('"currentPath" is given path when it does not refer to an entity', async () => {
+    mockFetch({
+      'https://api.serlo.org/graphql': createJsonResponse({
+        data: { uuid: { __typename: 'ArticleRevision' } },
+      }),
+    })
+
+    const pathInfo = await getPathInfo(LanguageCode.En, '/path')
+
+    expect(pathInfo).toEqual({
+      typename: 'ArticleRevision',
+      currentPath: '/path',
+    })
+  })
+
+  test('"typename" is "User" when path starts with "/user/profile/"', async () => {
     const pathInfo = await getPathInfo(LanguageCode.En, '/user/profile/Kulla')
 
     expect(pathInfo).toEqual({
@@ -112,8 +127,6 @@ describe('getPathInfo()', () => {
       currentPath: '/user/profile/Kulla',
     })
   })
-
-  test('"typename" is "User" when path starts with "/user/profile/"', async () => {})
 
   describe('request to the api endpoint', () => {
     test('is signed', async () => {
