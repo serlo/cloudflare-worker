@@ -1,3 +1,5 @@
+import { createJsonResponse } from '../src/utils'
+
 /**
  * This file is part of Serlo.org Cloudflare Worker.
  *
@@ -62,6 +64,15 @@ export async function expectIsJsonResponse(
   expectHasOkStatus(response)
   expect(response.headers.get('Content-Type')).toBe('application/json')
   expect(JSON.parse(await response.text())).toEqual(targetJson)
+}
+
+export function createApiResponse(uuid: {
+  __typename: string
+  alias?: string
+  username?: string
+  pages?: { alias: string }[]
+}) {
+  return createJsonResponse({ data: { uuid } })
 }
 
 type ResponseSpec = string | Response
