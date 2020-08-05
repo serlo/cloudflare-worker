@@ -65,6 +65,7 @@ const ApiResult = t.type({
       t.partial({
         alias: t.string,
         pages: t.array(t.type({ alias: t.string })),
+        username: t.string,
       }),
     ]),
   }),
@@ -74,7 +75,10 @@ export async function getPathInfo(
   lang: LanguageCode,
   path: string
 ): Promise<PathInfo | null> {
-  if (path.startsWith('/user/profile'))
+  const userProfilePrefix = '/user/profile/'
+  const userProfileId = /^\/user\/profile\/\d+$/
+
+  if (path.startsWith(userProfilePrefix) && !userProfileId.test(path))
     return { typename: 'User', currentPath: path }
 
   const cacheKey = `/${lang}${path}`
@@ -94,6 +98,7 @@ export async function getPathInfo(
     query TypenameAndCurrentPath($alias: AliasInput, $id: Int) {
       uuid(alias: $alias, id: $id) {
         __typename
+        ... on User { username }
         ... on Page { alias }
         ... on TaxonomyTerm { alias }
         ... on Entity { alias }
@@ -104,9 +109,19 @@ export async function getPathInfo(
         }
       }
     }`
-  const variables = /^\/\d+$/.test(path)
-    ? { alias: null, id: Number(path.slice(1)) }
-    : { alias: { instance: lang, path }, id: null }
+
+  let variables
+
+  if (/^\/\d+$/.test(path)) {
+    variables = { alias: null, id: Number(path.slice(1)) }
+  } else if (userProfileId.test(path)) {
+    variables = {
+      alias: null,
+      id: Number(path.substring(userProfilePrefix.length)),
+    }
+  } else {
+    variables = { alias: { instance: lang, path }, id: null }
+  }
 
   let apiResponseBody: unknown
 
@@ -127,11 +142,13 @@ export async function getPathInfo(
   if (E.isRight(apiResult)) {
     const uuid = apiResult.right.data.uuid
 
-    const currentAlias = uuid.alias ?? path
-    const currentPath =
-      uuid.pages !== undefined && uuid.pages.length > 0
-        ? uuid.pages[0].alias
-        : currentAlias
+    let currentPath = uuid.alias ?? path
+
+    if (uuid.pages !== undefined && uuid.pages.length)
+      currentPath = uuid.pages[0].alias
+
+    if (uuid.username !== undefined)
+      currentPath = `/user/profile/${uuid.username}`
 
     const result = { typename: uuid.__typename, currentPath }
 

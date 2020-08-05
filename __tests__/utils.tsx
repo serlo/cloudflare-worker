@@ -119,12 +119,44 @@ describe('getPathInfo()', () => {
     })
   })
 
-  test('"typename" is "User" when path starts with "/user/profile/"', async () => {
-    const pathInfo = await getPathInfo(LanguageCode.En, '/user/profile/Kulla')
+  describe('when path describes a User', () => {
+    test('when path is "/<id>"', async () => {
+      mockFetch({
+        'https://api.serlo.org/graphql': createJsonResponse({
+          data: { uuid: { __typename: 'User', username: 'arekkas' } },
+        }),
+      })
 
-    expect(pathInfo).toEqual({
-      typename: 'User',
-      currentPath: '/user/profile/Kulla',
+      const pathInfo = await getPathInfo(LanguageCode.En, '/1')
+
+      expect(pathInfo).toEqual({
+        typename: 'User',
+        currentPath: '/user/profile/arekkas',
+      })
+    })
+
+    test('when path is "/user/profile/id"', async () => {
+      mockFetch({
+        'https://api.serlo.org/graphql': createJsonResponse({
+          data: { uuid: { __typename: 'User', username: 'arekkas' } },
+        }),
+      })
+
+      const pathInfo = await getPathInfo(LanguageCode.En, '/user/profile/1')
+
+      expect(pathInfo).toEqual({
+        typename: 'User',
+        currentPath: '/user/profile/arekkas',
+      })
+    })
+
+    test('when path is "/user/profile/<username>"', async () => {
+      const pathInfo = await getPathInfo(LanguageCode.En, '/user/profile/Kulla')
+
+      expect(pathInfo).toEqual({
+        typename: 'User',
+        currentPath: '/user/profile/Kulla',
+      })
     })
   })
 
@@ -140,6 +172,13 @@ describe('getPathInfo()', () => {
       const apiBody = (await apiRequest.json()) as { variables: unknown }
 
       expect(apiBody.variables).toEqual({ id: 12345, alias: null })
+    })
+
+    test('contains right query when path is "/user/profile/<id>"', async () => {
+      const apiRequest = await getApiRequest(LanguageCode.En, '/user/profile/1')
+      const apiBody = (await apiRequest.json()) as { variables: unknown }
+
+      expect(apiBody.variables).toEqual({ id: 1, alias: null })
     })
 
     describe('contains right query when path is an uuid', () => {
