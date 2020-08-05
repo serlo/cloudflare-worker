@@ -1,6 +1,12 @@
 import { frontendProxy } from '../src/frontend-proxy'
 import { createJsonResponse, LanguageCode } from '../src/utils'
-import { expectHasOkStatus, mockFetch, mockKV, FetchMock } from './_helper'
+import {
+  expectHasOkStatus,
+  mockFetch,
+  mockKV,
+  FetchMock,
+  createApiResponse,
+} from './_helper'
 
 enum Backend {
   Frontend = 'frontend',
@@ -23,7 +29,7 @@ describe('handleRequest()', () => {
 
     fetch.mockRequest({
       to: global.API_ENDPOINT,
-      response: createApiResponse('Subject'),
+      response: createApiResponse({ __typename: 'Subject' }),
     })
     global.FRONTEND_ALLOWED_TYPES = '["Subject"]'
   })
@@ -241,7 +247,7 @@ describe('handleRequest()', () => {
   test('return null when type of path is not allowed', async () => {
     fetch.mockRequest({
       to: 'https://api.serlo.org/',
-      response: createApiResponse('TaxonomyTerm'),
+      response: createApiResponse({ __typename: 'TaxonomyTerm' }),
     })
     global.FRONTEND_ALLOWED_TYPES = '["Page", "Article"]'
 
@@ -253,7 +259,10 @@ describe('handleRequest()', () => {
   test('returns null when type of path is unknown', async () => {
     fetch.mockRequest({
       to: 'https://api.serlo.org/',
-      response: createApiErrorResponse(),
+      response: createJsonResponse({
+        errors: [{ message: 'error' }],
+        data: { uuid: null },
+      }),
     })
 
     const response = await handleUrl('https://de.serlo.org/unknown')
@@ -538,17 +547,6 @@ describe('handleRequest()', () => {
 
 async function handleUrl(url: string): Promise<Response> {
   return (await frontendProxy(new Request(url))) as Response
-}
-
-function createApiResponse(typename: string) {
-  return createJsonResponse({ data: { uuid: { __typename: typename } } })
-}
-
-function createApiErrorResponse() {
-  return createJsonResponse({
-    errors: [{ message: 'error' }],
-    data: { uuid: null },
-  })
 }
 
 function getUrlFor(backend: Backend, url: string) {
