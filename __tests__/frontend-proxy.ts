@@ -75,29 +75,49 @@ describe('handleRequest()', () => {
 
   describe('when user is authenticated', () => {
     describe('when REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = true', () => {
-      let response: Response
-
-      beforeEach(async () => {
+      beforeEach(() => {
         global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = 'true'
         setupProbabilityFor(Backend.Frontend)
-        fetch.mockRequest({ to: 'https://de.serlo.org/math' })
-
-        const request = new Request('https://de.serlo.org/math')
-        request.headers.set('Cookie', 'authenticated=1')
-        response = (await frontendProxy(request)) as Response
       })
 
-      test('chooses legacy backend', () => {
-        expect(fetch).toHaveExactlyOneRequestTo('https://de.serlo.org/math')
+      describe('when an entity is accessed', () => {
+        let response: Response
+
+        beforeEach(async () => {
+          fetch.mockRequest({ to: 'https://de.serlo.org/math' })
+
+          const request = new Request('https://de.serlo.org/math')
+          request.headers.set('Cookie', 'authenticated=1')
+          response = (await frontendProxy(request)) as Response
+        })
+
+        test('chooses legacy backend', () => {
+          expect(fetch).toHaveExactlyOneRequestTo('https://de.serlo.org/math')
+        })
+
+        test('does not set cookie with random number', () => {
+          expect(response.headers.get('Set-Cookie')).toBeNull()
+        })
+
+        test('does not check the path type', async () => {
+          expect(fetch).not.toHaveRequestsTo('https://api.serlo.org/')
+          expect(await getCachedType('/math')).toBeNull()
+        })
       })
 
-      test('does not set cookie with random number', () => {
-        expect(response.headers.get('Set-Cookie')).toBeNull()
-      })
+      describe('/search and /spenden go to legacy backend', () => {
+        test.each([
+          'https://de.serlo.org/search',
+          'https://de.serlo.org/spenden',
+        ])('url = %p', async (url) => {
+          fetch.mockRequest({ to: url })
 
-      test('does not check the path type', async () => {
-        expect(fetch).not.toHaveRequestsTo('https://api.serlo.org/')
-        expect(await getCachedType('/math')).toBeNull()
+          const request = new Request(url)
+          request.headers.set('Cookie', 'authenticated=1')
+          await frontendProxy(request)
+
+          expect(fetch).toHaveExactlyOneRequestTo(url)
+        })
       })
     })
 
