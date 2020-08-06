@@ -42,9 +42,7 @@ export async function frontendProxy(
     path.startsWith('/_next/') ||
     path.startsWith('/_assets/') ||
     path.startsWith('/api/auth/') ||
-    path.startsWith('/api/frontend/') ||
-    path === '/search' ||
-    path === '/spenden'
+    path.startsWith('/api/frontend/')
   )
     return await fetchBackend(true)
 
@@ -62,6 +60,8 @@ export async function frontendProxy(
       getCookieValue('authenticated', cookies) === '1')
   )
     return await fetchBackend(false)
+
+  if (path === '/search' || path === '/spenden') return await fetchBackend(true)
 
   if (path !== '/') {
     const typename = await queryTypename(path)
