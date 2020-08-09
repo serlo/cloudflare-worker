@@ -1,5 +1,5 @@
 import { getPathnameWithoutTrailingSlash, getSubdomain } from '../url-utils'
-import { LanguageCode, createJsonResponse } from '../utils'
+import { Instance, createJsonResponse } from '../utils'
 
 export function authFrontendSectorIdentifierUriValidation(
   request: Request
@@ -12,7 +12,7 @@ export function authFrontendSectorIdentifierUriValidation(
     return null
   }
   const redirectUris = [
-    ...Object.values(LanguageCode).map((instance) => {
+    ...Object.values(Instance).map((instance) => {
       return `https://${instance}.${global.DOMAIN}/api/auth/callback`
     }),
     ...(global.ALLOW_AUTH_FROM_LOCALHOST === 'true'
