@@ -26,13 +26,13 @@ import sanitize from 'sanitize-html'
 
 import { NotFound } from './ui'
 
-export enum LanguageCode {
-  En = 'en',
+export enum Instance {
   De = 'de',
-  Fr = 'fr',
-  Ta = 'ta',
-  Hi = 'hi',
+  En = 'en',
   Es = 'es',
+  Fr = 'fr',
+  Hi = 'hi',
+  Ta = 'ta',
 }
 
 export function getCookieValue(
@@ -48,8 +48,8 @@ export function getCookieValue(
         .map((c) => c.substring(name.length + 1))[0] ?? null
 }
 
-export function isLanguageCode(code: string): code is LanguageCode {
-  return Object.values(LanguageCode).some((x) => x === code)
+export function isLanguageCode(code: string): code is Instance {
+  return Object.values(Instance).some((x) => x === code)
 }
 
 export function sanitizeHtml(html: string): string {

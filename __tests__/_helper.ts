@@ -32,12 +32,6 @@ export function expectContentTypeIsHtml(response: Response): void {
   expect(response.headers.get('Content-Type')).toBe('text/html;charset=utf-8')
 }
 
-export function expectContentTypeIsJson(response: Response): void {
-  expect(response.headers.get('Content-Type')).toBe(
-    'application/json;charset=utf-8'
-  )
-}
-
 export function expectHasOkStatus(response: Response): void {
   expect(response).not.toBeNull()
   expect(response.status).toBe(200)
@@ -134,14 +128,16 @@ export class FetchMock {
   }
 }
 
-export function mockKV(name: string, values: Record<string, unknown>) {
-  // @ts-expect-error
+type KV_NAMES = 'MAINTENANCE_KV' | 'PACKAGES_KV' | 'FRONTEND_CACHE_TYPES_KV'
+
+export function mockKV(name: KV_NAMES, values: Record<string, string>) {
   global[name] = {
-    async get(key: string) {
+    async get(key: string): Promise<string | null> {
       return Promise.resolve(values[key] ?? null)
     },
 
-    put(key: string, value: unknown, _?: { expirationTtl: number }) {
+    // eslint-disable-next-line @typescript-eslint/require-await
+    async put(key: string, value: string, _?: { expirationTtl: number }) {
       values[key] = value
     },
   }
