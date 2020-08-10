@@ -126,12 +126,13 @@ export async function getPathInfo(
   let apiResponseBody: unknown
 
   try {
-    const apiResponse = await fetchApi(global.API_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, variables }),
-    })
-
+    const apiResponse = await fetchApi(
+      new Request(global.API_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, variables }),
+      })
+    )
     apiResponseBody = (await apiResponse.json()) as unknown
   } catch (e) {
     return null

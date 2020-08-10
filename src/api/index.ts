@@ -30,15 +30,35 @@ export async function api(request: Request, fetchFunc = fetchApi) {
   return await fetchFunc(request)
 }
 
-export async function fetchApi(resource: RequestInfo, init?: RequestInit) {
-  const token = jwt.sign({}, global.API_SECRET, {
+export async function fetchApi(request: Request) {
+  const serviceToken = jwt.sign({}, global.API_SECRET, {
     expiresIn: '2h',
     audience: 'api.serlo.org',
     issuer: 'serlo.org-cloudflare-worker',
   })
 
-  const request = new Request(resource, init)
-  request.headers.set('Authorization', `Serlo Service=${token}`)
+  request = new Request(request)
+  request.headers.set('Authorization', getAuthorizationHeader())
 
   return await fetch(request)
+
+  function getAuthorizationHeader() {
+    const authorizationHeader = request.headers.get('Authorization')
+
+    if (authorizationHeader === null) {
+      const serviceToken = jwt.sign({}, global.API_SECRET, {
+        expiresIn: '2h',
+        audience: 'api.serlo.org',
+        issuer: 'serlo.org-cloudflare-worker',
+      })
+      return `Serlo Service=${serviceToken}`
+    }
+
+    if (authorizationHeader.startsWith('Serlo')) return authorizationHeader
+
+    return `Serlo Service=${serviceToken};User=${authorizationHeader.replace(
+      'Bearer ',
+      ''
+    )}`
+  }
 }
