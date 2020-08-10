@@ -38,7 +38,7 @@ import {
   RevisedPage,
   RevisionsOverview,
 } from '../src/static-pages'
-import { LanguageCode } from '../src/utils'
+import { Instance } from '../src/utils'
 import {
   expectIsNotFoundResponse,
   expectIsJsonResponse,
@@ -191,7 +191,7 @@ test('UnrevisedPage()', () => {
   const html = render(
     <UnrevisedPage
       page={{
-        lang: LanguageCode.De,
+        lang: Instance.De,
         title: 'Imprint',
         content: '<p>Hello World</p>',
         url: '',
@@ -209,7 +209,7 @@ test('RevisedPage()', () => {
   const html = render(
     <RevisedPage
       page={{
-        lang: LanguageCode.En,
+        lang: Instance.En,
         revision: '2019-01-02',
         revisionDate: new Date('2019-01-02'),
         title: 'Privacy',
@@ -236,7 +236,7 @@ test('RevisionsOverview()', () => {
           revision: '2020-02-03',
           revisionDate: new Date('2020-02-03'),
           title: 'Privacy',
-          lang: LanguageCode.En,
+          lang: Instance.En,
           url: '',
           revisedType: 'privacy',
           isCurrentRevision: true,
@@ -245,7 +245,7 @@ test('RevisionsOverview()', () => {
           revision: '1999-12-07',
           revisionDate: new Date('1999-12-07'),
           title: 'Privacy',
-          lang: LanguageCode.En,
+          lang: Instance.En,
           url: '',
           revisedType: 'privacy',
           isCurrentRevision: false,
@@ -272,12 +272,12 @@ test('RevisionsOverview()', () => {
 
 describe('fetchContent()', () => {
   const exampleSpec: Page = {
-    lang: LanguageCode.En,
+    lang: Instance.En,
     title: 'Imprint',
     url: 'http://example.org/',
   }
   const exampleSpecMarkdown: Page = {
-    lang: LanguageCode.De,
+    lang: Instance.De,
     title: 'Imprint',
     url: 'http://example.org/imprint.md',
   }
@@ -432,25 +432,25 @@ describe('getRevisions()', () => {
 
   test('returns revisions if they exist in config', () => {
     expect(
-      getRevisions(exampleSpec, LanguageCode.En, RevisedType.Privacy, getTitle)
+      getRevisions(exampleSpec, Instance.En, RevisedType.Privacy, getTitle)
     ).toEqual(target)
   })
 
   test('returns revisions of default language if requested one does not exist', () => {
     expect(
-      getRevisions(exampleSpec, LanguageCode.Fr, RevisedType.Privacy, getTitle)
+      getRevisions(exampleSpec, Instance.Fr, RevisedType.Privacy, getTitle)
     ).toEqual(target)
   })
 
   test('returns null if requested and default revisions do not exist', () => {
     expect(
-      getRevisions({}, LanguageCode.En, RevisedType.Privacy, getTitle)
+      getRevisions({}, Instance.En, RevisedType.Privacy, getTitle)
     ).toBeNull()
 
     expect(
       getRevisions(
         { de: { privacy: [] } },
-        LanguageCode.Fr,
+        Instance.Fr,
         RevisedType.Privacy,
         getTitle
       )
@@ -466,7 +466,7 @@ describe('getPage()', () => {
 
   test('returns Spec when it exists', () => {
     expect(
-      getPage(exampleConfig, LanguageCode.En, UnrevisedType.Imprint, getTitle)
+      getPage(exampleConfig, Instance.En, UnrevisedType.Imprint, getTitle)
     ).toEqual({
       url: 'http://e/',
       lang: 'en',
@@ -474,7 +474,7 @@ describe('getPage()', () => {
     })
 
     expect(
-      getPage(exampleConfig, LanguageCode.De, UnrevisedType.Imprint, getTitle)
+      getPage(exampleConfig, Instance.De, UnrevisedType.Imprint, getTitle)
     ).toEqual({
       url: 'http://g/',
       lang: 'de',
@@ -482,7 +482,7 @@ describe('getPage()', () => {
     })
 
     expect(
-      getPage(exampleConfig, LanguageCode.De, UnrevisedType.Terms, getTitle)
+      getPage(exampleConfig, Instance.De, UnrevisedType.Terms, getTitle)
     ).toEqual({
       url: 'ftp://gt/',
       lang: 'de',
@@ -492,7 +492,7 @@ describe('getPage()', () => {
 
   test('returns English version when requested Spec does not exist', () => {
     expect(
-      getPage(exampleConfig, LanguageCode.Fr, UnrevisedType.Imprint, getTitle)
+      getPage(exampleConfig, Instance.Fr, UnrevisedType.Imprint, getTitle)
     ).toEqual({
       url: 'http://e/',
       lang: 'en',
@@ -501,12 +501,8 @@ describe('getPage()', () => {
   })
 
   test('returns null when no Spec or English Spec can be found', () => {
-    expect(
-      getPage(exampleConfig, LanguageCode.Fr, UnrevisedType.Terms)
-    ).toBeNull()
-    expect(
-      getPage(exampleConfig, LanguageCode.En, UnrevisedType.Terms)
-    ).toBeNull()
+    expect(getPage(exampleConfig, Instance.Fr, UnrevisedType.Terms)).toBeNull()
+    expect(getPage(exampleConfig, Instance.En, UnrevisedType.Terms)).toBeNull()
   })
 })
 

@@ -28,10 +28,12 @@ import {
   sanitizeHtml,
   markdownToHtml,
   fetchWithCache,
-  isLanguageCode,
+  isInstance,
   createPreactResponse,
   createJsonResponse,
   createNotFoundResponse,
+  getPathInfo,
+  Instance,
 } from '../src/utils'
 import {
   mockFetch,
@@ -40,6 +42,8 @@ import {
   expectContentTypeIsHtml,
   expectIsJsonResponse,
   expectIsNotFoundResponse,
+  mockKV,
+  createApiResponse,
 } from './_helper'
 
 describe('getCookieValue()', () => {
@@ -80,13 +84,269 @@ describe('getCookieValue()', () => {
   })
 })
 
-describe('isLanguageCode()', () => {
-  expect(isLanguageCode('de')).toBe(true)
-  expect(isLanguageCode('fr')).toBe(true)
+describe('getPathInfo()', () => {
+  const apiEndpoint = 'https://api.serlo.org/graphql'
 
-  expect(isLanguageCode('serlo')).toBe(false)
-  expect(isLanguageCode('EN_EN')).toBe(false)
-  expect(isLanguageCode('')).toBe(false)
+  beforeEach(() => {
+    global.API_ENDPOINT = apiEndpoint
+    mockKV('PATH_INFO_KV', {})
+  })
+
+  test('returns typename and currentPath from api.serlo.org', async () => {
+    mockFetch({
+      [apiEndpoint]: createApiResponse({
+        __typename: 'Article',
+        alias: '/current-path',
+      }),
+    })
+
+    const pathInfo = await getPathInfo(Instance.En, '/path')
+
+    expect(pathInfo).toEqual({
+      typename: 'Article',
+      currentPath: '/current-path',
+    })
+  })
+
+  test('"currentPath" is given path when it does not refer to an entity', async () => {
+    mockFetch({
+      [apiEndpoint]: createApiResponse({ __typename: 'ArticleRevision' }),
+    })
+
+    const pathInfo = await getPathInfo(Instance.En, '/path')
+
+    expect(pathInfo).toEqual({
+      typename: 'ArticleRevision',
+      currentPath: '/path',
+    })
+  })
+
+  describe('when path describes a User', () => {
+    test('when path is "/<id>"', async () => {
+      mockFetch({
+        [apiEndpoint]: createApiResponse({
+          __typename: 'User',
+          username: 'arekkas',
+        }),
+      })
+
+      const pathInfo = await getPathInfo(Instance.En, '/1')
+
+      expect(pathInfo).toEqual({
+        typename: 'User',
+        currentPath: '/user/profile/arekkas',
+      })
+    })
+
+    test('when path is "/user/profile/id"', async () => {
+      mockFetch({
+        [apiEndpoint]: createApiResponse({
+          __typename: 'User',
+          username: 'arekkas',
+        }),
+      })
+
+      const pathInfo = await getPathInfo(Instance.En, '/user/profile/1')
+
+      expect(pathInfo).toEqual({
+        typename: 'User',
+        currentPath: '/user/profile/arekkas',
+      })
+    })
+
+    test('when path is "/user/profile/<username>"', async () => {
+      const pathInfo = await getPathInfo(Instance.En, '/user/profile/Kulla')
+
+      expect(pathInfo).toEqual({
+        typename: 'User',
+        currentPath: '/user/profile/Kulla',
+      })
+    })
+  })
+
+  describe('request to the api endpoint', () => {
+    test('is signed', async () => {
+      const apiRequest = await getApiRequest('/path')
+
+      expect(apiRequest.headers.get('Authorization')).toMatch(/^Serlo Service/)
+    })
+
+    describe('contains right variables', () => {
+      test('when path is "/<id>"', async () => {
+        expect(await getApiVariables('/123')).toEqual({ id: 123, alias: null })
+      })
+
+      test('when path is "/user/profile/<id>"', async () => {
+        const variables = await getApiVariables('/user/profile/1')
+        expect(variables).toEqual({ id: 1, alias: null })
+      })
+
+      describe('when path is "/*"', () => {
+        test.each([Instance.En, Instance.De])('lang = %p', async (lang) => {
+          expect(await getApiVariables('/path', lang)).toEqual({
+            alias: { instance: lang, path: '/path' },
+            id: null,
+          })
+        })
+      })
+
+      async function getApiVariables(path: string, lang = Instance.En) {
+        const body = (await (await getApiRequest(path, lang)).json()) as {
+          variables: unknown
+        }
+
+        return body.variables
+      }
+    })
+
+    async function getApiRequest(path: string, lang = Instance.En) {
+      const fetch = mockFetch({
+        [apiEndpoint]: createJsonResponse({
+          __typename: 'Article',
+          alias: path,
+        }),
+      })
+
+      await getPathInfo(lang, path)
+
+      return fetch.getRequestTo(apiEndpoint) as Request
+    }
+  })
+
+  describe('returns null', () => {
+    test('when there was an error with the api call', async () => {
+      mockFetch({ [apiEndpoint]: new Response('', { status: 403 }) })
+
+      expect(await getPathInfo(Instance.En, '/path')).toBeNull()
+    })
+
+    test('when api response is malformed JSON', async () => {
+      mockFetch({ [apiEndpoint]: 'malformed json' })
+
+      expect(await getPathInfo(Instance.En, '/path')).toBeNull()
+    })
+
+    describe('when the response is not valid', () => {
+      test.each([null, {}, { data: { uuid: {} } }])(
+        'response = %p',
+        async (response) => {
+          mockFetch({ [apiEndpoint]: createJsonResponse(response) })
+
+          expect(await getPathInfo(Instance.En, '/path')).toBeNull()
+        }
+      )
+    })
+  })
+
+  describe('when path is a course', () => {
+    test('"currentPath" is path of first course page', async () => {
+      mockFetch({
+        [apiEndpoint]: createApiResponse({
+          __typename: 'Course',
+          alias: '/course',
+          pages: [{ alias: '/course-page1' }, { alias: '/course-page2' }],
+        }),
+      })
+
+      const pathInfo = await getPathInfo(Instance.En, '/course')
+
+      expect(pathInfo).toEqual({
+        typename: 'Course',
+        currentPath: '/course-page1',
+      })
+    })
+
+    test('"currentPath" is path of course when list of course pages is empty', async () => {
+      mockFetch({
+        [apiEndpoint]: createApiResponse({
+          __typename: 'Course',
+          alias: '/course',
+          pages: [],
+        }),
+      })
+
+      const pathInfo = await getPathInfo(Instance.En, '/course')
+
+      expect(pathInfo).toEqual({
+        typename: 'Course',
+        currentPath: '/course',
+      })
+    })
+  })
+
+  describe('uses PATH_INFO_KV as a cache', () => {
+    test('use value in cache', async () => {
+      const cacheValue = { typename: 'Article', currentPath: '/current-path' }
+      await global.PATH_INFO_KV.put('/en/path', JSON.stringify(cacheValue))
+
+      const pathInfo = await getPathInfo(Instance.En, '/path')
+
+      expect(pathInfo).toEqual({
+        typename: 'Article',
+        currentPath: '/current-path',
+      })
+    })
+
+    test('saves values in cache for 1 hour', async () => {
+      mockFetch({
+        [apiEndpoint]: createApiResponse({
+          __typename: 'Article',
+          alias: '/current-path',
+        }),
+      })
+
+      await getPathInfo(Instance.En, '/path')
+
+      expect(await global.PATH_INFO_KV.get('/en/path')).toEqual(
+        JSON.stringify({ typename: 'Article', currentPath: '/current-path' })
+      )
+    })
+
+    describe('ignores malformed cache values', () => {
+      const target = { typename: 'Article', currentPath: '/current-path' }
+
+      beforeEach(() => {
+        mockFetch({
+          [apiEndpoint]: createApiResponse({
+            __typename: 'Article',
+            alias: '/current-path',
+          }),
+        })
+      })
+
+      test('when cached value is malformed JSON', async () => {
+        await global.PATH_INFO_KV.put('/en/path', 'malformed json')
+
+        const pathInfo = await getPathInfo(Instance.En, '/path')
+
+        expect(pathInfo).toEqual(target)
+        expect(await global.PATH_INFO_KV.get('/en/path')).toEqual(
+          JSON.stringify(target)
+        )
+      })
+
+      test('when cached value is no PathInfo', async () => {
+        const malformedPathInfo = JSON.stringify({ typename: 'Course' })
+        await global.PATH_INFO_KV.put('/en/path', malformedPathInfo)
+
+        const pathInfo = await getPathInfo(Instance.En, '/path')
+
+        expect(pathInfo).toEqual(target)
+        expect(await global.PATH_INFO_KV.get('/en/path')).toEqual(
+          JSON.stringify(target)
+        )
+      })
+    })
+  })
+})
+
+describe('isInstance()', () => {
+  expect(isInstance('de')).toBe(true)
+  expect(isInstance('fr')).toBe(true)
+
+  expect(isInstance('serlo')).toBe(false)
+  expect(isInstance('EN_EN')).toBe(false)
+  expect(isInstance('')).toBe(false)
 })
 
 describe('sanitizeHtml()', () => {

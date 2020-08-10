@@ -30,6 +30,8 @@
     "build-storybook": "build-storybook"
   },
   "dependencies": {
+    "fp-ts": "^2.0.0",
+    "io-ts": "^2.0.0",
     "jsonwebtoken": "^8.0.0",
     "luxon": "^1.0.0",
     "marked": "^1.0.0",
