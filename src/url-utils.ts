@@ -36,10 +36,6 @@ export function getPathname(url: string): string {
   return new URL(url).pathname
 }
 
-export function getQueryString(url: string): string {
-  return new URL(url).search
-}
-
 export function getPathnameWithoutTrailingSlash(url: string): string {
   const pathname = getPathname(url)
 

@@ -28,7 +28,7 @@ import {
   createNotFoundResponse,
   createPreactResponse,
   fetchWithCache,
-  isLanguageCode,
+  isInstance,
   Instance,
   markdownToHtml,
   sanitizeHtml,
@@ -78,7 +78,7 @@ export async function staticPages(
   const lang = getSubdomain(request.url)
 
   if (lang === null) return null
-  if (!isLanguageCode(lang)) return null
+  if (!isInstance(lang)) return null
 
   const path = getPathnameWithoutTrailingSlash(request.url)
 

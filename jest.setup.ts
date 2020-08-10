@@ -44,6 +44,7 @@ beforeEach(() => {
   global.FRONTEND_ALLOWED_TYPES = '[]'
 
   mockKV('MAINTENANCE_KV', {})
+  mockKV('PATH_INFO_KV', {})
 })
 
 global.Response = (NodeResponse as unknown) as typeof Response
