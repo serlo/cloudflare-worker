@@ -89,7 +89,8 @@ export class FetchMock {
     private mockedFetch: jest.Mock<any, [RequestInfo, RequestInit | undefined]>
   ) {}
 
-  get mock() {
+  get mock(): jest.Mock<any, [RequestInfo, RequestInit | undefined]> &
+    typeof global.fetch {
     return this.mockedFetch
   }
 
