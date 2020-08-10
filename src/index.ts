@@ -30,7 +30,7 @@ import {
   getSubdomain,
   getPathname,
 } from './url-utils'
-import { getPathInfo, isLanguageCode } from './utils'
+import { getPathInfo, isInstance } from './utils'
 
 addEventListener('fetch', (event: Event) => {
   const e = event as FetchEvent
@@ -114,7 +114,7 @@ async function redirects(request: Request) {
     return Response.redirect(url.href)
   }
 
-  if (isLanguageCode(subdomain)) {
+  if (isInstance(subdomain)) {
     const pathInfo = await getPathInfo(subdomain, path)
 
     if (pathInfo !== null && path != pathInfo.currentPath) {

@@ -28,12 +28,12 @@ import {
   sanitizeHtml,
   markdownToHtml,
   fetchWithCache,
-  isLanguageCode,
+  isInstance,
   createPreactResponse,
   createJsonResponse,
   createNotFoundResponse,
   getPathInfo,
-  LanguageCode,
+  Instance,
 } from '../src/utils'
 import {
   mockFetch,
@@ -100,7 +100,7 @@ describe('getPathInfo()', () => {
       }),
     })
 
-    const pathInfo = await getPathInfo(LanguageCode.En, '/path')
+    const pathInfo = await getPathInfo(Instance.En, '/path')
 
     expect(pathInfo).toEqual({
       typename: 'Article',
@@ -113,7 +113,7 @@ describe('getPathInfo()', () => {
       [apiEndpoint]: createApiResponse({ __typename: 'ArticleRevision' }),
     })
 
-    const pathInfo = await getPathInfo(LanguageCode.En, '/path')
+    const pathInfo = await getPathInfo(Instance.En, '/path')
 
     expect(pathInfo).toEqual({
       typename: 'ArticleRevision',
@@ -130,7 +130,7 @@ describe('getPathInfo()', () => {
         }),
       })
 
-      const pathInfo = await getPathInfo(LanguageCode.En, '/1')
+      const pathInfo = await getPathInfo(Instance.En, '/1')
 
       expect(pathInfo).toEqual({
         typename: 'User',
@@ -146,7 +146,7 @@ describe('getPathInfo()', () => {
         }),
       })
 
-      const pathInfo = await getPathInfo(LanguageCode.En, '/user/profile/1')
+      const pathInfo = await getPathInfo(Instance.En, '/user/profile/1')
 
       expect(pathInfo).toEqual({
         typename: 'User',
@@ -155,7 +155,7 @@ describe('getPathInfo()', () => {
     })
 
     test('when path is "/user/profile/<username>"', async () => {
-      const pathInfo = await getPathInfo(LanguageCode.En, '/user/profile/Kulla')
+      const pathInfo = await getPathInfo(Instance.En, '/user/profile/Kulla')
 
       expect(pathInfo).toEqual({
         typename: 'User',
@@ -182,18 +182,15 @@ describe('getPathInfo()', () => {
       })
 
       describe('when path is "/*"', () => {
-        test.each([LanguageCode.En, LanguageCode.De])(
-          'lang = %p',
-          async (lang) => {
-            expect(await getApiVariables('/path', lang)).toEqual({
-              alias: { instance: lang, path: '/path' },
-              id: null,
-            })
-          }
-        )
+        test.each([Instance.En, Instance.De])('lang = %p', async (lang) => {
+          expect(await getApiVariables('/path', lang)).toEqual({
+            alias: { instance: lang, path: '/path' },
+            id: null,
+          })
+        })
       })
 
-      async function getApiVariables(path: string, lang = LanguageCode.En) {
+      async function getApiVariables(path: string, lang = Instance.En) {
         const body = (await (await getApiRequest(path, lang)).json()) as {
           variables: unknown
         }
@@ -202,7 +199,7 @@ describe('getPathInfo()', () => {
       }
     })
 
-    async function getApiRequest(path: string, lang = LanguageCode.En) {
+    async function getApiRequest(path: string, lang = Instance.En) {
       const fetch = mockFetch({
         [apiEndpoint]: createJsonResponse({
           __typename: 'Article',
@@ -220,13 +217,13 @@ describe('getPathInfo()', () => {
     test('when there was an error with the api call', async () => {
       mockFetch({ [apiEndpoint]: new Response('', { status: 403 }) })
 
-      expect(await getPathInfo(LanguageCode.En, '/path')).toBeNull()
+      expect(await getPathInfo(Instance.En, '/path')).toBeNull()
     })
 
     test('when api response is malformed JSON', async () => {
       mockFetch({ [apiEndpoint]: 'malformed json' })
 
-      expect(await getPathInfo(LanguageCode.En, '/path')).toBeNull()
+      expect(await getPathInfo(Instance.En, '/path')).toBeNull()
     })
 
     describe('when the response is not valid', () => {
@@ -235,7 +232,7 @@ describe('getPathInfo()', () => {
         async (response) => {
           mockFetch({ [apiEndpoint]: createJsonResponse(response) })
 
-          expect(await getPathInfo(LanguageCode.En, '/path')).toBeNull()
+          expect(await getPathInfo(Instance.En, '/path')).toBeNull()
         }
       )
     })
@@ -251,7 +248,7 @@ describe('getPathInfo()', () => {
         }),
       })
 
-      const pathInfo = await getPathInfo(LanguageCode.En, '/course')
+      const pathInfo = await getPathInfo(Instance.En, '/course')
 
       expect(pathInfo).toEqual({
         typename: 'Course',
@@ -268,7 +265,7 @@ describe('getPathInfo()', () => {
         }),
       })
 
-      const pathInfo = await getPathInfo(LanguageCode.En, '/course')
+      const pathInfo = await getPathInfo(Instance.En, '/course')
 
       expect(pathInfo).toEqual({
         typename: 'Course',
@@ -282,7 +279,7 @@ describe('getPathInfo()', () => {
       const cacheValue = { typename: 'Article', currentPath: '/current-path' }
       await global.PATH_INFO_KV.put('/en/path', JSON.stringify(cacheValue))
 
-      const pathInfo = await getPathInfo(LanguageCode.En, '/path')
+      const pathInfo = await getPathInfo(Instance.En, '/path')
 
       expect(pathInfo).toEqual({
         typename: 'Article',
@@ -298,7 +295,7 @@ describe('getPathInfo()', () => {
         }),
       })
 
-      await getPathInfo(LanguageCode.En, '/path')
+      await getPathInfo(Instance.En, '/path')
 
       expect(await global.PATH_INFO_KV.get('/en/path')).toEqual(
         JSON.stringify({ typename: 'Article', currentPath: '/current-path' })
@@ -320,7 +317,7 @@ describe('getPathInfo()', () => {
       test('when cached value is malformed JSON', async () => {
         await global.PATH_INFO_KV.put('/en/path', 'malformed json')
 
-        const pathInfo = await getPathInfo(LanguageCode.En, '/path')
+        const pathInfo = await getPathInfo(Instance.En, '/path')
 
         expect(pathInfo).toEqual(target)
         expect(await global.PATH_INFO_KV.get('/en/path')).toEqual(
@@ -332,7 +329,7 @@ describe('getPathInfo()', () => {
         const malformedPathInfo = JSON.stringify({ typename: 'Course' })
         await global.PATH_INFO_KV.put('/en/path', malformedPathInfo)
 
-        const pathInfo = await getPathInfo(LanguageCode.En, '/path')
+        const pathInfo = await getPathInfo(Instance.En, '/path')
 
         expect(pathInfo).toEqual(target)
         expect(await global.PATH_INFO_KV.get('/en/path')).toEqual(
@@ -343,13 +340,13 @@ describe('getPathInfo()', () => {
   })
 })
 
-describe('isLanguageCode()', () => {
-  expect(isLanguageCode('de')).toBe(true)
-  expect(isLanguageCode('fr')).toBe(true)
+describe('isInstance()', () => {
+  expect(isInstance('de')).toBe(true)
+  expect(isInstance('fr')).toBe(true)
 
-  expect(isLanguageCode('serlo')).toBe(false)
-  expect(isLanguageCode('EN_EN')).toBe(false)
-  expect(isLanguageCode('')).toBe(false)
+  expect(isInstance('serlo')).toBe(false)
+  expect(isInstance('EN_EN')).toBe(false)
+  expect(isInstance('')).toBe(false)
 })
 
 describe('sanitizeHtml()', () => {

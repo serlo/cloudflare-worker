@@ -29,17 +29,17 @@ import sanitize from 'sanitize-html'
 import { fetchApi } from './api'
 import { NotFound } from './ui'
 
-export enum LanguageCode {
-  En = 'en',
+export enum Instance {
   De = 'de',
-  Fr = 'fr',
-  Ta = 'ta',
-  Hi = 'hi',
+  En = 'en',
   Es = 'es',
+  Fr = 'fr',
+  Hi = 'hi',
+  Ta = 'ta',
 }
 
-export function isLanguageCode(code: string): code is LanguageCode {
-  return Object.values(LanguageCode).some((x) => x === code)
+export function isInstance(code: string): code is Instance {
+  return Object.values(Instance).some((x) => x === code)
 }
 
 export function getCookieValue(
@@ -72,7 +72,7 @@ const ApiResult = t.type({
 })
 
 export async function getPathInfo(
-  lang: LanguageCode,
+  lang: Instance,
   path: string
 ): Promise<PathInfo | null> {
   const userProfilePrefix = '/user/profile/'
