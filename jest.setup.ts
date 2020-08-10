@@ -21,7 +21,7 @@
  */
 // eslint-disable-next-line import/no-unassigned-import
 import '@testing-library/jest-dom'
-import { Response, Request } from 'node-fetch'
+import { Response as NodeResponse, Request as NodeRequest } from 'node-fetch'
 
 import { extendExpect } from './__tests__/_extend-jest'
 import { mockKV } from './__tests__/_helper'
@@ -47,24 +47,12 @@ beforeEach(() => {
   mockKV('PATH_INFO_KV', {})
 })
 
-// @ts-expect-error
-global.Response = Response
-// @ts-expect-error
-global.Request = Request
-
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace NodeJS {
-    interface Global {
-      Response: typeof Response
-      Request: typeof Request
-    }
-  }
-}
+global.Response = (NodeResponse as unknown) as typeof Response
+global.Request = (NodeRequest as unknown) as typeof Request
 
 // FIXME: Delete the following mock, when node-fetch is available in version 3.0.0
 // See https://github.com/node-fetch/node-fetch/commit/0959ca9739850bbd24e0721cc1296e7a0aa5c2bd#diff-d0f5704ae0738a7bd1f54aff42ddcb41
 // eslint-disable-next-line @typescript-eslint/unbound-method
-Response.redirect = function (url: string, status = 302) {
-  return new Response('', { status, headers: { location: url } })
+NodeResponse.redirect = function (url: string, status = 302) {
+  return new NodeResponse('', { status, headers: { location: url } })
 }

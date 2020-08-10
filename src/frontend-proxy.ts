@@ -1,10 +1,5 @@
 import { getSubdomain, getPathname, hasContentApiParameters } from './url-utils'
-import {
-  getCookieValue,
-  isLanguageCode,
-  LanguageCode,
-  getPathInfo,
-} from './utils'
+import { getCookieValue, isInstance, Instance, getPathInfo } from './utils'
 
 export async function frontendProxy(
   request: Request
@@ -18,9 +13,9 @@ export async function frontendProxy(
   const path = getPathname(url)
   const lang = getSubdomain(url)
 
-  if (lang === null || !isLanguageCode(lang)) return null
+  if (lang === null || !isInstance(lang)) return null
 
-  if (!supportInternationalization && lang !== LanguageCode.De) return null
+  if (!supportInternationalization && lang !== Instance.De) return null
 
   if (path === '/enable-frontend') {
     const response = new Response('Enabled: Use of new frontend')
@@ -93,7 +88,7 @@ export async function frontendProxy(
     lang,
   }: {
     useFrontend: boolean
-    lang: LanguageCode
+    lang: Instance
   }) {
     const backendUrl = new URL(request.url)
 

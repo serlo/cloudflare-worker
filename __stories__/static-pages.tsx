@@ -26,7 +26,7 @@ import {
   RevisedPage as RevisedPageOriginal,
   RevisionsOverview as RevisionsOverviewOriginal,
 } from '../src/static-pages'
-import { LanguageCode } from '../src/utils'
+import { Instance } from '../src/utils'
 import { createStaticComponent } from './utils'
 
 const UnrevisedPage = createStaticComponent(UnrevisedPageOriginal)
@@ -51,7 +51,7 @@ export function ExampleUnrevisedPage() {
   return (
     <UnrevisedPage
       page={{
-        lang: LanguageCode.En,
+        lang: Instance.En,
         title: 'Imprint',
         url: '',
         content,
@@ -64,7 +64,7 @@ export function ExampleCurrentRevisedPage() {
   return (
     <RevisedPage
       page={{
-        lang: LanguageCode.En,
+        lang: Instance.En,
         revision: '2020-01-10',
         revisionDate: new Date('2020-01-10'),
         title: 'Privacy',
@@ -81,7 +81,7 @@ export function ExampleArchivedRevisedPage() {
   return (
     <RevisedPage
       page={{
-        lang: LanguageCode.En,
+        lang: Instance.En,
         revision: '2020-01-10',
         revisionDate: new Date('2020-01-10'),
         title: 'Privacy',
@@ -102,7 +102,7 @@ export function ExampleRevisionsOverview() {
           revision: '2020-01-10',
           revisionDate: new Date('2020-01-10'),
           title: 'Privacy',
-          lang: LanguageCode.En,
+          lang: Instance.En,
           url: '',
           revisedType: 'privacy',
           isCurrentRevision: true,
@@ -111,7 +111,7 @@ export function ExampleRevisionsOverview() {
           revision: '2010-12-13',
           revisionDate: new Date('2010-12-13'),
           title: 'Privacy',
-          lang: LanguageCode.En,
+          lang: Instance.En,
           url: '',
           revisedType: 'privacy',
           isCurrentRevision: false,
@@ -120,7 +120,7 @@ export function ExampleRevisionsOverview() {
           revision: '1999-02-23',
           revisionDate: new Date('1999-02-23'),
           title: 'Privacy',
-          lang: LanguageCode.En,
+          lang: Instance.En,
           url: '',
           revisedType: 'privacy',
           isCurrentRevision: false,

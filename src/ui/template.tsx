@@ -21,7 +21,7 @@
  */
 import { h, ComponentChildren, Fragment } from 'preact'
 
-import { LanguageCode } from '../utils'
+import { Instance } from '../utils'
 
 export function NotFound() {
   return (
@@ -119,7 +119,7 @@ export function Template({
 
   function getFooter() {
     switch (lang) {
-      case LanguageCode.De:
+      case Instance.De:
         return (
           <Fragment>
             <div className="logo-wrapper">
@@ -145,7 +145,7 @@ export function Template({
             </nav>
           </Fragment>
         )
-      case LanguageCode.En:
+      case Instance.En:
       default:
         return (
           <Fragment>

@@ -1,9 +1,8 @@
 import { frontendProxy } from '../src/frontend-proxy'
-import { createJsonResponse, LanguageCode } from '../src/utils'
+import { createJsonResponse, Instance } from '../src/utils'
 import {
   expectHasOkStatus,
   mockFetch,
-  mockKV,
   FetchMock,
   createApiResponse,
 } from './_helper'
@@ -24,7 +23,6 @@ describe('handleRequest()', () => {
     global.FRONTEND_PROBABILITY = '0.5'
     Math.random = jest.fn().mockReturnValue(0.5)
 
-    mockKV('FRONTEND_CACHE_TYPES_KV', {})
     fetch = mockFetch()
 
     fetch.mockRequest({
@@ -81,7 +79,7 @@ describe('handleRequest()', () => {
 
   describe('when FRONTEND_SUPPORT_INTERNATIONALIZATION is "true"', () => {
     describe('prepends language code to path when backend is frontend', () => {
-      test.each([LanguageCode.En, LanguageCode.De])(
+      test.each([Instance.En, Instance.De])(
         'language code = %p',
         async (lang) => {
           global.FRONTEND_SUPPORT_INTERNATIONALIZATION = 'true'
@@ -99,7 +97,7 @@ describe('handleRequest()', () => {
     })
 
     describe('does not change path when backend is legacy backend', () => {
-      test.each([LanguageCode.En, LanguageCode.De])(
+      test.each([Instance.En, Instance.De])(
         'language code = %p',
         async (lang) => {
           const url = `https://${lang}.serlo.org/math`
