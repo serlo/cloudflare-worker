@@ -19,20 +19,27 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
+import { either as E } from 'fp-ts'
+import * as t from 'io-ts'
 import marked from 'marked'
 import { h, VNode } from 'preact'
 import renderToString from 'preact-render-to-string'
 import sanitize from 'sanitize-html'
 
+import { fetchApi } from './api'
 import { NotFound } from './ui'
 
-export enum LanguageCode {
-  En = 'en',
+export enum Instance {
   De = 'de',
-  Fr = 'fr',
-  Ta = 'ta',
-  Hi = 'hi',
+  En = 'en',
   Es = 'es',
+  Fr = 'fr',
+  Hi = 'hi',
+  Ta = 'ta',
+}
+
+export function isInstance(code: string): code is Instance {
+  return Object.values(Instance).some((x) => x === code)
 }
 
 export function getCookieValue(
@@ -48,8 +55,112 @@ export function getCookieValue(
         .map((c) => c.substring(name.length + 1))[0] ?? null
 }
 
-export function isLanguageCode(code: string): code is LanguageCode {
-  return Object.values(LanguageCode).some((x) => x === code)
+const PathInfo = t.type({ typename: t.string, currentPath: t.string })
+type PathInfo = t.TypeOf<typeof PathInfo>
+
+const ApiResult = t.type({
+  data: t.type({
+    uuid: t.intersection([
+      t.type({ __typename: t.string }),
+      t.partial({
+        alias: t.string,
+        pages: t.array(t.type({ alias: t.string })),
+        username: t.string,
+      }),
+    ]),
+  }),
+})
+
+export async function getPathInfo(
+  lang: Instance,
+  path: string
+): Promise<PathInfo | null> {
+  const userProfilePrefix = '/user/profile/'
+  const userProfileId = /^\/user\/profile\/\d+$/
+
+  if (path.startsWith(userProfilePrefix) && !userProfileId.test(path))
+    return { typename: 'User', currentPath: path }
+
+  const cacheKey = `/${lang}${path}`
+  const cachedValue = await global.PATH_INFO_KV.get(cacheKey)
+
+  if (cachedValue !== null) {
+    try {
+      const result = PathInfo.decode(JSON.parse(cachedValue))
+
+      if (E.isRight(result)) return result.right
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  const query = `
+    query TypenameAndCurrentPath($alias: AliasInput, $id: Int) {
+      uuid(alias: $alias, id: $id) {
+        __typename
+        ... on User { username }
+        ... on Page { alias }
+        ... on TaxonomyTerm { alias }
+        ... on Entity { alias }
+        ... on Course {
+          pages {
+            alias
+          }
+        }
+      }
+    }`
+
+  let variables
+
+  if (/^\/\d+$/.test(path)) {
+    variables = { alias: null, id: Number(path.slice(1)) }
+  } else if (userProfileId.test(path)) {
+    variables = {
+      alias: null,
+      id: Number(path.substring(userProfilePrefix.length)),
+    }
+  } else {
+    variables = { alias: { instance: lang, path }, id: null }
+  }
+
+  let apiResponseBody: unknown
+
+  try {
+    const apiResponse = await fetchApi(
+      new Request(global.API_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, variables }),
+      })
+    )
+    apiResponseBody = (await apiResponse.json()) as unknown
+  } catch (e) {
+    return null
+  }
+
+  const apiResult = ApiResult.decode(apiResponseBody)
+
+  if (E.isRight(apiResult)) {
+    const uuid = apiResult.right.data.uuid
+
+    let currentPath = uuid.alias ?? path
+
+    if (uuid.pages !== undefined && uuid.pages.length)
+      currentPath = uuid.pages[0].alias
+
+    if (uuid.username !== undefined)
+      currentPath = `/user/profile/${uuid.username}`
+
+    const result = { typename: uuid.__typename, currentPath }
+
+    await global.PATH_INFO_KV.put(cacheKey, JSON.stringify(result), {
+      expirationTtl: 60 * 60,
+    })
+
+    return result
+  } else {
+    return null
+  }
 }
 
 export function sanitizeHtml(html: string): string {

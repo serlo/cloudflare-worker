@@ -19,7 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { LanguageCode } from '../utils'
+import { Instance } from '../utils'
 
 export enum UnrevisedType {
   Imprint = 'imprint',
@@ -36,7 +36,7 @@ const legalRepo =
 // TODO: i18n
 export const titles: {
   [K in RevisedType | UnrevisedType]: {
-    [key in LanguageCode]?: string
+    [key in Instance]?: string
   }
 } = {
   imprint: {
@@ -123,13 +123,13 @@ export type UnrevisedConfig = Config<UnrevisedType, Spec>
 export type RevisedConfig = Config<RevisedType, RevisedSpec[]>
 
 export type Config<A extends string, B> = {
-  readonly [K1 in LanguageCode]?: {
+  readonly [K1 in Instance]?: {
     [K2 in A]?: B
   }
 }
 
 type BaseConfig = {
-  readonly [K1 in LanguageCode]?: {
+  readonly [K1 in Instance]?: {
     readonly unrevised: {
       readonly [K2 in UnrevisedType]?: Spec
     }
@@ -141,12 +141,12 @@ type BaseConfig = {
 
 function toUnrevisedConfig(config: BaseConfig): UnrevisedConfig {
   return Object.fromEntries(
-    Object.values(LanguageCode).map((lang) => [lang, config[lang]?.unrevised])
+    Object.values(Instance).map((lang) => [lang, config[lang]?.unrevised])
   )
 }
 
 function toRevisedConfig(config: BaseConfig): RevisedConfig {
   return Object.fromEntries(
-    Object.values(LanguageCode).map((lang) => [lang, config[lang]?.revised])
+    Object.values(Instance).map((lang) => [lang, config[lang]?.revised])
   )
 }
