@@ -95,7 +95,7 @@ describe('Redirects', () => {
     expectToBeRedirectTo(response, 'https://de.serlo.local/foo', 302)
   })
 
-  describe('redirects to current path of an ressource', () => {
+  describe('redirects to current path of an resource', () => {
     beforeEach(() => {
       global.API_ENDPOINT = 'https://api.serlo.org/graphql'
     })
