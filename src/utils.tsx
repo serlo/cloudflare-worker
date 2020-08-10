@@ -101,7 +101,7 @@ export async function getPathInfo(
         ... on User { username }
         ... on Page { alias }
         ... on TaxonomyTerm { alias }
-        ... on Entity { alias }
+        ... on AbstractEntity { alias }
         ... on Course {
           pages {
             alias
