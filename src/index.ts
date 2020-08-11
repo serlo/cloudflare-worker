@@ -117,7 +117,7 @@ async function redirects(request: Request) {
   if (isInstance(subdomain)) {
     const pathInfo = await getPathInfo(subdomain, path)
 
-    if (pathInfo !== null && path != pathInfo.currentPath) {
+    if (pathInfo !== null && decodeURIComponent(path) != pathInfo.currentPath) {
       const url = new URL(request.url)
 
       url.pathname = pathInfo.currentPath
