@@ -78,12 +78,14 @@ describe('handleRequest()', () => {
   })
 
   describe('when FRONTEND_SUPPORT_INTERNATIONALIZATION is "true"', () => {
+    beforeEach(() => {
+      global.FRONTEND_SUPPORT_INTERNATIONALIZATION = 'true'
+    })
+
     describe('prepends language code to path when backend is frontend', () => {
       test.each([Instance.En, Instance.De])(
         'language code = %p',
         async (lang) => {
-          global.FRONTEND_SUPPORT_INTERNATIONALIZATION = 'true'
-
           setupProbabilityFor(Backend.Frontend)
           fetch.mockRequest({ to: `https://frontend.serlo.org/${lang}/math` })
 
@@ -94,6 +96,15 @@ describe('handleRequest()', () => {
           )
         }
       )
+
+      test('removes trailing slashes from the frontend url', async () => {
+        setupProbabilityFor(Backend.Frontend)
+        fetch.mockRequest({ to: `https://frontend.serlo.org/de` })
+
+        await handleUrl(`https://de.serlo.org/`)
+
+        expect(fetch).toHaveExactlyOneRequestTo('https://frontend.serlo.org/de')
+      })
     })
 
     describe('does not change path when backend is legacy backend', () => {
@@ -412,7 +423,7 @@ describe('handleRequest()', () => {
         'https://de.serlo.org/search',
         'https://de.serlo.org/_next/script.js',
         'https://de.serlo.org/_assets/image.png',
-        'https://de.serlo.org/api/frontend/',
+        'https://de.serlo.org/api/frontend/privacy',
         'https://de.serlo.org/auth/login',
         'https://de.serlo.org/auth/logout',
         'https://de.serlo.org/auth/activate/:token',
@@ -437,7 +448,7 @@ describe('handleRequest()', () => {
         'https://de.serlo.org/search',
         'https://de.serlo.org/_next/script.js',
         'https://de.serlo.org/_assets/image.png',
-        'https://de.serlo.org/api/frontend/',
+        'https://de.serlo.org/api/frontend/privacy',
         'https://de.serlo.org/auth/login',
         'https://de.serlo.org/auth/logout',
         'https://de.serlo.org/auth/activate/:token',

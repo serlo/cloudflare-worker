@@ -1,4 +1,9 @@
-import { getSubdomain, getPathname, hasContentApiParameters } from './url-utils'
+import {
+  getSubdomain,
+  getPathname,
+  hasContentApiParameters,
+  getPathnameWithoutTrailingSlash,
+} from './url-utils'
 import { getCookieValue, isInstance, Instance, getPathInfo } from './utils'
 
 export async function frontendProxy(
@@ -98,6 +103,8 @@ export async function frontendProxy(
 
       if (supportInternationalization)
         backendUrl.pathname = `/${lang}${backendUrl.pathname}`
+
+      backendUrl.pathname = getPathnameWithoutTrailingSlash(backendUrl.href)
     }
 
     const response = await fetch(new Request(backendUrl.href, request))
