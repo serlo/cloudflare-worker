@@ -96,6 +96,16 @@ describe('handleRequest()', () => {
           )
         }
       )
+      test('prepends language prefix for special path /search', async () => {
+        setupProbabilityFor(Backend.Frontend)
+        fetch.mockRequest({ to: `https://frontend.serlo.org/en/search` })
+
+        await handleUrl(`https://en.serlo.org/search`)
+
+        expect(fetch).toHaveExactlyOneRequestTo(
+          `https://frontend.serlo.org/en/search`
+        )
+      })
 
       test('removes trailing slashes from the frontend url', async () => {
         setupProbabilityFor(Backend.Frontend)
@@ -104,6 +114,23 @@ describe('handleRequest()', () => {
         await handleUrl(`https://de.serlo.org/`)
 
         expect(fetch).toHaveExactlyOneRequestTo('https://frontend.serlo.org/de')
+      })
+
+      describe('special paths do not get a language prefix', () => {
+        test.each([
+          'https://de.serlo.org/spenden',
+          'https://de.serlo.org/_next/script.js',
+          'https://de.serlo.org/_assets/image.png',
+          'https://de.serlo.org/api/frontend/privacy',
+          'https://de.serlo.org/api/auth/login',
+        ])('URL = %p', async (url) => {
+          const backendUrl = getUrlFor(Backend.Frontend, url)
+          fetch.mockRequest({ to: backendUrl })
+
+          await handleUrl(url)
+
+          expect(fetch).toHaveExactlyOneRequestTo(backendUrl)
+        })
       })
     })
 
