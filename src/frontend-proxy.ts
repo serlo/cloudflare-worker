@@ -1,4 +1,9 @@
-import { getSubdomain, getPathname, hasContentApiParameters } from './url-utils'
+import {
+  getSubdomain,
+  getPathname,
+  hasContentApiParameters,
+  getPathnameWithoutTrailingSlash,
+} from './url-utils'
 import { getCookieValue, isInstance, Instance, getPathInfo } from './utils'
 
 export async function frontendProxy(
@@ -11,11 +16,11 @@ export async function frontendProxy(
 
   const url = request.url
   const path = getPathname(url)
-  const lang = getSubdomain(url)
+  const instance = getSubdomain(url)
 
-  if (lang === null || !isInstance(lang)) return null
+  if (instance === null || !isInstance(instance)) return null
 
-  if (!supportInternationalization && lang !== Instance.De) return null
+  if (!supportInternationalization && instance !== Instance.De) return null
 
   if (path === '/enable-frontend') {
     const response = new Response('Enabled: Use of new frontend')
@@ -43,7 +48,7 @@ export async function frontendProxy(
     path.startsWith('/api/auth/') ||
     path.startsWith('/api/frontend/')
   )
-    return await fetchBackend({ useFrontend: true, lang })
+    return await fetchBackend({ useFrontend: true })
 
   if (
     path === '/auth/login' ||
@@ -58,13 +63,15 @@ export async function frontendProxy(
     (global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND === 'true' &&
       getCookieValue('authenticated', cookies) === '1')
   )
-    return await fetchBackend({ useFrontend: false, lang })
+    return await fetchBackend({ useFrontend: false })
 
-  if (path === '/search' || path === '/spenden')
-    return await fetchBackend({ useFrontend: true, lang })
+  if (path === '/spenden') return await fetchBackend({ useFrontend: true })
+
+  if (path === '/search')
+    return await fetchBackend({ useFrontend: true, pathPrefix: instance })
 
   if (path !== '/') {
-    const pathInfo = await getPathInfo(lang, path)
+    const pathInfo = await getPathInfo(instance, path)
     const typename = pathInfo?.typename ?? null
 
     if (typename === null || !allowedTypes.includes(typename)) return null
@@ -77,7 +84,7 @@ export async function frontendProxy(
 
   const response = await fetchBackend({
     useFrontend: useFrontendNumber <= probability,
-    lang,
+    pathPrefix: instance,
   })
   if (Number.isNaN(cookieValue))
     setCookieUseFrontend(response, useFrontendNumber)
@@ -86,18 +93,20 @@ export async function frontendProxy(
 
   async function fetchBackend({
     useFrontend,
-    lang,
+    pathPrefix,
   }: {
     useFrontend: boolean
-    lang: Instance
+    pathPrefix?: Instance
   }) {
     const backendUrl = new URL(request.url)
 
     if (useFrontend) {
       backendUrl.hostname = frontendDomain
 
-      if (supportInternationalization)
-        backendUrl.pathname = `/${lang}${backendUrl.pathname}`
+      if (supportInternationalization && pathPrefix !== undefined)
+        backendUrl.pathname = `/${pathPrefix}${backendUrl.pathname}`
+
+      backendUrl.pathname = getPathnameWithoutTrailingSlash(backendUrl.href)
     }
 
     const response = await fetch(new Request(backendUrl.href, request))
