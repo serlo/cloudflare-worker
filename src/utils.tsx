@@ -66,7 +66,8 @@ export function markdownToHtml(markdown: string): string {
 
 export async function fetchWithCache(
   url: string | Request,
-  init?: RequestInit
+  init?: RequestInit,
+  fetchfunk = fetch
 ): Promise<Response> {
   return await fetch(url, ({
     cf: { cacheTtl: 60 * 60 },
