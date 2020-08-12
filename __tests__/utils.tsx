@@ -20,6 +20,9 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
+import { Console } from 'console'
+import { rest, MockedRequest } from 'msw'
+import { setupServer } from 'msw/node'
 import { h } from 'preact'
 
 import { Template } from '../src/ui'
@@ -41,6 +44,20 @@ import {
   expectIsJsonResponse,
   expectIsNotFoundResponse,
 } from './_helper'
+
+const server = setupServer()
+
+beforeAll(() => {
+  server.listen()
+})
+
+afterEach(() => {
+  server.resetHandlers()
+})
+
+afterAll(() => {
+  server.close()
+})
 
 describe('getCookieValue()', () => {
   describe('returns the cookie value of a given cookie header', () => {
@@ -146,7 +163,11 @@ test('NotFoundResponse', async () => {
 
 describe('fetchWithCache()', () => {
   test('returns the result of fetch()', async () => {
-    mockFetch({ 'http://example.com/': 'test' })
+    server.use(
+      rest.get('http://example.com/', (_req, res, ctx) => {
+        return res.once(ctx.status(200), ctx.body('test'))
+      })
+    )
 
     const response = await fetchWithCache('http://example.com/')
 
@@ -154,13 +175,16 @@ describe('fetchWithCache()', () => {
   })
 
   test('responses are cached for 1 hour', async () => {
-    const mockedFetch = mockFetch({ 'http://example.com/': '' })
+    let request!: MockedRequest
+    server.use(
+      rest.get('http://example.com/', (_req, res, ctx) => {
+        request = _req
+        return res.once(ctx.status(200), ctx.body('test'))
+      })
+    )
 
-    await fetchWithCache('http://example.com/')
-
-    expect(mockedFetch.getCallArgumentsFor('http://example.com/')).toEqual([
-      'http://example.com/',
-      { cf: { cacheTtl: 3600 } },
-    ])
+    const fetch = jest.fn().mockResolvedValueOnce(new Response(''))
+    await fetchWithCache('http://example.com/', undefined, fetch)
+    expect(fetch).toBeCalledWith(request)
   })
 })
