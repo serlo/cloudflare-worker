@@ -20,8 +20,7 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-import { Console } from 'console'
-import { rest, MockedRequest } from 'msw'
+import { rest} from 'msw'
 import { setupServer } from 'msw/node'
 import { h } from 'preact'
 
@@ -175,16 +174,10 @@ describe('fetchWithCache()', () => {
   })
 
   test('responses are cached for 1 hour', async () => {
-    let request!: MockedRequest
-    server.use(
-      rest.get('http://example.com/', (_req, res, ctx) => {
-        request = _req
-        return res.once(ctx.status(200), ctx.body('test'))
-      })
-    )
+    const fetchMock = jest.fn().mockResolvedValueOnce(new Response(''))
 
-    const fetch = jest.fn().mockResolvedValueOnce(new Response(''))
-    await fetchWithCache('http://example.com/', undefined, fetch)
-    expect(fetch).toBeCalledWith(request)
+    await fetchWithCache('http://example.com/', undefined, fetchMock )    
+    
+    expect(fetchMock).toHaveBeenCalledWith('http://example.com/', {cf: { cacheTtl: 3600 }})
   })
 })
