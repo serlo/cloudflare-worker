@@ -136,17 +136,34 @@ describe('Redirects', () => {
       expect(await response.text()).toBe('article content')
     })
 
-    test('handles URL encodings correctly', async () => {
-      mockFetch({
-        'https://de.serlo.org/größen': 'article content',
-        'https://api.serlo.org/graphql': createJsonResponse({
-          data: { uuid: { __typename: 'Article', alias: '/größen' } },
-        }),
+    describe('handles URL encodings correctly', () => {
+      test('API result is URL encoded', async () => {
+        mockFetch({
+          'https://de.serlo.org/größen': 'article content',
+          'https://api.serlo.org/graphql': createJsonResponse({
+            data: {
+              uuid: { __typename: 'Article', alias: '/gr%C3%B6%C3%9Fen' },
+            },
+          }),
+        })
+
+        const response = await handleUrl('https://de.serlo.org/größen')
+
+        expect(await response.text()).toBe('article content')
       })
 
-      const response = await handleUrl('https://de.serlo.org/größen')
+      test('API result is not URL encoded', async () => {
+        mockFetch({
+          'https://de.serlo.org/größen': 'article content',
+          'https://api.serlo.org/graphql': createJsonResponse({
+            data: { uuid: { __typename: 'Article', alias: '/größen' } },
+          }),
+        })
 
-      expect(await response.text()).toBe('article content')
+        const response = await handleUrl('https://de.serlo.org/größen')
+
+        expect(await response.text()).toBe('article content')
+      })
     })
   })
 })
