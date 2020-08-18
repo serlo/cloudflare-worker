@@ -112,6 +112,25 @@ describe('Redirects', () => {
       expectToBeRedirectTo(response, 'https://en.serlo.org/current-path', 301)
     })
 
+    test('no redirect when current path is different than given path and XMLHttpRequest', async () => {
+      mockFetch({
+        'https://en.serlo.org/path': 'article content',
+        'https://api.serlo.org/graphql': createJsonResponse({
+          data: { uuid: { __typename: 'Article', alias: '/current-path' } },
+        }),
+      })
+
+      const response = await handleRequest(
+        new Request('https://en.serlo.org/path', {
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+        })
+      )
+
+      expect(await response.text()).toBe('article content')
+    })
+
     test('no redirect when current path is the same as given path', async () => {
       mockFetch({
         'https://en.serlo.org/path': 'article content',

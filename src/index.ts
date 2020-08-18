@@ -120,6 +120,7 @@ async function redirects(request: Request) {
     // TODO: Remove decodeURIComponent() when we the API returns an
     // URL encoded alias
     if (
+      request.headers.get('X-Requested-With') !== 'XMLHttpRequest' &&
       pathInfo !== null &&
       decodeURIComponent(path) != decodeURIComponent(pathInfo.currentPath)
     ) {
