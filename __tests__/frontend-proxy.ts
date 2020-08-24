@@ -64,6 +64,7 @@ describe('handleRequest()', () => {
 
   describe('returned response set cookie with calculated random number', () => {
     test.each([Backend.Frontend, Backend.Legacy])('%p', async (backend) => {
+      global.DOMAIN = 'serlo.org'
       const backendUrl = getUrlFor(backend, 'https://de.serlo.org/math')
 
       setupProbabilityFor(backend)
@@ -73,7 +74,7 @@ describe('handleRequest()', () => {
       const response = await handleUrl('https://de.serlo.org/math')
 
       const cookieHeader = response.headers.get('Set-Cookie')
-      expect(cookieHeader).toBe('useFrontend=0.25; path=/')
+      expect(cookieHeader).toBe('useFrontend=0.25; path=/; domain=.serlo.org')
     })
   })
 
@@ -575,11 +576,8 @@ describe('handleRequest()', () => {
       const response = await handleUrl('https://de.serlo.org/')
 
       expect(response.headers.get('X-Header')).toBe('bar')
-      // FIXME: Use getAll() after https://github.com/whatwg/fetch/issues/973
-      // got implemented. See also
-      // https://community.cloudflare.com/t/dont-fold-set-cookie-headers-with-headers-append/165934/3
-      expect(response.headers.get('Set-Cookie')).toBe(
-        `token=123456; path=/, useFrontend=0.5; path=/`
+      expect(response.headers.get('Set-Cookie')).toEqual(
+        expect.stringContaining(`token=123456; path=/`)
       )
     })
   })
@@ -588,7 +586,9 @@ describe('handleRequest()', () => {
     const res = await handleUrl('https://de.serlo.org/enable-frontend')
 
     expectHasOkStatus(res)
-    expect(res.headers.get('Set-Cookie')).toBe('useFrontend=0; path=/')
+    expect(res.headers.get('Set-Cookie')).toEqual(
+      expect.stringContaining('useFrontend=0;')
+    )
     expect(await res.text()).toBe('Enabled: Use of new frontend')
   })
 
@@ -596,7 +596,9 @@ describe('handleRequest()', () => {
     const res = await handleUrl('https://de.serlo.org/disable-frontend')
 
     expectHasOkStatus(res)
-    expect(res.headers.get('Set-Cookie')).toBe('useFrontend=1; path=/')
+    expect(res.headers.get('Set-Cookie')).toEqual(
+      expect.stringContaining('useFrontend=1;')
+    )
     expect(await res.text()).toBe('Disabled: Use of new frontend')
   })
 })

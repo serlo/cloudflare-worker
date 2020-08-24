@@ -115,6 +115,9 @@ export async function frontendProxy(
   }
 
   function setCookieUseFrontend(res: Response, useFrontend: number) {
-    res.headers.append('Set-Cookie', `useFrontend=${useFrontend}; path=/`)
+    res.headers.append(
+      'Set-Cookie',
+      `useFrontend=${useFrontend}; path=/; domain=.${global.DOMAIN}`
+    )
   }
 }
