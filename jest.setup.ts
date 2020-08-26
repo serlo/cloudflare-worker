@@ -32,7 +32,7 @@ const randomCopy = Math.random
 
 afterEach(() => {
   Math.random = randomCopy
-  global.fetch = (fetch as unknown) as typeof global.fetch
+  global.fetch = jest.fn().mockImplementation(fetch)
 })
 
 beforeEach(() => {

@@ -1,6 +1,8 @@
 import { handleRequest } from '../src'
 import { expectIsJsonResponse } from './_helper'
 
+
+
 test('Frontend Sector Identifier URI Validation (block localhost)', async () => {
   global.ALLOW_AUTH_FROM_LOCALHOST = 'false'
   global.DOMAIN = 'serlo.org'
