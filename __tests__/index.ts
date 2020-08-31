@@ -75,7 +75,6 @@ describe('Enforce HTTPS', () => {
   test('Pact Broker', async () => {
     serverMock('http://pacts.serlo.local/bar', '')
 
-    fetch.mockRequest({ to: 'http://pacts.serlo.local/bar' })
 
     await handleUrl('http://pacts.serlo.local/bar')
 
