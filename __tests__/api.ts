@@ -19,12 +19,6 @@ afterAll(() => {
 })
 
 describe('api()', () => {
-  /*  let fetchApi: FetchMock
-
-  beforeEach(() => {
-    fetchApi = mockFetch({ 'https://api.serlo.org/graphql': '<api-result>' })
-  })
-*/
 
 function serverMock(url_e: string, body_e: string){
   server.use(
@@ -41,11 +35,9 @@ function serverMock(url_e: string, body_e: string){
     const response = (await api(req)) as Response
 
     expect(await response.text()).toBe('<api-result>')
-    //expect(fetchApi).toHaveExactlyOneRequestTo('https://api.serlo.org/graphql')   //könnte man löschen
   })
 
   describe('returns null if subdomain is not "api"', () => {
-    //jest.fn wie bei Utils NotToHaveBeenCall
     test('url without subdomain', async () => {
       serverMock('https://api.serlo.org/graphql','<api-result>');
 
