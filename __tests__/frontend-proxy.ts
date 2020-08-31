@@ -1,7 +1,11 @@
-import { frontendProxy, createApiQuery } from '../src/frontend-proxy'
-import { getPathname, getQueryString } from '../src/url-utils'
-import { createJsonResponse } from '../src/utils'
-import { expectHasOkStatus, mockFetch, mockKV, FetchMock } from './_helper'
+import { frontendProxy } from '../src/frontend-proxy'
+import { createJsonResponse, Instance } from '../src/utils'
+import {
+  expectHasOkStatus,
+  mockFetch,
+  FetchMock,
+  createApiResponse,
+} from './_helper'
 
 enum Backend {
   Frontend = 'frontend',
@@ -14,16 +18,16 @@ describe('handleRequest()', () => {
   beforeEach(() => {
     global.FRONTEND_DOMAIN = 'frontend.serlo.org'
     global.API_ENDPOINT = 'https://api.serlo.org/'
+    global.FRONTEND_SUPPORT_INTERNATIONALIZATION = 'false'
 
     global.FRONTEND_PROBABILITY = '0.5'
     Math.random = jest.fn().mockReturnValue(0.5)
 
-    mockKV('FRONTEND_CACHE_TYPES_KV', {})
     fetch = mockFetch()
 
     fetch.mockRequest({
       to: global.API_ENDPOINT,
-      response: createApiResponse('Subject'),
+      response: createApiResponse({ __typename: 'Subject' }),
     })
     global.FRONTEND_ALLOWED_TYPES = '["Subject"]'
   })
@@ -60,6 +64,7 @@ describe('handleRequest()', () => {
 
   describe('returned response set cookie with calculated random number', () => {
     test.each([Backend.Frontend, Backend.Legacy])('%p', async (backend) => {
+      global.DOMAIN = 'serlo.org'
       const backendUrl = getUrlFor(backend, 'https://de.serlo.org/math')
 
       setupProbabilityFor(backend)
@@ -69,35 +74,129 @@ describe('handleRequest()', () => {
       const response = await handleUrl('https://de.serlo.org/math')
 
       const cookieHeader = response.headers.get('Set-Cookie')
-      expect(cookieHeader).toBe('useFrontend=0.25; path=/')
+      expect(cookieHeader).toBe('useFrontend=0.25; path=/; domain=.serlo.org')
+    })
+  })
+
+  describe('when FRONTEND_SUPPORT_INTERNATIONALIZATION is "true"', () => {
+    beforeEach(() => {
+      global.FRONTEND_SUPPORT_INTERNATIONALIZATION = 'true'
+    })
+
+    describe('prepends language code to path when backend is frontend', () => {
+      test.each([Instance.En, Instance.De])(
+        'language code = %p',
+        async (lang) => {
+          setupProbabilityFor(Backend.Frontend)
+          fetch.mockRequest({ to: `https://frontend.serlo.org/${lang}/math` })
+
+          await handleUrl(`https://${lang}.serlo.org/math`)
+
+          expect(fetch).toHaveExactlyOneRequestTo(
+            `https://frontend.serlo.org/${lang}/math`
+          )
+        }
+      )
+      test('prepends language prefix for special path /search', async () => {
+        setupProbabilityFor(Backend.Frontend)
+        fetch.mockRequest({ to: `https://frontend.serlo.org/en/search` })
+
+        await handleUrl(`https://en.serlo.org/search`)
+
+        expect(fetch).toHaveExactlyOneRequestTo(
+          `https://frontend.serlo.org/en/search`
+        )
+      })
+
+      test('removes trailing slashes from the frontend url', async () => {
+        setupProbabilityFor(Backend.Frontend)
+        fetch.mockRequest({ to: `https://frontend.serlo.org/de` })
+
+        await handleUrl(`https://de.serlo.org/`)
+
+        expect(fetch).toHaveExactlyOneRequestTo('https://frontend.serlo.org/de')
+      })
+
+      describe('special paths do not get a language prefix', () => {
+        test.each([
+          'https://de.serlo.org/spenden',
+          'https://de.serlo.org/_next/script.js',
+          'https://de.serlo.org/_assets/image.png',
+          'https://de.serlo.org/api/frontend/privacy',
+          'https://de.serlo.org/api/auth/login',
+        ])('URL = %p', async (url) => {
+          const backendUrl = getUrlFor(Backend.Frontend, url)
+          fetch.mockRequest({ to: backendUrl })
+
+          await handleUrl(url)
+
+          expect(fetch).toHaveExactlyOneRequestTo(backendUrl)
+        })
+      })
+    })
+
+    describe('does not change path when backend is legacy backend', () => {
+      test.each([Instance.En, Instance.De])(
+        'language code = %p',
+        async (lang) => {
+          const url = `https://${lang}.serlo.org/math`
+          global.FRONTEND_SUPPORT_INTERNATIONALIZATION = 'true'
+
+          setupProbabilityFor(Backend.Legacy)
+          fetch.mockRequest({ to: url })
+
+          await handleUrl(url)
+
+          expect(fetch).toHaveExactlyOneRequestTo(url)
+        }
+      )
     })
   })
 
   describe('when user is authenticated', () => {
     describe('when REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = true', () => {
-      let response: Response
-
-      beforeEach(async () => {
+      beforeEach(() => {
         global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = 'true'
         setupProbabilityFor(Backend.Frontend)
-        fetch.mockRequest({ to: 'https://de.serlo.org/math' })
-
-        const request = new Request('https://de.serlo.org/math')
-        request.headers.set('Cookie', 'authenticated=1')
-        response = (await frontendProxy(request)) as Response
       })
 
-      test('chooses legacy backend', () => {
-        expect(fetch).toHaveExactlyOneRequestTo('https://de.serlo.org/math')
+      describe('when an entity is accessed', () => {
+        let response: Response
+
+        beforeEach(async () => {
+          fetch.mockRequest({ to: 'https://de.serlo.org/math' })
+
+          const request = new Request('https://de.serlo.org/math')
+          request.headers.set('Cookie', 'authenticated=1')
+          response = (await frontendProxy(request)) as Response
+        })
+
+        test('chooses legacy backend', () => {
+          expect(fetch).toHaveExactlyOneRequestTo('https://de.serlo.org/math')
+        })
+
+        test('does not set cookie with random number', () => {
+          expect(response.headers.get('Set-Cookie')).toBeNull()
+        })
+
+        test('does not check the path type', () => {
+          expect(fetch).not.toHaveRequestsTo('https://api.serlo.org/')
+        })
       })
 
-      test('does not set cookie with random number', () => {
-        expect(response.headers.get('Set-Cookie')).toBeNull()
-      })
+      describe('/search and /spenden go to legacy backend', () => {
+        test.each([
+          'https://de.serlo.org/search',
+          'https://de.serlo.org/spenden',
+        ])('url = %p', async (url) => {
+          fetch.mockRequest({ to: url })
 
-      test('does not check the path type', async () => {
-        expect(fetch).not.toHaveRequestsTo('https://api.serlo.org/')
-        expect(await getCachedType('/math')).toBeNull()
+          const request = new Request(url)
+          request.headers.set('Cookie', 'authenticated=1')
+          await frontendProxy(request)
+
+          expect(fetch).toHaveExactlyOneRequestTo(url)
+        })
       })
     })
 
@@ -137,9 +236,8 @@ describe('handleRequest()', () => {
       expect(response.headers.get('Set-Cookie')).toBeNull()
     })
 
-    test('does not check the path type', async () => {
+    test('does not check the path type', () => {
       expect(fetch).not.toHaveRequestsTo('https://api.serlo.org/')
-      expect(await getCachedType('/math')).toBeNull()
     })
   })
 
@@ -203,76 +301,30 @@ describe('handleRequest()', () => {
     expect(Math.random).toHaveBeenCalled()
   })
 
-  describe('handles types of requested resource', () => {
-    test('saves type in cache', async () => {
-      fetch.mockRequest({
-        to: global.API_ENDPOINT,
-        response: createApiResponse('Page'),
-      })
+  test('return null when type of path is not allowed', async () => {
+    fetch.mockRequest({
+      to: 'https://api.serlo.org/',
+      response: createApiResponse({ __typename: 'TaxonomyTerm' }),
+    })
+    global.FRONTEND_ALLOWED_TYPES = '["Page", "Article"]'
 
-      await handleUrl('https://de.serlo.org/example-page')
+    const response = await handleUrl('https://de.serlo.org/42')
 
-      expect(await getCachedType('/example-page')).toBe('Page')
+    expect(response).toBeNull()
+  })
+
+  test('returns null when type of path is unknown', async () => {
+    fetch.mockRequest({
+      to: 'https://api.serlo.org/',
+      response: createJsonResponse({
+        errors: [{ message: 'error' }],
+        data: { uuid: null },
+      }),
     })
 
-    test('uses cache to determine the type', async () => {
-      setupProbabilityFor(Backend.Frontend)
-      fetch.mockRequest({ to: 'https://frontend.serlo.org/math' })
+    const response = await handleUrl('https://de.serlo.org/unknown')
 
-      await global.FRONTEND_CACHE_TYPES_KV.put('/math', 'Page')
-      global.FRONTEND_ALLOWED_TYPES = '["Page"]'
-
-      await handleUrl('https://de.serlo.org/math')
-
-      expect(fetch.getAllRequestsTo('https://api.serlo.org/')).toHaveLength(0)
-      expect(await getCachedType('/math')).toBe('Page')
-    })
-
-    test('type of start page is not checked', async () => {})
-
-    describe('when type of path is not allowed', () => {
-      let response: Response
-
-      beforeEach(async () => {
-        const apiResponse = createApiResponse('TaxonomyTerm')
-        fetch.mockRequest({
-          to: 'https://api.serlo.org/',
-          response: apiResponse,
-        })
-        global.FRONTEND_ALLOWED_TYPES = '["Page", "Article"]'
-
-        response = await handleUrl('https://de.serlo.org/42')
-      })
-
-      test('returns null', () => {
-        expect(response).toBeNull()
-      })
-
-      test('caches type of path', async () => {
-        expect(await getCachedType('/42')).toBe('TaxonomyTerm')
-      })
-    })
-
-    describe('when type of path is unknown', () => {
-      let response: Response
-
-      beforeEach(async () => {
-        fetch.mockRequest({
-          to: 'https://api.serlo.org/',
-          response: createApiErrorResponse(),
-        })
-
-        response = await handleUrl('https://de.serlo.org/unknown')
-      })
-
-      test('returns null', () => {
-        expect(response).toBeNull()
-      })
-
-      test('does not cache type of path', async () => {
-        expect(await getCachedType('/unknown')).toBeNull()
-      })
-    })
+    expect(response).toBeNull()
   })
 
   describe('special paths', () => {
@@ -280,7 +332,9 @@ describe('handleRequest()', () => {
       global.FRONTEND_ALLOWED_TYPES = '[]'
       const backendUrl = 'https://de.serlo.org/user/profile/inyono'
       fetch.mockRequest({ to: backendUrl })
+
       const response = await handleUrl(backendUrl)
+
       expect(response).toBeNull()
     })
 
@@ -288,7 +342,9 @@ describe('handleRequest()', () => {
       global.FRONTEND_ALLOWED_TYPES = '["User"]'
       const backendUrl = 'https://frontend.serlo.org/user/profile/inyono'
       fetch.mockRequest({ to: backendUrl })
+
       await handleUrl('https://de.serlo.org/user/profile/inyono')
+
       expect(fetch).toHaveExactlyOneRequestTo(backendUrl)
     })
 
@@ -395,7 +451,7 @@ describe('handleRequest()', () => {
         'https://de.serlo.org/search',
         'https://de.serlo.org/_next/script.js',
         'https://de.serlo.org/_assets/image.png',
-        'https://de.serlo.org/api/frontend/',
+        'https://de.serlo.org/api/frontend/privacy',
         'https://de.serlo.org/auth/login',
         'https://de.serlo.org/auth/logout',
         'https://de.serlo.org/auth/activate/:token',
@@ -411,7 +467,6 @@ describe('handleRequest()', () => {
         await handleUrl(url)
 
         expect(fetch).not.toHaveRequestsTo('https://api.serlo.org/')
-        expect(await getCachedType(getPathname(url))).toBeNull()
       })
     })
 
@@ -421,7 +476,7 @@ describe('handleRequest()', () => {
         'https://de.serlo.org/search',
         'https://de.serlo.org/_next/script.js',
         'https://de.serlo.org/_assets/image.png',
-        'https://de.serlo.org/api/frontend/',
+        'https://de.serlo.org/api/frontend/privacy',
         'https://de.serlo.org/auth/login',
         'https://de.serlo.org/auth/logout',
         'https://de.serlo.org/auth/activate/:token',
@@ -480,7 +535,8 @@ describe('handleRequest()', () => {
       await frontendProxy(request)
 
       const backendRequest = fetch.getRequestTo(backendUrl) as Request
-      expect(getQueryString(backendRequest.url)).toEqual('?foo=bar')
+      const queryString = new URL(backendRequest.url).search
+      expect(queryString).toEqual('?foo=bar')
     })
   })
 
@@ -520,11 +576,8 @@ describe('handleRequest()', () => {
       const response = await handleUrl('https://de.serlo.org/')
 
       expect(response.headers.get('X-Header')).toBe('bar')
-      // FIXME: Use getAll() after https://github.com/whatwg/fetch/issues/973
-      // got implemented. See also
-      // https://community.cloudflare.com/t/dont-fold-set-cookie-headers-with-headers-append/165934/3
-      expect(response.headers.get('Set-Cookie')).toBe(
-        `token=123456; path=/, useFrontend=0.5; path=/`
+      expect(response.headers.get('Set-Cookie')).toEqual(
+        expect.stringContaining(`token=123456; path=/`)
       )
     })
   })
@@ -533,7 +586,9 @@ describe('handleRequest()', () => {
     const res = await handleUrl('https://de.serlo.org/enable-frontend')
 
     expectHasOkStatus(res)
-    expect(res.headers.get('Set-Cookie')).toBe('useFrontend=0; path=/')
+    expect(res.headers.get('Set-Cookie')).toEqual(
+      expect.stringContaining('useFrontend=0;')
+    )
     expect(await res.text()).toBe('Enabled: Use of new frontend')
   })
 
@@ -541,40 +596,15 @@ describe('handleRequest()', () => {
     const res = await handleUrl('https://de.serlo.org/disable-frontend')
 
     expectHasOkStatus(res)
-    expect(res.headers.get('Set-Cookie')).toBe('useFrontend=1; path=/')
-    expect(await res.text()).toBe('Disabled: Use of new frontend')
-  })
-})
-
-describe('createApiQuery()', () => {
-  test('alias path', () => {
-    expect(createApiQuery('/math')).toBe(
-      '{ uuid(alias: { instance: de, path: "/math" }) { __typename } }'
+    expect(res.headers.get('Set-Cookie')).toEqual(
+      expect.stringContaining('useFrontend=1;')
     )
-  })
-
-  test('uuid path', () => {
-    expect(createApiQuery('/266')).toBe('{ uuid(id: 266) { __typename } }')
+    expect(await res.text()).toBe('Disabled: Use of new frontend')
   })
 })
 
 async function handleUrl(url: string): Promise<Response> {
   return (await frontendProxy(new Request(url))) as Response
-}
-
-function createApiResponse(typename: string) {
-  return createJsonResponse({ data: { uuid: { __typename: typename } } })
-}
-
-function createApiErrorResponse() {
-  return createJsonResponse({
-    errors: [{ message: 'error' }],
-    data: { uuid: null },
-  })
-}
-
-async function getCachedType(path: string) {
-  return await global.FRONTEND_CACHE_TYPES_KV.get(path)
 }
 
 function getUrlFor(backend: Backend, url: string) {

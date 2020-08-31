@@ -1,3 +1,5 @@
+import { createJsonResponse } from '../src/utils'
+
 /**
  * This file is part of Serlo.org Cloudflare Worker.
  *
@@ -32,12 +34,6 @@ export function expectContentTypeIsHtml(response: Response): void {
   expect(response.headers.get('Content-Type')).toBe('text/html;charset=utf-8')
 }
 
-export function expectContentTypeIsJson(response: Response): void {
-  expect(response.headers.get('Content-Type')).toBe(
-    'application/json;charset=utf-8'
-  )
-}
-
 export function expectHasOkStatus(response: Response): void {
   expect(response).not.toBeNull()
   expect(response.status).toBe(200)
@@ -64,6 +60,15 @@ export async function expectIsJsonResponse(
   expect(JSON.parse(await response.text())).toEqual(targetJson)
 }
 
+export function createApiResponse(uuid: {
+  __typename: string
+  alias?: string
+  username?: string
+  pages?: { alias: string }[]
+}) {
+  return createJsonResponse({ data: { uuid } })
+}
+
 type ResponseSpec = string | Response
 type FetchSpec = Record<string, ResponseSpec>
 
@@ -84,7 +89,8 @@ export class FetchMock {
     private mockedFetch: jest.Mock<any, [RequestInfo, RequestInit | undefined]>
   ) {}
 
-  get mock() {
+  get mock(): jest.Mock<any, [RequestInfo, RequestInit | undefined]> &
+    typeof global.fetch {
     return this.mockedFetch
   }
 
@@ -134,14 +140,16 @@ export class FetchMock {
   }
 }
 
-export function mockKV(name: string, values: Record<string, unknown>) {
-  // @ts-expect-error
+type KV_NAMES = 'MAINTENANCE_KV' | 'PACKAGES_KV' | 'PATH_INFO_KV'
+
+export function mockKV(name: KV_NAMES, values: Record<string, string>) {
   global[name] = {
-    async get(key: string) {
+    async get(key: string): Promise<string | null> {
       return Promise.resolve(values[key] ?? null)
     },
 
-    put(key: string, value: unknown, _?: { expirationTtl: number }) {
+    // eslint-disable-next-line @typescript-eslint/require-await
+    async put(key: string, value: string, _?: { expirationTtl: number }) {
       values[key] = value
     },
   }

@@ -1,22 +1,26 @@
-import { fetchApi } from '../api'
 import {
   getSubdomain,
   getPathname,
   hasContentApiParameters,
-  getQueryString,
-} from '../url-utils'
-import { getCookieValue } from '../utils'
+  getPathnameWithoutTrailingSlash,
+} from './url-utils'
+import { getCookieValue, isInstance, Instance, getPathInfo } from './utils'
 
 export async function frontendProxy(
   request: Request
 ): Promise<Response | null> {
   const probability = Number(global.FRONTEND_PROBABILITY)
   const allowedTypes = JSON.parse(global.FRONTEND_ALLOWED_TYPES) as string[]
+  const supportInternationalization =
+    global.FRONTEND_SUPPORT_INTERNATIONALIZATION === 'true'
 
   const url = request.url
   const path = getPathname(url)
+  const instance = getSubdomain(url)
 
-  if (getSubdomain(url) !== 'de') return null
+  if (instance === null || !isInstance(instance)) return null
+
+  if (!supportInternationalization && instance !== Instance.De) return null
 
   if (path === '/enable-frontend') {
     const response = new Response('Enabled: Use of new frontend')
@@ -42,11 +46,9 @@ export async function frontendProxy(
     path.startsWith('/_next/') ||
     path.startsWith('/_assets/') ||
     path.startsWith('/api/auth/') ||
-    path.startsWith('/api/frontend/') ||
-    path === '/search' ||
-    path === '/spenden'
+    path.startsWith('/api/frontend/')
   )
-    return await fetchBackend(true)
+    return await fetchBackend({ useFrontend: true })
 
   if (
     path === '/auth/login' ||
@@ -61,10 +63,17 @@ export async function frontendProxy(
     (global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND === 'true' &&
       getCookieValue('authenticated', cookies) === '1')
   )
-    return await fetchBackend(false)
+    return await fetchBackend({ useFrontend: false })
+
+  if (path === '/spenden') return await fetchBackend({ useFrontend: true })
+
+  if (path === '/search')
+    return await fetchBackend({ useFrontend: true, pathPrefix: instance })
 
   if (path !== '/') {
-    const typename = await queryTypename(path)
+    const pathInfo = await getPathInfo(instance, path)
+    const typename = pathInfo?.typename ?? null
+
     if (typename === null || !allowedTypes.includes(typename)) return null
   }
 
@@ -73,62 +82,42 @@ export async function frontendProxy(
     ? Math.random()
     : cookieValue
 
-  const response = await fetchBackend(useFrontendNumber <= probability)
+  const response = await fetchBackend({
+    useFrontend: useFrontendNumber <= probability,
+    pathPrefix: instance,
+  })
   if (Number.isNaN(cookieValue))
     setCookieUseFrontend(response, useFrontendNumber)
 
   return response
 
-  async function fetchBackend(useFrontend: boolean) {
-    const backendUrl = useFrontend
-      ? `https://${frontendDomain}${getPathname(request.url)}${getQueryString(
-          request.url
-        )}`
-      : request.url
-    const response = await fetch(new Request(backendUrl, request))
+  async function fetchBackend({
+    useFrontend,
+    pathPrefix,
+  }: {
+    useFrontend: boolean
+    pathPrefix?: Instance
+  }) {
+    const backendUrl = new URL(request.url)
+
+    if (useFrontend) {
+      backendUrl.hostname = frontendDomain
+
+      if (supportInternationalization && pathPrefix !== undefined)
+        backendUrl.pathname = `/${pathPrefix}${backendUrl.pathname}`
+
+      backendUrl.pathname = getPathnameWithoutTrailingSlash(backendUrl.href)
+    }
+
+    const response = await fetch(new Request(backendUrl.href, request))
 
     return new Response(response.body, response)
   }
 
   function setCookieUseFrontend(res: Response, useFrontend: number) {
-    res.headers.append('Set-Cookie', `useFrontend=${useFrontend}; path=/`)
+    res.headers.append(
+      'Set-Cookie',
+      `useFrontend=${useFrontend}; path=/; domain=.${global.DOMAIN}`
+    )
   }
-
-  async function queryTypename(path: string): Promise<string | null> {
-    if (path.startsWith('/user/profile/')) {
-      return 'User'
-    }
-
-    const cachedType = await global.FRONTEND_CACHE_TYPES_KV.get(path)
-    if (cachedType !== null) return cachedType
-
-    const apiResponse = await fetchApi(global.API_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: createApiQuery(path) }),
-    })
-    const apiResult = (await apiResponse.json()) as {
-      data: {
-        uuid: {
-          __typename: string
-        } | null
-      } | null
-    } | null
-    const typename = apiResult?.data?.uuid?.__typename ?? null
-
-    if (typename !== null)
-      await global.FRONTEND_CACHE_TYPES_KV.put(path, typename, {
-        expirationTtl: 60 * 60,
-      })
-
-    return typename
-  }
-}
-
-export function createApiQuery(path: string): string {
-  const query = /^\/\d+$/.test(path)
-    ? `id: ${path.slice(1)}`
-    : `alias: { instance: de, path: "${path}" }`
-
-  return `{ uuid(${query}) { __typename } }`
 }

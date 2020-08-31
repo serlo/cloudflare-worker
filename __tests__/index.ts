@@ -24,6 +24,7 @@ import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 
 import { handleRequest } from '../src'
+import { createJsonResponse } from '../src/utils'
 import { mockKV, mockFetch, FetchMock } from './_helper'
 
 const server = setupServer()
@@ -122,6 +123,97 @@ describe('Redirects', () => {
     const response = await handleUrl('https://www.serlo.local/foo')
 
     expectToBeRedirectTo(response, 'https://de.serlo.local/foo', 302)
+  })
+
+  describe('redirects to current path of an resource', () => {
+    beforeEach(() => {
+      global.API_ENDPOINT = 'https://api.serlo.org/graphql'
+    })
+
+    test('redirects when current path is different than given path', async () => {
+      mockFetch({
+        'https://api.serlo.org/graphql': createJsonResponse({
+          data: { uuid: { __typename: 'Article', alias: '/current-path' } },
+        }),
+      })
+
+      const response = await handleUrl('https://en.serlo.org/path')
+
+      expectToBeRedirectTo(response, 'https://en.serlo.org/current-path', 301)
+    })
+
+    test('no redirect when current path is different than given path and XMLHttpRequest', async () => {
+      mockFetch({
+        'https://en.serlo.org/path': 'article content',
+        'https://api.serlo.org/graphql': createJsonResponse({
+          data: { uuid: { __typename: 'Article', alias: '/current-path' } },
+        }),
+      })
+
+      const response = await handleRequest(
+        new Request('https://en.serlo.org/path', {
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+        })
+      )
+
+      expect(await response.text()).toBe('article content')
+    })
+
+    test('no redirect when current path is the same as given path', async () => {
+      mockFetch({
+        'https://en.serlo.org/path': 'article content',
+        'https://api.serlo.org/graphql': createJsonResponse({
+          data: { uuid: { __typename: 'Article', alias: '/path' } },
+        }),
+      })
+
+      const response = await handleUrl('https://en.serlo.org/path')
+
+      expect(await response.text()).toBe('article content')
+    })
+
+    test('no redirect when current path cannot be requested', async () => {
+      mockFetch({
+        'https://en.serlo.org/path': 'article content',
+        'https://api.serlo.org/graphql': 'malformed json',
+      })
+
+      const response = await handleUrl('https://en.serlo.org/path')
+
+      expect(await response.text()).toBe('article content')
+    })
+
+    describe('handles URL encodings correctly', () => {
+      test('API result is URL encoded', async () => {
+        mockFetch({
+          'https://de.serlo.org/größen': 'article content',
+          'https://api.serlo.org/graphql': createJsonResponse({
+            data: {
+              uuid: { __typename: 'Article', alias: '/gr%C3%B6%C3%9Fen' },
+            },
+          }),
+        })
+
+        const response = await handleUrl('https://de.serlo.org/größen')
+
+        expect(await response.text()).toBe('article content')
+      })
+
+      test('API result is not URL encoded', async () => {
+        mockFetch({
+          'https://de.serlo.org/größen': 'article content',
+          'https://api.serlo.org/graphql': createJsonResponse({
+            data: { uuid: { __typename: 'Article', alias: '/größen' } },
+          }),
+        })
+
+        const response = await handleUrl('https://de.serlo.org/größen')
+
+        expect(await response.text()).toBe('article content')
+      })
+    })
   })
 })
 

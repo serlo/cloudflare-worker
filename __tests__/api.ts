@@ -74,9 +74,10 @@ describe('fetchApi()', () => {
     global.API_SECRET = 'my-secret'
 
     fetch = mockFetch({ 'https://api.serlo.org/': '{ "result": 42 }' })
-    response = await fetchApi('https://api.serlo.org/', {
+    const request = new Request('https://api.serlo.org/', {
       headers: { 'Content-Type': 'application/json' },
     })
+    response = await fetchApi(request)
   })
 
   test('returns the result of fetch()', async () => {
