@@ -180,8 +180,8 @@ describe('fetchWithCache()', () => {
   test('responses are cached for 1 hour', async () => {
     serverMock('http://example.com/', 'test');
 
-    const fetchWithCache = jest.fn().mockResolvedValueOnce(new Response('http://example.com/'))
-    await fetchWithCache()
-    expect(fetchWithCache).toHaveBeenCalledWith('http://example.com/', {cf: { cacheTtl: 3600 }}) 
+    await fetchWithCache('http://example.com/')
+
+    expect(fetch).toHaveBeenCalledWith('http://example.com/', {cf: { cacheTtl: 3600 }}) 
   })
 })
