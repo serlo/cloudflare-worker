@@ -437,7 +437,7 @@ describe('fetchWithCache()', () => {
   })
 
   test('responses are cached for 1 hour', async () => {
-    serverMock('http://example.com/', 'test')
+    serverMock('http://example.com/', '')
 
     await fetchWithCache('http://example.com/')
 
