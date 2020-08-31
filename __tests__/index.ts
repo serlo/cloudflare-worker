@@ -47,10 +47,10 @@ beforeEach(() => {
   fetch = mockFetch()
 })
 
-function serverMock(url_e: string, body_e: string) {
+function serverMock(url: string, body: string) {
   server.use(
     rest.get(url_e, (_req, res, ctx) => {
-      return res.once(ctx.status(200), ctx.body(body_e))
+      return res.once(ctx.status(200), ctx.body(body))
     })
   )
 }

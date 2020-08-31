@@ -21,7 +21,7 @@
  */
 // eslint-disable-next-line import/no-unassigned-import
 import '@testing-library/jest-dom'
-import fetch, { Response as NodeResponse, Request as NodeRequest } from 'node-fetch'
+import fetchNode, { Response as NodeResponse, Request as NodeRequest } from 'node-fetch'
 
 import { extendExpect } from './__tests__/_extend-jest'
 import { mockKV } from './__tests__/_helper'
@@ -40,7 +40,7 @@ beforeEach(() => {
   global.FRONTEND_DOMAIN = 'frontend.serlo.org'
   global.FRONTEND_PROBABILITY = '1'
   global.FRONTEND_ALLOWED_TYPES = '[]'
-  global.fetch = jest.fn().mockImplementation(fetch)
+  global.fetch = jest.fn().mockImplementation(fetchNode)
 
   mockKV('MAINTENANCE_KV', {})
   mockKV('PATH_INFO_KV', {})
