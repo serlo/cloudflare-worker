@@ -159,7 +159,7 @@ test('NotFoundResponse', async () => {
   await expectIsNotFoundResponse(createNotFoundResponse())
 })
 
-function serverMock(url_e: string, body_e: string){
+function serverMock(url_e: string, body_e: string) {
   server.use(
     rest.get(url_e, (_req, res, ctx) => {
       return res.once(ctx.status(200), ctx.body(body_e))
@@ -169,8 +169,7 @@ function serverMock(url_e: string, body_e: string){
 
 describe('fetchWithCache()', () => {
   test('returns the result of fetch()', async () => {
-
-    serverMock('http://example.com/', 'test');
+    serverMock('http://example.com/', 'test')
 
     const response = await fetchWithCache('http://example.com/')
 
@@ -178,10 +177,12 @@ describe('fetchWithCache()', () => {
   })
 
   test('responses are cached for 1 hour', async () => {
-    serverMock('http://example.com/', 'test');
+    serverMock('http://example.com/', 'test')
 
     await fetchWithCache('http://example.com/')
 
-    expect(fetch).toHaveBeenCalledWith('http://example.com/', {cf: { cacheTtl: 3600 }}) 
+    expect(fetch).toHaveBeenCalledWith('http://example.com/', {
+      cf: { cacheTtl: 3600 },
+    })
   })
 })
