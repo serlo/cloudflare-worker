@@ -28,8 +28,8 @@ import {
   createNotFoundResponse,
   createPreactResponse,
   fetchWithCache,
-  isLanguageCode,
-  LanguageCode,
+  isInstance,
+  Instance,
   markdownToHtml,
   sanitizeHtml,
 } from '../utils'
@@ -46,7 +46,7 @@ import {
   UnrevisedType,
 } from './config'
 
-const defaultLanguage = LanguageCode.En
+const defaultLanguage = Instance.En
 
 export {
   RevisedType,
@@ -59,7 +59,7 @@ export {
 
 export interface Page extends Spec {
   title: string
-  lang: LanguageCode
+  lang: Instance
 }
 
 export interface RevisedPage extends Page, RevisedSpec {
@@ -78,7 +78,7 @@ export async function staticPages(
   const lang = getSubdomain(request.url)
 
   if (lang === null) return null
-  if (!isLanguageCode(lang)) return null
+  if (!isInstance(lang)) return null
 
   const path = getPathnameWithoutTrailingSlash(request.url)
 
@@ -177,7 +177,7 @@ export function RevisedPage({ page }: { page: WithContent<RevisedPage> }) {
 
   function getAlert() {
     switch (page.lang) {
-      case LanguageCode.De:
+      case Instance.De:
         return (
           <Fragment>
             Dies ist eine archivierte Version. Schaue Dir die{' '}
@@ -185,7 +185,7 @@ export function RevisedPage({ page }: { page: WithContent<RevisedPage> }) {
             <a href={`/${page.revisedType}/archive`}>frühere Versionen</a> an.
           </Fragment>
         )
-      case LanguageCode.En:
+      case Instance.En:
       default:
         return (
           <Fragment>
@@ -199,14 +199,14 @@ export function RevisedPage({ page }: { page: WithContent<RevisedPage> }) {
 
   function getArchiveDescription() {
     switch (page.lang) {
-      case LanguageCode.De:
+      case Instance.De:
         return (
           <Fragment>
             Frühere Versionen findest Du im{' '}
             <a href={`/${page.revisedType}/archive`}>Archiv</a>.
           </Fragment>
         )
-      case LanguageCode.En:
+      case Instance.En:
       default:
         return (
           <Fragment>
@@ -219,13 +219,13 @@ export function RevisedPage({ page }: { page: WithContent<RevisedPage> }) {
 
   function getSubHeader() {
     switch (page.lang) {
-      case LanguageCode.De:
+      case Instance.De:
         return (
           <Fragment>
             wirksam ab dem {page.revisionDate.toLocaleDateString(page.lang)}
           </Fragment>
         )
-      case LanguageCode.En:
+      case Instance.En:
       default:
         return (
           <Fragment>
@@ -259,9 +259,9 @@ export function RevisionsOverview({ revisions }: { revisions: RevisedPage[] }) {
 
   function getTitle() {
     switch (current.lang) {
-      case LanguageCode.De:
+      case Instance.De:
         return `Aktualisierungen: ${current.title}`
-      case LanguageCode.En:
+      case Instance.En:
       default:
         return `Updates: ${current.title}`
     }
@@ -269,7 +269,7 @@ export function RevisionsOverview({ revisions }: { revisions: RevisedPage[] }) {
 
   function renderRevision(rev: RevisedPage) {
     switch (current.lang) {
-      case LanguageCode.De:
+      case Instance.De:
         return (
           <Fragment>
             {rev.isCurrentRevision
@@ -277,7 +277,7 @@ export function RevisionsOverview({ revisions }: { revisions: RevisedPage[] }) {
               : rev.revisionDate.toLocaleDateString(rev.lang)}
           </Fragment>
         )
-      case LanguageCode.En:
+      case Instance.En:
       default:
         return (
           <Fragment>
@@ -291,9 +291,9 @@ export function RevisionsOverview({ revisions }: { revisions: RevisedPage[] }) {
 
   function getDescription() {
     switch (current.lang) {
-      case LanguageCode.De:
+      case Instance.De:
         return <Fragment>Du findest hier frühere Versionen:</Fragment>
-      case LanguageCode.En:
+      case Instance.En:
       default:
         return (
           <Fragment>In this archive, you can see all past versions:</Fragment>
@@ -331,10 +331,10 @@ export function findRevisionById<A extends RevisedSpec>(
 
 export function getRevisions(
   config: RevisedConfig,
-  lang: LanguageCode,
+  lang: Instance,
   revisedType: RevisedType,
   getTitle: (revisedType: RevisedType) => string = (x) =>
-    titles[x][lang] || titles[x][LanguageCode.En] || ''
+    titles[x][lang] || titles[x][Instance.En] || ''
 ): RevisedPage[] | null {
   const result = getSpecAndLanguage(config, lang, revisedType)
 
@@ -358,10 +358,10 @@ export function getRevisions(
 
 export function getPage(
   config: UnrevisedConfig,
-  lang: LanguageCode,
+  lang: Instance,
   unrevisedType: UnrevisedType,
   getTitle: (unrevisedType: UnrevisedType) => string = (x) =>
-    titles[x][lang] || titles[x][LanguageCode.En] || ''
+    titles[x][lang] || titles[x][Instance.En] || ''
 ): Page | null {
   const result = getSpecAndLanguage(config, lang, unrevisedType)
 
@@ -372,9 +372,9 @@ export function getPage(
 
 function getSpecAndLanguage<A extends string, B>(
   config: Config<A, B>,
-  lang: LanguageCode,
+  lang: Instance,
   kind: A
-): { spec: B; lang: LanguageCode } | null {
+): { spec: B; lang: Instance } | null {
   // See https://stackoverflow.com/q/60400208 why the typecast is necessary
   const result = config[lang]?.[kind] as B | undefined
 
