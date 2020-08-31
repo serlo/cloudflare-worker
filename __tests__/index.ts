@@ -20,12 +20,11 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-import { rest} from 'msw'
+import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 
 import { handleRequest } from '../src'
 import { mockKV, mockFetch, FetchMock } from './_helper'
-
 
 const server = setupServer()
 
@@ -47,6 +46,13 @@ beforeEach(() => {
   fetch = mockFetch()
 })
 
+function serverMock(url_e: string, body_e: string){
+  server.use(
+    rest.get(url_e, (_req, res, ctx) => {
+      return res.once(ctx.status(200), ctx.body(body_e))
+    })
+  )
+}
 
 describe('Enforce HTTPS', () => {
   test('HTTP URL', async () => {
@@ -56,12 +62,7 @@ describe('Enforce HTTPS', () => {
   })
 
   test('HTTPS URL', async () => {
-
-    server.use(
-      rest.get('https://foo.serlo.local/bar', (_req, res, ctx) => {
-        return res.once(ctx.status(200), ctx.body('test'))
-      })
-    )
+    serverMock('https://foo.serlo.local/bar','')
 
     fetch.mockRequest({ to: 'https://foo.serlo.local/bar' })
 
@@ -71,12 +72,7 @@ describe('Enforce HTTPS', () => {
   })
 
   test('Pact Broker', async () => {
-
-    server.use(
-      rest.get('https://foo.serlo.local/bar', (_req, res, ctx) => {
-        return res.once(ctx.status(200), ctx.body('test'))
-      })
-    )
+    serverMock('http://pacts.serlo.local/bar','')
 
     fetch.mockRequest({ to: 'http://pacts.serlo.local/bar' })
 
@@ -130,13 +126,9 @@ describe('Redirects', () => {
 })
 
 describe('Semantic file names', () => {
+  
   test('assets.serlo.org/meta/*', async () => {
-
-    server.use(
-      rest.get('https://assets.serlo.org/meta/foo', (_req, res, ctx) => {
-        return res.once(ctx.status(200), ctx.body('https://assets.serlo.org/meta/foo'))
-      })
-    )
+    serverMock('https://assets.serlo.org/meta/foo','');
 
     fetch.mockRequest({ to: 'https://assets.serlo.org/meta/foo' })
 
@@ -146,12 +138,7 @@ describe('Semantic file names', () => {
   })
 
   test('assets.serlo.org/<hash>/<fileName>.<ext>', async () => {
-
-    server.use(
-      rest.get('https://assets.serlo.org/hash.ext', (_req, res, ctx) => {
-        return res.once(ctx.status(200), ctx.body('https://assets.serlo.org/hash.ext'))
-      })
-    )
+    serverMock('https://assets.serlo.org/hash.ext','')
 
     fetch.mockRequest({ to: 'https://assets.serlo.org/hash.ext' })
 
@@ -161,12 +148,7 @@ describe('Semantic file names', () => {
   })
 
   test('assets.serlo.org/legacy/<hash>/<fileName>.<ext>', async () => {
-
-    server.use(
-      rest.get('https://assets.serlo.org/hash.ext', (_req, res, ctx) => {
-        return res.once(ctx.status(200), ctx.body(_req))
-      })
-    )
+    serverMock('https://assets.serlo.org/legacy/hash.ext','');
 
     fetch.mockRequest({ to: 'https://assets.serlo.org/legacy/hash.ext' })
 
@@ -178,14 +160,8 @@ describe('Semantic file names', () => {
 })
 
 describe('Packages', () => {
-
   test('packages.serlo.org/<package>/<filePath>', async () => {
-
-    server.use(
-      rest.get('https://packages.serlo.org/foo@1.0.0/bar', (_req, res, ctx) => {
-        return res.once(ctx.status(200), ctx.body('https://packages.serlo.org/foo@1.0.0/bar'))
-      })
-    )
+    serverMock('https://packages.serlo.org/foo@1.0.0/bar','');
 
     mockKV('PACKAGES_KV', { foo: 'foo@1.0.0' })
     fetch.mockRequest({ to: 'https://packages.serlo.org/foo@1.0.0/bar' })
@@ -197,13 +173,9 @@ describe('Packages', () => {
   })
 
   test('packages.serlo.org/<package>/<filePath> (invalid)', async () => {
+   
+    serverMock('https://packages.serlo.org/foobar/bar','');
 
-    server.use(
-      rest.get('https://packages.serlo.org/foobar/bar', (_req, res, ctx) => {
-        return res.once(ctx.status(200), ctx.body('https://packages.serlo.org/foobar/bar'))
-      })
-    )
-    
     mockKV('PACKAGES_KV', { foo: 'foo@1.0.0' })
     fetch.mockRequest({ to: 'https://packages.serlo.org/foobar/bar' })
 
