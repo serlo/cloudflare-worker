@@ -32,7 +32,6 @@ const randomCopy = Math.random
 
 afterEach(() => {
   Math.random = randomCopy
-  global.fetch = jest.fn().mockImplementation(fetch)
 })
 
 beforeEach(() => {
@@ -41,6 +40,7 @@ beforeEach(() => {
   global.FRONTEND_DOMAIN = 'frontend.serlo.org'
   global.FRONTEND_PROBABILITY = '1'
   global.FRONTEND_ALLOWED_TYPES = '[]'
+  global.fetch = jest.fn().mockImplementation(fetch)
 
   mockKV('MAINTENANCE_KV', {})
 })

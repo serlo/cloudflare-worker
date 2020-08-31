@@ -20,7 +20,7 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-import { rest} from 'msw'
+import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import { h } from 'preact'
 
@@ -36,7 +36,6 @@ import {
   createNotFoundResponse,
 } from '../src/utils'
 import {
-  mockFetch,
   expectContainsText,
   expectHasOkStatus,
   expectContentTypeIsHtml,
@@ -160,45 +159,29 @@ test('NotFoundResponse', async () => {
   await expectIsNotFoundResponse(createNotFoundResponse())
 })
 
+function serverMock(url_e: string, body_e: string){
+  server.use(
+    rest.get(url_e, (_req, res, ctx) => {
+      return res.once(ctx.status(200), ctx.body(body_e))
+    })
+  )
+}
+
 describe('fetchWithCache()', () => {
   test('returns the result of fetch()', async () => {
-    server.use(
-      rest.get('http://example.com/', (_req, res, ctx) => {
-        return res.once(ctx.status(200), ctx.body('test'))
-      })
-    )
+
+    serverMock('http://example.com/', 'test');
 
     const response = await fetchWithCache('http://example.com/')
 
     expect(await response.text()).toBe('test')
   })
 
-  test('responses are cached for 1 hour' , async () => {
-    server.use(
-      rest.get('http://example.com/', (_req, res, ctx) => {
-        return res.once(ctx.status(200), ctx.body('test'))
-      })
-    )
-    const fetchMock = jest.fn().mockResolvedValueOnce(new Response('http://example.com/'))
-
-    await fetchMock('http://example.com/')
-  })
-})
-
-/*
   test('responses are cached for 1 hour', async () => {
-    
-    const fetchMock = jest.fn().mockResolvedValueOnce(new Response('http://example.com/'))
+    serverMock('http://example.com/', 'test');
 
-      expect(Response).toBeNull()
-      expect(fetch).not.toHaveBeenCalled()
-    //const fetchMock = jest.fn().mockResolvedValueOnce(new Response(''))
-
-    await fetchWithCache('http://example.com/', undefined)    
-    
-    expect(fetch).toHaveBeenCalledWith('http://example.com/', {cf: { cacheTtl: 3600 }})
-    
+    const fetchWithCache = jest.fn().mockResolvedValueOnce(new Response('http://example.com/'))
+    await fetchWithCache()
+    expect(fetchWithCache).toHaveBeenCalledWith('http://example.com/', {cf: { cacheTtl: 3600 }}) 
   })
-
 })
-*/
