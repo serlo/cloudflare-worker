@@ -4,7 +4,7 @@ import { expectIsJsonResponse } from './_helper'
 test('Frontend Sector Identifier URI Validation (block localhost)', async () => {
   global.ALLOW_AUTH_FROM_LOCALHOST = 'false'
   global.DOMAIN = 'serlo.org'
-  
+
   const response = await handleRequest(
     new Request('https://serlo.org/auth/frontend-redirect-uris.json')
   )
