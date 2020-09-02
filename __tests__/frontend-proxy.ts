@@ -582,24 +582,50 @@ describe('handleRequest()', () => {
     })
   })
 
-  test('requests to /enable-frontend enable use of frontend', async () => {
-    const res = await handleUrl('https://de.serlo.org/enable-frontend')
+  describe('requests to /enable-frontend enable use of frontend', () => {
+    let res: Response
 
-    expectHasOkStatus(res)
-    expect(res.headers.get('Set-Cookie')).toEqual(
-      expect.stringContaining('useFrontend=0;')
-    )
-    expect(await res.text()).toBe('Enabled: Use of new frontend')
+    beforeEach(async () => {
+      res = await handleUrl('https://de.serlo.org/enable-frontend')
+    })
+
+    test('shows message that frontend was enabled', async () => {
+      expectHasOkStatus(res)
+      expect(await res.text()).toBe('Enabled: Use of new frontend')
+    })
+
+    test('sets cookie so that new frontend will be used', () => {
+      expect(res.headers.get('Set-Cookie')).toEqual(
+        expect.stringContaining('useFrontend=0;')
+      )
+    })
+
+    test('main page will be loaded after 1 second', () => {
+      expect(res.headers.get('Refresh')).toBe('1; url=/')
+    })
   })
 
-  test('requests to /disable-frontend disable use of frontend', async () => {
-    const res = await handleUrl('https://de.serlo.org/disable-frontend')
+  describe('requests to /disable-frontend disable use of frontend', () => {
+    let res: Response
 
-    expectHasOkStatus(res)
-    expect(res.headers.get('Set-Cookie')).toEqual(
-      expect.stringContaining('useFrontend=1;')
-    )
-    expect(await res.text()).toBe('Disabled: Use of new frontend')
+    beforeEach(async () => {
+      res = await handleUrl('https://de.serlo.org/disable-frontend')
+    })
+
+    test('shows message that frontend use is disabled', async () => {
+      expectHasOkStatus(res)
+      expect(await res.text()).toBe('Disabled: Use of new frontend')
+    })
+
+    test('sets cookie to that legacy backend will be used', () => {
+      expect(res.headers.get('Set-Cookie')).toEqual(
+        expect.stringContaining('useFrontend=1;')
+      )
+    })
+
+    test('main page will be loaded after 1 second', () => {
+      expect(res.headers.get('Refresh')).toBe('1; url=/')
+    })
   })
 })
 

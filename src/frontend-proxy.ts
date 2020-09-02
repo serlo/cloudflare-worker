@@ -22,21 +22,11 @@ export async function frontendProxy(
 
   if (!supportInternationalization && instance !== Instance.De) return null
 
-  if (path === '/enable-frontend') {
-    const response = new Response('Enabled: Use of new frontend')
+  if (path === '/enable-frontend')
+    return createConfigurationResponse('Enabled: Use of new frontend', 0)
 
-    setCookieUseFrontend(response, 0)
-
-    return response
-  }
-
-  if (path === '/disable-frontend') {
-    const response = new Response('Disabled: Use of new frontend')
-
-    setCookieUseFrontend(response, 1)
-
-    return response
-  }
+  if (path === '/disable-frontend')
+    return createConfigurationResponse('Disabled: Use of new frontend', 1)
 
   const cookies = request.headers.get('Cookie')
   const frontendDomain =
@@ -112,6 +102,15 @@ export async function frontendProxy(
     const response = await fetch(new Request(backendUrl.href, request))
 
     return new Response(response.body, response)
+  }
+
+  function createConfigurationResponse(message: string, useFrontend: number) {
+    const response = new Response(message)
+
+    setCookieUseFrontend(response, useFrontend)
+    response.headers.set('Refresh', '1; url=/')
+
+    return response
   }
 
   function setCookieUseFrontend(res: Response, useFrontend: number) {
