@@ -109,7 +109,7 @@ describe('handleRequest()', () => {
     expectContentTypeIsHtml(response)
     await expectContainsText(response, [
       '<p>Hello</p>',
-      'wirksam ab dem 12/11/2020',
+      'wirksam ab dem 11.12.2020',
     ])
   })
 
@@ -123,7 +123,7 @@ describe('handleRequest()', () => {
     expectContentTypeIsHtml(response)
     await expectContainsText(response, [
       '<p>Hello</p>',
-      'wirksam ab dem 10/9/1999',
+      'wirksam ab dem 9.10.1999',
     ])
   })
 
@@ -136,7 +136,7 @@ describe('handleRequest()', () => {
     await expectContainsText(response, [
       '<h1>Aktualisierungen: Datenschutzerklärung</h1>',
       'Aktuelle Version',
-      '10/9/1999',
+      '9.10.1999',
     ])
   })
 
