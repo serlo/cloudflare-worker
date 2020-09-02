@@ -57,10 +57,7 @@ export async function frontendProxy(
 
   if (path === '/spenden') return await fetchBackend({ useFrontend: true })
 
-  if (path === '/search')
-    return await fetchBackend({ useFrontend: true, pathPrefix: instance })
-
-  if (path !== '/') {
+  if (path !== '/' && path !== '/search') {
     const pathInfo = await getPathInfo(instance, path)
     const typename = pathInfo?.typename ?? null
 
