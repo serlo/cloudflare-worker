@@ -97,6 +97,7 @@ describe('handleRequest()', () => {
           )
         }
       )
+
       test('prepends language prefix for special path /search', async () => {
         setupProbabilityFor(Backend.Frontend)
         fetch.mockRequest({ to: `https://frontend.serlo.org/en/search` })
@@ -184,19 +185,15 @@ describe('handleRequest()', () => {
         })
       })
 
-      describe('/search and /spenden go to legacy backend', () => {
-        test.each([
-          'https://de.serlo.org/search',
-          'https://de.serlo.org/spenden',
-        ])('url = %p', async (url) => {
-          fetch.mockRequest({ to: url })
+      test('/spenden go to legacy backend', async () => {
+        fetch.mockRequest({ to: 'https://de.serlo.org/spenden' })
 
-          const request = new Request(url)
-          request.headers.set('Cookie', 'authenticated=1')
-          await frontendProxy(request)
+        const request = new Request('https://de.serlo.org/spenden')
 
-          expect(fetch).toHaveExactlyOneRequestTo(url)
-        })
+        request.headers.set('Cookie', 'authenticated=1')
+        await frontendProxy(request)
+
+        expect(fetch).toHaveExactlyOneRequestTo('https://de.serlo.org/spenden')
       })
     })
 
@@ -390,16 +387,6 @@ describe('handleRequest()', () => {
       )
     })
 
-    test('requests to /search always resolve to frontend', async () => {
-      fetch.mockRequest({ to: 'https://frontend.serlo.org/search' })
-
-      await handleUrl('https://de.serlo.org/search')
-
-      expect(fetch).toHaveExactlyOneRequestTo(
-        'https://frontend.serlo.org/search'
-      )
-    })
-
     test('requests to /spenden always resolve to frontend', async () => {
       fetch.mockRequest({ to: 'https://frontend.serlo.org/spenden' })
 
@@ -407,6 +394,29 @@ describe('handleRequest()', () => {
 
       expect(fetch).toHaveExactlyOneRequestTo(
         'https://frontend.serlo.org/spenden'
+      )
+    })
+
+    describe('special paths where the cookie determines the backend', () => {
+      describe.each(['https://de.serlo.org/search', 'https://de.serlo.org/'])(
+        'URL = %p',
+        (url) => {
+          test.each([Backend.Frontend, Backend.Legacy])(
+            'backend = %p',
+            async (backend) => {
+              setupProbabilityFor(backend)
+              Math.random = jest.fn().mockReturnValue(0.5)
+              fetch.mockRequest({
+                to: getUrlFor(backend, url),
+                response: backend,
+              })
+
+              const response = await handleUrl(url)
+
+              expect(await response.text()).toBe(backend)
+            }
+          )
+        }
       )
     })
 
@@ -447,8 +457,8 @@ describe('handleRequest()', () => {
     describe('type of special paths is not checked nor cached', () => {
       test.each([
         'https://de.serlo.org/',
-        'https://de.serlo.org/spenden',
         'https://de.serlo.org/search',
+        'https://de.serlo.org/spenden',
         'https://de.serlo.org/_next/script.js',
         'https://de.serlo.org/_assets/image.png',
         'https://de.serlo.org/api/frontend/privacy',
@@ -473,7 +483,6 @@ describe('handleRequest()', () => {
     describe('Predetermined special paths do not set a cookie', () => {
       test.each([
         'https://de.serlo.org/spenden',
-        'https://de.serlo.org/search',
         'https://de.serlo.org/_next/script.js',
         'https://de.serlo.org/_assets/image.png',
         'https://de.serlo.org/api/frontend/privacy',
