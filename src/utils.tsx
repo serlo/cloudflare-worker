@@ -19,7 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { either as E } from 'fp-ts'
+import { either as E, pipeable as P } from 'fp-ts'
 import * as t from 'io-ts'
 import marked from 'marked'
 import { h, VNode } from 'preact'
@@ -40,6 +40,16 @@ export enum Instance {
 
 export function isInstance(code: string): code is Instance {
   return Object.values(Instance).some((x) => x === code)
+}
+
+export function decodePath(path: string): string {
+  return P.pipe(
+    E.tryCatch(
+      () => decodeURIComponent(path),
+      (e) => e
+    ),
+    E.getOrElse((_) => path)
+  )
 }
 
 export function getCookieValue(

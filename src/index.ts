@@ -30,7 +30,7 @@ import {
   getSubdomain,
   getPathname,
 } from './url-utils'
-import { getPathInfo, isInstance } from './utils'
+import { decodePath, getPathInfo, isInstance } from './utils'
 
 addEventListener('fetch', (event: Event) => {
   const e = event as FetchEvent
@@ -122,7 +122,7 @@ async function redirects(request: Request) {
     if (
       request.headers.get('X-Requested-With') !== 'XMLHttpRequest' &&
       pathInfo !== null &&
-      decodeURIComponent(path) != decodeURIComponent(pathInfo.currentPath)
+      decodePath(path) != decodePath(pathInfo.currentPath)
     ) {
       const url = new URL(request.url)
 

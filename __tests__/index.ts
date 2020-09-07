@@ -183,6 +183,19 @@ describe('Redirects', () => {
 
         expect(await response.text()).toBe('article content')
       })
+
+      test('API result is not URL encoded and cannot be decoded', async () => {
+        mockFetch({
+          'https://de.serlo.org/%%x%%': 'article content',
+          'https://api.serlo.org/graphql': createJsonResponse({
+            data: { uuid: { __typename: 'Article', alias: '/%%x%%' } },
+          }),
+        })
+
+        const response = await handleUrl('https://de.serlo.org/%%x%%')
+
+        expect(await response.text()).toBe('article content')
+      })
     })
   })
 })
