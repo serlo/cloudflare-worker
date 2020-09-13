@@ -21,7 +21,11 @@
  */
 // eslint-disable-next-line import/no-unassigned-import
 import '@testing-library/jest-dom'
-import fetchNode, { Response as NodeResponse, Request as NodeRequest } from 'node-fetch'
+import { setupServer } from 'msw/node'
+import fetchNode, {
+  Response as NodeResponse,
+  Request as NodeRequest,
+} from 'node-fetch'
 
 import { extendExpect } from './__tests__/_extend-jest'
 import { mockKV } from './__tests__/_helper'
@@ -54,4 +58,27 @@ global.Request = (NodeRequest as unknown) as typeof Request
 // eslint-disable-next-line @typescript-eslint/unbound-method
 NodeResponse.redirect = function (url: string, status = 302) {
   return new NodeResponse('', { status, headers: { location: url } })
+}
+
+global.server = setupServer()
+
+beforeAll(() => {
+  global.server.listen()
+})
+
+afterEach(() => {
+  global.server.resetHandlers()
+})
+
+afterAll(() => {
+  global.server.close()
+})
+
+/* eslint-disable @typescript-eslint/no-namespace */
+declare global {
+  namespace NodeJS {
+    interface Global {
+      server: ReturnType<typeof import('msw/node').setupServer>
+    }
+  }
 }

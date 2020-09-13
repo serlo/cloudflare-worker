@@ -20,40 +20,13 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-import { rest } from 'msw'
-import { setupServer } from 'msw/node'
-
 import { handleRequest } from '../src'
-import { createJsonResponse } from '../src/utils'
-import { mockKV, mockFetch, FetchMock } from './_helper'
-
-const server = setupServer()
-
-beforeAll(() => {
-  server.listen()
-})
-
-afterEach(() => {
-  server.resetHandlers()
-})
-
-afterAll(() => {
-  server.close()
-})
-
-let fetch: FetchMock
-
-beforeEach(() => {
-  fetch = mockFetch()
-})
-
-function serverMock(url: string, body: string) {
-  server.use(
-    rest.get(url_e, (_req, res, ctx) => {
-      return res.once(ctx.status(200), ctx.body(body))
-    })
-  )
-}
+import {
+  mockKV,
+  serverMock,
+  returnResponseText,
+  returnResponseJson,
+} from './_helper'
 
 describe('Enforce HTTPS', () => {
   test('HTTP URL', async () => {
@@ -63,9 +36,7 @@ describe('Enforce HTTPS', () => {
   })
 
   test('HTTPS URL', async () => {
-    serverMock('https://foo.serlo.local/bar', '')
-
-    fetch.mockRequest({ to: 'https://foo.serlo.local/bar' })
+    serverMock('https://foo.serlo.local/bar', returnResponseText(''))
 
     await handleUrl('https://foo.serlo.local/bar')
 
@@ -73,8 +44,7 @@ describe('Enforce HTTPS', () => {
   })
 
   test('Pact Broker', async () => {
-    serverMock('http://pacts.serlo.local/bar', '')
-
+    serverMock('http://pacts.serlo.local/bar', returnResponseText(''))
 
     await handleUrl('http://pacts.serlo.local/bar')
 
@@ -130,11 +100,15 @@ describe('Redirects', () => {
     })
 
     test('redirects when current path is different than given path', async () => {
+      serverMock('https://api.serlo.org/graphql', returnResponseJson(''))
+
+      /*
       mockFetch({
         'https://api.serlo.org/graphql': createJsonResponse({
           data: { uuid: { __typename: 'Article', alias: '/current-path' } },
         }),
       })
+      */
 
       const response = await handleUrl('https://en.serlo.org/path')
 
@@ -142,12 +116,15 @@ describe('Redirects', () => {
     })
 
     test('no redirect when current path is different than given path and XMLHttpRequest', async () => {
+      serverMock('https://en.serlo.org/path', returnResponseJson(''))
+      /*
       mockFetch({
         'https://en.serlo.org/path': 'article content',
         'https://api.serlo.org/graphql': createJsonResponse({
           data: { uuid: { __typename: 'Article', alias: '/current-path' } },
         }),
       })
+      */
 
       const response = await handleRequest(
         new Request('https://en.serlo.org/path', {
@@ -161,12 +138,15 @@ describe('Redirects', () => {
     })
 
     test('no redirect when current path is the same as given path', async () => {
+      serverMock('https://en.serlo.org/path', returnResponseJson(''))
+      /*
       mockFetch({
         'https://en.serlo.org/path': 'article content',
         'https://api.serlo.org/graphql': createJsonResponse({
           data: { uuid: { __typename: 'Article', alias: '/path' } },
         }),
       })
+      */
 
       const response = await handleUrl('https://en.serlo.org/path')
 
@@ -174,10 +154,13 @@ describe('Redirects', () => {
     })
 
     test('no redirect when current path cannot be requested', async () => {
+      serverMock('https://en.serlo.org/path', returnResponseJson(''))
+      /*
       mockFetch({
         'https://en.serlo.org/path': 'article content',
         'https://api.serlo.org/graphql': 'malformed json',
       })
+      */
 
       const response = await handleUrl('https://en.serlo.org/path')
 
@@ -186,6 +169,8 @@ describe('Redirects', () => {
 
     describe('handles URL encodings correctly', () => {
       test('API result is URL encoded', async () => {
+        serverMock('https://de.serlo.org/größen', returnResponseJson(''))
+        /*
         mockFetch({
           'https://de.serlo.org/größen': 'article content',
           'https://api.serlo.org/graphql': createJsonResponse({
@@ -194,6 +179,7 @@ describe('Redirects', () => {
             },
           }),
         })
+        */
 
         const response = await handleUrl('https://de.serlo.org/größen')
 
@@ -201,12 +187,16 @@ describe('Redirects', () => {
       })
 
       test('API result is not URL encoded', async () => {
+        serverMock('https://de.serlo.org/größen', returnResponseJson(''))
+
+        /*
         mockFetch({
           'https://de.serlo.org/größen': 'article content',
           'https://api.serlo.org/graphql': createJsonResponse({
             data: { uuid: { __typename: 'Article', alias: '/größen' } },
           }),
         })
+        */
 
         const response = await handleUrl('https://de.serlo.org/größen')
 
@@ -218,9 +208,7 @@ describe('Redirects', () => {
 
 describe('Semantic file names', () => {
   test('assets.serlo.org/meta/*', async () => {
-    serverMock('https://assets.serlo.org/meta/foo', '')
-
-    fetch.mockRequest({ to: 'https://assets.serlo.org/meta/foo' })
+    serverMock('https://assets.serlo.org/meta/foo', returnResponseText(''))
 
     await handleUrl('https://assets.serlo.local/meta/foo')
 
@@ -228,9 +216,7 @@ describe('Semantic file names', () => {
   })
 
   test('assets.serlo.org/<hash>/<fileName>.<ext>', async () => {
-    serverMock('https://assets.serlo.org/hash.ext', '')
-
-    fetch.mockRequest({ to: 'https://assets.serlo.org/hash.ext' })
+    serverMock('https://assets.serlo.org/hash.ext', returnResponseText(''))
 
     await handleUrl('https://assets.serlo.local/hash/fileName.ext')
 
@@ -238,9 +224,10 @@ describe('Semantic file names', () => {
   })
 
   test('assets.serlo.org/legacy/<hash>/<fileName>.<ext>', async () => {
-    serverMock('https://assets.serlo.org/legacy/hash.ext', '')
-
-    fetch.mockRequest({ to: 'https://assets.serlo.org/legacy/hash.ext' })
+    serverMock(
+      'https://assets.serlo.org/legacy/hash.ext',
+      returnResponseText('')
+    )
 
     await handleUrl('https://assets.serlo.local/legacy/hash/fileName.ext')
 
@@ -251,10 +238,12 @@ describe('Semantic file names', () => {
 
 describe('Packages', () => {
   test('packages.serlo.org/<package>/<filePath>', async () => {
-    serverMock('https://packages.serlo.org/foo@1.0.0/bar', '')
+    serverMock(
+      'https://packages.serlo.org/foo@1.0.0/bar',
+      returnResponseText('')
+    )
 
     mockKV('PACKAGES_KV', { foo: 'foo@1.0.0' })
-    fetch.mockRequest({ to: 'https://packages.serlo.org/foo@1.0.0/bar' })
 
     await handleUrl('https://packages.serlo.local/foo/bar')
 
@@ -263,10 +252,9 @@ describe('Packages', () => {
   })
 
   test('packages.serlo.org/<package>/<filePath> (invalid)', async () => {
-    serverMock('https://packages.serlo.org/foobar/bar', '')
+    serverMock('https://packages.serlo.org/foobar/bar', returnResponseText(''))
 
     mockKV('PACKAGES_KV', { foo: 'foo@1.0.0' })
-    fetch.mockRequest({ to: 'https://packages.serlo.org/foobar/bar' })
 
     await handleUrl('https://packages.serlo.local/foobar/bar')
 
