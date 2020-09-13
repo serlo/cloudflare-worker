@@ -1,5 +1,3 @@
-import { createJsonResponse } from '../src/utils'
-
 /**
  * This file is part of Serlo.org Cloudflare Worker.
  *
@@ -21,6 +19,18 @@ import { createJsonResponse } from '../src/utils'
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
+
+import { Json } from 'fp-ts/lib/Either'
+import {
+  rest,
+  ResponseResolver,
+  defaultContext,
+  restContext,
+  MockedRequest,
+} from 'msw'
+
+import { createJsonResponse } from '../src/utils'
+
 export async function expectContainsText(response: Response, texts: string[]) {
   expect(response).not.toBeNull()
 
@@ -153,4 +163,18 @@ export function mockKV(name: KV_NAMES, values: Record<string, string>) {
       values[key] = value
     },
   }
+}
+
+type RestResolver = ResponseResolver<MockedRequest, typeof restContext>
+
+export function serverMock(url: string, resolver: RestResolver) {
+  global.server.use(rest.get(url, resolver))
+}
+
+export function returnResponseText(body: string): RestResolver {
+  return (_req, res, ctx) => res.once(ctx.body(body))
+}
+
+export function returnResponseJson(body: any): RestResolver {
+  return (_req, res, ctx) => res.once(ctx.json(body))
 }
