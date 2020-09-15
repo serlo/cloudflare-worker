@@ -1,5 +1,5 @@
 import { api, fetchApi } from '../src/api'
-import { mockFetch, FetchMock, serverMock, returnResponseText } from './_helper'
+import { FetchMock, serverMock, returnResponseText, returnResponseJson } from './_helper'
 
 describe('api()', () => {
   test('uses fetch() for requests to the serlo api', async () => {
@@ -30,7 +30,7 @@ describe('api()', () => {
     test('url without subdomain different than "api"', async () => {
       serverMock(
         'https://stats.serlo.org/graphql',
-        returnResponseText('<api-result>')
+        returnResponseText('api-result')
       )
 
       const response = await api(new Request('https://stats.serlo.org/graphql'))
@@ -43,7 +43,7 @@ describe('api()', () => {
   test('returns null if path is not /graphql', async () => {
     serverMock(
       'https://api.serlo.org/something',
-      returnResponseText('<api-result>')
+      returnResponseText('api-result')
     )
 
     const response = await api(new Request('https://api.serlo.org/something'))
@@ -60,7 +60,11 @@ describe('fetchApi()', () => {
   beforeAll(async () => {
     global.API_SECRET = 'my-secret'
 
-    fetch = mockFetch({ 'https://api.serlo.org/': '{ "result": 42 }' })
+    fetch = serverMock('https://api.serlo.org/',returnResponseJson({
+      headers: { 'Content-Type': 'application/json' }
+    }))
+    //mockFetch({ 'https://api.serlo.org/': '{ "result": 42 }' })
+
     const request = new Request('https://api.serlo.org/', {
       headers: { 'Content-Type': 'application/json' },
     })
@@ -72,14 +76,12 @@ describe('fetchApi()', () => {
   })
 
   test('transfers meta data to fetch()', () => {
-    serverMock('https://api.serlo.org/', returnResponseText('<api-result>'))
 
     const apiRequest = fetch.getRequestTo('https://api.serlo.org/') as Request
     expect(apiRequest.headers.get('Content-Type')).toBe('application/json')
   })
 
   test('sets authorization header', () => {
-    serverMock('https://api.serlo.org/', returnResponseText('<api-result>'))
 
     const apiRequest = fetch.getRequestTo('https://api.serlo.org/') as Request
     expect(apiRequest.headers.get('Authorization')).toMatch(/^Serlo Service=ey/)
