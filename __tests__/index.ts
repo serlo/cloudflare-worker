@@ -100,7 +100,12 @@ describe('Redirects', () => {
     })
 
     test('redirects when current path is different than given path', async () => {
-      serverMock('https://api.serlo.org/graphql', returnResponseJson(''))
+      serverMock(
+        'https://api.serlo.org/graphql',
+        returnResponseJson({
+          data: { uuid: { __typename: 'Article', alias: '/current-path' } },
+        })
+      )
 
       /*
       mockFetch({
@@ -116,7 +121,16 @@ describe('Redirects', () => {
     })
 
     test('no redirect when current path is different than given path and XMLHttpRequest', async () => {
-      serverMock('https://en.serlo.org/path', returnResponseJson(''))
+      serverMock(
+        'https://en.serlo.org/path',
+        returnResponseText('article content')
+      )
+      serverMock(
+        'https://api.serlo.org/graphql',
+        returnResponseJson({
+          data: { uuid: { __typename: 'Article', alias: '/current-path' } },
+        })
+      )
       /*
       mockFetch({
         'https://en.serlo.org/path': 'article content',
@@ -138,7 +152,16 @@ describe('Redirects', () => {
     })
 
     test('no redirect when current path is the same as given path', async () => {
-      serverMock('https://en.serlo.org/path', returnResponseJson(''))
+      serverMock(
+        'https://en.serlo.org/path',
+        returnResponseText('article content')
+      )
+      serverMock(
+        'https://en.serlo.org/path',
+        returnResponseJson({
+          data: { uuid: { __typename: 'Article', alias: '/path' } },
+        })
+      )
       /*
       mockFetch({
         'https://en.serlo.org/path': 'article content',
@@ -154,7 +177,14 @@ describe('Redirects', () => {
     })
 
     test('no redirect when current path cannot be requested', async () => {
-      serverMock('https://en.serlo.org/path', returnResponseJson(''))
+      serverMock(
+        'https://en.serlo.org/path',
+        returnResponseText('article content')
+      )
+      serverMock(
+        'https://api.serlo.org/graphql',
+        returnResponseText('malformed json')
+      )
       /*
       mockFetch({
         'https://en.serlo.org/path': 'article content',
@@ -169,7 +199,18 @@ describe('Redirects', () => {
 
     describe('handles URL encodings correctly', () => {
       test('API result is URL encoded', async () => {
-        serverMock('https://de.serlo.org/größen', returnResponseJson(''))
+        serverMock(
+          'https://de.serlo.org/größen',
+          returnResponseText('article content')
+        )
+        serverMock(
+          'https://de.serlo.org/größen',
+          returnResponseJson({
+            data: {
+              uuid: { __typename: 'Article', alias: '/gr%C3%B6%C3%9Fen' },
+            },
+          })
+        )
         /*
         mockFetch({
           'https://de.serlo.org/größen': 'article content',
@@ -187,7 +228,16 @@ describe('Redirects', () => {
       })
 
       test('API result is not URL encoded', async () => {
-        serverMock('https://de.serlo.org/größen', returnResponseJson(''))
+        serverMock(
+          'https://de.serlo.org/größen',
+          returnResponseText('article content')
+        )
+        serverMock(
+          'https://de.serlo.org/größen',
+          returnResponseJson({
+            data: { uuid: { __typename: 'Article', alias: '/größen' } },
+          })
+        )
 
         /*
         mockFetch({

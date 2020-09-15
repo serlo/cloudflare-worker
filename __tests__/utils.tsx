@@ -45,8 +45,8 @@ import {
   mockFetch,
   serverMock,
   returnResponseText,
+  returnApiResponse
 } from './_helper'
-
 
 describe('getCookieValue()', () => {
   describe('returns the cookie value of a given cookie header', () => {
@@ -95,8 +95,10 @@ describe('getPathInfo()', () => {
   })
 
   test('returns typename and currentPath from api.serlo.org', async () => {
-    serverMock('Article', returnResponseText('/current-path'))
-    
+    serverMock(apiEndpoint, returnApiResponse({
+      __typename: 'Article',
+      alias: '/current-path',
+    }))
 
     const pathInfo = await getPathInfo(Instance.En, '/path')
 
@@ -107,8 +109,10 @@ describe('getPathInfo()', () => {
   })
 
   test('"currentPath" is given path when it does not refer to an entity', async () => {
-    serverMock('ArticleRevision', returnResponseText(''))
-    
+    serverMock(apiEndpoint, returnApiResponse({
+      __typename: 'ArticleRevision',
+      alias: '/path',
+    }))
 
     const pathInfo = await getPathInfo(Instance.En, '/path')
 
@@ -120,9 +124,10 @@ describe('getPathInfo()', () => {
 
   describe('when path describes a User', () => {
     test('when path is "/<id>"', async () => {
-      serverMock('User', returnResponseText('arekkas'))
-
-      
+      serverMock(apiEndpoint, returnApiResponse({
+        __typename: 'User',
+        alias: '/user/profile/arekkas',
+      }))
 
       const pathInfo = await getPathInfo(Instance.En, '/1')
 
@@ -133,8 +138,11 @@ describe('getPathInfo()', () => {
     })
 
     test('when path is "/user/profile/id"', async () => {
-      serverMock('User', returnResponseText('arekkas'))
-  
+      serverMock(apiEndpoint, returnApiResponse({
+        __typename: 'User',
+        alias: '/user/profile/arekkas',
+      }))
+
       const pathInfo = await getPathInfo(Instance.En, '/user/profile/1')
 
       expect(pathInfo).toEqual({
@@ -144,6 +152,10 @@ describe('getPathInfo()', () => {
     })
 
     test('when path is "/user/profile/<username>"', async () => {
+      serverMock(apiEndpoint, returnApiResponse({
+        __typename: 'User',
+        alias: '/user/profile/Kulla',
+      }))
       const pathInfo = await getPathInfo(Instance.En, '/user/profile/Kulla')
 
       expect(pathInfo).toEqual({
@@ -189,12 +201,19 @@ describe('getPathInfo()', () => {
     })
 
     async function getApiRequest(path: string, lang = Instance.En) {
+      serverMock(apiEndpoint, returnApiResponse({
+        __typename: 'Article',
+        alias: path,
+      }))
+
+      
       const fetch = mockFetch({
         [apiEndpoint]: createJsonResponse({
           __typename: 'Article',
           alias: path,
         }),
       })
+      
 
       await getPathInfo(lang, path)
 
@@ -206,13 +225,11 @@ describe('getPathInfo()', () => {
     test('when there was an error with the api call', async () => {
       serverMock('', returnResponseText('/path'))
 
-      expect(await getPathInfo(Instance.En, '/path')).toBeNull()   //delete?!!
+      expect(await getPathInfo(Instance.En, '/path')).toBeNull() //delete?!!
     })
-    
 
     test('when api response is malformed JSON', async () => {
-      serverMock('malformed json', returnResponseText('/path') )
-
+      serverMock('malformed json', returnResponseText('/path'))
 
       expect(await getPathInfo(Instance.En, '/path')).toBeNull() //delete?
     })
@@ -223,10 +240,9 @@ describe('getPathInfo()', () => {
         async () => {
           serverMock('', returnResponseText('/path'))
 
-          expect(await getPathInfo(Instance.En, '/path')).toBeNull()      //delete?!
+          expect(await getPathInfo(Instance.En, '/path')).toBeNull() //delete?!
         }
       )
-      
     })
   })
 
@@ -244,7 +260,7 @@ describe('getPathInfo()', () => {
 
     test('"currentPath" is path of course when list of course pages is empty', async () => {
       serverMock('Course', returnResponseText('/course'))
-      
+
       const pathInfo = await getPathInfo(Instance.En, '/course')
 
       expect(pathInfo).toEqual({
@@ -281,9 +297,8 @@ describe('getPathInfo()', () => {
       const target = { typename: 'Article', currentPath: '/current-path' }
 
       beforeEach(() => {
-        serverMock('Article',returnResponseText('/current-path'))
+        serverMock('Article', returnResponseText('/current-path'))
       })
-  
 
       test('when cached value is malformed JSON', async () => {
         await global.PATH_INFO_KV.put('/en/path', 'malformed json')
@@ -374,7 +389,6 @@ test('JsonResponse', async () => {
 test('NotFoundResponse', async () => {
   await expectIsNotFoundResponse(createNotFoundResponse())
 })
-
 
 describe('fetchWithCache()', () => {
   test('returns the result of fetch()', async () => {

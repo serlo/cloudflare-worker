@@ -24,7 +24,7 @@ import { Json } from 'fp-ts/lib/Either'
 import {
   rest,
   ResponseResolver,
-  defaultContext,
+
   restContext,
   MockedRequest,
 } from 'msw'
@@ -178,3 +178,14 @@ export function returnResponseText(body: string): RestResolver {
 export function returnResponseJson(body: any): RestResolver {
   return (_req, res, ctx) => res.once(ctx.json(body))
 }
+
+export function returnResponseApi(data: unknown) {
+  return returnResponseJson({ data })
+}
+
+/*
+export function returnResponseText(body: string, args : { status? : number }|undefined): RestResolver {
+  const status = args?.status ?? 200
+  return (_req, res, ctx) => res.once(ctx.body(body))|
+ }
+ */
