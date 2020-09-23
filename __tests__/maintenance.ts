@@ -19,15 +19,19 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-
 import { DateTime } from 'luxon'
 
 import { maintenanceMode } from '../src/maintenance'
-import { expectContentTypeIsHtml, expectContainsText, mockKV } from './_helper'
+import { expectContentTypeIsHtml, expectContainsText, mockKV, serverMock, returnResponseJson, returnResponseText } from './_helper'
 
 describe('Maintenance mode', () => {
   test('Disabled (no maintenance planned)', async () => {
+    serverMock('MAINTENANCE_KV', returnResponseJson(''))
+
+    /*
     mockKV('MAINTENANCE_KV', {})
+    because the second element wasn't define i wasn't sure if it was a Json or a text
+    */
 
     expect(await handleUrl('https://de.serlo.org')).toBeNull()
   })
@@ -38,9 +42,15 @@ describe('Maintenance mode', () => {
       end: DateTime.local().plus({ minutes: 20 }).toISO(),
       subdomains: ['de'],
     }
+
+    serverMock('MAINTENANCE_KV',returnResponseJson({value}))
+
+    /*
     mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
+    replace this with the servermock above, but wasn't sure about the returnResponseJson
+    */
 
     expect(await handleUrl('https://de.serlo.org')).toBeNull()
   })
@@ -51,9 +61,14 @@ describe('Maintenance mode', () => {
       end: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['de'],
     }
+
+    serverMock('MAINTENANCE_KV',returnResponseJson({value}))
+
+    /*
     mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
+    */
 
     expect(await handleUrl('https://de.serlo.org')).toBeNull()
   })
@@ -65,9 +80,13 @@ describe('Maintenance mode', () => {
       end: end.toISO(),
       subdomains: ['de'],
     }
+
+    serverMock('MAINTENANCE_KV',returnResponseJson({value}))
+
+    /*
     mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
-    })
+    }*/
 
     const response = await handleUrl('https://de.serlo.org')
     expect(response.status).toEqual(503)
@@ -86,9 +105,14 @@ describe('Maintenance mode', () => {
       end: end.toISO(),
       subdomains: ['en'],
     }
+
+    serverMock('MAINTENANCE_KV',returnResponseJson({value}))
+
+    /*
     mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
+    */
 
     const response = await handleUrl('https://en.serlo.org')
     expect(response.status).toEqual(503)
@@ -105,9 +129,14 @@ describe('Maintenance mode', () => {
       start: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['de'],
     }
+
+    serverMock('MAINTENANCE_KV',returnResponseJson({value}))
+
+    /*
     mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
+    */
 
     const response = await handleUrl('https://de.serlo.org')
     expect(response.status).toEqual(503)
@@ -123,9 +152,14 @@ describe('Maintenance mode', () => {
       start: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['en'],
     }
+
+    serverMock('MAINTENANCE_KV',returnResponseJson({value}))
+
+    /*
     mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
+    */
 
     const response = await handleUrl('https://en.serlo.org')
     expect(response.status).toEqual(503)
@@ -143,9 +177,14 @@ describe('Maintenance mode', () => {
       end: end.toISO(),
       subdomains: ['en'],
     }
+
+    serverMock('MAINTENANCE_KV',returnResponseJson({value}))
+
+    /*
     mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
+    */
 
     expect(await handleUrl('https://de.serlo.org')).toBeNull()
   })
@@ -155,9 +194,14 @@ describe('Maintenance mode', () => {
       start: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['en'],
     }
+
+    serverMock('MAINTENANCE_KV',returnResponseJson({value}))
+
+    /*
     mockKV('MAINTENANCE_KV', {
       enabled: JSON.stringify(value),
     })
+    */
 
     expect(await handleUrl('https://de.serlo.org')).toBeNull()
   })
