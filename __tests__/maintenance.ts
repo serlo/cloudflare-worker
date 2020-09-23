@@ -22,7 +22,14 @@
 import { DateTime } from 'luxon'
 
 import { maintenanceMode } from '../src/maintenance'
-import { expectContentTypeIsHtml, expectContainsText, mockKV, serverMock, returnResponseJson, returnResponseText } from './_helper'
+import {
+  expectContentTypeIsHtml,
+  expectContainsText,
+  mockKV,
+  serverMock,
+  returnResponseJson,
+  returnResponseText,
+} from './_helper'
 
 describe('Maintenance mode', () => {
   test('Disabled (no maintenance planned)', async () => {
@@ -43,7 +50,7 @@ describe('Maintenance mode', () => {
       subdomains: ['de'],
     }
 
-    serverMock('MAINTENANCE_KV',returnResponseJson({value}))
+    serverMock('MAINTENANCE_KV', returnResponseJson({ value }))
 
     /*
     mockKV('MAINTENANCE_KV', {
@@ -62,7 +69,7 @@ describe('Maintenance mode', () => {
       subdomains: ['de'],
     }
 
-    serverMock('MAINTENANCE_KV',returnResponseJson({value}))
+    serverMock('MAINTENANCE_KV', returnResponseJson({ value }))
 
     /*
     mockKV('MAINTENANCE_KV', {
@@ -81,7 +88,7 @@ describe('Maintenance mode', () => {
       subdomains: ['de'],
     }
 
-    serverMock('MAINTENANCE_KV',returnResponseJson({value}))
+    serverMock('MAINTENANCE_KV', returnResponseJson({ value }))
 
     /*
     mockKV('MAINTENANCE_KV', {
@@ -106,7 +113,7 @@ describe('Maintenance mode', () => {
       subdomains: ['en'],
     }
 
-    serverMock('MAINTENANCE_KV',returnResponseJson({value}))
+    serverMock('MAINTENANCE_KV', returnResponseJson({ value }))
 
     /*
     mockKV('MAINTENANCE_KV', {
@@ -130,7 +137,7 @@ describe('Maintenance mode', () => {
       subdomains: ['de'],
     }
 
-    serverMock('MAINTENANCE_KV',returnResponseJson({value}))
+    serverMock('MAINTENANCE_KV', returnResponseJson({ value }))
 
     /*
     mockKV('MAINTENANCE_KV', {
@@ -153,7 +160,7 @@ describe('Maintenance mode', () => {
       subdomains: ['en'],
     }
 
-    serverMock('MAINTENANCE_KV',returnResponseJson({value}))
+    serverMock('MAINTENANCE_KV', returnResponseJson({ value }))
 
     /*
     mockKV('MAINTENANCE_KV', {
@@ -178,7 +185,7 @@ describe('Maintenance mode', () => {
       subdomains: ['en'],
     }
 
-    serverMock('MAINTENANCE_KV',returnResponseJson({value}))
+    serverMock('MAINTENANCE_KV', returnResponseJson({ value }))
 
     /*
     mockKV('MAINTENANCE_KV', {
@@ -195,7 +202,7 @@ describe('Maintenance mode', () => {
       subdomains: ['en'],
     }
 
-    serverMock('MAINTENANCE_KV',returnResponseJson({value}))
+    serverMock('MAINTENANCE_KV', returnResponseJson({ value }))
 
     /*
     mockKV('MAINTENANCE_KV', {
