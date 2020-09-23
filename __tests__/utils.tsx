@@ -45,7 +45,8 @@ import {
   mockFetch,
   serverMock,
   returnResponseText,
-  returnApiResponse
+  returnResponseApi,
+  returnResponseJson,
 } from './_helper'
 
 describe('getCookieValue()', () => {
@@ -91,14 +92,16 @@ describe('getPathInfo()', () => {
 
   beforeEach(() => {
     global.API_ENDPOINT = apiEndpoint
-    mockKV('PATH_INFO_KV', {})
   })
 
   test('returns typename and currentPath from api.serlo.org', async () => {
-    serverMock(apiEndpoint, returnApiResponse({
-      __typename: 'Article',
-      alias: '/current-path',
-    }))
+    serverMock(
+      apiEndpoint,
+      returnResponseApi({
+        __typename: 'Article',
+        alias: '/current-path',
+      })
+    )
 
     const pathInfo = await getPathInfo(Instance.En, '/path')
 
@@ -109,10 +112,13 @@ describe('getPathInfo()', () => {
   })
 
   test('"currentPath" is given path when it does not refer to an entity', async () => {
-    serverMock(apiEndpoint, returnApiResponse({
-      __typename: 'ArticleRevision',
-      alias: '/path',
-    }))
+    serverMock(
+      apiEndpoint,
+      returnResponseApi({
+        __typename: 'ArticleRevision',
+        alias: '/path',
+      })
+    )
 
     const pathInfo = await getPathInfo(Instance.En, '/path')
 
@@ -124,10 +130,12 @@ describe('getPathInfo()', () => {
 
   describe('when path describes a User', () => {
     test('when path is "/<id>"', async () => {
-      serverMock(apiEndpoint, returnApiResponse({
-        __typename: 'User',
-        alias: '/user/profile/arekkas',
-      }))
+      serverMock(
+        apiEndpoint,returnResponseJson({
+          __typename: 'User',
+          username: 'arekkas',
+        })
+      )
 
       const pathInfo = await getPathInfo(Instance.En, '/1')
 
@@ -138,10 +146,13 @@ describe('getPathInfo()', () => {
     })
 
     test('when path is "/user/profile/id"', async () => {
-      serverMock(apiEndpoint, returnApiResponse({
-        __typename: 'User',
-        alias: '/user/profile/arekkas',
-      }))
+      serverMock(
+        apiEndpoint,
+        returnResponseApi({
+          __typename: 'User',
+          username: 'arekkas',
+        })
+      )
 
       const pathInfo = await getPathInfo(Instance.En, '/user/profile/1')
 
@@ -152,10 +163,13 @@ describe('getPathInfo()', () => {
     })
 
     test('when path is "/user/profile/<username>"', async () => {
-      serverMock(apiEndpoint, returnApiResponse({
-        __typename: 'User',
-        alias: '/user/profile/Kulla',
-      }))
+      serverMock(
+        apiEndpoint,
+        returnResponseApi({
+          __typename: 'User',
+          currentPath: '/user/profile/Kulla',
+        })
+      )
       const pathInfo = await getPathInfo(Instance.En, '/user/profile/Kulla')
 
       expect(pathInfo).toEqual({
@@ -201,19 +215,20 @@ describe('getPathInfo()', () => {
     })
 
     async function getApiRequest(path: string, lang = Instance.En) {
-      serverMock(apiEndpoint, returnApiResponse({
-        __typename: 'Article',
-        alias: path,
-      }))
+      serverMock(
+        apiEndpoint,
+        returnResponseApi({
+          __typename: 'Article',
+          alias: path,
+        })
+      )
 
-      
       const fetch = mockFetch({
         [apiEndpoint]: createJsonResponse({
           __typename: 'Article',
           alias: path,
         }),
       })
-      
 
       await getPathInfo(lang, path)
 
@@ -223,13 +238,13 @@ describe('getPathInfo()', () => {
 
   describe('returns null', () => {
     test('when there was an error with the api call', async () => {
-      serverMock('', returnResponseText('/path'))
+      serverMock('', returnResponseApi({status: 403}))
 
       expect(await getPathInfo(Instance.En, '/path')).toBeNull() //delete?!!
     })
 
     test('when api response is malformed JSON', async () => {
-      serverMock('malformed json', returnResponseText('/path'))
+      serverMock('', returnResponseText(''))
 
       expect(await getPathInfo(Instance.En, '/path')).toBeNull() //delete?
     })
@@ -238,7 +253,10 @@ describe('getPathInfo()', () => {
       test.each([null, {}, { data: { uuid: {} } }])(
         'response = %p',
         async () => {
-          serverMock('', returnResponseText('/path'))
+          serverMock('', returnResponseJson(''))
+          /*
+          mockFetch({ [apiEndpoint]: createJsonResponse(response) })
+          */
 
           expect(await getPathInfo(Instance.En, '/path')).toBeNull() //delete?!
         }
@@ -248,7 +266,11 @@ describe('getPathInfo()', () => {
 
   describe('when path is a course', () => {
     test('"currentPath" is path of first course page', async () => {
-      serverMock('Course', returnResponseText('/course'))
+      serverMock('', returnResponseJson({
+        __typename: 'Course',
+        alias: '/course',
+        pages: [{ alias: '/course-page1' }, { alias: '/course-page2' }],
+      }))
 
       const pathInfo = await getPathInfo(Instance.En, '/course')
 
@@ -259,7 +281,11 @@ describe('getPathInfo()', () => {
     })
 
     test('"currentPath" is path of course when list of course pages is empty', async () => {
-      serverMock('Course', returnResponseText('/course'))
+      serverMock('', returnResponseJson({
+        __typename: 'Course',
+        alias: '/course',
+        pages: [],
+      }))
 
       const pathInfo = await getPathInfo(Instance.En, '/course')
 
@@ -284,7 +310,10 @@ describe('getPathInfo()', () => {
     })
 
     test('saves values in cache for 1 hour', async () => {
-      serverMock('Article', returnResponseText('/current-path'))
+      serverMock('', returnResponseJson({
+        __typename: 'Article',
+        alias: '/current-path',
+      }))
 
       await getPathInfo(Instance.En, '/path')
 
@@ -297,7 +326,10 @@ describe('getPathInfo()', () => {
       const target = { typename: 'Article', currentPath: '/current-path' }
 
       beforeEach(() => {
-        serverMock('Article', returnResponseText('/current-path'))
+        serverMock('', returnResponseJson({
+          __typename: 'Article',
+          alias: '/current-path',
+        }))
       })
 
       test('when cached value is malformed JSON', async () => {

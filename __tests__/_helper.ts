@@ -21,13 +21,7 @@
  */
 
 import { Json } from 'fp-ts/lib/Either'
-import {
-  rest,
-  ResponseResolver,
-
-  restContext,
-  MockedRequest,
-} from 'msw'
+import { rest, ResponseResolver, restContext, MockedRequest } from 'msw'
 
 import { createJsonResponse } from '../src/utils'
 
