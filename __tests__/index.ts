@@ -224,6 +224,7 @@ describe('Semantic file names', () => {
 
 describe('Packages', () => {
   test('packages.serlo.org/<package>/<filePath>', async () => {
+    mockKV('PACKAGES_KV', { foo: 'foo@1.0.0' })
     serverMock(
       'https://packages.serlo.org/foo@1.0.0/bar',
       returnResponseText('')
@@ -236,6 +237,7 @@ describe('Packages', () => {
   })
 
   test('packages.serlo.org/<package>/<filePath> (invalid)', async () => {
+    mockKV('PACKAGES_KV', { foo: 'foo@1.0.0' })
     serverMock('https://packages.serlo.org/foobar/bar', returnResponseText(''))
 
     await handleUrl('https://packages.serlo.local/foobar/bar')

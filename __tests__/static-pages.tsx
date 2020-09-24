@@ -299,7 +299,7 @@ describe('fetchContent()', () => {
     test('parses reponse as Markdown if url ends with `.md`', async () => {
       serverMock(
         'http://example.org/imprint.md',
-        returnResponseText('Hello World\n<iframe src="http://serlo.org/">')
+        returnResponseText('# Hello World')
       )
 
       expect(await fetchContent(exampleSpecMarkdown)).toEqual({
@@ -327,8 +327,8 @@ describe('fetchContent()', () => {
     describe('returned HTML is sanitized', () => {
       test('HTML response', async () => {
         serverMock(
-          'http://example.org',
-          returnResponseText('Hello\n<iframe src="http://serlo.org/">')
+          'http://example.org/',
+          returnResponseText('<h1>Hello World</h1><script>alert(42)</script>')
         )
 
         expect(await fetchContent(exampleSpec)).toEqual({
@@ -358,8 +358,8 @@ describe('fetchContent()', () => {
   describe('support for JS-GOOGLE-ANALYTICS-DEACTIVATE', () => {
     test('HTML response', async () => {
       serverMock(
-        'http://example.org',
-        returnResponseText('Click [here](JS-GOOGLE-ANALYTICS-DEACTIVATE)')
+        'http://example.org/',
+        returnResponseText('Click <a href="JS-GOOGLE-ANALYTICS-DEACTIVATE">here</a>')
       )
 
       expect(await fetchContent(exampleSpec)).toEqual({
