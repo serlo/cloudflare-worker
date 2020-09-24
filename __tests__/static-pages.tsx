@@ -313,7 +313,7 @@ describe('fetchContent()', () => {
     test('returns response content when url does not end with `.md`', async () => {
       serverMock(
         'http://example.org',
-        returnResponseText('Hello World\n<iframe src="http://serlo.org/">')
+        returnResponseText('<h1>Hello World</h1>')
       )
 
       expect(await fetchContent(exampleSpec)).toEqual({
