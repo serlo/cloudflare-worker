@@ -115,6 +115,10 @@ describe('Redirects', () => {
 
     test('no redirect when current path is different than given path and XMLHttpRequest', async () => {
       serverMock(
+        'https://en.serlo.org/path',
+        returnResponseText('article content')
+      )
+      serverMock(
         'https://api.serlo.org/graphql',
         returnResponseApi({
           uuid: { __typename: 'Article', alias: '/current-path' },
