@@ -115,8 +115,7 @@ describe('getPathInfo()', () => {
     serverMock(
       apiEndpoint,
       returnResponseApi({
-        __typename: 'ArticleRevision',
-        alias: '/path',
+        __typename: 'ArticleRevision'
       })
     )
 
@@ -164,13 +163,6 @@ describe('getPathInfo()', () => {
     })
 
     test('when path is "/user/profile/<username>"', async () => {
-      serverMock(
-        apiEndpoint,
-        returnResponseApi({
-          __typename: 'User',
-          currentPath: '/user/profile/Kulla',
-        })
-      )
       const pathInfo = await getPathInfo(Instance.En, '/user/profile/Kulla')
 
       expect(pathInfo).toEqual({
@@ -241,7 +233,7 @@ describe('getPathInfo()', () => {
     test('when there was an error with the api call', async () => {
       serverMock('', returnResponseApi({ status: 403 }))
 
-      expect(await getPathInfo(Instance.En, '/path')).toBeNull() //delete?!!
+      expect(await getPathInfo(Instance.En, '/path')).toBeNull()
     })
 
     test('when api response is malformed JSON', async () => {
@@ -268,7 +260,7 @@ describe('getPathInfo()', () => {
   describe('when path is a course', () => {
     test('"currentPath" is path of first course page', async () => {
       serverMock(
-        '',
+        apiEndpoint,
         returnResponseJson({
           __typename: 'Course',
           alias: '/course',
@@ -286,7 +278,7 @@ describe('getPathInfo()', () => {
 
     test('"currentPath" is path of course when list of course pages is empty', async () => {
       serverMock(
-        '',
+        apiEndpoint,
         returnResponseJson({
           __typename: 'Course',
           alias: '/course',
@@ -318,7 +310,7 @@ describe('getPathInfo()', () => {
 
     test('saves values in cache for 1 hour', async () => {
       serverMock(
-        '',
+        apiEndpoint,
         returnResponseJson({
           __typename: 'Article',
           alias: '/current-path',
