@@ -139,6 +139,10 @@ describe('Redirects', () => {
     test('no redirect when current path is the same as given path', async () => {
       serverMock(
         'https://en.serlo.org/path',
+        returnResponseText('article content')
+      )
+      serverMock(
+        'https://api.serlo.org/graphql',
         returnResponseApi({ uuid: { __typename: 'Article', alias: '/path' } })
       )
 
