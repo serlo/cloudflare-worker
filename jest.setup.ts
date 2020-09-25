@@ -21,7 +21,9 @@
  */
 // eslint-disable-next-line import/no-unassigned-import
 import '@testing-library/jest-dom'
+import * as cryptoNode from 'crypto'
 import { Response as NodeResponse, Request as NodeRequest } from 'node-fetch'
+import * as util from 'util'
 
 import { extendExpect } from './__tests__/_extend-jest'
 import { mockKV } from './__tests__/_helper'
@@ -47,6 +49,19 @@ beforeEach(() => {
   mockKV('PATH_INFO_KV', {})
 })
 
+global.crypto = ({
+  subtle: {
+    digest(encoding: string, message: Uint8Array) {
+      return Promise.resolve(
+        cryptoNode
+          .createHash(encoding.toLowerCase().replace('-', ''))
+          .update(message)
+          .digest()
+      )
+    },
+  },
+} as unknown) as typeof crypto
+global.TextEncoder = util.TextEncoder
 global.Response = (NodeResponse as unknown) as typeof Response
 global.Request = (NodeRequest as unknown) as typeof Request
 

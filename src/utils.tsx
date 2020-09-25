@@ -91,7 +91,7 @@ export async function getPathInfo(
   if (path.startsWith(userProfilePrefix) && !userProfileId.test(path))
     return { typename: 'User', currentPath: path }
 
-  const cacheKey = `/${lang}${path}`
+  const cacheKey = await toCacheKey(`/${lang}${path}`)
   const cachedValue = await global.PATH_INFO_KV.get(cacheKey)
 
   if (cachedValue !== null) {
@@ -219,4 +219,16 @@ export function createJsonResponse(json: unknown) {
 
 export function createNotFoundResponse() {
   return createPreactResponse(<NotFound />, { status: 404 })
+}
+
+async function toCacheKey(key: string): Promise<string> {
+  return key.length > 512 ? await digestMessage(key) : key
+}
+
+async function digestMessage(message: string): Promise<string> {
+  const msgUint8 = new TextEncoder().encode(message)
+  const hashBuffer = await crypto.subtle.digest('SHA-1', msgUint8)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+  return hashHex
 }
