@@ -1,19 +1,14 @@
+import { MockedRequest } from 'msw/lib/types'
+
 import { api, fetchApi } from '../src/api'
-import {
-  FetchMock,
-  serverMock,
-  returnResponseText,
-  returnResponseJson,
-} from './_helper'
+import { serverMock, returnResponseText } from './_helper'
 
 describe('api()', () => {
   test('uses fetch() for requests to the serlo api', async () => {
-    beforeEach(() => {
-      serverMock(
-        'https://api.serlo.org/graphql',
-        returnResponseText('<api-result>')
-      )
-    })
+    serverMock(
+      'https://api.serlo.org/graphql',
+      returnResponseText('<api-result>')
+    )
 
     const req = new Request('https://api.serlo.org/graphql')
     const response = (await api(req)) as Response
@@ -46,18 +41,20 @@ describe('api()', () => {
 })
 
 describe('fetchApi()', () => {
-  let fetch: FetchMock
+  let apiRequest: MockedRequest
   let response: Response
 
   beforeAll(async () => {
     global.API_SECRET = 'my-secret'
 
-    serverMock(
-      'https://api.serlo.org/',
-      returnResponseJson({
-        result: 42,
-      })
-    )
+    serverMock('https://api.serlo.org/', (req, res, ctx) => {
+      apiRequest = req
+      return res.once(
+        ctx.json({
+          result: 42,
+        })
+      )
+    })
 
     const request = new Request('https://api.serlo.org/', {
       headers: { 'Content-Type': 'application/json' },
@@ -66,16 +63,14 @@ describe('fetchApi()', () => {
   })
 
   test('returns the result of fetch()', async () => {
-    expect(await response.text()).toBe('{ "result": 42 }')
+    expect(await response.text()).toBe('{"result":42}')
   })
 
   test('transfers meta data to fetch()', () => {
-    const apiRequest = fetch.getRequestTo('https://api.serlo.org/') as Request
     expect(apiRequest.headers.get('Content-Type')).toBe('application/json')
   })
 
   test('sets authorization header', () => {
-    const apiRequest = fetch.getRequestTo('https://api.serlo.org/') as Request
     expect(apiRequest.headers.get('Authorization')).toMatch(/^Serlo Service=ey/)
   })
 })

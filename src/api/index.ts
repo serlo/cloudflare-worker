@@ -23,11 +23,11 @@ import jwt from 'jsonwebtoken'
 
 import { getPathname, getSubdomain } from '../url-utils'
 
-export async function api(request: Request, fetchFunc = fetchApi) {
+export async function api(request: Request) {
   if (getSubdomain(request.url) !== 'api') return null
   if (getPathname(request.url) !== '/graphql') return null
 
-  return await fetchFunc(request)
+  return await fetchApi(request)
 }
 
 export async function fetchApi(request: Request) {

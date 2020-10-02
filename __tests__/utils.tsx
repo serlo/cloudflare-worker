@@ -41,7 +41,6 @@ import {
   expectContentTypeIsHtml,
   expectIsJsonResponse,
   expectIsNotFoundResponse,
-  mockKV,
   mockFetch,
   serverMock,
   returnResponseText,
@@ -115,7 +114,7 @@ describe('getPathInfo()', () => {
     serverMock(
       apiEndpoint,
       returnResponseApi({
-        __typename: 'ArticleRevision'
+        __typename: 'ArticleRevision',
       })
     )
 
@@ -231,27 +230,24 @@ describe('getPathInfo()', () => {
 
   describe('returns null', () => {
     test('when there was an error with the api call', async () => {
-      serverMock('', returnResponseApi({ status: 403 }))
+      serverMock(apiEndpoint, (_req, res, ctx) => res.once(ctx.status(403)))
 
       expect(await getPathInfo(Instance.En, '/path')).toBeNull()
     })
 
     test('when api response is malformed JSON', async () => {
-      serverMock('', returnResponseText(''))
+      serverMock(apiEndpoint, returnResponseText('malform json'))
 
-      expect(await getPathInfo(Instance.En, '/path')).toBeNull() //delete?
+      expect(await getPathInfo(Instance.En, '/path')).toBeNull()
     })
 
     describe('when the response is not valid', () => {
       test.each([null, {}, { data: { uuid: {} } }])(
         'response = %p',
         async () => {
-          serverMock('', returnResponseJson(''))
-          /*
-          mockFetch({ [apiEndpoint]: createJsonResponse(response) })
-          */
+          serverMock(apiEndpoint, returnResponseJson(''))
 
-          expect(await getPathInfo(Instance.En, '/path')).toBeNull() //delete?!
+          expect(await getPathInfo(Instance.En, '/path')).toBeNull()
         }
       )
     })
