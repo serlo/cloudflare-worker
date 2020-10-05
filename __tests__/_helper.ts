@@ -20,7 +20,6 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-import { Json } from 'fp-ts/lib/Either'
 import { rest, ResponseResolver, restContext, MockedRequest } from 'msw'
 
 import { createJsonResponse } from '../src/utils'
@@ -165,8 +164,12 @@ export function serverMock(url: string, resolver: RestResolver) {
   global.server.use(rest.get(url, resolver))
 }
 
-export function returnResponseText(body: string): RestResolver {
-  return (_req, res, ctx) => res.once(ctx.body(body))
+export function returnResponseText(
+  body: string,
+  args?: { status?: number }
+): RestResolver {
+  const status = args?.status ?? 200
+  return (_req, res, ctx) => res.once(ctx.body(body), ctx.status(status))
 }
 
 export function returnResponseJson(body: any): RestResolver {
@@ -176,10 +179,3 @@ export function returnResponseJson(body: any): RestResolver {
 export function returnResponseApi(data: unknown) {
   return returnResponseJson({ data })
 }
-
-/*
-export function returnResponseText(body: string, args : { status? : number }|undefined): RestResolver {
-  const status = args?.status ?? 200
-  return (_req, res, ctx) => res.once(ctx.body(body))|
- }
- */

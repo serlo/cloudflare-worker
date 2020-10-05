@@ -41,6 +41,7 @@ import {
   expectContentTypeIsHtml,
   expectIsJsonResponse,
   expectIsNotFoundResponse,
+  mockKV,
   mockFetch,
   serverMock,
   returnResponseText,
@@ -91,6 +92,7 @@ describe('getPathInfo()', () => {
 
   beforeEach(() => {
     global.API_ENDPOINT = apiEndpoint
+    mockKV('PATH_INFO_KV', {})
   })
 
   test('returns typename and currentPath from api.serlo.org', async () => {
@@ -215,16 +217,20 @@ describe('getPathInfo()', () => {
         })
       )
 
-      const fetch = mockFetch({
-        [apiEndpoint]: createJsonResponse({
-          __typename: 'Article',
-          alias: path,
-        }),
-      })
-
       await getPathInfo(lang, path)
 
+        /*
+      expect(await response.json()).toBe({
+        __typename: 'Article',
+        alias: path,
+      })
+      */
+     
+        
+      
       return fetch.getRequestTo(apiEndpoint) as Request
+      
+      
     }
   })
 
@@ -325,7 +331,7 @@ describe('getPathInfo()', () => {
 
       beforeEach(() => {
         serverMock(
-          '',
+          apiEndpoint,
           returnResponseJson({
             __typename: 'Article',
             alias: '/current-path',
