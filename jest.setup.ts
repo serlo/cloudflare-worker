@@ -21,6 +21,7 @@
  */
 // eslint-disable-next-line import/no-unassigned-import
 import '@testing-library/jest-dom'
+import { onUnhandledRequest } from 'msw/lib/types/onUnhandledRequest'
 import { setupServer } from 'msw/node'
 import fetchNode, {
   Response as NodeResponse,
@@ -63,7 +64,7 @@ NodeResponse.redirect = function (url: string, status = 302) {
 global.server = setupServer()
 
 beforeAll(() => {
-  global.server.listen()
+  global.server.listen({ onUnhandledRequest: 'error' })
 })
 
 afterEach(() => {

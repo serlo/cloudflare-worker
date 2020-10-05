@@ -359,7 +359,9 @@ describe('fetchContent()', () => {
     test('HTML response', async () => {
       serverMock(
         'http://example.org/',
-        returnResponseText('Click <a href="JS-GOOGLE-ANALYTICS-DEACTIVATE">here</a>')
+        returnResponseText(
+          'Click <a href="JS-GOOGLE-ANALYTICS-DEACTIVATE">here</a>'
+        )
       )
 
       expect(await fetchContent(exampleSpec)).toEqual({
