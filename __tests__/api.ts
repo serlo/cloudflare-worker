@@ -1,14 +1,9 @@
-import { MockedRequest } from 'msw/lib/types'
-
 import { api, fetchApi } from '../src/api'
-import { serverMock, returnResponseText } from './_helper'
+import { mockHttpGet, returnText } from './_helper'
 
 describe('api()', () => {
   test('uses fetch() for requests to the serlo api', async () => {
-    serverMock(
-      'https://api.serlo.org/graphql',
-      returnResponseText('<api-result>')
-    )
+    mockHttpGet('https://api.serlo.org/graphql', returnText('<api-result>'))
 
     const req = new Request('https://api.serlo.org/graphql')
     const response = (await api(req)) as Response
@@ -21,14 +16,12 @@ describe('api()', () => {
       const response = await api(new Request('https://serlo.org/graphql'))
 
       expect(response).toBeNull()
-      expect(fetch).not.toHaveBeenCalled()
     })
 
     test('url without subdomain different than "api"', async () => {
       const response = await api(new Request('https://stats.serlo.org/graphql'))
 
       expect(response).toBeNull()
-      expect(fetch).not.toHaveBeenCalled()
     })
   })
 
@@ -36,41 +29,28 @@ describe('api()', () => {
     const response = await api(new Request('https://api.serlo.org/something'))
 
     expect(response).toBeNull()
-    expect(fetch).not.toHaveBeenCalled()
   })
 })
 
 describe('fetchApi()', () => {
-  let apiRequest: MockedRequest
-  let response: Response
-
-  beforeAll(async () => {
+  test('returns the result of fetch()', async () => {
     global.API_SECRET = 'my-secret'
 
-    serverMock('https://api.serlo.org/', (req, res, ctx) => {
-      apiRequest = req
-      return res.once(
-        ctx.json({
-          result: 42,
-        })
-      )
+    // TODO: Move this to returnApiResponse()
+    mockHttpGet('https://api.serlo.org/', (req, res, ctx) => {
+      if (req.headers.get('Content-Type') !== 'application/json')
+        return res(ctx.status(415))
+      if (!req.headers.get('Authorization')?.match(/^Serlo Service=ey/))
+        return res(ctx.status(401))
+
+      return res.once(ctx.json({ result: 42 }))
     })
 
     const request = new Request('https://api.serlo.org/', {
       headers: { 'Content-Type': 'application/json' },
     })
-    response = await fetchApi(request)
-  })
+    const response = await fetchApi(request)
 
-  test('returns the result of fetch()', async () => {
     expect(await response.text()).toBe('{"result":42}')
-  })
-
-  test('transfers meta data to fetch()', () => {
-    expect(apiRequest.headers.get('Content-Type')).toBe('application/json')
-  })
-
-  test('sets authorization header', () => {
-    expect(apiRequest.headers.get('Authorization')).toMatch(/^Serlo Service=ey/)
   })
 })

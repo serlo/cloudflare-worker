@@ -21,7 +21,6 @@
  */
 // eslint-disable-next-line import/no-unassigned-import
 import '@testing-library/jest-dom'
-import { onUnhandledRequest } from 'msw/lib/types/onUnhandledRequest'
 import { setupServer } from 'msw/node'
 import fetchNode, {
   Response as NodeResponse,
@@ -33,10 +32,11 @@ import { mockKV } from './__tests__/_helper'
 
 extendExpect()
 
+global.server = setupServer()
 const randomCopy = Math.random
 
-afterEach(() => {
-  Math.random = randomCopy
+beforeAll(() => {
+  global.server.listen({ onUnhandledRequest: 'error' })
 })
 
 beforeEach(() => {
@@ -45,10 +45,20 @@ beforeEach(() => {
   global.FRONTEND_DOMAIN = 'frontend.serlo.org'
   global.FRONTEND_PROBABILITY = '1'
   global.FRONTEND_ALLOWED_TYPES = '[]'
+  // TODO: Remove this since this tests an implementation details
   global.fetch = jest.fn().mockImplementation(fetchNode)
 
   mockKV('MAINTENANCE_KV', {})
   mockKV('PATH_INFO_KV', {})
+})
+
+afterEach(() => {
+  global.server.resetHandlers()
+  Math.random = randomCopy
+})
+
+afterAll(() => {
+  global.server.close()
 })
 
 global.Response = (NodeResponse as unknown) as typeof Response
@@ -60,20 +70,6 @@ global.Request = (NodeRequest as unknown) as typeof Request
 NodeResponse.redirect = function (url: string, status = 302) {
   return new NodeResponse('', { status, headers: { location: url } })
 }
-
-global.server = setupServer()
-
-beforeAll(() => {
-  global.server.listen({ onUnhandledRequest: 'error' })
-})
-
-afterEach(() => {
-  global.server.resetHandlers()
-})
-
-afterAll(() => {
-  global.server.close()
-})
 
 /* eslint-disable @typescript-eslint/no-namespace */
 declare global {

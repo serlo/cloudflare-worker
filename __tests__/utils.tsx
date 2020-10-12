@@ -20,6 +20,7 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
+import { MockedRequest } from 'msw/lib/types'
 import { h } from 'preact'
 
 import { Template } from '../src/ui'
@@ -42,11 +43,11 @@ import {
   expectIsJsonResponse,
   expectIsNotFoundResponse,
   mockKV,
-  mockFetch,
-  serverMock,
-  returnResponseText,
-  returnResponseApi,
-  returnResponseJson,
+  mockHttpGet,
+  returnText,
+  returnJson,
+  mockHttpPost,
+  returnApiUuid,
 } from './_helper'
 
 describe('getCookieValue()', () => {
@@ -96,12 +97,9 @@ describe('getPathInfo()', () => {
   })
 
   test('returns typename and currentPath from api.serlo.org', async () => {
-    serverMock(
+    mockHttpPost(
       apiEndpoint,
-      returnResponseApi({
-        __typename: 'Article',
-        alias: '/current-path',
-      })
+      returnApiUuid({ __typename: 'Article', alias: '/current-path' })
     )
 
     const pathInfo = await getPathInfo(Instance.En, '/path')
@@ -113,12 +111,7 @@ describe('getPathInfo()', () => {
   })
 
   test('"currentPath" is given path when it does not refer to an entity', async () => {
-    serverMock(
-      apiEndpoint,
-      returnResponseApi({
-        __typename: 'ArticleRevision',
-      })
-    )
+    mockHttpPost(apiEndpoint, returnApiUuid({ __typename: 'ArticleRevision' }))
 
     const pathInfo = await getPathInfo(Instance.En, '/path')
 
@@ -130,12 +123,9 @@ describe('getPathInfo()', () => {
 
   describe('when path describes a User', () => {
     test('when path is "/<id>"', async () => {
-      serverMock(
+      mockHttpPost(
         apiEndpoint,
-        returnResponseJson({
-          __typename: 'User',
-          username: 'arekkas',
-        })
+        returnApiUuid({ __typename: 'User', username: 'arekkas' })
       )
 
       const pathInfo = await getPathInfo(Instance.En, '/1')
@@ -147,12 +137,9 @@ describe('getPathInfo()', () => {
     })
 
     test('when path is "/user/profile/id"', async () => {
-      serverMock(
+      mockHttpPost(
         apiEndpoint,
-        returnResponseApi({
-          __typename: 'User',
-          username: 'arekkas',
-        })
+        returnApiUuid({ __typename: 'User', username: 'arekkas' })
       )
 
       const pathInfo = await getPathInfo(Instance.En, '/user/profile/1')
@@ -200,49 +187,45 @@ describe('getPathInfo()', () => {
       })
 
       async function getApiVariables(path: string, lang = Instance.En) {
-        const body = (await (await getApiRequest(path, lang)).json()) as {
-          variables: unknown
-        }
+        const body = (await getApiRequest(path, lang))?.body as Record<
+          string,
+          unknown
+        >
 
         return body.variables
       }
     })
 
-    async function getApiRequest(path: string, lang = Instance.En) {
-      serverMock(
-        apiEndpoint,
-        returnResponseApi({
+    async function getApiRequest(
+      path: string,
+      lang = Instance.En
+    ): Promise<MockedRequest> {
+      // TODO: This is bad design > we should rewrite this unit test
+      let request!: MockedRequest
+      mockHttpPost(apiEndpoint, (req, res, ctx) => {
+        request = req
+
+        return returnApiUuid({
           __typename: 'Article',
           alias: path,
-        })
-      )
+        })(req, res, ctx)
+      })
 
       await getPathInfo(lang, path)
 
-        /*
-      expect(await response.json()).toBe({
-        __typename: 'Article',
-        alias: path,
-      })
-      */
-     
-        
-      
-      return fetch.getRequestTo(apiEndpoint) as Request
-      
-      
+      return request
     }
   })
 
   describe('returns null', () => {
     test('when there was an error with the api call', async () => {
-      serverMock(apiEndpoint, (_req, res, ctx) => res.once(ctx.status(403)))
+      mockHttpPost(apiEndpoint, returnText('', { status: 403 }))
 
       expect(await getPathInfo(Instance.En, '/path')).toBeNull()
     })
 
     test('when api response is malformed JSON', async () => {
-      serverMock(apiEndpoint, returnResponseText('malform json'))
+      mockHttpPost(apiEndpoint, returnText('malform json'))
 
       expect(await getPathInfo(Instance.En, '/path')).toBeNull()
     })
@@ -250,8 +233,8 @@ describe('getPathInfo()', () => {
     describe('when the response is not valid', () => {
       test.each([null, {}, { data: { uuid: {} } }])(
         'response = %p',
-        async () => {
-          serverMock(apiEndpoint, returnResponseJson(''))
+        async (response) => {
+          mockHttpPost(apiEndpoint, returnJson(response))
 
           expect(await getPathInfo(Instance.En, '/path')).toBeNull()
         }
@@ -261,9 +244,9 @@ describe('getPathInfo()', () => {
 
   describe('when path is a course', () => {
     test('"currentPath" is path of first course page', async () => {
-      serverMock(
+      mockHttpPost(
         apiEndpoint,
-        returnResponseJson({
+        returnApiUuid({
           __typename: 'Course',
           alias: '/course',
           pages: [{ alias: '/course-page1' }, { alias: '/course-page2' }],
@@ -279,13 +262,9 @@ describe('getPathInfo()', () => {
     })
 
     test('"currentPath" is path of course when list of course pages is empty', async () => {
-      serverMock(
+      mockHttpPost(
         apiEndpoint,
-        returnResponseJson({
-          __typename: 'Course',
-          alias: '/course',
-          pages: [],
-        })
+        returnApiUuid({ __typename: 'Course', alias: '/course', pages: [] })
       )
 
       const pathInfo = await getPathInfo(Instance.En, '/course')
@@ -311,12 +290,9 @@ describe('getPathInfo()', () => {
     })
 
     test('saves values in cache for 1 hour', async () => {
-      serverMock(
+      mockHttpPost(
         apiEndpoint,
-        returnResponseJson({
-          __typename: 'Article',
-          alias: '/current-path',
-        })
+        returnApiUuid({ __typename: 'Article', alias: '/current-path' })
       )
 
       await getPathInfo(Instance.En, '/path')
@@ -330,12 +306,9 @@ describe('getPathInfo()', () => {
       const target = { typename: 'Article', currentPath: '/current-path' }
 
       beforeEach(() => {
-        serverMock(
+        mockHttpPost(
           apiEndpoint,
-          returnResponseJson({
-            __typename: 'Article',
-            alias: '/current-path',
-          })
+          returnApiUuid({ __typename: 'Article', alias: '/current-path' })
         )
       })
 
@@ -431,7 +404,7 @@ test('NotFoundResponse', async () => {
 
 describe('fetchWithCache()', () => {
   test('returns the result of fetch()', async () => {
-    serverMock('http://example.com/', returnResponseText('test'))
+    mockHttpGet('http://example.com/', returnText('test'))
 
     const response = await fetchWithCache('http://example.com/')
 
@@ -439,7 +412,7 @@ describe('fetchWithCache()', () => {
   })
 
   test('responses are cached for 1 hour', async () => {
-    serverMock('http://example.com/', returnResponseText(''))
+    mockHttpGet('http://example.com/', returnText(''))
 
     await fetchWithCache('http://example.com/')
 

@@ -63,6 +63,7 @@ export async function expectIsJsonResponse(
   expect(JSON.parse(await response.text())).toEqual(targetJson)
 }
 
+// TODO: Can this be deleted?
 export function createApiResponse(uuid: {
   __typename: string
   alias?: string
@@ -72,6 +73,7 @@ export function createApiResponse(uuid: {
   return createJsonResponse({ data: { uuid } })
 }
 
+// TODO: Delete following functions
 type ResponseSpec = string | Response
 type FetchSpec = Record<string, ResponseSpec>
 
@@ -160,22 +162,29 @@ export function mockKV(name: KV_NAMES, values: Record<string, string>) {
 
 type RestResolver = ResponseResolver<MockedRequest, typeof restContext>
 
-export function serverMock(url: string, resolver: RestResolver) {
+export function mockHttpGet(url: string, resolver: RestResolver) {
   global.server.use(rest.get(url, resolver))
 }
 
-export function returnResponseText(
+export function mockHttpPost(url: string, resolver: RestResolver) {
+  global.server.use(rest.post(url, resolver))
+}
+
+export function returnText(
   body: string,
-  args?: { status?: number }
+  { status = 200 }: { status?: number } = {}
 ): RestResolver {
-  const status = args?.status ?? 200
   return (_req, res, ctx) => res.once(ctx.body(body), ctx.status(status))
 }
 
-export function returnResponseJson(body: any): RestResolver {
-  return (_req, res, ctx) => res.once(ctx.json(body))
+export function returnJson(json: any): RestResolver {
+  return (_req, res, ctx) => res.once(ctx.json(json))
 }
 
-export function returnResponseApi(data: unknown) {
-  return returnResponseJson({ data })
+export function returnApiData(data: unknown): RestResolver {
+  return returnJson({ data })
+}
+
+export function returnApiUuid(uuid: unknown): RestResolver {
+  return returnApiData({ uuid })
 }

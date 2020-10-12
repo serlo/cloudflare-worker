@@ -23,10 +23,12 @@
 import { handleRequest } from '../src'
 import {
   mockKV,
-  serverMock,
-  returnResponseText,
-  returnResponseJson,
-  returnResponseApi,
+  mockHttpGet,
+  returnText,
+  returnJson,
+  returnApiData,
+  mockHttpPost,
+  returnApiUuid,
 } from './_helper'
 
 describe('Enforce HTTPS', () => {
@@ -37,19 +39,19 @@ describe('Enforce HTTPS', () => {
   })
 
   test('HTTPS URL', async () => {
-    serverMock('https://foo.serlo.local/bar', returnResponseText('test'))
+    mockHttpGet('https://foo.serlo.local/bar', returnText('content'))
 
     const response = await handleUrl('https://foo.serlo.local/bar')
 
-    expect(await response.text()).toBe('test')
+    expect(await response.text()).toBe('content')
   })
 
   test('Pact Broker', async () => {
-    serverMock('http://pacts.serlo.local/bar', returnResponseText('test'))
+    mockHttpGet('http://pacts.serlo.local/bar', returnText('content'))
 
     const response = await handleUrl('http://pacts.serlo.local/bar')
 
-    expect(await response.text()).toBe('test')
+    expect(await response.text()).toBe('content')
   })
 })
 
@@ -101,11 +103,9 @@ describe('Redirects', () => {
     })
 
     test('redirects when current path is different than given path', async () => {
-      serverMock(
+      mockHttpPost(
         'https://api.serlo.org/graphql',
-        returnResponseApi({
-          uuid: { __typename: 'Article', alias: '/current-path' },
-        })
+        returnApiUuid({ __typename: 'Article', alias: '/current-path' })
       )
 
       const response = await handleUrl('https://en.serlo.org/path')
@@ -114,38 +114,28 @@ describe('Redirects', () => {
     })
 
     test('no redirect when current path is different than given path and XMLHttpRequest', async () => {
-      serverMock(
-        'https://en.serlo.org/path',
-        returnResponseText('article content')
-      )
-
-      serverMock(
+      mockHttpPost(
         'https://api.serlo.org/graphql',
-        returnResponseApi({
-          uuid: { __typename: 'Article', alias: '/current-path' },
-        })
+        returnApiUuid({ __typename: 'Article', alias: '/current-path' })
       )
+      mockHttpGet('https://en.serlo.org/path', returnText('article content'))
 
-      const response = await handleRequest(
-        new Request('https://en.serlo.org/path', {
-          headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-          },
-        })
-      )
+      const request = new Request('https://en.serlo.org/path', {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+      })
+      const response = await handleRequest(request)
 
       expect(await response.text()).toBe('article content')
     })
 
     test('no redirect when current path is the same as given path', async () => {
-      serverMock(
-        'https://en.serlo.org/path',
-        returnResponseText('article content')
-      )
-      serverMock(
+      mockHttpPost(
         'https://api.serlo.org/graphql',
-        returnResponseApi({ uuid: { __typename: 'Article', alias: '/path' } })
+        returnApiUuid({ __typename: 'Article', alias: '/path' })
       )
+      mockHttpGet('https://en.serlo.org/path', returnText('article content'))
 
       const response = await handleUrl('https://en.serlo.org/path')
 
@@ -153,10 +143,11 @@ describe('Redirects', () => {
     })
 
     test('no redirect when current path cannot be requested', async () => {
-      serverMock(
+      mockHttpPost(
         'https://api.serlo.org/graphql',
-        returnResponseText('malformed json')
+        returnText('malformed json')
       )
+      mockHttpGet('https://en.serlo.org/path', returnText('article content'))
 
       const response = await handleUrl('https://en.serlo.org/path')
 
@@ -165,15 +156,13 @@ describe('Redirects', () => {
 
     describe('handles URL encodings correctly', () => {
       test('API result is URL encoded', async () => {
-        serverMock(
-          'https://de.serlo.org/größen',
-          returnResponseText('article content')
-        )
-        serverMock(
+        mockHttpPost(
           'https://api.serlo.org/graphql',
-          returnResponseApi({
-            uuid: { __typename: 'Article', alias: '/gr%C3%B6%C3%9Fen' },
-          })
+          returnApiUuid({ __typename: 'Article', alias: '/gr%C3%B6%C3%9Fen' })
+        )
+        mockHttpGet(
+          'https://de.serlo.org/größen',
+          returnText('article content')
         )
 
         const response = await handleUrl('https://de.serlo.org/größen')
@@ -182,21 +171,18 @@ describe('Redirects', () => {
       })
 
       test('API result is not URL encoded', async () => {
-        serverMock(
-          'https://de.serlo.org/größen',
-          returnResponseText('article content')
+        mockHttpPost(
+          'https://api.serlo.org/graphql',
+          returnApiUuid({ __typename: 'Article', alias: '/größen' })
         )
-
-        serverMock(
+        mockHttpGet(
           'https://de.serlo.org/größen',
-          returnResponseJson({
-            data: { uuid: { __typename: 'Article', alias: '/größen' } },
-          })
+          returnText('article content')
         )
 
         const response = await handleUrl('https://de.serlo.org/größen')
 
-        expect(await response.text()).toBe("{\"data\":{\"uuid\":{\"__typename\":\"Article\",\"alias\":\"/größen\"}}}")
+        expect(await response.text()).toBe('article content')
       })
     })
   })
@@ -204,55 +190,54 @@ describe('Redirects', () => {
 
 describe('Semantic file names', () => {
   test('assets.serlo.org/meta/*', async () => {
-    serverMock('https://assets.serlo.org/meta/foo', returnResponseText('test'))
+    mockHttpGet('https://assets.serlo.org/meta/foo', returnText('content'))
 
     const response = await handleUrl('https://assets.serlo.local/meta/foo')
 
-    expect(await response.text()).toBe('test')
+    expect(await response.text()).toBe('content')
   })
 
   test('assets.serlo.org/<hash>/<fileName>.<ext>', async () => {
-    serverMock('https://assets.serlo.org/hash.ext', returnResponseText('test'))
+    mockHttpGet('https://assets.serlo.org/hash.ext', returnText('image'))
 
     const response = await handleUrl(
       'https://assets.serlo.local/hash/fileName.ext'
     )
 
-    expect(await response.text()).toBe('test')
+    expect(await response.text()).toBe('image')
   })
 
   test('assets.serlo.org/legacy/<hash>/<fileName>.<ext>', async () => {
-    serverMock(
-      'https://assets.serlo.org/legacy/hash.ext',
-      returnResponseText('test')
+    mockHttpGet('https://assets.serlo.org/legacy/hash.ext', returnText('image'))
+
+    const response = await handleUrl(
+      'https://assets.serlo.local/legacy/hash/fileName.ext'
     )
 
-    const response = await handleUrl('https://assets.serlo.local/legacy/hash/fileName.ext')
-
-   expect(await response.text()).toBe('test')
+    expect(await response.text()).toBe('image')
   })
 })
 
 describe('Packages', () => {
   test('packages.serlo.org/<package>/<filePath>', async () => {
     mockKV('PACKAGES_KV', { foo: 'foo@1.0.0' })
-    serverMock(
+    mockHttpGet(
       'https://packages.serlo.org/foo@1.0.0/bar',
-      returnResponseText('test')
+      returnText('content')
     )
 
     const response = await handleUrl('https://packages.serlo.local/foo/bar')
 
-    expect(await response.text()).toBe('test')
+    expect(await response.text()).toBe('content')
   })
 
   test('packages.serlo.org/<package>/<filePath> (invalid)', async () => {
     mockKV('PACKAGES_KV', { foo: 'foo@1.0.0' })
-    serverMock('https://packages.serlo.org/foobar/bar', returnResponseText('test'))
+    mockHttpGet('https://packages.serlo.org/foobar/bar', returnText('content'))
 
     const response = await handleUrl('https://packages.serlo.local/foobar/bar')
 
-    expect(await response.text()).toBe('test')
+    expect(await response.text()).toBe('content')
   })
 })
 
