@@ -1,5 +1,3 @@
-import { createJsonResponse } from '../src/utils'
-
 /**
  * This file is part of Serlo.org Cloudflare Worker.
  *
@@ -21,6 +19,9 @@ import { createJsonResponse } from '../src/utils'
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
+
+import { rest, ResponseResolver, restContext, MockedRequest } from 'msw'
+
 export async function expectContainsText(response: Response, texts: string[]) {
   expect(response).not.toBeNull()
 
@@ -60,86 +61,6 @@ export async function expectIsJsonResponse(
   expect(JSON.parse(await response.text())).toEqual(targetJson)
 }
 
-export function createApiResponse(uuid: {
-  __typename: string
-  alias?: string
-  username?: string
-  pages?: { alias: string }[]
-}) {
-  return createJsonResponse({ data: { uuid } })
-}
-
-type ResponseSpec = string | Response
-type FetchSpec = Record<string, ResponseSpec>
-
-export function mockFetch(spec: FetchSpec = {}): FetchMock {
-  const mockedFetch = jest.fn()
-  const mockedInternet = new FetchMock(spec, mockedFetch)
-
-  mockedFetch.mockImplementation((reqInfo) => mockedInternet.fetch(reqInfo))
-
-  global.fetch = mockedFetch
-
-  return mockedInternet
-}
-
-export class FetchMock {
-  constructor(
-    private specs: FetchSpec,
-    private mockedFetch: jest.Mock<any, [RequestInfo, RequestInit | undefined]>
-  ) {}
-
-  get mock(): jest.Mock<any, [RequestInfo, RequestInit | undefined]> &
-    typeof global.fetch {
-    return this.mockedFetch
-  }
-
-  fetch(reqInfo: RequestInfo) {
-    const url = typeof reqInfo === 'string' ? reqInfo : reqInfo.url
-    const responseSpec = this.specs[url]
-    const errorMessage = `Response for URL ${url} is not defined in mocked fetch`
-
-    return responseSpec === undefined
-      ? Promise.reject(new Error(errorMessage))
-      : Promise.resolve(FetchMock.convertToResponse(responseSpec))
-  }
-
-  mockRequest({ to, response = '' }: { to: string; response?: ResponseSpec }) {
-    this.specs[to] = response
-  }
-
-  getAllCallArgumentsFor(url: string) {
-    return this.mockedFetch.mock.calls.filter(
-      ([req]) => FetchMock.getUrl(req) === url
-    )
-  }
-
-  getCallArgumentsFor(url: string) {
-    const argsList = this.getAllCallArgumentsFor(url)
-
-    if (argsList.length === 0) throw new Error(`URL ${url} was never fetched`)
-    if (argsList.length > 1)
-      throw new Error(`URL ${url} was fetched more than one time`)
-
-    return argsList[0]
-  }
-
-  getRequestTo(url: string): RequestInfo {
-    return this.getCallArgumentsFor(url)[0]
-  }
-
-  getAllRequestsTo(url: string): RequestInfo[] {
-    return this.getAllCallArgumentsFor(url).map((x) => x[0])
-  }
-
-  static getUrl(req: RequestInfo): string {
-    return typeof req === 'string' ? req : req.url
-  }
-  static convertToResponse(spec: ResponseSpec): Response {
-    return typeof spec === 'string' ? new Response(spec) : spec
-  }
-}
-
 type KV_NAMES = 'MAINTENANCE_KV' | 'PACKAGES_KV' | 'PATH_INFO_KV'
 
 export function mockKV(name: KV_NAMES, values: Record<string, string>) {
@@ -153,4 +74,36 @@ export function mockKV(name: KV_NAMES, values: Record<string, string>) {
       values[key] = value
     },
   }
+}
+
+type RestResolver = ResponseResolver<MockedRequest, typeof restContext>
+
+export function mockHttpGet(url: string, resolver: RestResolver) {
+  global.server.use(
+    rest.get(url, (req, res, ctx) => {
+      if (req.url.toString() !== url)
+        return res(ctx.status(400, 'Bad Request: Query string does not match'))
+
+      return resolver(req, res, ctx)
+    })
+  )
+}
+
+export function mockHttpPost(url: string, resolver: RestResolver) {
+  global.server.use(rest.post(url, resolver))
+}
+
+export function returnText(
+  body: string,
+  { status = 200 }: { status?: number } = {}
+): RestResolver {
+  return (_req, res, ctx) => res.once(ctx.body(body), ctx.status(status))
+}
+
+export function returnJson(json: Record<string, unknown>): RestResolver {
+  return (_req, res, ctx) => res.once(ctx.json(json))
+}
+
+export function returnApiUuid(uuid: unknown): RestResolver {
+  return returnJson({ data: { uuid } })
 }

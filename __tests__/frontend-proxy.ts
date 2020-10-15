@@ -1,10 +1,12 @@
 import { frontendProxy } from '../src/frontend-proxy'
-import { createJsonResponse, Instance } from '../src/utils'
+import { Instance } from '../src/utils'
 import {
   expectHasOkStatus,
-  mockFetch,
-  FetchMock,
-  createApiResponse,
+  mockHttpPost,
+  returnApiUuid,
+  mockHttpGet,
+  returnText,
+  returnJson,
 } from './_helper'
 
 enum Backend {
@@ -13,8 +15,6 @@ enum Backend {
 }
 
 describe('handleRequest()', () => {
-  let fetch: FetchMock
-
   beforeEach(() => {
     global.FRONTEND_DOMAIN = 'frontend.serlo.org'
     global.API_ENDPOINT = 'https://api.serlo.org/'
@@ -23,12 +23,7 @@ describe('handleRequest()', () => {
     global.FRONTEND_PROBABILITY = '0.5'
     Math.random = jest.fn().mockReturnValue(0.5)
 
-    fetch = mockFetch()
-
-    fetch.mockRequest({
-      to: global.API_ENDPOINT,
-      response: createApiResponse({ __typename: 'Subject' }),
-    })
+    mockHttpPost(global.API_ENDPOINT, returnApiUuid({ __typename: 'Subject' }))
     global.FRONTEND_ALLOWED_TYPES = '["Subject"]'
   })
 
@@ -36,29 +31,21 @@ describe('handleRequest()', () => {
     test('chooses frontend when random number <= probability', async () => {
       global.FRONTEND_PROBABILITY = '0.5'
       Math.random = jest.fn().mockReturnValue(0.5)
-      fetch.mockRequest({
-        to: 'https://frontend.serlo.org/math',
-        response: 'frontend',
+
+      await expectResponseFrom({
+        backend: 'https://frontend.serlo.org/math',
+        request: 'https://de.serlo.org/math',
       })
-
-      const response = await handleUrl('https://de.serlo.org/math')
-
-      expect(await response.text()).toBe('frontend')
-      expect(fetch).toHaveExactlyOneRequestTo('https://frontend.serlo.org/math')
     })
 
     test('chose legacy backend for random number > probability', async () => {
       global.FRONTEND_PROBABILITY = '0.5'
       Math.random = jest.fn().mockReturnValue(0.75)
-      fetch.mockRequest({
-        to: 'https://de.serlo.org/math',
-        response: 'legacy backend',
+
+      await expectResponseFrom({
+        backend: 'https://de.serlo.org/math',
+        request: 'https://de.serlo.org/math',
       })
-
-      const response = await handleUrl('https://de.serlo.org/math')
-
-      expect(await response.text()).toBe('legacy backend')
-      expect(fetch).toHaveExactlyOneRequestTo('https://de.serlo.org/math')
     })
   })
 
@@ -68,7 +55,7 @@ describe('handleRequest()', () => {
       const backendUrl = getUrlFor(backend, 'https://de.serlo.org/math')
 
       setupProbabilityFor(backend)
-      fetch.mockRequest({ to: backendUrl })
+      mockHttpGet(backendUrl, returnText(''))
       Math.random = jest.fn().mockReturnValue(0.25)
 
       const response = await handleUrl('https://de.serlo.org/math')
@@ -88,34 +75,30 @@ describe('handleRequest()', () => {
         'language code = %p',
         async (lang) => {
           setupProbabilityFor(Backend.Frontend)
-          fetch.mockRequest({ to: `https://frontend.serlo.org/${lang}/math` })
 
-          await handleUrl(`https://${lang}.serlo.org/math`)
-
-          expect(fetch).toHaveExactlyOneRequestTo(
-            `https://frontend.serlo.org/${lang}/math`
-          )
+          await expectResponseFrom({
+            backend: `https://frontend.serlo.org/${lang}/math`,
+            request: `https://${lang}.serlo.org/math`,
+          })
         }
       )
 
       test('prepends language prefix for special path /search', async () => {
         setupProbabilityFor(Backend.Frontend)
-        fetch.mockRequest({ to: `https://frontend.serlo.org/en/search` })
 
-        await handleUrl(`https://en.serlo.org/search`)
-
-        expect(fetch).toHaveExactlyOneRequestTo(
-          `https://frontend.serlo.org/en/search`
-        )
+        await expectResponseFrom({
+          backend: 'https://frontend.serlo.org/en/search',
+          request: 'https://en.serlo.org/search',
+        })
       })
 
       test('removes trailing slashes from the frontend url', async () => {
         setupProbabilityFor(Backend.Frontend)
-        fetch.mockRequest({ to: `https://frontend.serlo.org/de` })
 
-        await handleUrl(`https://de.serlo.org/`)
-
-        expect(fetch).toHaveExactlyOneRequestTo('https://frontend.serlo.org/de')
+        await expectResponseFrom({
+          backend: 'https://frontend.serlo.org/de',
+          request: 'https://de.serlo.org/',
+        })
       })
 
       describe('special paths do not get a language prefix', () => {
@@ -126,12 +109,10 @@ describe('handleRequest()', () => {
           'https://de.serlo.org/api/frontend/privacy',
           'https://de.serlo.org/api/auth/login',
         ])('URL = %p', async (url) => {
-          const backendUrl = getUrlFor(Backend.Frontend, url)
-          fetch.mockRequest({ to: backendUrl })
-
-          await handleUrl(url)
-
-          expect(fetch).toHaveExactlyOneRequestTo(backendUrl)
+          await expectResponseFrom({
+            backend: getUrlFor(Backend.Frontend, url),
+            request: url,
+          })
         })
       })
     })
@@ -140,15 +121,12 @@ describe('handleRequest()', () => {
       test.each([Instance.En, Instance.De])(
         'language code = %p',
         async (lang) => {
-          const url = `https://${lang}.serlo.org/math`
-          global.FRONTEND_SUPPORT_INTERNATIONALIZATION = 'true'
-
           setupProbabilityFor(Backend.Legacy)
-          fetch.mockRequest({ to: url })
 
-          await handleUrl(url)
-
-          expect(fetch).toHaveExactlyOneRequestTo(url)
+          await expectResponseFrom({
+            backend: `https://${lang}.serlo.org/math`,
+            request: `https://${lang}.serlo.org/math`,
+          })
         }
       )
     })
@@ -165,51 +143,46 @@ describe('handleRequest()', () => {
         let response: Response
 
         beforeEach(async () => {
-          fetch.mockRequest({ to: 'https://de.serlo.org/math' })
+          setupApiToReturnError()
+          mockHttpGet('https://de.serlo.org/math', returnText('content'))
 
           const request = new Request('https://de.serlo.org/math')
           request.headers.set('Cookie', 'authenticated=1')
           response = (await frontendProxy(request)) as Response
         })
 
-        test('chooses legacy backend', () => {
-          expect(fetch).toHaveExactlyOneRequestTo('https://de.serlo.org/math')
+        test('chooses legacy backend', async () => {
+          expect(await response.text()).toBe('content')
         })
 
         test('does not set cookie with random number', () => {
           expect(response.headers.get('Set-Cookie')).toBeNull()
         })
-
-        test('does not check the path type', () => {
-          expect(fetch).not.toHaveRequestsTo('https://api.serlo.org/')
-        })
       })
 
       test('/spenden go to legacy backend', async () => {
-        fetch.mockRequest({ to: 'https://de.serlo.org/spenden' })
-
         const request = new Request('https://de.serlo.org/spenden')
-
         request.headers.set('Cookie', 'authenticated=1')
-        await frontendProxy(request)
 
-        expect(fetch).toHaveExactlyOneRequestTo('https://de.serlo.org/spenden')
+        await expectResponseFrom({
+          backend: 'https://de.serlo.org/spenden',
+          request,
+        })
       })
     })
 
     describe('when REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = false', () => {
       test('does not choose legacy backend', async () => {
         global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = 'false'
-
         setupProbabilityFor(Backend.Frontend)
-        fetch.mockRequest({ to: 'https://frontend.serlo.org/math' })
 
         const request = new Request('https://de.serlo.org/math')
         request.headers.set('Cookie', 'authenticated=1')
-        await frontendProxy(request)
-        expect(fetch).toHaveExactlyOneRequestTo(
-          'https://frontend.serlo.org/math'
-        )
+
+        await expectResponseFrom({
+          backend: 'https://frontend.serlo.org/math',
+          request,
+        })
       })
     })
   })
@@ -219,22 +192,19 @@ describe('handleRequest()', () => {
     let response: Response
 
     beforeEach(async () => {
+      setupApiToReturnError()
       setupProbabilityFor(Backend.Frontend)
-      fetch.mockRequest({ to: url })
+      mockHttpGet(url, returnText('content'))
 
       response = await handleUrl(url)
     })
 
-    test('chooses legacy backend', () => {
-      expect(fetch).toHaveExactlyOneRequestTo(url)
+    test('chooses legacy backend', async () => {
+      expect(await response.text()).toBe('content')
     })
 
     test('does not set cookie with random number', () => {
       expect(response.headers.get('Set-Cookie')).toBeNull()
-    })
-
-    test('does not check the path type', () => {
-      expect(fetch).not.toHaveRequestsTo('https://api.serlo.org/')
     })
   })
 
@@ -259,7 +229,7 @@ describe('handleRequest()', () => {
         const url = 'https://de.serlo.org/math'
         const backendUrl = getUrlFor(backend, url)
 
-        fetch.mockRequest({ to: backendUrl })
+        mockHttpGet(backendUrl, returnText('content'))
         global.FRONTEND_PROBABILITY = '0.5'
 
         const request = new Request(url, { headers: { Cookie: cookieValue } })
@@ -278,32 +248,35 @@ describe('handleRequest()', () => {
 
   test('uses cookie "frontendUrl" to determine the url of the frontend', async () => {
     setupProbabilityFor(Backend.Frontend)
-    fetch.mockRequest({ to: 'https://myfrontend.org/math' })
 
     const request = new Request('https://de.serlo.org/math')
     request.headers.set('Cookie', 'frontendDomain=myfrontend.org')
-    await frontendProxy(request)
 
-    expect(fetch).toHaveExactlyOneRequestTo('https://myfrontend.org/math')
+    await expectResponseFrom({
+      backend: 'https://myfrontend.org/math',
+      request,
+    })
   })
 
   test('ignore wrongly formatted cookie values', async () => {
     setupProbabilityFor(Backend.Frontend)
-    fetch.mockRequest({ to: 'https://frontend.serlo.org/math' })
 
     const request = new Request('https://de.serlo.org/math')
     request.headers.set('Cookie', 'useFrontend=foo')
-    await frontendProxy(request)
 
+    await expectResponseFrom({
+      backend: 'https://frontend.serlo.org/math',
+      request,
+    })
     expect(Math.random).toHaveBeenCalled()
   })
 
   test('return null when type of path is not allowed', async () => {
-    fetch.mockRequest({
-      to: 'https://api.serlo.org/',
-      response: createApiResponse({ __typename: 'TaxonomyTerm' }),
-    })
     global.FRONTEND_ALLOWED_TYPES = '["Page", "Article"]'
+    mockHttpPost(
+      global.API_ENDPOINT,
+      returnApiUuid({ __typename: 'TaxonomyTerm' })
+    )
 
     const response = await handleUrl('https://de.serlo.org/42')
 
@@ -311,13 +284,10 @@ describe('handleRequest()', () => {
   })
 
   test('returns null when type of path is unknown', async () => {
-    fetch.mockRequest({
-      to: 'https://api.serlo.org/',
-      response: createJsonResponse({
-        errors: [{ message: 'error' }],
-        data: { uuid: null },
-      }),
-    })
+    mockHttpPost(
+      global.API_ENDPOINT,
+      returnJson({ errors: [{ message: 'error' }], data: { uuid: null } })
+    )
 
     const response = await handleUrl('https://de.serlo.org/unknown')
 
@@ -327,9 +297,8 @@ describe('handleRequest()', () => {
   describe('special paths', () => {
     test('requests to /user/profile/... resolve to legacy backend when `User` is not in FRONTEND_ALLOWED_TYPES', async () => {
       global.FRONTEND_ALLOWED_TYPES = '[]'
-      const backendUrl = 'https://de.serlo.org/user/profile/inyono'
-      fetch.mockRequest({ to: backendUrl })
 
+      const backendUrl = 'https://de.serlo.org/user/profile/inyono'
       const response = await handleUrl(backendUrl)
 
       expect(response).toBeNull()
@@ -337,64 +306,46 @@ describe('handleRequest()', () => {
 
     test('requests to /user/profile/... resolve to frontend when `User` is in FRONTEND_ALLOWED_TYPES', async () => {
       global.FRONTEND_ALLOWED_TYPES = '["User"]'
-      const backendUrl = 'https://frontend.serlo.org/user/profile/inyono'
-      fetch.mockRequest({ to: backendUrl })
 
-      await handleUrl('https://de.serlo.org/user/profile/inyono')
-
-      expect(fetch).toHaveExactlyOneRequestTo(backendUrl)
+      await expectResponseFrom({
+        backend: 'https://frontend.serlo.org/user/profile/inyono',
+        request: 'https://de.serlo.org/user/profile/inyono',
+      })
     })
 
     test('requests to /api/auth/... always resolve to frontend', async () => {
-      const backendUrl = 'https://frontend.serlo.org/api/auth/callback'
-
-      fetch.mockRequest({ to: backendUrl })
-
-      await handleUrl('https://de.serlo.org/api/auth/callback')
-
-      expect(fetch).toHaveExactlyOneRequestTo(backendUrl)
+      await expectResponseFrom({
+        backend: 'https://frontend.serlo.org/api/auth/callback',
+        request: 'https://de.serlo.org/api/auth/callback',
+      })
     })
 
     test('requests to /api/frontend/... always resolve to frontend', async () => {
-      const backendUrl = 'https://frontend.serlo.org/api/frontend/privacy/json'
-
-      fetch.mockRequest({ to: backendUrl })
-
-      await handleUrl('https://de.serlo.org/api/frontend/privacy/json')
-
-      expect(fetch).toHaveExactlyOneRequestTo(backendUrl)
+      await expectResponseFrom({
+        backend: 'https://frontend.serlo.org/api/frontend/privacy/json',
+        request: 'https://de.serlo.org/api/frontend/privacy/json',
+      })
     })
 
     test('requests to /_next/... always resolve to frontend', async () => {
-      fetch.mockRequest({ to: 'https://frontend.serlo.org/_next/script.js' })
-
-      await handleUrl('https://de.serlo.org/_next/script.js')
-
-      expect(fetch).toHaveExactlyOneRequestTo(
-        'https://frontend.serlo.org/_next/script.js'
-      )
+      await expectResponseFrom({
+        backend: 'https://frontend.serlo.org/_next/script.js',
+        request: 'https://de.serlo.org/_next/script.js',
+      })
     })
 
     test('requests to /_assets/... always resolve to frontend', async () => {
-      fetch.mockRequest({
-        to: 'https://frontend.serlo.org/_assets/img/picture.svg',
+      await expectResponseFrom({
+        backend: 'https://frontend.serlo.org/_assets/img/picture.svg',
+        request: 'https://de.serlo.org/_assets/img/picture.svg',
       })
-
-      await handleUrl('https://de.serlo.org/_assets/img/picture.svg')
-
-      expect(fetch).toHaveExactlyOneRequestTo(
-        'https://frontend.serlo.org/_assets/img/picture.svg'
-      )
     })
 
     test('requests to /spenden always resolve to frontend', async () => {
-      fetch.mockRequest({ to: 'https://frontend.serlo.org/spenden' })
-
-      await handleUrl('https://de.serlo.org/spenden')
-
-      expect(fetch).toHaveExactlyOneRequestTo(
-        'https://frontend.serlo.org/spenden'
-      )
+      await expectResponseFrom({
+        backend: 'https://frontend.serlo.org/spenden',
+        request: 'https://de.serlo.org/spenden',
+      })
     })
 
     describe('special paths where the cookie determines the backend', () => {
@@ -406,14 +357,11 @@ describe('handleRequest()', () => {
             async (backend) => {
               setupProbabilityFor(backend)
               Math.random = jest.fn().mockReturnValue(0.5)
-              fetch.mockRequest({
-                to: getUrlFor(backend, url),
-                response: backend,
+
+              await expectResponseFrom({
+                backend: getUrlFor(backend, url),
+                request: url,
               })
-
-              const response = await handleUrl(url)
-
-              expect(await response.text()).toBe(backend)
             }
           )
         }
@@ -431,11 +379,7 @@ describe('handleRequest()', () => {
         'https://de.serlo.org/auth/hydra/consent',
         'https://de.serlo.org/user/register',
       ])('URL = %p', async (url) => {
-        fetch.mockRequest({ to: url })
-
-        await handleUrl(url)
-
-        expect(fetch).toHaveExactlyOneRequestTo(url)
+        await expectResponseFrom({ backend: url, request: url })
       })
     })
 
@@ -446,11 +390,7 @@ describe('handleRequest()', () => {
         'https://de.serlo.org/_assets-alias',
       ])('URL = %p', async (url) => {
         setupProbabilityFor(Backend.Legacy)
-        fetch.mockRequest({ to: url })
-
-        await handleUrl(url)
-
-        expect(fetch).toHaveExactlyOneRequestTo(url)
+        await expectResponseFrom({ backend: url, request: url })
       })
     })
 
@@ -471,12 +411,13 @@ describe('handleRequest()', () => {
         'https://de.serlo.org/auth/hydra/consent',
         'https://de.serlo.org/user/register',
       ])('URL = %p', async (url) => {
-        fetch.mockRequest({ to: getUrlFor(Backend.Frontend, url) })
-        fetch.mockRequest({ to: getUrlFor(Backend.Legacy, url) })
+        setupApiToReturnError()
+        mockHttpGet(getUrlFor(Backend.Frontend, url), returnText('content'))
+        mockHttpGet(getUrlFor(Backend.Legacy, url), returnText('content'))
 
-        await handleUrl(url)
+        const response = await handleUrl(url)
 
-        expect(fetch).not.toHaveRequestsTo('https://api.serlo.org/')
+        expect(await response.text()).toBe('content')
       })
     })
 
@@ -495,8 +436,8 @@ describe('handleRequest()', () => {
         'https://de.serlo.org/auth/hydra/consent',
         'https://de.serlo.org/user/register',
       ])('URL = %p', async (url) => {
-        fetch.mockRequest({ to: getUrlFor(Backend.Frontend, url) })
-        fetch.mockRequest({ to: getUrlFor(Backend.Legacy, url) })
+        mockHttpGet(getUrlFor(Backend.Frontend, url), returnText(url))
+        mockHttpGet(getUrlFor(Backend.Legacy, url), returnText(url))
 
         const response = await handleUrl(url)
 
@@ -521,13 +462,10 @@ describe('handleRequest()', () => {
 
   test('creates a copy of backend responses (otherwise there is an error in cloudflare)', async () => {
     const backendResponse = new Response('')
+    global.fetch = jest.fn().mockResolvedValue(backendResponse)
 
-    setupProbabilityFor(Backend.Frontend)
-    fetch.mockRequest({
-      to: 'https://frontend.serlo.org/',
-      response: backendResponse,
-    })
-
+    // There is not type checking for the main page and thus we do not need
+    // to mock the api request here
     const response = await handleUrl('https://de.serlo.org/')
 
     expect(response).not.toBe(backendResponse)
@@ -535,53 +473,44 @@ describe('handleRequest()', () => {
 
   describe('passes query string to backend', () => {
     test.each([Backend.Frontend, Backend.Legacy])('%p', async (backend) => {
-      const backendUrl = getUrlFor(backend, 'https://de.serlo.org/?foo=bar')
-
       setupProbabilityFor(backend)
-      fetch.mockRequest({ to: backendUrl })
 
-      const request = new Request('https://de.serlo.org/?foo=bar')
-      await frontendProxy(request)
-
-      const backendRequest = fetch.getRequestTo(backendUrl) as Request
-      const queryString = new URL(backendRequest.url).search
-      expect(queryString).toEqual('?foo=bar')
+      await expectResponseFrom({
+        backend: getUrlFor(backend, 'https://de.serlo.org/?foo=bar'),
+        request: 'https://de.serlo.org/?foo=bar',
+      })
     })
   })
 
   describe('transfers request headers to backend', () => {
     test.each([Backend.Frontend, Backend.Legacy])('%p', async (backend) => {
-      const backendUrl = getUrlFor(backend, 'https://de.serlo.org/')
-
       setupProbabilityFor(backend)
-      fetch.mockRequest({ to: backendUrl })
+      mockHttpGet(
+        getUrlFor(backend, 'https://de.serlo.org/'),
+        (req, res, ctx) =>
+          res(ctx.status(req.headers.get('Cookie') === 'token=123' ? 200 : 400))
+      )
 
       const request = new Request('https://de.serlo.org/')
-      request.headers.set('X-Header', 'foo')
-      request.headers.set('Cookie', 'token=12345;')
-      await frontendProxy(request)
+      request.headers.set('Cookie', 'token=123')
+      const response = (await frontendProxy(request)) as Response
 
-      const backendRequest = fetch.getRequestTo(backendUrl) as Request
-      expect(backendRequest.headers.get('X-Header')).toBe('foo')
-      expect(backendRequest.headers.get('Cookie')).toBe('token=12345;')
+      expectHasOkStatus(response)
     })
   })
 
   describe('transfers response headers from backend', () => {
     test.each([Backend.Frontend, Backend.Legacy])('%p', async (backend) => {
-      const backendResponse = new Response('', {
-        headers: {
-          'X-Header': 'bar',
-          'Set-Cookie': 'token=123456; path=/',
-        },
-      })
+      const headers = {
+        'X-Header': 'bar',
+        'Set-Cookie': 'token=123456; path=/',
+      }
+      mockHttpGet(
+        getUrlFor(backend, 'https://de.serlo.org/'),
+        (_req, res, ctx) => res(ctx.set(headers))
+      )
 
       setupProbabilityFor(backend)
-      fetch.mockRequest({
-        to: getUrlFor(backend, 'https://de.serlo.org/'),
-        response: backendResponse,
-      })
-
       const response = await handleUrl('https://de.serlo.org/')
 
       expect(response.headers.get('X-Header')).toBe('bar')
@@ -638,6 +567,29 @@ describe('handleRequest()', () => {
   })
 })
 
+function setupProbabilityFor(backend: Backend) {
+  global.FRONTEND_PROBABILITY = backend === Backend.Frontend ? '1' : '0'
+}
+
+function setupApiToReturnError() {
+  mockHttpPost(global.API_ENDPOINT, (_req, res, ctx) => res(ctx.status(404)))
+}
+
+async function expectResponseFrom({
+  backend,
+  request,
+}: {
+  backend: string
+  request: Request | string
+}) {
+  mockHttpGet(backend, returnText('content'))
+
+  request = typeof request === 'string' ? new Request(request) : request
+  const response = (await frontendProxy(request)) as Response
+
+  expect(await response.text()).toBe('content')
+}
+
 async function handleUrl(url: string): Promise<Response> {
   return (await frontendProxy(new Request(url))) as Response
 }
@@ -646,8 +598,4 @@ function getUrlFor(backend: Backend, url: string) {
   return backend === Backend.Frontend
     ? url.replace('de.serlo.org', 'frontend.serlo.org')
     : url
-}
-
-function setupProbabilityFor(backend: Backend) {
-  global.FRONTEND_PROBABILITY = backend === Backend.Frontend ? '1' : '0'
 }
