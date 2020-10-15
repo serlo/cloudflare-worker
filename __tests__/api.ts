@@ -36,7 +36,6 @@ describe('fetchApi()', () => {
   test('returns the result of fetch()', async () => {
     global.API_SECRET = 'my-secret'
 
-    // TODO: Move this to returnApiResponse()
     mockHttpGet('https://api.serlo.org/', (req, res, ctx) => {
       if (req.headers.get('Content-Type') !== 'application/json')
         return res(ctx.status(415))
