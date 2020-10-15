@@ -200,7 +200,6 @@ describe('getPathInfo()', () => {
       path: string,
       lang = Instance.En
     ): Promise<MockedRequest> {
-      // TODO: This is bad design > we should rewrite this unit test
       let request!: MockedRequest
       mockHttpPost(apiEndpoint, (req, res, ctx) => {
         request = req
