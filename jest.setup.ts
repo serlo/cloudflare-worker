@@ -21,11 +21,13 @@
  */
 // eslint-disable-next-line import/no-unassigned-import
 import '@testing-library/jest-dom'
+import * as cryptoNode from 'crypto'
 import { setupServer } from 'msw/node'
 import fetchNode, {
   Response as NodeResponse,
   Request as NodeRequest,
 } from 'node-fetch'
+import * as util from 'util'
 
 import { mockKV } from './__tests__/_helper'
 
@@ -60,6 +62,19 @@ afterAll(() => {
 
 global.Response = (NodeResponse as unknown) as typeof Response
 global.Request = (NodeRequest as unknown) as typeof Request
+global.crypto = ({
+  subtle: {
+    digest(encoding: string, message: Uint8Array) {
+      return Promise.resolve(
+        cryptoNode
+          .createHash(encoding.toLowerCase().replace('-', ''))
+          .update(message)
+          .digest()
+      )
+    },
+  },
+} as unknown) as typeof crypto
+global.TextEncoder = util.TextEncoder
 
 // FIXME: Delete the following mock, when node-fetch is available in version 3.0.0
 // See https://github.com/node-fetch/node-fetch/commit/0959ca9739850bbd24e0721cc1296e7a0aa5c2bd#diff-d0f5704ae0738a7bd1f54aff42ddcb41

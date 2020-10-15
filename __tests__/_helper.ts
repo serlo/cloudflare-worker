@@ -105,5 +105,5 @@ export function returnJson(json: Record<string, unknown>): RestResolver {
 }
 
 export function returnApiUuid(uuid: unknown): RestResolver {
-  return returnJson({ data: { uuid  }})
+  return returnJson({ data: { uuid } })
 }

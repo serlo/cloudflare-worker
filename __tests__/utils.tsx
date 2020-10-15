@@ -25,6 +25,7 @@ import { h } from 'preact'
 
 import { Template } from '../src/ui'
 import {
+  decodePath,
   getCookieValue,
   sanitizeHtml,
   markdownToHtml,
@@ -49,6 +50,18 @@ import {
   mockHttpPost,
   returnApiUuid,
 } from './_helper'
+
+describe('decodePath()', () => {
+  const path = '/math/%%x^2 & y^2%%'
+
+  test('decode encoded URLs', () => {
+    expect(decodePath(encodeURIComponent(path))).toBe(path)
+  })
+
+  test('return decoded URLs without error', () => {
+    expect(decodePath(path)).toBe(path)
+  })
+})
 
 describe('getCookieValue()', () => {
   describe('returns the cookie value of a given cookie header', () => {
@@ -298,6 +311,30 @@ describe('getPathInfo()', () => {
 
       expect(await global.PATH_INFO_KV.get('/en/path')).toEqual(
         JSON.stringify({ typename: 'Article', currentPath: '/current-path' })
+      )
+    })
+
+    test('cache key has maximum width of 512 characters by sha-1 hashing longer keys', async () => {
+      const longTamilPath =
+        '/%E0%AE%87%E0%AE%B2%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AE%A3%E0' +
+        '%AE%AE%E0%AF%8D/%E0%AE%85%E0%AE%9F%E0%AE%BF%E0%AE%AA%E0%AF%8D%E0' +
+        '%AE%AA%E0%AE%9F%E0%AF%88-%E0%AE%87%E0%AE%B2%E0%AE%95%E0%AF%8D%E0' +
+        '%AE%95%E0%AE%A3%E0%AE%AE%E0%AF%8D/%E0%AE%AE%E0%AF%8A%E0%AE%B4%E0' +
+        '%AE%BF%E0%AE%AF%E0%AE%BF%E0%AE%A9%E0%AF%8D-%E0%AE%9A%E0%AF%8A%E0' +
+        '%AE%B1%E0%AF%8D%E0%AE%AA%E0%AE%BE%E0%AE%95%E0%AF%81%E0%AE%AA%E0' +
+        '%AE%BE%E0%AE%9F%E0%AF%81-%E0%AE%87%E0%AE%B2%E0%AE%95%E0%AF%8D%E0' +
+        '%AE%95%E0%AE%BF%E0%AE%AF-%E0%AE%B5%E0%AE%95%E0%AF%88%E0%AE%95%E0' +
+        '%AE%B3%E0%AF%8D'
+      mockHttpPost(
+        apiEndpoint,
+        returnApiUuid({ __typename: 'Article', alias: longTamilPath })
+      )
+
+      await getPathInfo(Instance.Ta, longTamilPath)
+
+      const cacheKey = '23e2e346e649c466a41fabf38d7e8bf03333b007'
+      expect(await global.PATH_INFO_KV.get(cacheKey)).toEqual(
+        JSON.stringify({ typename: 'Article', currentPath: longTamilPath })
       )
     })
 

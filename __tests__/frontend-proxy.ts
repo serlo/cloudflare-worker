@@ -160,15 +160,13 @@ describe('handleRequest()', () => {
         })
       })
 
-      describe('/search and /spenden go to legacy backend', () => {
-        test.each([
-          'https://de.serlo.org/search',
-          'https://de.serlo.org/spenden',
-        ])('url = %p', async (url) => {
-          const request = new Request(url)
-          request.headers.set('Cookie', 'authenticated=1')
+      test('/spenden go to legacy backend', async () => {
+        const request = new Request('https://de.serlo.org/spenden')
+        request.headers.set('Cookie', 'authenticated=1')
 
-          await expectResponseFrom({ backend: url, request })
+        await expectResponseFrom({
+          backend: 'https://de.serlo.org/spenden',
+          request,
         })
       })
     })
@@ -343,18 +341,31 @@ describe('handleRequest()', () => {
       })
     })
 
-    test('requests to /search always resolve to frontend', async () => {
-      await expectResponseFrom({
-        backend: 'https://frontend.serlo.org/search',
-        request: 'https://de.serlo.org/search',
-      })
-    })
-
     test('requests to /spenden always resolve to frontend', async () => {
       await expectResponseFrom({
         backend: 'https://frontend.serlo.org/spenden',
         request: 'https://de.serlo.org/spenden',
       })
+    })
+
+    describe('special paths where the cookie determines the backend', () => {
+      describe.each(['https://de.serlo.org/search', 'https://de.serlo.org/'])(
+        'URL = %p',
+        (url) => {
+          test.each([Backend.Frontend, Backend.Legacy])(
+            'backend = %p',
+            async (backend) => {
+              setupProbabilityFor(backend)
+              Math.random = jest.fn().mockReturnValue(0.5)
+
+              await expectResponseFrom({
+                backend: getUrlFor(backend, url),
+                request: url,
+              })
+            }
+          )
+        }
+      )
     })
 
     describe('forwards authentication requests to legacy backend', () => {
@@ -386,8 +397,8 @@ describe('handleRequest()', () => {
     describe('type of special paths is not checked nor cached', () => {
       test.each([
         'https://de.serlo.org/',
-        'https://de.serlo.org/spenden',
         'https://de.serlo.org/search',
+        'https://de.serlo.org/spenden',
         'https://de.serlo.org/_next/script.js',
         'https://de.serlo.org/_assets/image.png',
         'https://de.serlo.org/api/frontend/privacy',
@@ -413,7 +424,6 @@ describe('handleRequest()', () => {
     describe('Predetermined special paths do not set a cookie', () => {
       test.each([
         'https://de.serlo.org/spenden',
-        'https://de.serlo.org/search',
         'https://de.serlo.org/_next/script.js',
         'https://de.serlo.org/_assets/image.png',
         'https://de.serlo.org/api/frontend/privacy',
@@ -510,24 +520,50 @@ describe('handleRequest()', () => {
     })
   })
 
-  test('requests to /enable-frontend enable use of frontend', async () => {
-    const res = await handleUrl('https://de.serlo.org/enable-frontend')
+  describe('requests to /enable-frontend enable use of frontend', () => {
+    let res: Response
 
-    expectHasOkStatus(res)
-    expect(res.headers.get('Set-Cookie')).toEqual(
-      expect.stringContaining('useFrontend=0;')
-    )
-    expect(await res.text()).toBe('Enabled: Use of new frontend')
+    beforeEach(async () => {
+      res = await handleUrl('https://de.serlo.org/enable-frontend')
+    })
+
+    test('shows message that frontend was enabled', async () => {
+      expectHasOkStatus(res)
+      expect(await res.text()).toBe('Enabled: Use of new frontend')
+    })
+
+    test('sets cookie so that new frontend will be used', () => {
+      expect(res.headers.get('Set-Cookie')).toEqual(
+        expect.stringContaining('useFrontend=0;')
+      )
+    })
+
+    test('main page will be loaded after 1 second', () => {
+      expect(res.headers.get('Refresh')).toBe('1; url=/')
+    })
   })
 
-  test('requests to /disable-frontend disable use of frontend', async () => {
-    const res = await handleUrl('https://de.serlo.org/disable-frontend')
+  describe('requests to /disable-frontend disable use of frontend', () => {
+    let res: Response
 
-    expectHasOkStatus(res)
-    expect(res.headers.get('Set-Cookie')).toEqual(
-      expect.stringContaining('useFrontend=1;')
-    )
-    expect(await res.text()).toBe('Disabled: Use of new frontend')
+    beforeEach(async () => {
+      res = await handleUrl('https://de.serlo.org/disable-frontend')
+    })
+
+    test('shows message that frontend use is disabled', async () => {
+      expectHasOkStatus(res)
+      expect(await res.text()).toBe('Disabled: Use of new frontend')
+    })
+
+    test('sets cookie to that legacy backend will be used', () => {
+      expect(res.headers.get('Set-Cookie')).toEqual(
+        expect.stringContaining('useFrontend=1;')
+      )
+    })
+
+    test('main page will be loaded after 1 second', () => {
+      expect(res.headers.get('Refresh')).toBe('1; url=/')
+    })
   })
 })
 
