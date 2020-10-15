@@ -154,6 +154,7 @@ describe('handleRequest()', () => {
         let response: Response
 
         beforeEach(async () => {
+          setupApiToReturnError()
           mockHttpGet('https://de.serlo.org/math', returnText('content'))
 
           const request = new Request('https://de.serlo.org/math')
@@ -167,11 +168,6 @@ describe('handleRequest()', () => {
 
         test('does not set cookie with random number', () => {
           expect(response.headers.get('Set-Cookie')).toBeNull()
-        })
-
-        test('does not check the path type', () => {
-          // TODO: We need to find another solution
-          // expect(fetch).not.toHaveRequestsTo('https://api.serlo.org/')
         })
       })
 
@@ -212,6 +208,7 @@ describe('handleRequest()', () => {
     let response: Response
 
     beforeEach(async () => {
+      setupApiToReturnError()
       setupProbabilityFor(Backend.Frontend)
       mockHttpGet(url, returnText('content'))
 
@@ -224,10 +221,6 @@ describe('handleRequest()', () => {
 
     test('does not set cookie with random number', () => {
       expect(response.headers.get('Set-Cookie')).toBeNull()
-    })
-
-    test('does not check the path type', () => {
-      //expect(fetch).not.toHaveRequestsTo('https://api.serlo.org/')
     })
   })
 
@@ -454,13 +447,13 @@ describe('handleRequest()', () => {
         'https://de.serlo.org/auth/hydra/consent',
         'https://de.serlo.org/user/register',
       ])('URL = %p', async (url) => {
+        setupApiToReturnError()
         mockHttpGet(getUrlFor(Backend.Frontend, url), returnText('content'))
         mockHttpGet(getUrlFor(Backend.Legacy, url), returnText('content'))
 
         const response = await handleUrl(url)
 
         expect(await response.text()).toBe('content')
-        //expect(fetch).not.toHaveRequestsTo('https://api.serlo.org/')
       })
     })
 
@@ -586,6 +579,14 @@ describe('handleRequest()', () => {
   })
 })
 
+function setupProbabilityFor(backend: Backend) {
+  global.FRONTEND_PROBABILITY = backend === Backend.Frontend ? '1' : '0'
+}
+
+function setupApiToReturnError() {
+  mockHttpPost(global.API_ENDPOINT, (_req, res, ctx) => res(ctx.status(404)))
+}
+
 async function handleUrl(url: string): Promise<Response> {
   return (await frontendProxy(new Request(url))) as Response
 }
@@ -594,8 +595,4 @@ function getUrlFor(backend: Backend, url: string) {
   return backend === Backend.Frontend
     ? url.replace('de.serlo.org', 'frontend.serlo.org')
     : url
-}
-
-function setupProbabilityFor(backend: Backend) {
-  global.FRONTEND_PROBABILITY = backend === Backend.Frontend ? '1' : '0'
 }
