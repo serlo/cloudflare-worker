@@ -231,7 +231,7 @@ describe('getPathInfo()', () => {
     })
 
     describe('when the response is not valid', () => {
-      test.each([null, {}, { data: { uuid: {} } }])(
+      test.each([{}, { data: { uuid: {} } }])(
         'response = %p',
         async (response) => {
           mockHttpPost(apiEndpoint, returnJson(response))

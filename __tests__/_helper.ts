@@ -100,7 +100,7 @@ export function returnText(
   return (_req, res, ctx) => res.once(ctx.body(body), ctx.status(status))
 }
 
-export function returnJson(json: any): RestResolver {
+export function returnJson(json: Record<string, unknown>): RestResolver {
   return (_req, res, ctx) => res.once(ctx.json(json))
 }
 
