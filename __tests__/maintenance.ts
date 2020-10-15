@@ -37,9 +37,7 @@ describe('Maintenance mode', () => {
       end: DateTime.local().plus({ minutes: 20 }).toISO(),
       subdomains: ['de'],
     }
-    mockKV('MAINTENANCE_KV', {
-      enabled: JSON.stringify(value),
-    })
+    mockKV('MAINTENANCE_KV', { enabled: JSON.stringify(value) })
 
     expect(await handleUrl('https://de.serlo.org')).toBeNull()
   })
@@ -50,9 +48,7 @@ describe('Maintenance mode', () => {
       end: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['de'],
     }
-    mockKV('MAINTENANCE_KV', {
-      enabled: JSON.stringify(value),
-    })
+    mockKV('MAINTENANCE_KV', { enabled: JSON.stringify(value) })
 
     expect(await handleUrl('https://de.serlo.org')).toBeNull()
   })
@@ -64,9 +60,7 @@ describe('Maintenance mode', () => {
       end: end.toISO(),
       subdomains: ['de'],
     }
-    mockKV('MAINTENANCE_KV', {
-      enabled: JSON.stringify(value),
-    })
+    mockKV('MAINTENANCE_KV', { enabled: JSON.stringify(value) })
 
     const response = await handleUrl('https://de.serlo.org')
     expect(response.status).toEqual(503)
@@ -85,9 +79,7 @@ describe('Maintenance mode', () => {
       end: end.toISO(),
       subdomains: ['en'],
     }
-    mockKV('MAINTENANCE_KV', {
-      enabled: JSON.stringify(value),
-    })
+    mockKV('MAINTENANCE_KV', { enabled: JSON.stringify(value) })
 
     const response = await handleUrl('https://en.serlo.org')
     expect(response.status).toEqual(503)
@@ -104,9 +96,7 @@ describe('Maintenance mode', () => {
       start: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['de'],
     }
-    mockKV('MAINTENANCE_KV', {
-      enabled: JSON.stringify(value),
-    })
+    mockKV('MAINTENANCE_KV', { enabled: JSON.stringify(value) })
 
     const response = await handleUrl('https://de.serlo.org')
     expect(response.status).toEqual(503)
@@ -122,9 +112,7 @@ describe('Maintenance mode', () => {
       start: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['en'],
     }
-    mockKV('MAINTENANCE_KV', {
-      enabled: JSON.stringify(value),
-    })
+    mockKV('MAINTENANCE_KV', { enabled: JSON.stringify(value) })
 
     const response = await handleUrl('https://en.serlo.org')
     expect(response.status).toEqual(503)
@@ -142,9 +130,7 @@ describe('Maintenance mode', () => {
       end: end.toISO(),
       subdomains: ['en'],
     }
-    mockKV('MAINTENANCE_KV', {
-      enabled: JSON.stringify(value),
-    })
+    mockKV('MAINTENANCE_KV', { enabled: JSON.stringify(value) })
 
     expect(await handleUrl('https://de.serlo.org')).toBeNull()
   })
@@ -154,9 +140,7 @@ describe('Maintenance mode', () => {
       start: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['en'],
     }
-    mockKV('MAINTENANCE_KV', {
-      enabled: JSON.stringify(value),
-    })
+    mockKV('MAINTENANCE_KV', { enabled: JSON.stringify(value) })
 
     expect(await handleUrl('https://de.serlo.org')).toBeNull()
   })

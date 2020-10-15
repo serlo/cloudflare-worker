@@ -22,20 +22,20 @@
 // eslint-disable-next-line import/no-unassigned-import
 import '@testing-library/jest-dom'
 import * as cryptoNode from 'crypto'
-import { Response as NodeResponse, Request as NodeRequest } from 'node-fetch'
+import { setupServer } from 'msw/node'
+import fetchNode, {
+  Response as NodeResponse,
+  Request as NodeRequest,
+} from 'node-fetch'
 import * as util from 'util'
 
-import { extendExpect } from './__tests__/_extend-jest'
 import { mockKV } from './__tests__/_helper'
 
-extendExpect()
-
-const fetchCopy = global.fetch
+global.server = setupServer()
 const randomCopy = Math.random
 
-afterEach(() => {
-  Math.random = randomCopy
-  global.fetch = fetchCopy
+beforeAll(() => {
+  global.server.listen({ onUnhandledRequest: 'error' })
 })
 
 beforeEach(() => {
@@ -44,11 +44,24 @@ beforeEach(() => {
   global.FRONTEND_DOMAIN = 'frontend.serlo.org'
   global.FRONTEND_PROBABILITY = '1'
   global.FRONTEND_ALLOWED_TYPES = '[]'
+  // TODO: Remove this since this tests an implementation details
+  global.fetch = jest.fn().mockImplementation(fetchNode)
 
   mockKV('MAINTENANCE_KV', {})
   mockKV('PATH_INFO_KV', {})
 })
 
+afterEach(() => {
+  global.server.resetHandlers()
+  Math.random = randomCopy
+})
+
+afterAll(() => {
+  global.server.close()
+})
+
+global.Response = (NodeResponse as unknown) as typeof Response
+global.Request = (NodeRequest as unknown) as typeof Request
 global.crypto = ({
   subtle: {
     digest(encoding: string, message: Uint8Array) {
@@ -62,12 +75,19 @@ global.crypto = ({
   },
 } as unknown) as typeof crypto
 global.TextEncoder = util.TextEncoder
-global.Response = (NodeResponse as unknown) as typeof Response
-global.Request = (NodeRequest as unknown) as typeof Request
 
 // FIXME: Delete the following mock, when node-fetch is available in version 3.0.0
 // See https://github.com/node-fetch/node-fetch/commit/0959ca9739850bbd24e0721cc1296e7a0aa5c2bd#diff-d0f5704ae0738a7bd1f54aff42ddcb41
 // eslint-disable-next-line @typescript-eslint/unbound-method
 NodeResponse.redirect = function (url: string, status = 302) {
   return new NodeResponse('', { status, headers: { location: url } })
+}
+
+/* eslint-disable @typescript-eslint/no-namespace */
+declare global {
+  namespace NodeJS {
+    interface Global {
+      server: ReturnType<typeof import('msw/node').setupServer>
+    }
+  }
 }

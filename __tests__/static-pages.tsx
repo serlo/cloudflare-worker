@@ -45,7 +45,8 @@ import {
   expectHasOkStatus,
   expectContainsText,
   expectContentTypeIsHtml,
-  mockFetch,
+  mockHttpGet,
+  returnText,
 } from './_helper'
 
 describe('handleRequest()', () => {
@@ -78,7 +79,10 @@ describe('handleRequest()', () => {
       'https://de.serlo.org/imprint',
       'https://fr.serlo.org/imprint/',
     ])('URL is %p', async (url) => {
-      mockFetch({ 'https://example.org/imprint.html': '<p>Hello World</p>' })
+      mockHttpGet(
+        'https://example.org/imprint.html',
+        returnText('<p>Hello World</p>')
+      )
 
       const response = (await testHandleRequest(url))!
 
@@ -89,7 +93,7 @@ describe('handleRequest()', () => {
   })
 
   test('returns unrevised page response at /terms (markdown specification)', async () => {
-    mockFetch({ 'https://example.org/terms.md': '# Terms of Use' })
+    mockHttpGet('https://example.org/terms.md', returnText('# Terms of Use'))
 
     const url = 'https://de.serlo.org/terms'
     const response = (await testHandleRequest(url))!
@@ -101,7 +105,10 @@ describe('handleRequest()', () => {
 
   test('returns current revision for requests at /privacy', async () => {
     const url = 'https://de.serlo.org/privacy/'
-    mockFetch({ 'http://example.org/privacy-current': '<p>Hello</p>' })
+    mockHttpGet(
+      'http://example.org/privacy-current',
+      returnText('<p>Hello</p>')
+    )
 
     const response = (await testHandleRequest(url))!
 
@@ -114,7 +121,7 @@ describe('handleRequest()', () => {
   })
 
   test('returns archived revision for requests at /privacy/archive/<id>', async () => {
-    mockFetch({ 'http://example.org/privacy-old': '<p>Hello</p>' })
+    mockHttpGet('http://example.org/privacy-old', returnText('<p>Hello</p>'))
 
     const url = 'https://de.serlo.org/privacy/archive/1999-10-09'
     const response = (await testHandleRequest(url)) as Response
@@ -284,7 +291,7 @@ describe('fetchContent()', () => {
 
   describe('returns page when url can be resolved', () => {
     test('parses reponse as Markdown if url ends with `.md`', async () => {
-      mockFetch({ 'http://example.org/imprint.md': '# Hello World' })
+      mockHttpGet('http://example.org/imprint.md', returnText('# Hello World'))
 
       expect(await fetchContent(exampleSpecMarkdown)).toEqual({
         lang: 'de',
@@ -295,7 +302,7 @@ describe('fetchContent()', () => {
     })
 
     test('returns response content when url does not end with `.md`', async () => {
-      mockFetch({ 'http://example.org/': '<h1>Hello World</h1>' })
+      mockHttpGet('http://example.org/', returnText('<h1>Hello World</h1>'))
 
       expect(await fetchContent(exampleSpec)).toEqual({
         lang: 'en',
@@ -307,10 +314,10 @@ describe('fetchContent()', () => {
 
     describe('returned HTML is sanitized', () => {
       test('HTML response', async () => {
-        mockFetch({
-          'http://example.org/':
-            '<h1>Hello World</h1><script>alert(42)</script>',
-        })
+        mockHttpGet(
+          'http://example.org/',
+          returnText('<h1>Hello World</h1><script>alert(42)</script>')
+        )
 
         expect(await fetchContent(exampleSpec)).toEqual({
           lang: 'en',
@@ -321,10 +328,10 @@ describe('fetchContent()', () => {
       })
 
       test('Markdown response', async () => {
-        mockFetch({
-          'http://example.org/imprint.md':
-            'Hello\n<iframe src="http://serlo.org/">',
-        })
+        mockHttpGet(
+          'http://example.org/imprint.md',
+          returnText('Hello\n<iframe src="http://serlo.org/">')
+        )
 
         expect(await fetchContent(exampleSpecMarkdown)).toEqual({
           lang: 'de',
@@ -338,10 +345,10 @@ describe('fetchContent()', () => {
 
   describe('support for JS-GOOGLE-ANALYTICS-DEACTIVATE', () => {
     test('HTML response', async () => {
-      mockFetch({
-        'http://example.org/':
-          'Click <a href="JS-GOOGLE-ANALYTICS-DEACTIVATE">here</a>',
-      })
+      mockHttpGet(
+        'http://example.org/',
+        returnText('Click <a href="JS-GOOGLE-ANALYTICS-DEACTIVATE">here</a>')
+      )
 
       expect(await fetchContent(exampleSpec)).toEqual({
         lang: 'en',
@@ -352,10 +359,10 @@ describe('fetchContent()', () => {
     })
 
     test('Markdown response', async () => {
-      mockFetch({
-        'http://example.org/imprint.md':
-          'Click [here](JS-GOOGLE-ANALYTICS-DEACTIVATE)',
-      })
+      mockHttpGet(
+        'http://example.org/imprint.md',
+        returnText('Click [here](JS-GOOGLE-ANALYTICS-DEACTIVATE)')
+      )
 
       expect(await fetchContent(exampleSpecMarkdown)).toEqual({
         lang: 'de',
@@ -367,8 +374,8 @@ describe('fetchContent()', () => {
   })
 
   describe('returns null when request on the url of the spec fails', () => {
-    test.each([301, 404, 500])('status code %p', async (code) => {
-      mockFetch({ 'http://example.org/': new Response('', { status: code }) })
+    test.each([301, 404, 500])('status code %p', async (status) => {
+      mockHttpGet('http://example.org/', returnText('', { status }))
 
       expect(await fetchContent(exampleSpec)).toBeNull()
     })

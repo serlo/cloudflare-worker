@@ -65,6 +65,7 @@
     "eslint-plugin-react": "^7.0.0",
     "glob": "^7.0.0",
     "jest": "^26.0.0",
+    "msw": "^0.20.0",
     "node-fetch": "^2.6.1",
     "nodemon": "^2.0.0",
     "npm-run-all": "^4.0.0",
