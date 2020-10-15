@@ -104,10 +104,6 @@ export function returnJson(json: Record<string, unknown>): RestResolver {
   return (_req, res, ctx) => res.once(ctx.json(json))
 }
 
-export function returnApiData(data: unknown): RestResolver {
-  return returnJson({ data })
-}
-
 export function returnApiUuid(uuid: unknown): RestResolver {
-  return returnApiData({ uuid })
+  return returnJson({ data: { uuid  }})
 }
