@@ -22,8 +22,6 @@
 
 import { rest, ResponseResolver, restContext, MockedRequest } from 'msw'
 
-import { createJsonResponse } from '../src/utils'
-
 export async function expectContainsText(response: Response, texts: string[]) {
   expect(response).not.toBeNull()
 
@@ -61,88 +59,6 @@ export async function expectIsJsonResponse(
   expectHasOkStatus(response)
   expect(response.headers.get('Content-Type')).toBe('application/json')
   expect(JSON.parse(await response.text())).toEqual(targetJson)
-}
-
-// TODO: Can this be deleted?
-export function createApiResponse(uuid: {
-  __typename: string
-  alias?: string
-  username?: string
-  pages?: { alias: string }[]
-}) {
-  return createJsonResponse({ data: { uuid } })
-}
-
-// TODO: Delete following functions
-type ResponseSpec = string | Response
-type FetchSpec = Record<string, ResponseSpec>
-
-export function mockFetch(spec: FetchSpec = {}): FetchMock {
-  const mockedFetch = jest.fn()
-  const mockedInternet = new FetchMock(spec, mockedFetch)
-
-  mockedFetch.mockImplementation((reqInfo) => mockedInternet.fetch(reqInfo))
-
-  global.fetch = mockedFetch
-
-  return mockedInternet
-}
-
-export class FetchMock {
-  constructor(
-    private specs: FetchSpec,
-    private mockedFetch: jest.Mock<any, [RequestInfo, RequestInit | undefined]>
-  ) {}
-
-  get mock(): jest.Mock<any, [RequestInfo, RequestInit | undefined]> &
-    typeof global.fetch {
-    return this.mockedFetch
-  }
-
-  fetch(reqInfo: RequestInfo) {
-    const url = typeof reqInfo === 'string' ? reqInfo : reqInfo.url
-    const responseSpec = this.specs[url]
-    const errorMessage = `Response for URL ${url} is not defined in mocked fetch`
-
-    return responseSpec === undefined
-      ? Promise.reject(new Error(errorMessage))
-      : Promise.resolve(FetchMock.convertToResponse(responseSpec))
-  }
-
-  mockRequest({ to, response = '' }: { to: string; response?: ResponseSpec }) {
-    this.specs[to] = response
-  }
-
-  getAllCallArgumentsFor(url: string) {
-    return this.mockedFetch.mock.calls.filter(
-      ([req]) => FetchMock.getUrl(req) === url
-    )
-  }
-
-  getCallArgumentsFor(url: string) {
-    const argsList = this.getAllCallArgumentsFor(url)
-
-    if (argsList.length === 0) throw new Error(`URL ${url} was never fetched`)
-    if (argsList.length > 1)
-      throw new Error(`URL ${url} was fetched more than one time`)
-
-    return argsList[0]
-  }
-
-  getRequestTo(url: string): RequestInfo {
-    return this.getCallArgumentsFor(url)[0]
-  }
-
-  getAllRequestsTo(url: string): RequestInfo[] {
-    return this.getAllCallArgumentsFor(url).map((x) => x[0])
-  }
-
-  static getUrl(req: RequestInfo): string {
-    return typeof req === 'string' ? req : req.url
-  }
-  static convertToResponse(spec: ResponseSpec): Response {
-    return typeof spec === 'string' ? new Response(spec) : spec
-  }
 }
 
 type KV_NAMES = 'MAINTENANCE_KV' | 'PACKAGES_KV' | 'PATH_INFO_KV'

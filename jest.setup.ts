@@ -27,10 +27,7 @@ import fetchNode, {
   Request as NodeRequest,
 } from 'node-fetch'
 
-import { extendExpect } from './__tests__/_extend-jest'
 import { mockKV } from './__tests__/_helper'
-
-extendExpect()
 
 global.server = setupServer()
 const randomCopy = Math.random
