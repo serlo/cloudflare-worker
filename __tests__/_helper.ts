@@ -163,7 +163,14 @@ export function mockKV(name: KV_NAMES, values: Record<string, string>) {
 type RestResolver = ResponseResolver<MockedRequest, typeof restContext>
 
 export function mockHttpGet(url: string, resolver: RestResolver) {
-  global.server.use(rest.get(url, resolver))
+  global.server.use(
+    rest.get(url, (req, res, ctx) => {
+      if (req.url.toString() !== url)
+        return res(ctx.status(400, 'Bad Request: Query string does not match'))
+
+      return resolver(req, res, ctx)
+    })
+  )
 }
 
 export function mockHttpPost(url: string, resolver: RestResolver) {

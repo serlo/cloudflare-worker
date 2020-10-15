@@ -25,8 +25,6 @@ import {
   mockKV,
   mockHttpGet,
   returnText,
-  returnJson,
-  returnApiData,
   mockHttpPost,
   returnApiUuid,
 } from './_helper'
@@ -161,7 +159,7 @@ describe('Redirects', () => {
           returnApiUuid({ __typename: 'Article', alias: '/gr%C3%B6%C3%9Fen' })
         )
         mockHttpGet(
-          'https://de.serlo.org/größen',
+          'https://de.serlo.org/gr%C3%B6%C3%9Fen',
           returnText('article content')
         )
 
@@ -176,7 +174,7 @@ describe('Redirects', () => {
           returnApiUuid({ __typename: 'Article', alias: '/größen' })
         )
         mockHttpGet(
-          'https://de.serlo.org/größen',
+          'https://de.serlo.org/gr%C3%B6%C3%9Fen',
           returnText('article content')
         )
 

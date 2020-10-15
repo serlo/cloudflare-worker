@@ -302,7 +302,7 @@ describe('fetchContent()', () => {
     })
 
     test('returns response content when url does not end with `.md`', async () => {
-      mockHttpGet('http://example.org', returnText('<h1>Hello World</h1>'))
+      mockHttpGet('http://example.org/', returnText('<h1>Hello World</h1>'))
 
       expect(await fetchContent(exampleSpec)).toEqual({
         lang: 'en',
