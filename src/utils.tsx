@@ -19,7 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { either as E } from 'fp-ts'
+import { either as E, pipeable as P } from 'fp-ts'
 import * as t from 'io-ts'
 import marked from 'marked'
 import { h, VNode } from 'preact'
@@ -40,6 +40,16 @@ export enum Instance {
 
 export function isInstance(code: string): code is Instance {
   return Object.values(Instance).some((x) => x === code)
+}
+
+export function decodePath(path: string): string {
+  return P.pipe(
+    E.tryCatch(
+      () => decodeURIComponent(path),
+      (e) => e
+    ),
+    E.getOrElse((_) => path)
+  )
 }
 
 export function getCookieValue(
@@ -81,7 +91,7 @@ export async function getPathInfo(
   if (path.startsWith(userProfilePrefix) && !userProfileId.test(path))
     return { typename: 'User', currentPath: path }
 
-  const cacheKey = `/${lang}${path}`
+  const cacheKey = await toCacheKey(`/${lang}${path}`)
   const cachedValue = await global.PATH_INFO_KV.get(cacheKey)
 
   if (cachedValue !== null) {
@@ -209,4 +219,16 @@ export function createJsonResponse(json: unknown) {
 
 export function createNotFoundResponse() {
   return createPreactResponse(<NotFound />, { status: 404 })
+}
+
+async function toCacheKey(key: string): Promise<string> {
+  return key.length > 512 ? await digestMessage(key) : key
+}
+
+async function digestMessage(message: string): Promise<string> {
+  const msgUint8 = new TextEncoder().encode(message)
+  const hashBuffer = await crypto.subtle.digest('SHA-1', msgUint8)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+  return hashHex
 }
