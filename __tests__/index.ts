@@ -62,21 +62,21 @@ describe('Redirects', () => {
     expectToBeRedirectTo(response, target, 301)
   })
 
-  test('de.serlo.org/labschool', async () => {
-    const response = await handleUrl('https://de.serlo.local/labschool')
+  test.each(['/labschool', '/labschool/'])('serlo.org%s', async (path) => {
+    const response = await handleUrl(`https://de.serlo.local${path}`)
 
     expectToBeRedirectTo(response, 'https://labschool.serlo.local/', 301)
   })
 
-  test('de.serlo.org/hochschule', async () => {
-    const response = await handleUrl('https://de.serlo.local/hochschule')
+  test.each(['/hochschule', '/hochschule/'])('serlo.org%s', async (path) => {
+    const response = await handleUrl(`https://de.serlo.local${path}`)
 
     const target = 'https://de.serlo.local/mathe/universitaet/44323'
     expectToBeRedirectTo(response, target, 301)
   })
 
-  test('de.serlo.org/beitreten', async () => {
-    const response = await handleUrl('https://de.serlo.local/beitreten')
+  test.each(['/beitreten', '/beitreten/'])('serlo.org%s', async (path) => {
+    const response = await handleUrl(`https://de.serlo.local${path}`)
 
     const target =
       'https://docs.google.com/forms/d/e/1FAIpQLSdEoyCcDVP_G_-G_u642S768e_sxz6wO6rJ3tad4Hb9z7Slwg/viewform'
