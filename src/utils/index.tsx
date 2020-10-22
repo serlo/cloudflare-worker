@@ -26,8 +26,10 @@ import { h, VNode } from 'preact'
 import renderToString from 'preact-render-to-string'
 import sanitize from 'sanitize-html'
 
-import { fetchApi } from './api'
-import { NotFound } from './ui'
+import { fetchApi } from '../api'
+import { NotFound } from '../ui'
+
+export * from './url'
 
 export enum Instance {
   De = 'de',
