@@ -1,10 +1,5 @@
-import {
-  getSubdomain,
-  getPathname,
-  hasContentApiParameters,
-  getPathnameWithoutTrailingSlash,
-} from './url-utils'
-import { getCookieValue, isInstance, Instance, getPathInfo } from './utils'
+import { hasContentApiParameters } from './url-utils'
+import { Url, getCookieValue, isInstance, Instance, getPathInfo } from './utils'
 
 export async function frontendProxy(
   request: Request
@@ -13,19 +8,16 @@ export async function frontendProxy(
   const allowedTypes = JSON.parse(global.FRONTEND_ALLOWED_TYPES) as string[]
   const supportInternationalization =
     global.FRONTEND_SUPPORT_INTERNATIONALIZATION === 'true'
+  const url = Url.fromRequest(request)
 
-  const url = request.url
-  const path = getPathname(url)
-  const instance = getSubdomain(url)
+  if (!isInstance(url.subdomain)) return null
 
-  if (instance === null || !isInstance(instance)) return null
+  if (!supportInternationalization && url.subdomain !== Instance.De) return null
 
-  if (!supportInternationalization && instance !== Instance.De) return null
-
-  if (path === '/enable-frontend')
+  if (url.pathname === '/enable-frontend')
     return createConfigurationResponse('Enabled: Use of new frontend', 0)
 
-  if (path === '/disable-frontend')
+  if (url.pathname === '/disable-frontend')
     return createConfigurationResponse('Disabled: Use of new frontend', 1)
 
   const cookies = request.headers.get('Cookie')
@@ -33,32 +25,35 @@ export async function frontendProxy(
     getCookieValue('frontendDomain', cookies) ?? global.FRONTEND_DOMAIN
 
   if (
-    path.startsWith('/_next/') ||
-    path.startsWith('/_assets/') ||
-    path.startsWith('/api/auth/') ||
-    path.startsWith('/api/frontend/')
+    url.pathname.startsWith('/_next/') ||
+    url.pathname.startsWith('/_assets/') ||
+    url.pathname.startsWith('/api/auth/') ||
+    url.pathname.startsWith('/api/frontend/')
   )
     return await fetchBackend({ useFrontend: true })
 
   if (
-    path === '/auth/login' ||
-    path === '/auth/logout' ||
-    path.startsWith('/auth/activate/') ||
-    path === '/auth/password/change' ||
-    path.startsWith('/auth/password/restore/') ||
-    path === '/auth/hydra/login' ||
-    path === '/auth/hydra/consent' ||
-    path === '/user/register' ||
-    hasContentApiParameters(url) ||
+    url.pathname.startsWith('/auth/activate/') ||
+    url.pathname.startsWith('/auth/password/restore/') ||
+    [
+      '/auth/login',
+      '/auth/logout',
+      '/auth/password/change',
+      '/auth/hydra/login',
+      '/auth/hydra/consent',
+      '/user/register',
+    ].includes(url.pathname) ||
+    hasContentApiParameters(url.toString()) ||
     (global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND === 'true' &&
       getCookieValue('authenticated', cookies) === '1')
   )
     return await fetchBackend({ useFrontend: false })
 
-  if (path === '/spenden') return await fetchBackend({ useFrontend: true })
+  if (url.pathname === '/spenden')
+    return await fetchBackend({ useFrontend: true })
 
-  if (path !== '/' && path !== '/search') {
-    const pathInfo = await getPathInfo(instance, path)
+  if (url.pathname !== '/' && url.pathname !== '/search') {
+    const pathInfo = await getPathInfo(url.subdomain, url.pathname)
     const typename = pathInfo?.typename ?? null
 
     if (typename === null || !allowedTypes.includes(typename)) return null
@@ -71,7 +66,7 @@ export async function frontendProxy(
 
   const response = await fetchBackend({
     useFrontend: useFrontendNumber <= probability,
-    pathPrefix: instance,
+    pathPrefix: url.subdomain,
   })
   if (Number.isNaN(cookieValue))
     setCookieUseFrontend(response, useFrontendNumber)
@@ -85,18 +80,22 @@ export async function frontendProxy(
     useFrontend: boolean
     pathPrefix?: Instance
   }) {
-    const backendUrl = new URL(request.url)
+    let backendUrl = url
 
     if (useFrontend) {
-      backendUrl.hostname = frontendDomain
+      backendUrl = backendUrl.changeHostname(frontendDomain)
 
       if (supportInternationalization && pathPrefix !== undefined)
-        backendUrl.pathname = `/${pathPrefix}${backendUrl.pathname}`
+        backendUrl = backendUrl.change({
+          pathname: `/${pathPrefix}${backendUrl.pathname}`,
+        })
 
-      backendUrl.pathname = getPathnameWithoutTrailingSlash(backendUrl.href)
+      backendUrl = backendUrl.change({
+        pathname: backendUrl.pathnameWithoutTrailingSlash,
+      })
     }
 
-    const response = await fetch(new Request(backendUrl.href, request))
+    const response = await fetch(new Request(backendUrl.toString(), request))
 
     return new Response(response.body, response)
   }

@@ -25,12 +25,8 @@ import { authFrontendSectorIdentifierUriValidation } from './auth'
 import { frontendProxy } from './frontend-proxy'
 import { maintenanceMode } from './maintenance'
 import { staticPages } from './static-pages'
-import {
-  getPathnameWithoutTrailingSlash,
-  getSubdomain,
-  getPathname,
-} from './url-utils'
-import { decodePath, getPathInfo, isInstance } from './utils'
+import { getSubdomain } from './url-utils'
+import { Url, decodePath, getPathInfo, isInstance } from './utils'
 
 addEventListener('fetch', (event: Event) => {
   const e = event as FetchEvent
@@ -63,72 +59,54 @@ async function enforceHttps(request: Request) {
 }
 
 async function redirects(request: Request) {
-  const subdomain = getSubdomain(request.url)
-  const path = getPathname(request.url)
-  const pathWithoutSlash = getPathnameWithoutTrailingSlash(request.url)
+  const url = Url.fromRequest(request)
 
-  if (subdomain === 'start') {
+  if (url.subdomain === 'start') {
     return Response.redirect(
       'https://docs.google.com/document/d/1qsgkXWNwC-mcgroyfqrQPkZyYqn7m1aimw2gwtDTmpM/',
       301
     )
   }
 
-  if (subdomain === 'de' && pathWithoutSlash === '/labschool') {
-    const url = new URL(request.url)
-
-    url.host = url.host.replace('de.', 'labschool.')
-    url.pathname = '/'
-
-    return Response.redirect(url.href, 301)
+  if (
+    url.subdomain === 'de' &&
+    url.pathnameWithoutTrailingSlash === '/labschool'
+  ) {
+    return url.change({ subdomain: 'labschool', pathname: '/' }).toRedirect(301)
   }
 
-  if (subdomain === 'de' && pathWithoutSlash === '/hochschule') {
-    const url = new URL(request.url)
-
-    url.pathname = '/mathe/universitaet/44323'
-
-    return Response.redirect(url.href, 301)
+  if (
+    url.subdomain === 'de' &&
+    url.pathnameWithoutTrailingSlash === '/hochschule'
+  ) {
+    return url.change({ pathname: '/mathe/universitaet/44323' }).toRedirect(301)
   }
 
-  if (subdomain === 'de' && pathWithoutSlash === '/beitreten') {
+  if (
+    url.subdomain === 'de' &&
+    url.pathnameWithoutTrailingSlash === '/beitreten'
+  ) {
     return Response.redirect(
       'https://docs.google.com/forms/d/e/1FAIpQLSdEoyCcDVP_G_-G_u642S768e_sxz6wO6rJ3tad4Hb9z7Slwg/viewform',
       301
     )
   }
 
-  if (subdomain === 'www') {
-    const url = new URL(request.url)
-
-    url.host = url.host.replace('www.', 'de.')
-
-    return Response.redirect(url.href)
+  if (url.subdomain === 'www' || url.subdomain === '') {
+    return url.change({ subdomain: 'de' }).toRedirect()
   }
 
-  if (subdomain === null) {
-    const url = new URL(request.url)
-
-    url.host = `de.${url.host}`
-
-    return Response.redirect(url.href)
-  }
-
-  if (isInstance(subdomain)) {
-    const pathInfo = await getPathInfo(subdomain, path)
+  if (isInstance(url.subdomain)) {
+    const pathInfo = await getPathInfo(url.subdomain, url.pathname)
 
     // TODO: Remove decodeURIComponent() when we the API returns an
     // URL encoded alias
     if (
       request.headers.get('X-Requested-With') !== 'XMLHttpRequest' &&
       pathInfo !== null &&
-      decodePath(path) != decodePath(pathInfo.currentPath)
+      decodePath(url.pathname) != decodePath(pathInfo.currentPath)
     ) {
-      const url = new URL(request.url)
-
-      url.pathname = pathInfo.currentPath
-
-      return Response.redirect(url.href, 301)
+      return url.change({ pathname: pathInfo.currentPath }).toRedirect(301)
     }
   }
 }
