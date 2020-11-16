@@ -1,13 +1,6 @@
 import { frontendProxy } from '../src/frontend-proxy'
 import { Instance } from '../src/utils'
-import {
-  expectHasOkStatus,
-  mockHttpPost,
-  returnApiUuid,
-  mockHttpGet,
-  returnText,
-  returnJson,
-} from './_helper'
+import { expectHasOkStatus, mockHttpGet, returnText, mockApi } from './_helper'
 
 enum Backend {
   Frontend = 'frontend',
@@ -23,8 +16,7 @@ describe('handleRequest()', () => {
     global.FRONTEND_PROBABILITY = '0.5'
     Math.random = jest.fn().mockReturnValue(0.5)
 
-    mockHttpPost(global.API_ENDPOINT, returnApiUuid({ __typename: 'Subject' }))
-    global.FRONTEND_ALLOWED_TYPES = '["Subject"]'
+    mockApi(global.API_ENDPOINT, { __typename: 'Subject' })
   })
 
   describe('chooses backend based on random number', () => {
@@ -143,7 +135,7 @@ describe('handleRequest()', () => {
         let response: Response
 
         beforeEach(async () => {
-          setupApiToReturnError()
+          apiToReturnError()
           mockHttpGet('https://de.serlo.org/math', returnText('content'))
 
           const request = new Request('https://de.serlo.org/math')
@@ -192,7 +184,7 @@ describe('handleRequest()', () => {
     let response: Response
 
     beforeEach(async () => {
-      setupApiToReturnError()
+      apiToReturnError()
       setupProbabilityFor(Backend.Frontend)
       mockHttpGet(url, returnText('content'))
 
@@ -273,10 +265,7 @@ describe('handleRequest()', () => {
 
   test('return null when type of path is not allowed', async () => {
     global.FRONTEND_ALLOWED_TYPES = '["Page", "Article"]'
-    mockHttpPost(
-      global.API_ENDPOINT,
-      returnApiUuid({ __typename: 'TaxonomyTerm' })
-    )
+    mockApi(global.API_ENDPOINT, { __typename: 'TaxonomyTerm' })
 
     const response = await handleUrl('https://de.serlo.org/42')
 
@@ -284,10 +273,10 @@ describe('handleRequest()', () => {
   })
 
   test('returns null when type of path is unknown', async () => {
-    mockHttpPost(
-      global.API_ENDPOINT,
-      returnJson({ errors: [{ message: 'error' }], data: { uuid: null } })
-    )
+    mockApi(global.API_ENDPOINT, {
+      errors: [{ message: 'error' }],
+      data: { uuid: null },
+    })
 
     const response = await handleUrl('https://de.serlo.org/unknown')
 
@@ -411,7 +400,7 @@ describe('handleRequest()', () => {
         'https://de.serlo.org/auth/hydra/consent',
         'https://de.serlo.org/user/register',
       ])('URL = %p', async (url) => {
-        setupApiToReturnError()
+        apiToReturnError()
         mockHttpGet(getUrlFor(Backend.Frontend, url), returnText('content'))
         mockHttpGet(getUrlFor(Backend.Legacy, url), returnText('content'))
 
@@ -571,8 +560,8 @@ function setupProbabilityFor(backend: Backend) {
   global.FRONTEND_PROBABILITY = backend === Backend.Frontend ? '1' : '0'
 }
 
-function setupApiToReturnError() {
-  mockHttpPost(global.API_ENDPOINT, (_req, res, ctx) => res(ctx.status(404)))
+function apiToReturnError() {
+  mockApi(global.API_ENDPOINT, (_req, res, ctx) => res(ctx.status(404)))
 }
 
 async function expectResponseFrom({

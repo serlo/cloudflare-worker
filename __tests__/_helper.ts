@@ -89,8 +89,12 @@ export function mockHttpGet(url: string, resolver: RestResolver) {
   )
 }
 
-export function mockHttpPost(url: string, resolver: RestResolver) {
-  global.server.use(rest.post(url, resolver))
+export function mockApi(url: string, uuid: unknown) {
+  global.server.use(
+    rest.post(url, (req, res, ctx) => {
+      return res(ctx.json({ data: { uuid } }))
+    })
+  )
 }
 
 export function returnText(
@@ -104,6 +108,10 @@ export function returnJson(json: Record<string, unknown>): RestResolver {
   return (_req, res, ctx) => res.once(ctx.json(json))
 }
 
-export function returnApiUuid(uuid: unknown): RestResolver {
+export function apiToReturnError(body: string, { status = 404 }): RestResolver {
+  return (_req, res, ctx) => res.once(ctx.status(status))
+}
+
+export function apiUuid(uuid: unknown): RestResolver {
   return returnJson({ data: { uuid } })
 }
