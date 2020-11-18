@@ -561,7 +561,7 @@ function setupProbabilityFor(backend: Backend) {
 }
 
 function apiToReturnError() {
-  mockApi(global.API_ENDPOINT, (_req, res, ctx) => res(ctx.status(404)))
+  global.API_ENDPOINT, (_req, res, ctx) => res(ctx.status(404))
 }
 
 async function expectResponseFrom({
