@@ -20,7 +20,7 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-import { MockedRequest } from 'msw/lib/types'
+import { MockedRequest, rest } from 'msw/lib/types'
 import { h } from 'preact'
 
 import { Template } from '../src/ui'
@@ -204,20 +204,17 @@ describe('getPathInfo()', () => {
       lang = Instance.En
     ): Promise<MockedRequest> {
       let request!: MockedRequest
-      mockApi(apiEndpoint, (req, res, ctx) => {
-        request = req
-
-        return returnApiUuid({
-          __typename: 'Article',
-          alias: path,
-        })(req, res, ctx)
-      })
+      global.server.use(
+        rest.post(apiEndpoint, (_req, res, ctx) => {
+          return res(ctx.json({ data: {  __typename: 'Article',
+          alias: path } }))
+        })
+      )
 
       await getPathInfo(lang, path)
 
       return request
     }
-  })
 
   describe('returns null', () => {
     test('when there was an error with the api call', async () => {
