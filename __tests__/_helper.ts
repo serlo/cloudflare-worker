@@ -108,9 +108,14 @@ export function returnJson(json: Record<string, unknown>): RestResolver {
   return (_req, res, ctx) => res.once(ctx.json(json))
 }
 
-export function apiToReturnError(url: string, { status = 404 }): void {
+export function apiToReturnError(
+  url: string,
+  options?: { status?: number }
+): void {
   global.server.use(
-    rest.post(url, (_req, res, ctx) => res.once(ctx.status(status)))
+    rest.post(url, (_req, res, ctx) =>
+      res.once(ctx.status(options?.status ?? 404))
+    )
   )
 }
 
