@@ -1,6 +1,12 @@
 import { frontendProxy } from '../src/frontend-proxy'
 import { Instance } from '../src/utils'
-import { expectHasOkStatus, mockHttpGet, returnText, mockApi } from './_helper'
+import {
+  expectHasOkStatus,
+  mockHttpGet,
+  returnText,
+  mockApi,
+  apiToReturnError,
+} from './_helper'
 
 enum Backend {
   Frontend = 'frontend',
@@ -135,7 +141,7 @@ describe('handleRequest()', () => {
         let response: Response
 
         beforeEach(async () => {
-          apiToReturnError()
+          apiToReturnError(global.API_ENDPOINT)
           mockHttpGet('https://de.serlo.org/math', returnText('content'))
 
           const request = new Request('https://de.serlo.org/math')
@@ -184,7 +190,7 @@ describe('handleRequest()', () => {
     let response: Response
 
     beforeEach(async () => {
-      apiToReturnError()
+      apiToReturnError(global.API_ENDPOINT)
       setupProbabilityFor(Backend.Frontend)
       mockHttpGet(url, returnText('content'))
 
@@ -400,7 +406,7 @@ describe('handleRequest()', () => {
         'https://de.serlo.org/auth/hydra/consent',
         'https://de.serlo.org/user/register',
       ])('URL = %p', async (url) => {
-        apiToReturnError()
+        apiToReturnError(global.API_ENDPOINT)
         mockHttpGet(getUrlFor(Backend.Frontend, url), returnText('content'))
         mockHttpGet(getUrlFor(Backend.Legacy, url), returnText('content'))
 
@@ -558,10 +564,6 @@ describe('handleRequest()', () => {
 
 function setupProbabilityFor(backend: Backend) {
   global.FRONTEND_PROBABILITY = backend === Backend.Frontend ? '1' : '0'
-}
-
-function apiToReturnError() {
-  global.API_ENDPOINT, (_req, res, ctx) => res(ctx.status(404))
 }
 
 async function expectResponseFrom({
