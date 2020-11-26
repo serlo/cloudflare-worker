@@ -25,7 +25,6 @@ import { authFrontendSectorIdentifierUriValidation } from './auth'
 import { frontendProxy } from './frontend-proxy'
 import { maintenanceMode } from './maintenance'
 import { staticPages } from './static-pages'
-import { getSubdomain } from './url-utils'
 import { Url, decodePath, getPathInfo, isInstance } from './utils'
 
 addEventListener('fetch', (event: Event) => {
@@ -49,13 +48,12 @@ export async function handleRequest(request: Request) {
   )
 }
 
-// eslint-disable-next-line @typescript-eslint/require-await
 async function enforceHttps(request: Request) {
-  if (getSubdomain(request.url) === 'pacts') return null
-  const url = new URL(request.url)
+  const url = Url.fromRequest(request)
+  if (url.subdomain === 'pacts') return null
   if (url.protocol !== 'http:') return null
   url.protocol = 'https:'
-  return Response.redirect(url.href)
+  return Promise.resolve(url.toRedirect())
 }
 
 async function redirects(request: Request) {
@@ -112,9 +110,10 @@ async function redirects(request: Request) {
 }
 
 async function semanticFileNames(request: Request) {
-  if (getSubdomain(request.url) !== 'assets') return null
+  const url = Url.fromRequest(request)
 
-  const url = new URL(request.url)
+  if (url.subdomain !== 'assets') return null
+
   url.host = 'assets.serlo.org'
 
   const re = /^\/(legacy\/|)((?!legacy)\w+)\/([\w\-+]+)\.(\w+)$/
@@ -131,9 +130,10 @@ async function semanticFileNames(request: Request) {
 }
 
 async function packages(request: Request) {
-  if (getSubdomain(request.url) !== 'packages') return null
+  const url = Url.fromRequest(request)
 
-  const url = new URL(request.url)
+  if (url.subdomain !== 'packages') return null
+
   url.host = 'packages.serlo.org'
 
   const re = /([^/]+)\//

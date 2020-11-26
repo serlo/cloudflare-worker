@@ -21,20 +21,22 @@
  */
 import { h } from 'preact'
 
-import { getSubdomain } from '../url-utils'
 import {
   createPreactResponse,
   fetchWithCache,
   getBasicAuthHeaders,
+  Url,
 } from '../utils'
 import { AreWeEdtrIoYet, AreWeEdtrIoYetProps } from './template'
 
 export async function edtrIoStats(request: Request) {
-  if (getSubdomain(request.url) !== 'are-we-edtr-io-yet') return null
+  const url = Url.fromRequest(request)
 
-  const url = new URL(request.url)
-  url.host = url.host.replace('are-we-edtr-io-yet.', 'de.')
+  if (url.subdomain !== 'are-we-edtr-io-yet') return null
+
+  url.subdomain = 'de'
   url.pathname = '/entities/are-we-edtr-io-yet'
+
   const data = await fetchWithCache(url.href, {
     headers: getBasicAuthHeaders(),
   })

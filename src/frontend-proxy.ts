@@ -1,4 +1,3 @@
-import { hasContentApiParameters } from './url-utils'
 import { Url, getCookieValue, isInstance, Instance, getPathInfo } from './utils'
 
 export async function frontendProxy(
@@ -43,7 +42,7 @@ export async function frontendProxy(
       '/auth/hydra/consent',
       '/user/register',
     ].includes(url.pathname) ||
-    hasContentApiParameters(url.toString()) ||
+    url.hasContentApiParameters() ||
     (global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND === 'true' &&
       getCookieValue('authenticated', cookies) === '1')
   )

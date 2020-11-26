@@ -24,6 +24,19 @@ import URL from 'core-js-pure/features/url'
 const UrlProperties = ['subdomain', 'hostname', 'pathname'] as const
 type UrlProperties = typeof UrlProperties[number]
 
+const contentApiParameters = [
+  'contentOnly',
+  'hideTopbar',
+  'hideLeftSidebar',
+  'hideRightSidebar',
+  'hideBreadcrumbs',
+  'hideDiscussions',
+  'hideBanner',
+  'hideHorizon',
+  'hideFooter',
+  'fullWidth',
+]
+
 export class Url extends URL {
   get subdomain(): string {
     return this.hostname.split('.').slice(0, -2).join('.')
@@ -51,6 +64,14 @@ export class Url extends URL {
     }
 
     return this
+  }
+
+  hasContentApiParameters() {
+    return this.search
+      .slice(1)
+      .split('&')
+      .map((parameterWithValue) => parameterWithValue.split('=')[0])
+      .some((queryParameter) => contentApiParameters.includes(queryParameter))
   }
 
   static fromRequest(request: Request): Url {

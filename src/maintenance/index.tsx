@@ -22,17 +22,17 @@
 import { DateTime } from 'luxon'
 import { h } from 'preact'
 
-import { getSubdomain } from '../url-utils'
-import { createPreactResponse } from '../utils'
+import { createPreactResponse, Url } from '../utils'
 import { Maintenance } from './template'
 
 export async function maintenanceMode(request: Request) {
+  const url = Url.fromRequest(request)
   const enabled = await global.MAINTENANCE_KV.get('enabled')
   if (!enabled) return null
   const { start: startISO, end: endISO, subdomains = [] } = JSON.parse(
     enabled
   ) as { start: string; end: string; subdomains?: string[] }
-  if (!subdomains.includes(getSubdomain(request.url) ?? '')) return null
+  if (!subdomains.includes(url.subdomain)) return null
   if (!startISO) return null
   const now = DateTime.local()
   const start = DateTime.fromISO(startISO)
@@ -45,10 +45,7 @@ export async function maintenanceMode(request: Request) {
   return createMaintenanceResponse({ lang: getLanguage() })
 
   function getLanguage() {
-    const subdomain = getSubdomain(request.url)
-    return subdomain === null || subdomain === 'de' || subdomain === 'www'
-      ? 'de'
-      : 'en'
+    return ['', 'de', 'www'].includes(url.subdomain) ? 'de' : 'en'
   }
 }
 
