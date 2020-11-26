@@ -109,7 +109,7 @@ describe('getPathInfo()', () => {
   })
 
   test('returns typename and currentPath from api.serlo.org', async () => {
-    mockApi(apiEndpoint, { __typename: 'Article', alias: '/current-path' })
+    mockApi({ __typename: 'Article', alias: '/current-path' })
 
     const pathInfo = await getPathInfo(Instance.En, '/path')
 
@@ -120,7 +120,7 @@ describe('getPathInfo()', () => {
   })
 
   test('"currentPath" is given path when it does not refer to an entity', async () => {
-    mockApi(apiEndpoint, { __typename: 'ArticleRevision' })
+    mockApi({ __typename: 'ArticleRevision' })
 
     const pathInfo = await getPathInfo(Instance.En, '/path')
 
@@ -132,7 +132,7 @@ describe('getPathInfo()', () => {
 
   describe('when path describes a User', () => {
     test('when path is "/<id>"', async () => {
-      mockApi(apiEndpoint, { __typename: 'User', username: 'arekkas' })
+      mockApi({ __typename: 'User', username: 'arekkas' })
 
       const pathInfo = await getPathInfo(Instance.En, '/1')
 
@@ -143,7 +143,7 @@ describe('getPathInfo()', () => {
     })
 
     test('when path is "/user/profile/id"', async () => {
-      mockApi(apiEndpoint, { __typename: 'User', username: 'arekkas' })
+      mockApi({ __typename: 'User', username: 'arekkas' })
 
       const pathInfo = await getPathInfo(Instance.En, '/user/profile/1')
 
@@ -218,13 +218,14 @@ describe('getPathInfo()', () => {
 
   describe('returns null', () => {
     test('when there was an error with the api call', async () => {
-      mockApi(apiEndpoint, returnText('', { status: 403 }))
+      mockApi(returnText('', { status: 403 }))
 
       expect(await getPathInfo(Instance.En, '/path')).toBeNull()
     })
 
     test('when api response is malformed JSON', async () => {
-      mockApi(apiEndpoint, returnText('malform json'))
+      mockApi(returnText('malform json'))
+      apiToReturnMalformedJson()
 
       expect(await getPathInfo(Instance.En, '/path')).toBeNull()
     })
@@ -233,7 +234,7 @@ describe('getPathInfo()', () => {
       test.each([{}, { data: { uuid: {} } }])(
         'response = %p',
         async (response) => {
-          mockApi(apiEndpoint, returnJson(response))
+          mockApi(returnJson(response))
 
           expect(await getPathInfo(Instance.En, '/path')).toBeNull()
         }
@@ -243,7 +244,7 @@ describe('getPathInfo()', () => {
 
   describe('when path is a course', () => {
     test('"currentPath" is path of first course page', async () => {
-      mockApi(apiEndpoint, {
+      mockApi({
         __typename: 'Course',
         alias: '/course',
         pages: [{ alias: '/course-page1' }, { alias: '/course-page2' }],
@@ -258,7 +259,7 @@ describe('getPathInfo()', () => {
     })
 
     test('"currentPath" is path of course when list of course pages is empty', async () => {
-      mockApi(apiEndpoint, {
+      mockApi({
         __typename: 'Course',
         alias: '/course',
         pages: [],
@@ -287,7 +288,7 @@ describe('getPathInfo()', () => {
     })
 
     test('saves values in cache for 1 hour', async () => {
-      mockApi(apiEndpoint, { __typename: 'Article', alias: '/current-path' })
+      mockApi({ __typename: 'Article', alias: '/current-path' })
 
       await getPathInfo(Instance.En, '/path')
 
@@ -307,7 +308,7 @@ describe('getPathInfo()', () => {
         '%AE%BE%E0%AE%9F%E0%AF%81-%E0%AE%87%E0%AE%B2%E0%AE%95%E0%AF%8D%E0' +
         '%AE%95%E0%AE%BF%E0%AE%AF-%E0%AE%B5%E0%AE%95%E0%AF%88%E0%AE%95%E0' +
         '%AE%B3%E0%AF%8D'
-      mockApi(apiEndpoint, { __typename: 'Article', alias: longTamilPath })
+      mockApi({ __typename: 'Article', alias: longTamilPath })
 
       await getPathInfo(Instance.Ta, longTamilPath)
 
@@ -321,7 +322,7 @@ describe('getPathInfo()', () => {
       const target = { typename: 'Article', currentPath: '/current-path' }
 
       beforeEach(() => {
-        mockApi(apiEndpoint, { __typename: 'Article', alias: '/current-path' })
+        mockApi({ __typename: 'Article', alias: '/current-path' })
       })
 
       test('when cached value is malformed JSON', async () => {
