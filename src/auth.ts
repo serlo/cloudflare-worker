@@ -1,13 +1,12 @@
-import { getPathnameWithoutTrailingSlash, getSubdomain } from './url-utils'
-import { Instance, createJsonResponse } from './utils'
+import { Instance, createJsonResponse, Url } from './utils'
 
 export function authFrontendSectorIdentifierUriValidation(
   request: Request
 ): Response | null {
-  const { url } = request
+  const url = Url.fromRequest(request)
   if (
-    getSubdomain(url) !== null ||
-    getPathnameWithoutTrailingSlash(url) !== '/auth/frontend-redirect-uris.json'
+    url.subdomain !== '' ||
+    url.pathname !== '/auth/frontend-redirect-uris.json'
   ) {
     return null
   }
