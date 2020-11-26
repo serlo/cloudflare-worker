@@ -89,9 +89,9 @@ export function mockHttpGet(url: string, resolver: RestResolver) {
   )
 }
 
-export function mockApi(url: string, uuid: unknown) {
+export function mockApi(uuid: unknown) {
   global.server.use(
-    rest.post(url, (_req, res, ctx) => {
+    rest.post(global.API_ENDPOINT, (_req, res, ctx) => {
       return res(ctx.json({ data: { uuid } }))
     })
   )
@@ -108,17 +108,19 @@ export function returnJson(json: Record<string, unknown>): RestResolver {
   return (_req, res, ctx) => res.once(ctx.json(json))
 }
 
-export function apiToReturnError(
-  url: string,
-  options?: { status?: number }
-): void {
+export function apiToReturnError(options?: { status?: number }): void {
   global.server.use(
-    rest.post(url, (_req, res, ctx) =>
+    rest.post(global.API_ENDPOINT, (_req, res, ctx) =>
       res.once(ctx.status(options?.status ?? 404))
     )
   )
 }
 
-export function apiUuid(uuid: unknown): RestResolver {
-  return returnJson({ data: { uuid } })
+/*
+export function apiToReturnMalformedJson(json: Record<string,unknown>): void{
+  global.server.use(
+    res.post(global.API_ENDPOINT, (_req, res, ctx) =>
+    res.once(ctx.json(json)))
+  )
 }
+*/

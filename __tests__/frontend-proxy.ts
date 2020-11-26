@@ -22,7 +22,7 @@ describe('handleRequest()', () => {
     global.FRONTEND_PROBABILITY = '0.5'
     Math.random = jest.fn().mockReturnValue(0.5)
 
-    mockApi(global.API_ENDPOINT, { __typename: 'Subject' })
+    mockApi({ __typename: 'Subject' })
   })
 
   describe('chooses backend based on random number', () => {
@@ -141,7 +141,7 @@ describe('handleRequest()', () => {
         let response: Response
 
         beforeEach(async () => {
-          apiToReturnError(global.API_ENDPOINT)
+          apiToReturnError()
           mockHttpGet('https://de.serlo.org/math', returnText('content'))
 
           const request = new Request('https://de.serlo.org/math')
@@ -190,7 +190,7 @@ describe('handleRequest()', () => {
     let response: Response
 
     beforeEach(async () => {
-      apiToReturnError(global.API_ENDPOINT)
+      apiToReturnError()
       setupProbabilityFor(Backend.Frontend)
       mockHttpGet(url, returnText('content'))
 
@@ -271,7 +271,7 @@ describe('handleRequest()', () => {
 
   test('return null when type of path is not allowed', async () => {
     global.FRONTEND_ALLOWED_TYPES = '["Page", "Article"]'
-    mockApi(global.API_ENDPOINT, { __typename: 'TaxonomyTerm' })
+    mockApi({ __typename: 'TaxonomyTerm' })
 
     const response = await handleUrl('https://de.serlo.org/42')
 
@@ -279,7 +279,7 @@ describe('handleRequest()', () => {
   })
 
   test('returns null when type of path is unknown', async () => {
-    mockApi(global.API_ENDPOINT, {
+    mockApi({
       errors: [{ message: 'error' }],
       data: { uuid: null },
     })
@@ -406,7 +406,7 @@ describe('handleRequest()', () => {
         'https://de.serlo.org/auth/hydra/consent',
         'https://de.serlo.org/user/register',
       ])('URL = %p', async (url) => {
-        apiToReturnError(global.API_ENDPOINT)
+        apiToReturnError()
         mockHttpGet(getUrlFor(Backend.Frontend, url), returnText('content'))
         mockHttpGet(getUrlFor(Backend.Legacy, url), returnText('content'))
 
