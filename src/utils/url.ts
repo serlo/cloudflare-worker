@@ -19,90 +19,42 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import * as R from 'ramda'
+import URL from 'core-js-pure/features/url'
 
-interface UrlSpec {
-  protocol?: string
-  subdomain?: string
-  domain?: string
-  pathname?: string
-  query?: string
-}
+const UrlProperties = ['subdomain', 'hostname', 'pathname'] as const
+type UrlProperties = typeof UrlProperties[number]
 
-const urlRegex = /(?<protocol>https?):\/\/((?<subdomain>[\w.]+)\.)?(?<domain>[\w-]+\.\w+)(?<pathname>\/[^?]*)?(?<query>\?.*)?/
-
-export class Url {
-  constructor(private spec: UrlSpec) {}
-
-  get protocol(): string {
-    return this.spec.protocol ?? 'https'
-  }
-
+export class Url extends URL {
   get subdomain(): string {
-    return this.spec.subdomain ?? ''
+    return this.hostname.split('.').slice(0, -2).join('.')
   }
 
   get domain(): string {
-    return this.spec.domain ?? global.DOMAIN
+    return this.hostname.split('.').slice(-2).join('.')
   }
 
-  get pathname(): string {
-    return this.spec.pathname ?? '/'
+  set subdomain(subdomain: string) {
+    this.hostname = subdomain + (subdomain.length > 0 ? '.' : '') + this.domain
   }
 
   get pathnameWithoutTrailingSlash(): string {
     return this.pathname.endsWith('/')
-      ? this.pathname.substr(0, this.pathname.length - 1)
+      ? this.pathname.slice(0, -1)
       : this.pathname
   }
 
-  get query(): string {
-    return this.spec.query ?? ''
-  }
+  change(changes: { [K in UrlProperties]?: string }): Url {
+    for (const prop of UrlProperties) {
+      const value = changes[prop]
 
-  change(changes: UrlSpec): Url {
-    return new Url(R.mergeRight(this.spec, changes))
-  }
-
-  changeHostname(hostname: string): Url {
-    const parts = hostname.split('.')
-
-    return this.change({
-      subdomain: parts.slice(0, -2).join('.'),
-      domain: parts.slice(-2).join('.'),
-    })
-  }
-
-  static fromString(url: string): Url {
-    const match = urlRegex.exec(url)
-
-    if (match) {
-      return new Url(
-        R.pick(
-          ['protocol', 'subdomain', 'domain', 'pathname', 'query'],
-          match.groups ?? {}
-        )
-      )
-    } else {
-      // TODO: Report sentry error
-      return new Url({})
+      if (value !== undefined) this[prop] = value
     }
+
+    return this
   }
 
   static fromRequest(request: Request): Url {
-    return Url.fromString(request.url)
-  }
-
-  toString(): string {
-    return [
-      this.protocol,
-      '://',
-      this.subdomain,
-      this.subdomain !== '' ? '.' : '',
-      this.domain,
-      this.pathname,
-      this.query,
-    ].join('')
+    return new Url(request.url)
   }
 
   toRedirect(status?: number) {

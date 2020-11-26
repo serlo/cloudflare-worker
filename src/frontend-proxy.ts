@@ -80,19 +80,15 @@ export async function frontendProxy(
     useFrontend: boolean
     pathPrefix?: Instance
   }) {
-    let backendUrl = url
+    const backendUrl = new Url(url.href)
 
     if (useFrontend) {
-      backendUrl = backendUrl.changeHostname(frontendDomain)
+      backendUrl.hostname = frontendDomain
 
       if (supportInternationalization && pathPrefix !== undefined)
-        backendUrl = backendUrl.change({
-          pathname: `/${pathPrefix}${backendUrl.pathname}`,
-        })
+        backendUrl.pathname = `/${pathPrefix}${backendUrl.pathname}`
 
-      backendUrl = backendUrl.change({
-        pathname: backendUrl.pathnameWithoutTrailingSlash,
-      })
+      backendUrl.pathname = backendUrl.pathnameWithoutTrailingSlash
     }
 
     const response = await fetch(new Request(backendUrl.toString(), request))
