@@ -21,7 +21,7 @@
  */
 import jwt from 'jsonwebtoken'
 
-import { getPathname, getSubdomain } from '../url-utils'
+import { getPathname, getSubdomain } from './url-utils'
 
 export async function api(request: Request) {
   if (getSubdomain(request.url) !== 'api') return null
