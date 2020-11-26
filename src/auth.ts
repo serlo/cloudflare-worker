@@ -1,5 +1,5 @@
-import { getPathnameWithoutTrailingSlash, getSubdomain } from '../url-utils'
-import { Instance, createJsonResponse } from '../utils'
+import { getPathnameWithoutTrailingSlash, getSubdomain } from './url-utils'
+import { Instance, createJsonResponse } from './utils'
 
 export function authFrontendSectorIdentifierUriValidation(
   request: Request
