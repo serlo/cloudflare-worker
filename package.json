@@ -30,6 +30,7 @@
     "build-storybook": "build-storybook"
   },
   "dependencies": {
+    "core-js-pure": "^3.0.0",
     "fp-ts": "^2.0.0",
     "io-ts": "^2.0.0",
     "jsonwebtoken": "^8.0.0",
@@ -47,6 +48,7 @@
     "@storybook/preact": "^5.0.0",
     "@testing-library/jest-dom": "^5.0.0",
     "@testing-library/preact": "^2.0.0",
+    "@types/core-js": "^2.0.0",
     "@types/jest": "^26.0.0",
     "@types/jsonwebtoken": "^8.0.0",
     "@types/luxon": "^1.0.0",
