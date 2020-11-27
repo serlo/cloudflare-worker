@@ -48,6 +48,8 @@ import {
   returnText,
   returnJson,
   mockApi,
+  apiToReturnMalformedJson,
+  apiToReturnEmptyJson,
 } from './_helper'
 
 describe('decodePath()', () => {
@@ -224,8 +226,8 @@ describe('getPathInfo()', () => {
     })
 
     test('when api response is malformed JSON', async () => {
-      mockApi(returnText('malform json'))
-      apiToReturnMalformedJson()
+      apiToReturnMalformedJson('malform json')
+      
 
       expect(await getPathInfo(Instance.En, '/path')).toBeNull()
     })
@@ -234,7 +236,7 @@ describe('getPathInfo()', () => {
       test.each([{}, { data: { uuid: {} } }])(
         'response = %p',
         async (response) => {
-          mockApi(returnJson(response))
+          apiToReturnEmptyJson(response)
 
           expect(await getPathInfo(Instance.En, '/path')).toBeNull()
         }

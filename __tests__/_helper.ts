@@ -20,6 +20,7 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
+import { string } from 'io-ts'
 import { rest, ResponseResolver, restContext, MockedRequest } from 'msw'
 
 export async function expectContainsText(response: Response, texts: string[]) {
@@ -116,11 +117,21 @@ export function apiToReturnError(options?: { status?: number }): void {
   )
 }
 
-/*
-export function apiToReturnMalformedJson(json: Record<string,unknown>): void{
+export function apiToReturnMalformedJson(
+  options?: string,
+  { status = 200 }: { status?: number } = {}
+): void {
   global.server.use(
-    res.post(global.API_ENDPOINT, (_req, res, ctx) =>
-    res.once(ctx.json(json)))
+    rest.post(global.API_ENDPOINT, (_req, res, ctx) =>
+      res.once(ctx.body(string), ctx.status(status))
+    )
   )
 }
-*/
+
+export function apiToReturnEmptyJson(options?: { status?: number }): void {
+  global.server.use(
+    rest.post(global.API_ENDPOINT, (_req, res, ctx) =>
+      res.once(ctx.status(options?.status ?? 200))
+    )
+  )
+}
