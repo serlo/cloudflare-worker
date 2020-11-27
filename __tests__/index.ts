@@ -97,10 +97,6 @@ describe('Redirects', () => {
   })
 
   describe('redirects to current path of an resource', () => {
-    beforeEach(() => {
-      global.API_ENDPOINT = 'https://api.serlo.org/graphql'
-    })
-
     test('redirects when current path is different than given path', async () => {
       apiReturns({ __typename: 'Article', alias: '/current-path' })
 

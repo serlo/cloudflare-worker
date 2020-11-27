@@ -17,7 +17,6 @@ enum Backend {
 describe('handleRequest()', () => {
   beforeEach(() => {
     global.FRONTEND_DOMAIN = 'frontend.serlo.org'
-    global.API_ENDPOINT = 'https://api.serlo.org/'
     global.FRONTEND_SUPPORT_INTERNATIONALIZATION = 'false'
     global.FRONTEND_ALLOWED_TYPES = '["Subject"]'
     global.FRONTEND_PROBABILITY = '0.5'

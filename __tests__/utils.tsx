@@ -106,7 +106,6 @@ describe('getPathInfo()', () => {
   const apiEndpoint = 'https://api.serlo.org/graphql'
 
   beforeEach(() => {
-    global.API_ENDPOINT = apiEndpoint
     mockKV('PATH_INFO_KV', {})
   })
 
