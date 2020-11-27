@@ -20,7 +20,6 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-import { string } from 'io-ts'
 import { rest, ResponseResolver, restContext, MockedRequest } from 'msw'
 
 export async function expectContainsText(response: Response, texts: string[]) {
@@ -98,6 +97,30 @@ export function mockApi(uuid: unknown) {
   )
 }
 
+export function apiToReturnError(options?: { status?: number }): void {
+  global.server.use(
+    rest.post(global.API_ENDPOINT, (_req, res, ctx) =>
+      res.once(ctx.status(options?.status ?? 404))
+    )
+  )
+}
+
+export function apiToReturnMalformedJson(): void {
+  global.server.use(
+    rest.post(global.API_ENDPOINT, (_req, res, ctx) =>
+      res.once(ctx.body('malformed json'))
+    )
+  )
+}
+
+export function apiToReturn(body: unknown): void {
+  global.server.use(
+    rest.post(global.API_ENDPOINT, (_req, res, ctx) =>
+      res.once(ctx.json(body as Record<string, unknown>))
+    )
+  )
+}
+
 export function returnText(
   body: string,
   { status = 200 }: { status?: number } = {}
@@ -107,31 +130,4 @@ export function returnText(
 
 export function returnJson(json: Record<string, unknown>): RestResolver {
   return (_req, res, ctx) => res.once(ctx.json(json))
-}
-
-export function apiToReturnError(options?: { status?: number }): void {
-  global.server.use(
-    rest.post(global.API_ENDPOINT, (_req, res, ctx) =>
-      res.once(ctx.status(options?.status ?? 404))
-    )
-  )
-}
-
-export function apiToReturnMalformedJson(
-  options?: string,
-  { status = 200 }: { status?: number } = {}
-): void {
-  global.server.use(
-    rest.post(global.API_ENDPOINT, (_req, res, ctx) =>
-      res.once(ctx.body(string), ctx.status(status))
-    )
-  )
-}
-
-export function apiToReturnEmptyJson(options?: { status?: number }): void {
-  global.server.use(
-    rest.post(global.API_ENDPOINT, (_req, res, ctx) =>
-      res.once(ctx.status(options?.status ?? 200))
-    )
-  )
 }
