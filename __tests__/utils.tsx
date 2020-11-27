@@ -117,39 +117,6 @@ describe('getPathInfo()', () => {
     })
   })
 
-  describe('when path describes a User', () => {
-    test('when path is "/<id>"', async () => {
-      apiReturns({ __typename: 'User', username: 'arekkas' })
-
-      const pathInfo = await getPathInfo(Instance.En, '/1')
-
-      expect(pathInfo).toEqual({
-        typename: 'User',
-        currentPath: '/user/profile/arekkas',
-      })
-    })
-
-    test('when path is "/user/profile/id"', async () => {
-      apiReturns({ __typename: 'User', username: 'arekkas' })
-
-      const pathInfo = await getPathInfo(Instance.En, '/user/profile/1')
-
-      expect(pathInfo).toEqual({
-        typename: 'User',
-        currentPath: '/user/profile/arekkas',
-      })
-    })
-
-    test('when path is "/user/profile/<username>"', async () => {
-      const pathInfo = await getPathInfo(Instance.En, '/user/profile/Kulla')
-
-      expect(pathInfo).toEqual({
-        typename: 'User',
-        currentPath: '/user/profile/Kulla',
-      })
-    })
-  })
-
   describe('request to the api endpoint', () => {
     test('is signed', async () => {
       const apiRequest = await getApiRequest('/path')
@@ -158,21 +125,9 @@ describe('getPathInfo()', () => {
     })
 
     describe('contains right variables', () => {
-      test('when path is "/<id>"', async () => {
-        expect(await getApiVariables('/123')).toEqual({ id: 123, alias: null })
-      })
-
-      test('when path is "/user/profile/<id>"', async () => {
-        const variables = await getApiVariables('/user/profile/1')
-        expect(variables).toEqual({ id: 1, alias: null })
-      })
-
-      describe('when path is "/*"', () => {
-        test.each([Instance.En, Instance.De])('lang = %p', async (lang) => {
-          expect(await getApiVariables('/path', lang)).toEqual({
-            alias: { instance: lang, path: '/path' },
-            id: null,
-          })
+      test.each([Instance.En, Instance.De])('lang = %p', async (lang) => {
+        expect(await getApiVariables('/path', lang)).toEqual({
+          alias: { instance: lang, path: '/path' },
         })
       })
 
