@@ -20,7 +20,7 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-import { MockedRequest, rest } from 'msw/lib/types'
+import { MockedRequest, rest } from 'msw'
 import { h } from 'preact'
 
 import { Template } from '../src/ui'
@@ -46,10 +46,9 @@ import {
   mockKV,
   mockHttpGet,
   returnText,
-  returnJson,
   mockApi,
   apiToReturnMalformedJson,
-  apiToReturnEmptyJson,
+  apiToReturn,
 } from './_helper'
 
 describe('decodePath()', () => {
@@ -206,10 +205,11 @@ describe('getPathInfo()', () => {
       lang = Instance.En
     ): Promise<MockedRequest> {
       let request!: MockedRequest
+
       global.server.use(
-        rest.post(apiEndpoint, (_req, res, ctx) => {
-          return res(ctx.json({ data: {  __typename: 'Article',
-          alias: path } }))
+        rest.post(apiEndpoint, (req, res, ctx) => {
+          request = req
+          return res(ctx.json({ data: { __typename: 'Article', alias: path } }))
         })
       )
 
@@ -217,6 +217,7 @@ describe('getPathInfo()', () => {
 
       return request
     }
+  })
 
   describe('returns null', () => {
     test('when there was an error with the api call', async () => {
@@ -226,17 +227,16 @@ describe('getPathInfo()', () => {
     })
 
     test('when api response is malformed JSON', async () => {
-      apiToReturnMalformedJson('malform json')
-      
+      apiToReturnMalformedJson()
 
       expect(await getPathInfo(Instance.En, '/path')).toBeNull()
     })
 
     describe('when the response is not valid', () => {
-      test.each([{}, { data: { uuid: {} } }])(
+      test.each([null, {}, { data: { uuid: {} } }])(
         'response = %p',
         async (response) => {
-          apiToReturnEmptyJson(response)
+          apiToReturn(response)
 
           expect(await getPathInfo(Instance.En, '/path')).toBeNull()
         }
