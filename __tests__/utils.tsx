@@ -50,6 +50,7 @@ import {
   mockApi,
   returnMalformedJson,
   returnJson,
+  returnBadRequest,
 } from './_helper'
 
 describe('decodePath()', () => {
@@ -221,7 +222,7 @@ describe('getPathInfo()', () => {
 
   describe('returns null', () => {
     test('when there was an error with the api call', async () => {
-      apiReturns(returnText('', { status: 403 }))
+      mockApi(returnBadRequest())
 
       expect(await getPathInfo(Instance.En, '/path')).toBeNull()
     })
