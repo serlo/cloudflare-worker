@@ -84,7 +84,8 @@ NodeResponse.redirect = function (url: string, status = 302) {
   return new NodeResponse('', { status, headers: { location: url } })
 }
 
-/* eslint-disable @typescript-eslint/no-namespace */
+export {}
+
 declare global {
   namespace NodeJS {
     interface Global {
