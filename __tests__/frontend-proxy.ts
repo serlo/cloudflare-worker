@@ -4,8 +4,9 @@ import {
   expectHasOkStatus,
   mockHttpGet,
   returnText,
+  apiReturns,
   mockApi,
-  apiToReturnError,
+  returnMalformedJson,
 } from './_helper'
 
 enum Backend {
@@ -22,7 +23,7 @@ describe('handleRequest()', () => {
     global.FRONTEND_PROBABILITY = '0.5'
     Math.random = jest.fn().mockReturnValue(0.5)
 
-    mockApi({ __typename: 'Subject' })
+    apiReturns({ __typename: 'Subject' })
   })
 
   describe('chooses backend based on random number', () => {
@@ -141,7 +142,7 @@ describe('handleRequest()', () => {
         let response: Response
 
         beforeEach(async () => {
-          apiToReturnError()
+          mockApi(returnMalformedJson())
           mockHttpGet('https://de.serlo.org/math', returnText('content'))
 
           const request = new Request('https://de.serlo.org/math')
@@ -190,7 +191,7 @@ describe('handleRequest()', () => {
     let response: Response
 
     beforeEach(async () => {
-      apiToReturnError()
+      mockApi(returnMalformedJson())
       setupProbabilityFor(Backend.Frontend)
       mockHttpGet(url, returnText('content'))
 
@@ -271,7 +272,7 @@ describe('handleRequest()', () => {
 
   test('return null when type of path is not allowed', async () => {
     global.FRONTEND_ALLOWED_TYPES = '["Page", "Article"]'
-    mockApi({ __typename: 'TaxonomyTerm' })
+    apiReturns({ __typename: 'TaxonomyTerm' })
 
     const response = await handleUrl('https://de.serlo.org/42')
 
@@ -279,7 +280,7 @@ describe('handleRequest()', () => {
   })
 
   test('returns null when type of path is unknown', async () => {
-    mockApi({
+    apiReturns({
       errors: [{ message: 'error' }],
       data: { uuid: null },
     })
@@ -406,7 +407,7 @@ describe('handleRequest()', () => {
         'https://de.serlo.org/auth/hydra/consent',
         'https://de.serlo.org/user/register',
       ])('URL = %p', async (url) => {
-        apiToReturnError()
+        mockApi(returnMalformedJson())
         mockHttpGet(getUrlFor(Backend.Frontend, url), returnText('content'))
         mockHttpGet(getUrlFor(Backend.Legacy, url), returnText('content'))
 
