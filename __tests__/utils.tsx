@@ -104,8 +104,6 @@ describe('getCookieValue()', () => {
 })
 
 describe('getPathInfo()', () => {
-  const apiEndpoint = 'https://api.serlo.org/graphql'
-
   beforeEach(() => {
     mockKV('PATH_INFO_KV', {})
   })
@@ -208,7 +206,7 @@ describe('getPathInfo()', () => {
       let request!: MockedRequest
 
       global.server.use(
-        rest.post(apiEndpoint, (req, res, ctx) => {
+        rest.post(global.API_ENDPOINT, (req, res, ctx) => {
           request = req
           return res(ctx.json({ data: { __typename: 'Article', alias: path } }))
         })
@@ -262,11 +260,7 @@ describe('getPathInfo()', () => {
     })
 
     test('"currentPath" is path of course when list of course pages is empty', async () => {
-      apiReturns({
-        __typename: 'Course',
-        alias: '/course',
-        pages: [],
-      })
+      apiReturns({ __typename: 'Course', alias: '/course', pages: [] })
 
       const pathInfo = await getPathInfo(Instance.En, '/course')
 
