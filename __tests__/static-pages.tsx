@@ -47,7 +47,7 @@ import {
   expectContentTypeIsHtml,
   mockHttpGet,
   returnText,
-} from './_helper'
+} from './__utils__'
 
 describe('handleRequest()', () => {
   const unrevisedConfig: UnrevisedConfig = {

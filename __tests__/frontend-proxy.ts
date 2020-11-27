@@ -28,7 +28,7 @@ import {
   apiReturns,
   mockApi,
   returnMalformedJson,
-} from './_helper'
+} from './__utils__'
 
 enum Backend {
   Frontend = 'frontend',

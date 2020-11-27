@@ -28,7 +28,7 @@ import {
   apiReturns,
   mockApi,
   returnMalformedJson,
-} from './_helper'
+} from './__utils__'
 
 describe('Enforce HTTPS', () => {
   test('HTTP URL', async () => {
