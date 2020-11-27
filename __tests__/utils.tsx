@@ -51,7 +51,7 @@ import {
   returnMalformedJson,
   returnJson,
   returnBadRequest,
-} from './_helper'
+} from './__utils__'
 
 describe('decodePath()', () => {
   const path = '/math/%%x^2 & y^2%%'

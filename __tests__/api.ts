@@ -20,7 +20,7 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 import { api, fetchApi } from '../src/api'
-import { mockHttpGet, apiReturns } from './_helper'
+import { mockHttpGet, apiReturns } from './__utils__'
 
 describe('api()', () => {
   test('uses fetch() for requests to the serlo api', async () => {

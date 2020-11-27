@@ -29,7 +29,7 @@ import fetchNode, {
 } from 'node-fetch'
 import * as util from 'util'
 
-import { mockKV } from './__tests__/_helper'
+import { mockKV } from './__tests__/__utils__'
 
 global.server = setupServer()
 const randomCopy = Math.random
