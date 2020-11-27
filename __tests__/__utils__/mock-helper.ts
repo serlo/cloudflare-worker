@@ -37,8 +37,6 @@ export function mockKV(name: KV_NAMES, values: Record<string, string>) {
   }
 }
 
-type RestResolver = ResponseResolver<MockedRequest, typeof restContext>
-
 export function mockHttpGet(url: string, resolver: RestResolver) {
   global.server.use(
     rest.get(url, (req, res, ctx) => {
@@ -50,23 +48,6 @@ export function mockHttpGet(url: string, resolver: RestResolver) {
   )
 }
 
-export function apiReturns(uuid: {
-  __typename?: string
-  username?: string
-  alias?: string
-  pages?: { alias: string }[]
-}) {
-  mockApi(returnJson({ data: { uuid } }))
-}
-
-export function mockApi(resolver: RestResolver) {
-  global.server.use(rest.post(global.API_ENDPOINT, resolver))
-}
-
-export function returnMalformedJson(): RestResolver {
-  return returnText('malformed json')
-}
-
 export function returnText(
   body: string,
   { status = 200 }: { status?: number } = {}
@@ -74,10 +55,4 @@ export function returnText(
   return (_req, res, ctx) => res.once(ctx.body(body), ctx.status(status))
 }
 
-export function returnJson(json: unknown): RestResolver {
-  return (_req, res, ctx) => res.once(ctx.json(json as Record<string, unknown>))
-}
-
-export function returnBadRequest(): RestResolver {
-  return (_req, res, ctx) => res.once(ctx.status(400))
-}
+type RestResolver = ResponseResolver<MockedRequest, typeof restContext>

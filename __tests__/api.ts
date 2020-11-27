@@ -19,21 +19,33 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
+import { handleRequest } from '../src'
 import { api, fetchApi } from '../src/api'
-import { mockHttpGet, apiReturns } from './__utils__'
+import { mockHttpGet } from './__utils__'
 
-describe('api()', () => {
-  test('uses fetch() for requests to the serlo api', async () => {
-    apiReturns({ username: 'inyono' })
+describe('api calls', () => {
+  test('get a signature', async () => {
+    global.apiServer.uuids.push({
+      id: 23591,
+      __typename: 'Page',
+      alias: '/math',
+    })
 
-    const req = new Request('https://api.serlo.org/graphql', { method: 'POST' })
-    const response = (await api(req)) as Response
+    const req = new Request(global.API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ variables: { alias: { path: '/23591' } } }),
+    })
+    const response = await handleRequest(req)
 
+    expect(response.statusText).toBe('OK')
     expect(await response.json()).toEqual({
-      data: { uuid: { username: 'inyono' } },
+      data: { uuid: { __typename: 'Page', alias: '/math' } },
     })
   })
+})
 
+describe('api()', () => {
   describe('returns null if subdomain is not "api"', () => {
     test('url without subdomain', async () => {
       const response = await api(new Request('https://serlo.org/graphql'))

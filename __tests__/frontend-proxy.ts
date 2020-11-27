@@ -21,14 +21,7 @@
  */
 import { frontendProxy } from '../src/frontend-proxy'
 import { Instance } from '../src/utils'
-import {
-  expectHasOkStatus,
-  mockHttpGet,
-  returnText,
-  apiReturns,
-  mockApi,
-  returnMalformedJson,
-} from './__utils__'
+import { expectHasOkStatus, mockHttpGet, returnText } from './__utils__'
 
 enum Backend {
   Frontend = 'frontend',
@@ -39,11 +32,15 @@ describe('handleRequest()', () => {
   beforeEach(() => {
     global.FRONTEND_DOMAIN = 'frontend.serlo.org'
     global.FRONTEND_SUPPORT_INTERNATIONALIZATION = 'false'
-    global.FRONTEND_ALLOWED_TYPES = '["Subject"]'
+    global.FRONTEND_ALLOWED_TYPES = '["Page"]'
     global.FRONTEND_PROBABILITY = '0.5'
     Math.random = jest.fn().mockReturnValue(0.5)
 
-    apiReturns({ __typename: 'Subject' })
+    global.apiServer.uuids.push({
+      id: 23591,
+      __typename: 'Page',
+      alias: '/math',
+    })
   })
 
   describe('chooses backend based on random number', () => {
@@ -89,49 +86,44 @@ describe('handleRequest()', () => {
       global.FRONTEND_SUPPORT_INTERNATIONALIZATION = 'true'
     })
 
-    describe('prepends language code to path when backend is frontend', () => {
-      test.each([Instance.En, Instance.De])(
-        'language code = %p',
-        async (lang) => {
-          setupProbabilityFor(Backend.Frontend)
+    test('prepends language code to path when backend is frontend', async () => {
+      setupProbabilityFor(Backend.Frontend)
 
-          await expectResponseFrom({
-            backend: `https://frontend.serlo.org/${lang}/math`,
-            request: `https://${lang}.serlo.org/math`,
-          })
-        }
-      )
-
-      test('prepends language prefix for special path /search', async () => {
-        setupProbabilityFor(Backend.Frontend)
-
-        await expectResponseFrom({
-          backend: 'https://frontend.serlo.org/en/search',
-          request: 'https://en.serlo.org/search',
-        })
+      await expectResponseFrom({
+        backend: `https://frontend.serlo.org/en/math`,
+        request: `https://en.serlo.org/math`,
       })
+    })
 
-      test('removes trailing slashes from the frontend url', async () => {
-        setupProbabilityFor(Backend.Frontend)
+    test('prepends language prefix for special path /search', async () => {
+      setupProbabilityFor(Backend.Frontend)
 
-        await expectResponseFrom({
-          backend: 'https://frontend.serlo.org/de',
-          request: 'https://de.serlo.org/',
-        })
+      await expectResponseFrom({
+        backend: 'https://frontend.serlo.org/en/search',
+        request: 'https://en.serlo.org/search',
       })
+    })
 
-      describe('special paths do not get a language prefix', () => {
-        test.each([
-          'https://de.serlo.org/spenden',
-          'https://de.serlo.org/_next/script.js',
-          'https://de.serlo.org/_assets/image.png',
-          'https://de.serlo.org/api/frontend/privacy',
-          'https://de.serlo.org/api/auth/login',
-        ])('URL = %p', async (url) => {
-          await expectResponseFrom({
-            backend: getUrlFor(Backend.Frontend, url),
-            request: url,
-          })
+    test('removes trailing slashes from the frontend url', async () => {
+      setupProbabilityFor(Backend.Frontend)
+
+      await expectResponseFrom({
+        backend: 'https://frontend.serlo.org/de',
+        request: 'https://de.serlo.org/',
+      })
+    })
+
+    describe('special paths do not get a language prefix', () => {
+      test.each([
+        'https://de.serlo.org/spenden',
+        'https://de.serlo.org/_next/script.js',
+        'https://de.serlo.org/_assets/image.png',
+        'https://de.serlo.org/api/frontend/privacy',
+        'https://de.serlo.org/api/auth/login',
+      ])('URL = %p', async (url) => {
+        await expectResponseFrom({
+          backend: getUrlFor(Backend.Frontend, url),
+          request: url,
         })
       })
     })
@@ -162,7 +154,7 @@ describe('handleRequest()', () => {
         let response: Response
 
         beforeEach(async () => {
-          mockApi(returnMalformedJson())
+          global.apiServer.returnsMalformedJson = true
           mockHttpGet('https://de.serlo.org/math', returnText('content'))
 
           const request = new Request('https://de.serlo.org/math')
@@ -211,7 +203,7 @@ describe('handleRequest()', () => {
     let response: Response
 
     beforeEach(async () => {
-      mockApi(returnMalformedJson())
+      global.apiServer.returnsMalformedJson = true
       setupProbabilityFor(Backend.Frontend)
       mockHttpGet(url, returnText('content'))
 
@@ -292,7 +284,7 @@ describe('handleRequest()', () => {
 
   test('return null when type of path is not allowed', async () => {
     global.FRONTEND_ALLOWED_TYPES = '["Page", "Article"]'
-    apiReturns({ __typename: 'TaxonomyTerm' })
+    global.apiServer.uuids.push({ id: 42, __typename: 'TaxonomyTerm' })
 
     const response = await handleUrl('https://de.serlo.org/42')
 
@@ -300,7 +292,7 @@ describe('handleRequest()', () => {
   })
 
   test('returns null when type of path is unknown', async () => {
-    apiReturns({})
+    global.apiServer.uuids.push({ alias: '/unknown' })
 
     const response = await handleUrl('https://de.serlo.org/unknown')
 
@@ -384,7 +376,12 @@ describe('handleRequest()', () => {
         'https://de.serlo.org/_next-alias',
         'https://de.serlo.org/_assets-alias',
       ])('URL = %p', async (url) => {
+        global.apiServer.uuids.push({
+          alias: new URL(url).pathname,
+          __typename: 'Page',
+        })
         setupProbabilityFor(Backend.Legacy)
+
         await expectResponseFrom({ backend: url, request: url })
       })
     })
@@ -406,7 +403,7 @@ describe('handleRequest()', () => {
         'https://de.serlo.org/auth/hydra/consent',
         'https://de.serlo.org/user/register',
       ])('URL = %p', async (url) => {
-        mockApi(returnMalformedJson())
+        global.apiServer.returnsMalformedJson = true
         mockHttpGet(getUrlFor(Backend.Frontend, url), returnText('content'))
         mockHttpGet(getUrlFor(Backend.Legacy, url), returnText('content'))
 
