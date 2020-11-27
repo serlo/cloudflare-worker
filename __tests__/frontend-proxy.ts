@@ -279,10 +279,7 @@ describe('handleRequest()', () => {
   })
 
   test('returns null when type of path is unknown', async () => {
-    apiReturns({
-      errors: [{ message: 'error' }],
-      data: { uuid: null },
-    })
+    apiReturns({})
 
     const response = await handleUrl('https://de.serlo.org/unknown')
 

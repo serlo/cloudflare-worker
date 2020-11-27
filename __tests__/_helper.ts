@@ -89,7 +89,12 @@ export function mockHttpGet(url: string, resolver: RestResolver) {
   )
 }
 
-export function apiReturns(uuid: unknown) {
+export function apiReturns(uuid: {
+  __typename?: string
+  username?: string
+  alias?: string
+  pages?: { alias: string }[]
+}) {
   mockApi(returnJson({ data: { uuid } }))
 }
 
