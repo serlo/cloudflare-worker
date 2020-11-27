@@ -1,14 +1,16 @@
 import { api, fetchApi } from '../src/api'
-import { mockHttpGet, returnText } from './_helper'
+import { mockHttpGet, apiReturns } from './_helper'
 
 describe('api()', () => {
   test('uses fetch() for requests to the serlo api', async () => {
-    mockHttpGet('https://api.serlo.org/graphql', returnText('<api-result>'))
+    apiReturns({ username: 'inyono' })
 
-    const req = new Request('https://api.serlo.org/graphql')
+    const req = new Request('https://api.serlo.org/graphql', { method: 'POST' })
     const response = (await api(req)) as Response
 
-    expect(await response.text()).toBe('<api-result>')
+    expect(await response.json()).toEqual({
+      data: { uuid: { username: 'inyono' } },
+    })
   })
 
   describe('returns null if subdomain is not "api"', () => {

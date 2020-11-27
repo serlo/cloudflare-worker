@@ -39,7 +39,7 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
-  global.API_ENDPOINT = 'https://api.serlo.org'
+  global.API_ENDPOINT = 'https://api.serlo.org/graphql'
   global.API_SECRET = 'secret'
   global.ENABLE_PATH_INFO_CACHE = 'true'
   global.FRONTEND_DOMAIN = 'frontend.serlo.org'

@@ -25,8 +25,9 @@ import {
   mockKV,
   mockHttpGet,
   returnText,
-  mockHttpPost,
-  returnApiUuid,
+  apiReturns,
+  mockApi,
+  returnMalformedJson,
 } from './_helper'
 
 describe('Enforce HTTPS', () => {
@@ -96,15 +97,8 @@ describe('Redirects', () => {
   })
 
   describe('redirects to current path of an resource', () => {
-    beforeEach(() => {
-      global.API_ENDPOINT = 'https://api.serlo.org/graphql'
-    })
-
     test('redirects when current path is different than given path', async () => {
-      mockHttpPost(
-        'https://api.serlo.org/graphql',
-        returnApiUuid({ __typename: 'Article', alias: '/current-path' })
-      )
+      apiReturns({ __typename: 'Article', alias: '/current-path' })
 
       const response = await handleUrl('https://en.serlo.org/path')
 
@@ -112,10 +106,8 @@ describe('Redirects', () => {
     })
 
     test('no redirect when current path is different than given path and XMLHttpRequest', async () => {
-      mockHttpPost(
-        'https://api.serlo.org/graphql',
-        returnApiUuid({ __typename: 'Article', alias: '/current-path' })
-      )
+      apiReturns({ __typename: 'Article', alias: '/current-path' })
+
       mockHttpGet('https://en.serlo.org/path', returnText('article content'))
 
       const request = new Request('https://en.serlo.org/path', {
@@ -129,10 +121,8 @@ describe('Redirects', () => {
     })
 
     test('no redirect when current path is the same as given path', async () => {
-      mockHttpPost(
-        'https://api.serlo.org/graphql',
-        returnApiUuid({ __typename: 'Article', alias: '/path' })
-      )
+      apiReturns({ __typename: 'Article', alias: '/path' })
+
       mockHttpGet('https://en.serlo.org/path', returnText('article content'))
 
       const response = await handleUrl('https://en.serlo.org/path')
@@ -141,10 +131,8 @@ describe('Redirects', () => {
     })
 
     test('no redirect when current path cannot be requested', async () => {
-      mockHttpPost(
-        'https://api.serlo.org/graphql',
-        returnText('malformed json')
-      )
+      mockApi(returnMalformedJson())
+
       mockHttpGet('https://en.serlo.org/path', returnText('article content'))
 
       const response = await handleUrl('https://en.serlo.org/path')
@@ -154,10 +142,8 @@ describe('Redirects', () => {
 
     describe('handles URL encodings correctly', () => {
       test('API result is URL encoded', async () => {
-        mockHttpPost(
-          'https://api.serlo.org/graphql',
-          returnApiUuid({ __typename: 'Article', alias: '/gr%C3%B6%C3%9Fen' })
-        )
+        apiReturns({ __typename: 'Article', alias: '/gr%C3%B6%C3%9Fen' })
+
         mockHttpGet(
           'https://de.serlo.org/gr%C3%B6%C3%9Fen',
           returnText('article content')
@@ -169,10 +155,8 @@ describe('Redirects', () => {
       })
 
       test('API result is not URL encoded', async () => {
-        mockHttpPost(
-          'https://api.serlo.org/graphql',
-          returnApiUuid({ __typename: 'Article', alias: '/größen' })
-        )
+        apiReturns({ __typename: 'Article', alias: '/größen' })
+
         mockHttpGet(
           'https://de.serlo.org/gr%C3%B6%C3%9Fen',
           returnText('article content')
@@ -185,10 +169,7 @@ describe('Redirects', () => {
 
       test('API result is not URL encoded and cannot be decoded', async () => {
         mockHttpGet('https://de.serlo.org/%%x%%', returnText('article content'))
-        mockHttpPost(
-          'https://api.serlo.org/graphql',
-          returnApiUuid({ __typename: 'Article', alias: '/%%x%%' })
-        )
+        apiReturns({ __typename: 'Article', alias: '/%%x%%' })
 
         const response = await handleUrl('https://de.serlo.org/%%x%%')
 
