@@ -13,15 +13,16 @@ kv-namespaces = [
 ]
 
 [env.dev.vars]
+ALLOW_AUTH_FROM_LOCALHOST = "true"
 API_ENDPOINT = "https://api.serlo-development.dev/graphql"
 DOMAIN = "serlo-development.dev"
+ENABLE_BASIC_AUTH = "true"
+ENABLE_PATH_INFO_CACHE = "false"
+FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "GroupedExercise", "Exercise", "ExerciseGroup", "Event", "Page", "Solution", "TaxonomyTerm", "User", "Video"]'
 FRONTEND_DOMAIN = "frontend-git-staging.serlo.vercel.app"
 FRONTEND_PROBABILITY = "0.50"
-FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "GroupedExercise", "Exercise", "ExerciseGroup", "Event", "Page", "Solution", "TaxonomyTerm", "User", "Video"]'
 FRONTEND_SUPPORT_INTERNATIONALIZATION = "true"
-ENABLE_BASIC_AUTH = "true"
 REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = "false"
-ALLOW_AUTH_FROM_LOCALHOST = "true"
 
 [env.staging]
 name = "serlo-staging"
@@ -34,15 +35,16 @@ kv-namespaces = [
 ]
 
 [env.staging.vars]
+ALLOW_AUTH_FROM_LOCALHOST = "true"
 API_ENDPOINT = "https://api.serlo-staging.dev/graphql"
 DOMAIN = "serlo-staging.dev"
+ENABLE_BASIC_AUTH = "true"
+ENABLE_PATH_INFO_CACHE = "false"
+FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "GroupedExercise", "Exercise", "ExerciseGroup", "Event", "Page", "Solution", "TaxonomyTerm", "User", "Video"]'
 FRONTEND_DOMAIN = "frontend-git-staging.serlo.vercel.app"
 FRONTEND_PROBABILITY = "0.50"
-FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "GroupedExercise", "Exercise", "ExerciseGroup", "Event", "Page", "Solution", "TaxonomyTerm", "User", "Video"]'
 FRONTEND_SUPPORT_INTERNATIONALIZATION = "true"
-ENABLE_BASIC_AUTH = "true"
 REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = "false"
-ALLOW_AUTH_FROM_LOCALHOST = "true"
 
 [env.production]
 name = "serlo-production"
@@ -55,12 +57,13 @@ kv-namespaces = [
 ]
 
 [env.production.vars]
+ALLOW_AUTH_FROM_LOCALHOST = "false"
 API_ENDPOINT = "https://api.serlo.org/graphql"
 DOMAIN = "serlo.org"
 ENABLE_BASIC_AUTH = "false"
+ENABLE_PATH_INFO_CACHE = "true"
+FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "Exercise", "ExerciseGroup", "Event", "Page", "TaxonomyTerm", "Video"]'
 FRONTEND_DOMAIN = "frontend.serlo.org"
 FRONTEND_PROBABILITY = "0.1"
-FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "Exercise", "ExerciseGroup", "Event", "Page", "TaxonomyTerm", "Video"]'
 FRONTEND_SUPPORT_INTERNATIONALIZATION = "true"
 REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = "true"
-ALLOW_AUTH_FROM_LOCALHOST = "false"
