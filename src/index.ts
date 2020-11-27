@@ -100,13 +100,10 @@ async function redirects(request: Request) {
 
   if (isInstance(url.subdomain)) {
     const pathInfo = await getPathInfo(url.subdomain, url.pathname)
-
-    // TODO: Remove decodeURIComponent() when we the API returns an
-    // URL encoded alias
     if (
       request.headers.get('X-Requested-With') !== 'XMLHttpRequest' &&
       pathInfo !== null &&
-      decodePath(url.pathname) != decodePath(pathInfo.currentPath)
+      url.pathname != pathInfo.currentPath
     ) {
       url.pathname = pathInfo.currentPath
       return url.toRedirect(301)

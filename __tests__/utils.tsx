@@ -25,7 +25,6 @@ import { h } from 'preact'
 
 import { Template } from '../src/ui'
 import {
-  decodePath,
   getCookieValue,
   sanitizeHtml,
   markdownToHtml,
@@ -52,18 +51,6 @@ import {
   returnJson,
   returnBadRequest,
 } from './__utils__'
-
-describe('decodePath()', () => {
-  const path = '/math/%%x^2 & y^2%%'
-
-  test('decode encoded URLs', () => {
-    expect(decodePath(encodeURIComponent(path))).toBe(path)
-  })
-
-  test('return decoded URLs without error', () => {
-    expect(decodePath(path)).toBe(path)
-  })
-})
 
 describe('getCookieValue()', () => {
   describe('returns the cookie value of a given cookie header', () => {
