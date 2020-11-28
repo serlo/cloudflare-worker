@@ -89,13 +89,6 @@ describe('getPathInfo()', () => {
     mockKV('PATH_INFO_KV', {})
   })
 
-  /*describe('request to the api endpoint', () => {
-    test('is signed', async () => {
-      const apiRequest = await getApiRequest('/path')
-
-      expect(apiRequest.headers.get('Authorization')).toMatch(/^Serlo Service/)
-	})*/
-
   describe('returns null', () => {
     test('when there was an error with the api call', async () => {
       global.apiServer.hasInternalServerError = true

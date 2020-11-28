@@ -45,6 +45,9 @@ beforeAll(() => {
       if (global.apiServer.returnsInvalidJson !== undefined)
         return res(ctx.json(global.apiServer.returnsMalformedJson as any))
 
+      if (!req.headers.get('Authorization')?.match(/^Serlo Service=ey/))
+        return res(ctx.status(401, 'No authorization header given'))
+
       if (req.body === undefined)
         return res(ctx.status(400, 'request body is missing'))
       if (

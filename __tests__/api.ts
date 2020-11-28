@@ -20,8 +20,7 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 import { handleRequest } from '../src'
-import { api, fetchApi } from '../src/api'
-import { mockHttpGet } from './__utils__'
+import { api } from '../src/api'
 
 describe('api calls', () => {
   test('get a signature', async () => {
@@ -64,27 +63,5 @@ describe('api()', () => {
     const response = await api(new Request('https://api.serlo.org/something'))
 
     expect(response).toBeNull()
-  })
-})
-
-describe('fetchApi()', () => {
-  test('returns the result of fetch()', async () => {
-    global.API_SECRET = 'my-secret'
-
-    mockHttpGet('https://api.serlo.org/', (req, res, ctx) => {
-      if (req.headers.get('Content-Type') !== 'application/json')
-        return res(ctx.status(415))
-      if (!req.headers.get('Authorization')?.match(/^Serlo Service=ey/))
-        return res(ctx.status(401))
-
-      return res.once(ctx.json({ result: 42 }))
-    })
-
-    const request = new Request('https://api.serlo.org/', {
-      headers: { 'Content-Type': 'application/json' },
-    })
-    const response = await fetchApi(request)
-
-    expect(await response.text()).toBe('{"result":42}')
   })
 })
