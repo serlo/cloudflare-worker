@@ -155,7 +155,6 @@ interface Uuid {
   id?: number
   alias?: string
   oldAlias?: string
-  username?: string
   pages?: { alias: string }[]
 }
 
