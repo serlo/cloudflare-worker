@@ -22,6 +22,7 @@
 import { render, RenderResult } from '@testing-library/preact'
 import { h } from 'preact'
 
+import { handleRequest } from '../src'
 import {
   UnrevisedConfig,
   RevisedConfig,
@@ -48,6 +49,7 @@ import {
   mockHttpGet,
   returnsText,
 } from './__utils__'
+import { setupProbabilityFor, Backend } from './frontend-proxy'
 
 describe('handleRequest()', () => {
   const unrevisedConfig: UnrevisedConfig = {
@@ -170,26 +172,19 @@ describe('handleRequest()', () => {
     })
   })
 
-  describe('returns null if requested domain is no serlo language tenant', () => {
-    test.each([
-      'https://stats.serlo.org/',
-      'https://stats.fr.serlo.org/',
-      'http://serlo.org',
-      'http://gg.serlo.org/',
-      'http://deserlo.org/imprint',
-    ])('URL is %p', async (url) => {
-      expect(await testHandleRequest(url)).toBeNull()
-    })
-  })
-
-  describe('returns null if requested path does not belong to static pages', () => {
+  describe('requests to paths which do not belong to static pages go to default backend', () => {
     test.each([
       'https://en.serlo.org/imprint/foo',
       'https://fr.serlo.org/foo/imprint',
       'https://de.serlo.org/imprint/json',
       'https://de.serlo.org/privacy/jsons',
     ])(' URL is %p', async (url) => {
-      expect(await testHandleRequest(url)).toBeNull()
+      setupProbabilityFor(Backend.Legacy)
+      mockHttpGet(url, returnsText('content'))
+
+      const response = await handleRequest(new Request(url))
+
+      expect(await response.text()).toBe('content')
     })
   })
 })

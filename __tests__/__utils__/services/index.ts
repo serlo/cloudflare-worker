@@ -21,4 +21,5 @@
  */
 export * from './api'
 export * from './database'
+export * from './stats'
 export * from './utils'

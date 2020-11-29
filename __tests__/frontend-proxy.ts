@@ -19,7 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { frontendProxy } from '../src/frontend-proxy'
+import { handleRequest } from '../src'
 import { Instance } from '../src/utils'
 import {
   expectHasOkStatus,
@@ -31,7 +31,7 @@ import {
   returnsJson,
 } from './__utils__'
 
-enum Backend {
+export enum Backend {
   Frontend = 'frontend',
   Legacy = 'legacy',
 }
@@ -71,6 +71,14 @@ describe('handleRequest()', () => {
         request: 'https://de.serlo.org/math',
       })
     })
+  })
+
+  test('requests with subdomain different from "de" are not changed', async () => {
+    mockHttpGet('https://en.serlo.org/', returnsText('content'))
+
+    const response = await handleUrl('https://en.serlo.org/')
+
+    expect(await response.text()).toBe('content')
   })
 
   describe('returned response set cookie with calculated random number', () => {
@@ -168,7 +176,7 @@ describe('handleRequest()', () => {
 
           const request = new Request('https://de.serlo.org/math')
           request.headers.set('Cookie', 'authenticated=1')
-          response = (await frontendProxy(request)) as Response
+          response = await handleRequest(request)
         })
 
         test('chooses legacy backend', async () => {
@@ -253,7 +261,7 @@ describe('handleRequest()', () => {
         global.FRONTEND_PROBABILITY = '0.5'
 
         const request = new Request(url, { headers: { Cookie: cookieValue } })
-        response = (await frontendProxy(request)) as Response
+        response = await handleRequest(request)
       })
 
       test('new random number was not calculated', () => {
@@ -291,21 +299,23 @@ describe('handleRequest()', () => {
     expect(Math.random).toHaveBeenCalled()
   })
 
-  test('return null when type of path is not allowed', async () => {
+  test('chooses legacy backend when type of ressource is not in FRONTEND_ALLOWED_TYPES', async () => {
     global.FRONTEND_ALLOWED_TYPES = '["Page", "Article"]'
     givenUuid({ id: 42, __typename: 'TaxonomyTerm' })
 
-    const response = await handleUrl('https://de.serlo.org/42')
-
-    expect(response).toBeNull()
+    await expectResponseFrom({
+      backend: 'https://de.serlo.org/42',
+      request: 'https://de.serlo.org/42',
+    })
   })
 
-  test('returns null when type of path is unknown', async () => {
+  test('chooses legacy backend when type of ressource is unknown', async () => {
     givenApi(returnsJson({}))
 
-    const response = await handleUrl('https://de.serlo.org/unknown')
-
-    expect(response).toBeNull()
+    await expectResponseFrom({
+      backend: 'https://de.serlo.org/unknown',
+      request: 'https://de.serlo.org/unknown',
+    })
   })
 
   describe('special paths', () => {
@@ -448,20 +458,6 @@ describe('handleRequest()', () => {
     })
   })
 
-  describe('returns null if language tenant is not "de"', () => {
-    test('URL without subdomain', async () => {
-      const response = await handleUrl('https://serlo.org/')
-
-      expect(response).toBeNull()
-    })
-
-    test('URL with subdomain different from "de"', async () => {
-      const response = await handleUrl('https://en.serlo.org/')
-
-      expect(response).toBeNull()
-    })
-  })
-
   test('creates a copy of backend responses (otherwise there is an error in cloudflare)', async () => {
     const backendResponse = new Response('')
     global.fetch = jest.fn().mockResolvedValue(backendResponse)
@@ -495,7 +491,7 @@ describe('handleRequest()', () => {
 
       const request = new Request('https://de.serlo.org/')
       request.headers.set('Cookie', 'token=123')
-      const response = (await frontendProxy(request)) as Response
+      const response = await handleRequest(request)
 
       expectHasOkStatus(response)
     })
@@ -569,7 +565,7 @@ describe('handleRequest()', () => {
   })
 })
 
-function setupProbabilityFor(backend: Backend) {
+export function setupProbabilityFor(backend: Backend) {
   global.FRONTEND_PROBABILITY = backend === Backend.Frontend ? '1' : '0'
 }
 
@@ -583,13 +579,13 @@ async function expectResponseFrom({
   mockHttpGet(backend, returnsText('content'))
 
   request = typeof request === 'string' ? new Request(request) : request
-  const response = (await frontendProxy(request)) as Response
+  const response = await handleRequest(request)
 
   expect(await response.text()).toBe('content')
 }
 
 async function handleUrl(url: string): Promise<Response> {
-  return (await frontendProxy(new Request(url))) as Response
+  return await handleRequest(new Request(url))
 }
 
 function getUrlFor(backend: Backend, url: string) {
