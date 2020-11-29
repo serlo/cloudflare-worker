@@ -43,7 +43,12 @@ import {
   expectIsNotFoundResponse,
   mockKV,
   mockHttpGet,
-  returnText,
+  returnsText,
+  givenApi,
+  givenUuid,
+  hasInternalServerError,
+  returnsMalformedJson,
+  returnsJson,
 } from './__utils__'
 
 describe('getCookieValue()', () => {
@@ -91,13 +96,13 @@ describe('getPathInfo()', () => {
 
   describe('returns null', () => {
     test('when there was an error with the api call', async () => {
-      global.apiServer.hasInternalServerError = true
+      givenApi(hasInternalServerError())
 
       expect(await getPathInfo(Instance.En, '/path')).toBeNull()
     })
 
     test('when api response is malformed JSON', async () => {
-      global.apiServer.returnsMalformedJson = true
+      givenApi(returnsMalformedJson())
 
       expect(await getPathInfo(Instance.En, '/path')).toBeNull()
     })
@@ -106,7 +111,7 @@ describe('getPathInfo()', () => {
       test.each([null, {}, { data: { uuid: {} } }])(
         'response = %p',
         async (invalidResponse) => {
-          global.apiServer.returnsInvalidJson = invalidResponse
+          givenApi(returnsJson(invalidResponse))
 
           expect(await getPathInfo(Instance.En, '/path')).toBeNull()
         }
@@ -128,7 +133,7 @@ describe('getPathInfo()', () => {
     })
 
     test('saves values in cache for 1 hour', async () => {
-      global.apiServer.uuids.push({
+      givenUuid({
         __typename: 'Article',
         alias: '/current-path',
         id: 42,
@@ -152,7 +157,7 @@ describe('getPathInfo()', () => {
         '%AE%BE%E0%AE%9F%E0%AF%81-%E0%AE%87%E0%AE%B2%E0%AE%95%E0%AF%8D%E0' +
         '%AE%95%E0%AE%BF%E0%AE%AF-%E0%AE%B5%E0%AE%95%E0%AF%88%E0%AE%95%E0' +
         '%AE%B3%E0%AF%8D'
-      global.apiServer.uuids.push({
+      givenUuid({
         __typename: 'Article',
         alias: longTamilPath,
       })
@@ -172,7 +177,7 @@ describe('getPathInfo()', () => {
       const target = { typename: 'Article', currentPath: '/current-path' }
 
       beforeEach(() => {
-        global.apiServer.uuids.push({
+        givenUuid({
           __typename: 'Article',
           alias: '/current-path',
           id: 42,
@@ -275,7 +280,7 @@ test('NotFoundResponse', async () => {
 
 describe('fetchWithCache()', () => {
   test('returns the result of fetch()', async () => {
-    mockHttpGet('http://example.com/', returnText('test'))
+    mockHttpGet('http://example.com/', returnsText('test'))
 
     const response = await fetchWithCache('http://example.com/')
 
@@ -283,7 +288,7 @@ describe('fetchWithCache()', () => {
   })
 
   test('responses are cached for 1 hour', async () => {
-    mockHttpGet('http://example.com/', returnText(''))
+    mockHttpGet('http://example.com/', returnsText(''))
 
     await fetchWithCache('http://example.com/')
 

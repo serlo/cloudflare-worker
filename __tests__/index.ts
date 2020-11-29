@@ -21,7 +21,14 @@
  */
 
 import { handleRequest } from '../src'
-import { mockKV, mockHttpGet, returnText } from './__utils__'
+import {
+  mockKV,
+  mockHttpGet,
+  returnsText,
+  givenUuid,
+  givenApi,
+  returnsMalformedJson,
+} from './__utils__'
 
 describe('Enforce HTTPS', () => {
   test('HTTP URL', async () => {
@@ -31,7 +38,7 @@ describe('Enforce HTTPS', () => {
   })
 
   test('HTTPS URL', async () => {
-    mockHttpGet('https://foo.serlo.local/bar', returnText('content'))
+    mockHttpGet('https://foo.serlo.local/bar', returnsText('content'))
 
     const response = await handleUrl('https://foo.serlo.local/bar')
 
@@ -39,7 +46,7 @@ describe('Enforce HTTPS', () => {
   })
 
   test('Pact Broker', async () => {
-    mockHttpGet('http://pacts.serlo.local/bar', returnText('content'))
+    mockHttpGet('http://pacts.serlo.local/bar', returnsText('content'))
 
     const response = await handleUrl('http://pacts.serlo.local/bar')
 
@@ -91,7 +98,7 @@ describe('Redirects', () => {
 
   describe('redirects to current path of an resource', () => {
     beforeEach(() => {
-      global.apiServer.uuids.push({
+      givenUuid({
         __typename: 'Page',
         oldAlias: '/sexed',
         alias: '/sex-ed',
@@ -105,7 +112,7 @@ describe('Redirects', () => {
     })
 
     test('no redirect when current path is different than given path and XMLHttpRequest', async () => {
-      mockHttpGet('https://en.serlo.org/sexed', returnText('article content'))
+      mockHttpGet('https://en.serlo.org/sexed', returnsText('article content'))
 
       const request = new Request('https://en.serlo.org/sexed', {
         headers: {
@@ -118,7 +125,7 @@ describe('Redirects', () => {
     })
 
     test('no redirect when current path is the same as given path', async () => {
-      mockHttpGet('https://en.serlo.org/sex-ed', returnText('article content'))
+      mockHttpGet('https://en.serlo.org/sex-ed', returnsText('article content'))
 
       const response = await handleUrl('https://en.serlo.org/sex-ed')
 
@@ -126,8 +133,8 @@ describe('Redirects', () => {
     })
 
     test('no redirect when requested entity has no alias', async () => {
-      global.apiServer.uuids.push({ id: 128620, __typename: 'ArticleRevision' })
-      mockHttpGet('https://de.serlo.org/128620', returnText('article content'))
+      givenUuid({ id: 128620, __typename: 'ArticleRevision' })
+      mockHttpGet('https://de.serlo.org/128620', returnsText('article content'))
 
       const response = await handleUrl('https://de.serlo.org/128620')
 
@@ -135,7 +142,7 @@ describe('Redirects', () => {
     })
 
     test('redirects to first course page when requested entity is empty', async () => {
-      global.apiServer.uuids.push({
+      givenUuid({
         id: 61682,
         __typename: 'Course',
         alias:
@@ -163,8 +170,7 @@ describe('Redirects', () => {
 
     test('redirects to alias of course when list of course pages is empty', async () => {
       // TODO: Find an empty course at serlo.org
-
-      global.apiServer.uuids.push({
+      givenUuid({
         id: 42,
         __typename: 'Course',
         alias: '/course',
@@ -177,9 +183,9 @@ describe('Redirects', () => {
     })
 
     test('no redirect when current path cannot be requested', async () => {
-      global.apiServer.returnsMalformedJson = true
+      givenApi(returnsMalformedJson())
 
-      mockHttpGet('https://en.serlo.org/path', returnText('article content'))
+      mockHttpGet('https://en.serlo.org/path', returnsText('article content'))
 
       const response = await handleUrl('https://en.serlo.org/path')
 
@@ -187,13 +193,13 @@ describe('Redirects', () => {
     })
 
     test('handles URL encodings correctly', async () => {
-      global.apiServer.uuids.push({
+      givenUuid({
         __typename: 'TaxonomyTerm',
         alias: '/mathe/zahlen-größen/größen-einheiten',
       })
       mockHttpGet(
         'https://de.serlo.org/mathe/zahlen-gr%C3%B6%C3%9Fen',
-        returnText('article content')
+        returnsText('article content')
       )
 
       const response = await handleUrl(
@@ -207,7 +213,7 @@ describe('Redirects', () => {
 
 describe('Semantic file names', () => {
   test('assets.serlo.org/meta/*', async () => {
-    mockHttpGet('https://assets.serlo.org/meta/foo', returnText('content'))
+    mockHttpGet('https://assets.serlo.org/meta/foo', returnsText('content'))
 
     const response = await handleUrl('https://assets.serlo.local/meta/foo')
 
@@ -215,7 +221,7 @@ describe('Semantic file names', () => {
   })
 
   test('assets.serlo.org/<hash>/<fileName>.<ext>', async () => {
-    mockHttpGet('https://assets.serlo.org/hash.ext', returnText('image'))
+    mockHttpGet('https://assets.serlo.org/hash.ext', returnsText('image'))
 
     const response = await handleUrl(
       'https://assets.serlo.local/hash/fileName.ext'
@@ -225,7 +231,10 @@ describe('Semantic file names', () => {
   })
 
   test('assets.serlo.org/legacy/<hash>/<fileName>.<ext>', async () => {
-    mockHttpGet('https://assets.serlo.org/legacy/hash.ext', returnText('image'))
+    mockHttpGet(
+      'https://assets.serlo.org/legacy/hash.ext',
+      returnsText('image')
+    )
 
     const response = await handleUrl(
       'https://assets.serlo.local/legacy/hash/fileName.ext'
@@ -240,7 +249,7 @@ describe('Packages', () => {
     mockKV('PACKAGES_KV', { foo: 'foo@1.0.0' })
     mockHttpGet(
       'https://packages.serlo.org/foo@1.0.0/bar',
-      returnText('content')
+      returnsText('content')
     )
 
     const response = await handleUrl('https://packages.serlo.local/foo/bar')
@@ -250,7 +259,7 @@ describe('Packages', () => {
 
   test('packages.serlo.org/<package>/<filePath> (invalid)', async () => {
     mockKV('PACKAGES_KV', { foo: 'foo@1.0.0' })
-    mockHttpGet('https://packages.serlo.org/foobar/bar', returnText('content'))
+    mockHttpGet('https://packages.serlo.org/foobar/bar', returnsText('content'))
 
     const response = await handleUrl('https://packages.serlo.local/foobar/bar')
 

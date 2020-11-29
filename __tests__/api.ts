@@ -21,10 +21,11 @@
  */
 import { handleRequest } from '../src'
 import { api } from '../src/api'
+import { givenUuid } from './__utils__'
 
 describe('api calls', () => {
   test('get a signature', async () => {
-    global.apiServer.uuids.push({
+    givenUuid({
       id: 23591,
       __typename: 'Page',
       alias: '/math',

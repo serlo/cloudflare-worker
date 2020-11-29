@@ -20,8 +20,6 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-import { rest, ResponseResolver, restContext, MockedRequest } from 'msw'
-
 type KV_NAMES = 'MAINTENANCE_KV' | 'PACKAGES_KV' | 'PATH_INFO_KV'
 
 export function mockKV(name: KV_NAMES, values: Record<string, string>) {
@@ -36,23 +34,3 @@ export function mockKV(name: KV_NAMES, values: Record<string, string>) {
     },
   }
 }
-
-export function mockHttpGet(url: string, resolver: RestResolver) {
-  global.server.use(
-    rest.get(url, (req, res, ctx) => {
-      if (req.url.toString() !== url)
-        return res(ctx.status(400, 'Bad Request: Query string does not match'))
-
-      return resolver(req, res, ctx)
-    })
-  )
-}
-
-export function returnText(
-  body: string,
-  { status = 200 }: { status?: number } = {}
-): RestResolver {
-  return (_req, res, ctx) => res.once(ctx.body(body), ctx.status(status))
-}
-
-type RestResolver = ResponseResolver<MockedRequest, typeof restContext>
