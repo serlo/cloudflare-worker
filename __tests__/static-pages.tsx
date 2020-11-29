@@ -48,6 +48,7 @@ import {
   expectContentTypeIsHtml,
   mockHttpGet,
   returnsText,
+  hasInternalServerError,
 } from './__utils__'
 import { setupProbabilityFor, Backend } from './frontend-proxy'
 
@@ -368,12 +369,10 @@ describe('fetchContent()', () => {
     })
   })
 
-  describe('returns null when request on the url of the spec fails', () => {
-    test.each([301, 404, 500])('status code %p', async (status) => {
-      mockHttpGet('http://example.org/', returnsText('', { status }))
+  test('returns null when request on the url of the spec fails', async () => {
+    mockHttpGet('http://example.org/', hasInternalServerError())
 
-      expect(await fetchContent(exampleSpec)).toBeNull()
-    })
+    expect(await fetchContent(exampleSpec)).toBeNull()
   })
 })
 

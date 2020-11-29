@@ -34,11 +34,8 @@ export function mockHttpGet(url: string, resolver: RestResolver) {
   )
 }
 
-export function returnsText(
-  body: string,
-  { status = 200 }: { status?: number } = {}
-): RestResolver {
-  return (_req, res, ctx) => res.once(ctx.body(body), ctx.status(status))
+export function returnsText(body: string): RestResolver {
+  return (_req, res, ctx) => res.once(ctx.body(body))
 }
 
 export function returnsMalformedJson(): RestResolver {
