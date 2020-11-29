@@ -20,6 +20,23 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-export * from './expect-helper'
-export * from './kv'
-export * from './services'
+export function givenUuid(uuid: Uuid) {
+  global.uuids.push(uuid)
+}
+
+export type Uuid = GenericUuid | Course
+
+interface Course extends AbstractUuid<'Course'> {
+  pages?: { alias: string }[]
+}
+
+interface GenericUuid extends AbstractUuid<GenericTypenames> {}
+
+type GenericTypenames = 'Page' | 'Article' | 'TaxonomyTerm' | 'ArticleRevision'
+
+interface AbstractUuid<Typename extends string> {
+  __typename: Typename
+  id?: number
+  alias?: string
+  oldAlias?: string
+}

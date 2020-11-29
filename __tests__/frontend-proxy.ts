@@ -21,7 +21,15 @@
  */
 import { frontendProxy } from '../src/frontend-proxy'
 import { Instance } from '../src/utils'
-import { expectHasOkStatus, mockHttpGet, returnText } from './__utils__'
+import {
+  expectHasOkStatus,
+  mockHttpGet,
+  returnsText,
+  givenUuid,
+  givenApi,
+  returnsMalformedJson,
+  returnsJson,
+} from './__utils__'
 
 enum Backend {
   Frontend = 'frontend',
@@ -36,7 +44,7 @@ describe('handleRequest()', () => {
     global.FRONTEND_PROBABILITY = '0.5'
     Math.random = jest.fn().mockReturnValue(0.5)
 
-    global.apiServer.uuids.push({
+    givenUuid({
       id: 23591,
       __typename: 'Page',
       alias: '/math',
@@ -71,7 +79,7 @@ describe('handleRequest()', () => {
       const backendUrl = getUrlFor(backend, 'https://de.serlo.org/math')
 
       setupProbabilityFor(backend)
-      mockHttpGet(backendUrl, returnText(''))
+      mockHttpGet(backendUrl, returnsText(''))
       Math.random = jest.fn().mockReturnValue(0.25)
 
       const response = await handleUrl('https://de.serlo.org/math')
@@ -154,8 +162,9 @@ describe('handleRequest()', () => {
         let response: Response
 
         beforeEach(async () => {
-          global.apiServer.returnsMalformedJson = true
-          mockHttpGet('https://de.serlo.org/math', returnText('content'))
+          givenApi(returnsMalformedJson())
+
+          mockHttpGet('https://de.serlo.org/math', returnsText('content'))
 
           const request = new Request('https://de.serlo.org/math')
           request.headers.set('Cookie', 'authenticated=1')
@@ -203,9 +212,9 @@ describe('handleRequest()', () => {
     let response: Response
 
     beforeEach(async () => {
-      global.apiServer.returnsMalformedJson = true
+      givenApi(returnsMalformedJson())
       setupProbabilityFor(Backend.Frontend)
-      mockHttpGet(url, returnText('content'))
+      mockHttpGet(url, returnsText('content'))
 
       response = await handleUrl(url)
     })
@@ -240,7 +249,7 @@ describe('handleRequest()', () => {
         const url = 'https://de.serlo.org/math'
         const backendUrl = getUrlFor(backend, url)
 
-        mockHttpGet(backendUrl, returnText('content'))
+        mockHttpGet(backendUrl, returnsText('content'))
         global.FRONTEND_PROBABILITY = '0.5'
 
         const request = new Request(url, { headers: { Cookie: cookieValue } })
@@ -284,7 +293,7 @@ describe('handleRequest()', () => {
 
   test('return null when type of path is not allowed', async () => {
     global.FRONTEND_ALLOWED_TYPES = '["Page", "Article"]'
-    global.apiServer.uuids.push({ id: 42, __typename: 'TaxonomyTerm' })
+    givenUuid({ id: 42, __typename: 'TaxonomyTerm' })
 
     const response = await handleUrl('https://de.serlo.org/42')
 
@@ -292,7 +301,7 @@ describe('handleRequest()', () => {
   })
 
   test('returns null when type of path is unknown', async () => {
-    global.apiServer.uuids.push({ alias: '/unknown' })
+    givenApi(returnsJson({}))
 
     const response = await handleUrl('https://de.serlo.org/unknown')
 
@@ -376,9 +385,9 @@ describe('handleRequest()', () => {
         'https://de.serlo.org/_next-alias',
         'https://de.serlo.org/_assets-alias',
       ])('URL = %p', async (url) => {
-        global.apiServer.uuids.push({
-          alias: new URL(url).pathname,
+        givenUuid({
           __typename: 'Page',
+          alias: new URL(url).pathname,
         })
         setupProbabilityFor(Backend.Legacy)
 
@@ -403,9 +412,10 @@ describe('handleRequest()', () => {
         'https://de.serlo.org/auth/hydra/consent',
         'https://de.serlo.org/user/register',
       ])('URL = %p', async (url) => {
-        global.apiServer.returnsMalformedJson = true
-        mockHttpGet(getUrlFor(Backend.Frontend, url), returnText('content'))
-        mockHttpGet(getUrlFor(Backend.Legacy, url), returnText('content'))
+        givenApi(returnsMalformedJson())
+
+        mockHttpGet(getUrlFor(Backend.Frontend, url), returnsText('content'))
+        mockHttpGet(getUrlFor(Backend.Legacy, url), returnsText('content'))
 
         const response = await handleUrl(url)
 
@@ -428,8 +438,8 @@ describe('handleRequest()', () => {
         'https://de.serlo.org/auth/hydra/consent',
         'https://de.serlo.org/user/register',
       ])('URL = %p', async (url) => {
-        mockHttpGet(getUrlFor(Backend.Frontend, url), returnText(url))
-        mockHttpGet(getUrlFor(Backend.Legacy, url), returnText(url))
+        mockHttpGet(getUrlFor(Backend.Frontend, url), returnsText(url))
+        mockHttpGet(getUrlFor(Backend.Legacy, url), returnsText(url))
 
         const response = await handleUrl(url)
 
@@ -570,7 +580,7 @@ async function expectResponseFrom({
   backend: string
   request: Request | string
 }) {
-  mockHttpGet(backend, returnText('content'))
+  mockHttpGet(backend, returnsText('content'))
 
   request = typeof request === 'string' ? new Request(request) : request
   const response = (await frontendProxy(request)) as Response

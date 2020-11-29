@@ -22,73 +22,20 @@
 // eslint-disable-next-line import/no-unassigned-import
 import '@testing-library/jest-dom'
 import * as cryptoNode from 'crypto'
-import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import fetchNode, {
   Response as NodeResponse,
   Request as NodeRequest,
 } from 'node-fetch'
-import * as R from 'ramda'
 import * as util from 'util'
 
-import { mockKV } from './__tests__/__utils__'
+import { mockKV, givenApi, defaultApiServer, Uuid } from './__tests__/__utils__'
 
 const randomCopy = Math.random
 
 beforeAll(() => {
   global.API_ENDPOINT = 'https://api.serlo.org/graphql'
-  global.server = setupServer(
-    rest.post(global.API_ENDPOINT, (req, res, ctx) => {
-      if (global.apiServer.hasInternalServerError) return res(ctx.status(500))
-      if (global.apiServer.returnsMalformedJson)
-        return res(ctx.body('malformed json'))
-      if (global.apiServer.returnsInvalidJson !== undefined)
-        return res(ctx.json(global.apiServer.returnsMalformedJson as any))
-
-      if (!req.headers.get('Authorization')?.match(/^Serlo Service=ey/))
-        return res(ctx.status(401, 'No authorization header given'))
-
-      if (req.body === undefined)
-        return res(ctx.status(400, 'request body is missing'))
-      if (
-        req.headers.get('Content-Type') !== 'application/json' ||
-        typeof req.body === 'string'
-      )
-        return res(ctx.status(400, 'Content-Type is not application/json'))
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const path = req.body?.variables?.alias?.path as string | undefined
-
-      if (path == null)
-        return res(ctx.status(400, 'variable "alias" is not defined'))
-
-      let result: Uuid | undefined
-
-      const idMatch = /\/(\d+)/.exec(path)
-
-      if (idMatch) {
-        const id = parseInt(idMatch[1])
-        result = global.apiServer.uuids.find((uuid) => uuid.id === id)
-      } else {
-        result = global.apiServer.uuids.find(
-          (uuid) => uuid.alias === path || uuid.oldAlias === path
-        )
-      }
-
-      if (result === undefined) {
-        const statusText = `Nothing found for "${path}"`
-
-        return res(ctx.status(404, statusText))
-      }
-
-      const uuid = R.omit(['id', 'oldAlias'], result)
-
-      if (uuid.alias !== undefined)
-        uuid.alias = encodeURIComponent(uuid.alias).replace(/%2F/g, '/')
-
-      return res(ctx.json({ data: { uuid } }))
-    })
-  )
+  global.server = setupServer()
   global.server.listen({ onUnhandledRequest: 'error' })
 })
 
@@ -104,11 +51,9 @@ beforeEach(() => {
   mockKV('MAINTENANCE_KV', {})
   mockKV('PATH_INFO_KV', {})
 
-  global.apiServer = {
-    hasInternalServerError: false,
-    returnsMalformedJson: false,
-    uuids: [],
-  }
+  global.uuids = new Array<Uuid>()
+
+  givenApi(defaultApiServer())
 })
 
 afterEach(() => {
@@ -143,28 +88,13 @@ NodeResponse.redirect = function (url: string, status = 302) {
   return new NodeResponse('', { status, headers: { location: url } })
 }
 
-interface ApiServerState {
-  uuids: Uuid[]
-  hasInternalServerError: Boolean
-  returnsMalformedJson: Boolean
-  returnsInvalidJson?: unknown
-}
-
-interface Uuid {
-  __typename?: string
-  id?: number
-  alias?: string
-  oldAlias?: string
-  pages?: { alias: string }[]
-}
-
 export {}
 
 declare global {
   namespace NodeJS {
     interface Global {
       server: ReturnType<typeof import('msw/node').setupServer>
-      apiServer: ApiServerState
+      uuids: Uuid[]
     }
   }
 }
