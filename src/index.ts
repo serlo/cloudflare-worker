@@ -22,7 +22,7 @@
 import { api } from './api'
 import { edtrIoStats } from './are-we-edtr-io-yet'
 import { authFrontendSectorIdentifierUriValidation } from './auth'
-import { frontendProxy } from './frontend-proxy'
+import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
 import { maintenanceMode } from './maintenance'
 import { staticPages } from './static-pages'
 import { Url, getPathInfo, isInstance, Instance } from './utils'
@@ -38,6 +38,7 @@ export async function handleRequest(request: Request) {
     (await edtrIoStats(request)) ||
     (await maintenanceMode(request)) ||
     (await enforceHttps(request)) ||
+    (await frontendSpecialPaths(request)) ||
     (await redirects(request)) ||
     (await staticPages(request)) ||
     (await semanticFileNames(request)) ||
