@@ -21,18 +21,13 @@
  */
 import { Url, getCookieValue, isInstance, Instance, getPathInfo } from './utils'
 
-export async function frontendProxy(
+export async function frontendSpecialPaths(
   request: Request
 ): Promise<Response | null> {
-  const probability = Number(global.FRONTEND_PROBABILITY)
-  const allowedTypes = JSON.parse(global.FRONTEND_ALLOWED_TYPES) as string[]
-  const supportInternationalization =
-    global.FRONTEND_SUPPORT_INTERNATIONALIZATION === 'true'
+  const config = getConfig(request)
   const url = Url.fromRequest(request)
 
-  if (!isInstance(url.subdomain)) return null
-
-  if (!supportInternationalization && url.subdomain !== Instance.De) return null
+  if (!config.relevantRequest) return null
 
   if (url.pathname === '/enable-frontend')
     return createConfigurationResponse('Enabled: Use of new frontend', 0)
@@ -40,17 +35,13 @@ export async function frontendProxy(
   if (url.pathname === '/disable-frontend')
     return createConfigurationResponse('Disabled: Use of new frontend', 1)
 
-  const cookies = request.headers.get('Cookie')
-  const frontendDomain =
-    getCookieValue('frontendDomain', cookies) ?? global.FRONTEND_DOMAIN
-
   if (
     url.pathname.startsWith('/_next/') ||
     url.pathname.startsWith('/_assets/') ||
     url.pathname.startsWith('/api/auth/') ||
     url.pathname.startsWith('/api/frontend/')
   )
-    return await fetchBackend({ useFrontend: true })
+    return await fetchBackend({ ...config, useFrontend: true, request })
 
   if (
     url.pathname.startsWith('/auth/activate/') ||
@@ -62,21 +53,38 @@ export async function frontendProxy(
       '/auth/hydra/login',
       '/auth/hydra/consent',
       '/user/register',
-    ].includes(url.pathname) ||
+    ].includes(url.pathname)
+  )
+    return await fetchBackend({ ...config, useFrontend: false, request })
+
+  return null
+}
+
+export async function frontendProxy(
+  request: Request
+): Promise<Response | null> {
+  const config = getConfig(request)
+  const url = Url.fromRequest(request)
+  const cookies = request.headers.get('Cookie')
+
+  if (!config.relevantRequest) return null
+
+  if (
     url.hasContentApiParameters() ||
     (global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND === 'true' &&
       getCookieValue('authenticated', cookies) === '1')
   )
-    return await fetchBackend({ useFrontend: false })
+    return await fetchBackend({ ...config, useFrontend: false, request })
 
   if (url.pathname === '/spenden')
-    return await fetchBackend({ useFrontend: true })
+    return await fetchBackend({ ...config, useFrontend: true, request })
 
   if (url.pathname !== '/' && url.pathname !== '/search') {
-    const pathInfo = await getPathInfo(url.subdomain, url.pathname)
+    const pathInfo = await getPathInfo(config.instance, url.pathname)
     const typename = pathInfo?.typename ?? null
 
-    if (typename === null || !allowedTypes.includes(typename)) return null
+    if (typename === null || !config.allowedTypes.includes(typename))
+      return null
   }
 
   const cookieValue = Number(getCookieValue('useFrontend', cookies) ?? 'NaN')
@@ -85,50 +93,94 @@ export async function frontendProxy(
     : cookieValue
 
   const response = await fetchBackend({
-    useFrontend: useFrontendNumber <= probability,
-    pathPrefix: url.subdomain,
+    ...config,
+    useFrontend: useFrontendNumber <= config.probability,
+    pathPrefix: config.instance,
+    request,
   })
   if (Number.isNaN(cookieValue))
     setCookieUseFrontend(response, useFrontendNumber)
 
   return response
+}
 
-  async function fetchBackend({
-    useFrontend,
-    pathPrefix,
-  }: {
-    useFrontend: boolean
-    pathPrefix?: Instance
-  }) {
-    const backendUrl = new Url(url.href)
+async function fetchBackend({
+  frontendDomain,
+  supportInternationalization,
+  pathPrefix,
+  request,
+  useFrontend,
+}: {
+  pathPrefix?: Instance
+  request: Request
+  useFrontend: boolean
+} & RelevantRequestConfig) {
+  const backendUrl = Url.fromRequest(request)
 
-    if (useFrontend) {
-      backendUrl.hostname = frontendDomain
+  if (useFrontend) {
+    backendUrl.hostname = frontendDomain
 
-      if (supportInternationalization && pathPrefix !== undefined)
-        backendUrl.pathname = `/${pathPrefix}${backendUrl.pathname}`
+    if (supportInternationalization && pathPrefix !== undefined)
+      backendUrl.pathname = `/${pathPrefix}${backendUrl.pathname}`
 
-      backendUrl.pathname = backendUrl.pathnameWithoutTrailingSlash
-    }
-
-    const response = await fetch(new Request(backendUrl.toString(), request))
-
-    return new Response(response.body, response)
+    backendUrl.pathname = backendUrl.pathnameWithoutTrailingSlash
   }
 
-  function createConfigurationResponse(message: string, useFrontend: number) {
-    const response = new Response(message)
+  const response = await fetch(new Request(backendUrl.toString(), request))
 
-    setCookieUseFrontend(response, useFrontend)
-    response.headers.set('Refresh', '1; url=/')
+  return new Response(response.body, response)
+}
 
-    return response
+function createConfigurationResponse(message: string, useFrontend: number) {
+  const response = new Response(message)
+
+  setCookieUseFrontend(response, useFrontend)
+  response.headers.set('Refresh', '1; url=/')
+
+  return response
+}
+
+function setCookieUseFrontend(res: Response, useFrontend: number) {
+  res.headers.append(
+    'Set-Cookie',
+    `useFrontend=${useFrontend}; path=/; domain=.${global.DOMAIN}`
+  )
+}
+
+function getConfig(request: Request): Config {
+  const supportInternationalization =
+    global.FRONTEND_SUPPORT_INTERNATIONALIZATION === 'true'
+  const url = Url.fromRequest(request)
+  const cookies = request.headers.get('Cookie')
+
+  if (
+    !isInstance(url.subdomain) ||
+    (!supportInternationalization && url.subdomain !== Instance.De)
+  )
+    return { relevantRequest: false }
+
+  return {
+    relevantRequest: true,
+    allowedTypes: JSON.parse(global.FRONTEND_ALLOWED_TYPES) as string[],
+    frontendDomain:
+      getCookieValue('frontendDomain', cookies) ?? global.FRONTEND_DOMAIN,
+    instance: url.subdomain,
+    probability: Number(global.FRONTEND_PROBABILITY),
+    supportInternationalization,
   }
+}
 
-  function setCookieUseFrontend(res: Response, useFrontend: number) {
-    res.headers.append(
-      'Set-Cookie',
-      `useFrontend=${useFrontend}; path=/; domain=.${global.DOMAIN}`
-    )
-  }
+type Config = RelevantRequestConfig | IrrelevantRequestConfig
+
+interface RelevantRequestConfig {
+  relevantRequest: true
+  instance: Instance
+  allowedTypes: string[]
+  probability: number
+  frontendDomain: string
+  supportInternationalization: boolean
+}
+
+interface IrrelevantRequestConfig {
+  relevantRequest: false
 }

@@ -334,9 +334,15 @@ describe('handleRequest()', () => {
     })
 
     test('requests to /_next/... always resolve to frontend', async () => {
+      // Make sure that special paths of the frontend are resolved before the
+      // redirects
+      //
+      // See also https://github.com/serlo/serlo.org-cloudflare-worker/issues/71
+      givenUuid({ id: 5, __typename: 'TaxonomyTerm', alias: '/mathe/-5' })
+
       await expectResponseFrom({
-        backend: 'https://frontend.serlo.org/_next/script.js',
-        request: 'https://de.serlo.org/_next/script.js',
+        backend: 'https://frontend.serlo.org/_next/static/Xi-nU5/script.js',
+        request: 'https://de.serlo.org/_next/static/Xi-nU5/script.js',
       })
     })
 
