@@ -20,7 +20,6 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 import { handleRequest } from '../src'
-import { api } from '../src/api'
 import { givenUuid } from './__utils__'
 
 describe('api calls', () => {
@@ -42,27 +41,5 @@ describe('api calls', () => {
     expect(await response.json()).toEqual({
       data: { uuid: { __typename: 'Page', alias: '/math' } },
     })
-  })
-})
-
-describe('api()', () => {
-  describe('returns null if subdomain is not "api"', () => {
-    test('url without subdomain', async () => {
-      const response = await api(new Request('https://serlo.org/graphql'))
-
-      expect(response).toBeNull()
-    })
-
-    test('url without subdomain different than "api"', async () => {
-      const response = await api(new Request('https://stats.serlo.org/graphql'))
-
-      expect(response).toBeNull()
-    })
-  })
-
-  test('returns null if path is not /graphql', async () => {
-    const response = await api(new Request('https://api.serlo.org/something'))
-
-    expect(response).toBeNull()
   })
 })
