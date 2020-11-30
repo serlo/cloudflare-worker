@@ -70,14 +70,17 @@ async function redirects(request: Request) {
     url.subdomain === Instance.De &&
     url.pathnameWithoutTrailingSlash === '/labschool'
   ) {
-    return url.change({ subdomain: 'labschool', pathname: '/' }).toRedirect(301)
+    url.subdomain = 'labschool'
+    url.pathname = '/'
+    return url.toRedirect(301)
   }
 
   if (
     url.subdomain === Instance.De &&
     url.pathnameWithoutTrailingSlash === '/hochschule'
   ) {
-    return url.change({ pathname: '/mathe/universitaet/44323' }).toRedirect(301)
+    url.pathname = '/mathe/universitaet/44323'
+    return url.toRedirect(301)
   }
 
   if (
@@ -91,7 +94,8 @@ async function redirects(request: Request) {
   }
 
   if (url.subdomain === 'www' || url.subdomain === '') {
-    return url.change({ subdomain: 'de' }).toRedirect()
+    url.subdomain = 'de'
+    return url.toRedirect()
   }
 
   if (isInstance(url.subdomain)) {
@@ -104,7 +108,8 @@ async function redirects(request: Request) {
       pathInfo !== null &&
       decodePath(url.pathname) != decodePath(pathInfo.currentPath)
     ) {
-      return url.change({ pathname: pathInfo.currentPath }).toRedirect(301)
+      url.pathname = pathInfo.currentPath
+      return url.toRedirect(301)
     }
   }
 }

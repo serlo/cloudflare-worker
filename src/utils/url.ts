@@ -21,9 +21,6 @@
  */
 import URL from 'core-js-pure/features/url'
 
-const UrlProperties = ['subdomain', 'hostname', 'pathname'] as const
-type UrlProperties = typeof UrlProperties[number]
-
 const contentApiParameters = [
   'contentOnly',
   'hideTopbar',
@@ -54,16 +51,6 @@ export class Url extends URL {
     return this.pathname.endsWith('/')
       ? this.pathname.slice(0, -1)
       : this.pathname
-  }
-
-  public change(changes: { [K in UrlProperties]?: string }): Url {
-    for (const prop of UrlProperties) {
-      const value = changes[prop]
-
-      if (value !== undefined) this[prop] = value
-    }
-
-    return this
   }
 
   public hasContentApiParameters() {
