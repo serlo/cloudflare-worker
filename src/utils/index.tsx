@@ -95,10 +95,9 @@ export async function getPathInfo(
     query TypenameAndCurrentPath($alias: AliasInput) {
       uuid(alias: $alias) {
         __typename
-        ... on User { alias }
-        ... on Page { alias }
-        ... on TaxonomyTerm { alias }
-        ... on AbstractEntity { alias }
+        ... on AbstractUuid {
+          alias
+        }
         ... on Course {
           pages {
             alias
