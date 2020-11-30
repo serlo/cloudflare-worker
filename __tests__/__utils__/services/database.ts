@@ -19,27 +19,24 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { handleRequest } from '../src'
-import { givenUuid } from './__utils__'
 
-describe('api calls', () => {
-  test('get a signature', async () => {
-    givenUuid({
-      id: 23591,
-      __typename: 'Page',
-      alias: '/math',
-    })
+export function givenUuid(uuid: Uuid) {
+  global.uuids.push(uuid)
+}
 
-    const req = new Request(global.API_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ variables: { alias: { path: '/23591' } } }),
-    })
-    const response = await handleRequest(req)
+export type Uuid = GenericUuid | Course
 
-    expect(response.statusText).toBe('OK')
-    expect(await response.json()).toEqual({
-      data: { uuid: { __typename: 'Page', alias: '/math' } },
-    })
-  })
-})
+interface Course extends AbstractUuid<'Course'> {
+  pages?: { alias: string }[]
+}
+
+interface GenericUuid extends AbstractUuid<GenericTypenames> {}
+
+type GenericTypenames = 'Page' | 'Article' | 'TaxonomyTerm' | 'ArticleRevision'
+
+interface AbstractUuid<Typename extends string> {
+  __typename: Typename
+  id?: number
+  alias?: string
+  oldAlias?: string
+}

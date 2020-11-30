@@ -20,7 +20,6 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-import { MockedRequest, rest } from 'msw'
 import { h } from 'preact'
 
 import { Template } from '../src/ui'
@@ -44,12 +43,12 @@ import {
   expectIsNotFoundResponse,
   mockKV,
   mockHttpGet,
-  returnText,
-  apiReturns,
-  mockApi,
-  returnMalformedJson,
-  returnJson,
-  returnBadRequest,
+  returnsText,
+  givenApi,
+  givenUuid,
+  hasInternalServerError,
+  returnsMalformedJson,
+  returnsJson,
 } from './__utils__'
 
 describe('getCookieValue()', () => {
@@ -95,80 +94,15 @@ describe('getPathInfo()', () => {
     mockKV('PATH_INFO_KV', {})
   })
 
-  test('returns typename and currentPath from api.serlo.org', async () => {
-    apiReturns({ __typename: 'Article', alias: '/current-path' })
-
-    const pathInfo = await getPathInfo(Instance.En, '/path')
-
-    expect(pathInfo).toEqual({
-      typename: 'Article',
-      currentPath: '/current-path',
-    })
-  })
-
-  test('"currentPath" is given path when it does not refer to an entity', async () => {
-    apiReturns({ __typename: 'ArticleRevision' })
-
-    const pathInfo = await getPathInfo(Instance.En, '/path')
-
-    expect(pathInfo).toEqual({
-      typename: 'ArticleRevision',
-      currentPath: '/path',
-    })
-  })
-
-  describe('request to the api endpoint', () => {
-    test('is signed', async () => {
-      const apiRequest = await getApiRequest('/path')
-
-      expect(apiRequest.headers.get('Authorization')).toMatch(/^Serlo Service/)
-    })
-
-    describe('contains right variables', () => {
-      test.each([Instance.En, Instance.De])('lang = %p', async (lang) => {
-        expect(await getApiVariables('/path', lang)).toEqual({
-          alias: { instance: lang, path: '/path' },
-        })
-      })
-
-      async function getApiVariables(path: string, lang = Instance.En) {
-        const body = (await getApiRequest(path, lang))?.body as Record<
-          string,
-          unknown
-        >
-
-        return body.variables
-      }
-    })
-
-    async function getApiRequest(
-      path: string,
-      lang = Instance.En
-    ): Promise<MockedRequest> {
-      let request!: MockedRequest
-
-      global.server.use(
-        rest.post(global.API_ENDPOINT, (req, res, ctx) => {
-          request = req
-          return res(ctx.json({ data: { __typename: 'Article', alias: path } }))
-        })
-      )
-
-      await getPathInfo(lang, path)
-
-      return request
-    }
-  })
-
   describe('returns null', () => {
     test('when there was an error with the api call', async () => {
-      mockApi(returnBadRequest())
+      givenApi(hasInternalServerError())
 
       expect(await getPathInfo(Instance.En, '/path')).toBeNull()
     })
 
     test('when api response is malformed JSON', async () => {
-      mockApi(returnMalformedJson())
+      givenApi(returnsMalformedJson())
 
       expect(await getPathInfo(Instance.En, '/path')).toBeNull()
     })
@@ -176,40 +110,12 @@ describe('getPathInfo()', () => {
     describe('when the response is not valid', () => {
       test.each([null, {}, { data: { uuid: {} } }])(
         'response = %p',
-        async (response) => {
-          mockApi(returnJson(response))
+        async (invalidResponse) => {
+          givenApi(returnsJson(invalidResponse))
 
           expect(await getPathInfo(Instance.En, '/path')).toBeNull()
         }
       )
-    })
-  })
-
-  describe('when path is a course', () => {
-    test('"currentPath" is path of first course page', async () => {
-      apiReturns({
-        __typename: 'Course',
-        alias: '/course',
-        pages: [{ alias: '/course-page1' }, { alias: '/course-page2' }],
-      })
-
-      const pathInfo = await getPathInfo(Instance.En, '/course')
-
-      expect(pathInfo).toEqual({
-        typename: 'Course',
-        currentPath: '/course-page1',
-      })
-    })
-
-    test('"currentPath" is path of course when list of course pages is empty', async () => {
-      apiReturns({ __typename: 'Course', alias: '/course', pages: [] })
-
-      const pathInfo = await getPathInfo(Instance.En, '/course')
-
-      expect(pathInfo).toEqual({
-        typename: 'Course',
-        currentPath: '/course',
-      })
     })
   })
 
@@ -227,11 +133,15 @@ describe('getPathInfo()', () => {
     })
 
     test('saves values in cache for 1 hour', async () => {
-      apiReturns({ __typename: 'Article', alias: '/current-path' })
+      givenUuid({
+        __typename: 'Article',
+        alias: '/current-path',
+        id: 42,
+      })
 
-      await getPathInfo(Instance.En, '/path')
+      await getPathInfo(Instance.En, '/42')
 
-      expect(await global.PATH_INFO_KV.get('/en/path')).toEqual(
+      expect(await global.PATH_INFO_KV.get('/en/42')).toEqual(
         JSON.stringify({ typename: 'Article', currentPath: '/current-path' })
       )
     })
@@ -247,13 +157,19 @@ describe('getPathInfo()', () => {
         '%AE%BE%E0%AE%9F%E0%AF%81-%E0%AE%87%E0%AE%B2%E0%AE%95%E0%AF%8D%E0' +
         '%AE%95%E0%AE%BF%E0%AE%AF-%E0%AE%B5%E0%AE%95%E0%AF%88%E0%AE%95%E0' +
         '%AE%B3%E0%AF%8D'
-      apiReturns({ __typename: 'Article', alias: longTamilPath })
+      givenUuid({
+        __typename: 'Article',
+        alias: longTamilPath,
+      })
 
       await getPathInfo(Instance.Ta, longTamilPath)
 
       const cacheKey = '23e2e346e649c466a41fabf38d7e8bf03333b007'
       expect(await global.PATH_INFO_KV.get(cacheKey)).toEqual(
-        JSON.stringify({ typename: 'Article', currentPath: longTamilPath })
+        JSON.stringify({
+          typename: 'Article',
+          currentPath: encode(longTamilPath),
+        })
       )
     })
 
@@ -261,32 +177,40 @@ describe('getPathInfo()', () => {
       const target = { typename: 'Article', currentPath: '/current-path' }
 
       beforeEach(() => {
-        apiReturns({ __typename: 'Article', alias: '/current-path' })
+        givenUuid({
+          __typename: 'Article',
+          alias: '/current-path',
+          id: 42,
+        })
       })
 
       test('when cached value is malformed JSON', async () => {
-        await global.PATH_INFO_KV.put('/en/path', 'malformed json')
+        await global.PATH_INFO_KV.put('/en/42', 'malformed json')
 
-        const pathInfo = await getPathInfo(Instance.En, '/path')
+        const pathInfo = await getPathInfo(Instance.En, '/42')
 
         expect(pathInfo).toEqual(target)
-        expect(await global.PATH_INFO_KV.get('/en/path')).toEqual(
+        expect(await global.PATH_INFO_KV.get('/en/42')).toEqual(
           JSON.stringify(target)
         )
       })
 
       test('when cached value is no PathInfo', async () => {
         const malformedPathInfo = JSON.stringify({ typename: 'Course' })
-        await global.PATH_INFO_KV.put('/en/path', malformedPathInfo)
+        await global.PATH_INFO_KV.put('/en/42', malformedPathInfo)
 
-        const pathInfo = await getPathInfo(Instance.En, '/path')
+        const pathInfo = await getPathInfo(Instance.En, '/42')
 
         expect(pathInfo).toEqual(target)
-        expect(await global.PATH_INFO_KV.get('/en/path')).toEqual(
+        expect(await global.PATH_INFO_KV.get('/en/42')).toEqual(
           JSON.stringify(target)
         )
       })
     })
+
+    function encode(text: string) {
+      return encodeURIComponent(text).replace(/%2F/g, '/')
+    }
   })
 })
 
@@ -356,7 +280,7 @@ test('NotFoundResponse', async () => {
 
 describe('fetchWithCache()', () => {
   test('returns the result of fetch()', async () => {
-    mockHttpGet('http://example.com/', returnText('test'))
+    mockHttpGet('http://example.com/', returnsText('test'))
 
     const response = await fetchWithCache('http://example.com/')
 
@@ -364,7 +288,7 @@ describe('fetchWithCache()', () => {
   })
 
   test('responses are cached for 1 hour', async () => {
-    mockHttpGet('http://example.com/', returnText(''))
+    mockHttpGet('http://example.com/', returnsText(''))
 
     await fetchWithCache('http://example.com/')
 

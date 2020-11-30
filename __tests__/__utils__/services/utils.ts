@@ -19,27 +19,33 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { handleRequest } from '../src'
-import { givenUuid } from './__utils__'
+import { rest, ResponseResolver, restContext, MockedRequest } from 'msw'
 
-describe('api calls', () => {
-  test('get a signature', async () => {
-    givenUuid({
-      id: 23591,
-      __typename: 'Page',
-      alias: '/math',
-    })
+export type RestResolver = ResponseResolver<MockedRequest, typeof restContext>
 
-    const req = new Request(global.API_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ variables: { alias: { path: '/23591' } } }),
-    })
-    const response = await handleRequest(req)
+export function mockHttpGet(url: string, resolver: RestResolver) {
+  global.server.use(
+    rest.get(url, (req, res, ctx) => {
+      if (req.url.toString() !== url)
+        return res(ctx.status(400, 'Bad Request: Query string does not match'))
 
-    expect(response.statusText).toBe('OK')
-    expect(await response.json()).toEqual({
-      data: { uuid: { __typename: 'Page', alias: '/math' } },
+      return resolver(req, res, ctx)
     })
-  })
-})
+  )
+}
+
+export function returnsText(body: string): RestResolver {
+  return (_req, res, ctx) => res.once(ctx.body(body))
+}
+
+export function returnsMalformedJson(): RestResolver {
+  return (_req, res, ctx) => res(ctx.body('malformed json'))
+}
+
+export function returnsJson(data: unknown): RestResolver {
+  return (_req, res, ctx) => res(ctx.json(data as any))
+}
+
+export function hasInternalServerError(): RestResolver {
+  return (_req, res, ctx) => res(ctx.status(500))
+}

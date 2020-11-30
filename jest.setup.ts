@@ -29,17 +29,17 @@ import fetchNode, {
 } from 'node-fetch'
 import * as util from 'util'
 
-import { mockKV } from './__tests__/__utils__'
+import { mockKV, givenApi, defaultApiServer, Uuid } from './__tests__/__utils__'
 
-global.server = setupServer()
 const randomCopy = Math.random
 
 beforeAll(() => {
+  global.API_ENDPOINT = 'https://api.serlo.org/graphql'
+  global.server = setupServer()
   global.server.listen({ onUnhandledRequest: 'error' })
 })
 
 beforeEach(() => {
-  global.API_ENDPOINT = 'https://api.serlo.org/graphql'
   global.API_SECRET = 'secret'
   global.ENABLE_PATH_INFO_CACHE = 'true'
   global.FRONTEND_DOMAIN = 'frontend.serlo.org'
@@ -50,6 +50,10 @@ beforeEach(() => {
 
   mockKV('MAINTENANCE_KV', {})
   mockKV('PATH_INFO_KV', {})
+
+  global.uuids = new Array<Uuid>()
+
+  givenApi(defaultApiServer())
 })
 
 afterEach(() => {
@@ -80,8 +84,8 @@ global.TextEncoder = util.TextEncoder
 // FIXME: Delete the following mock, when node-fetch is available in version 3.0.0
 // See https://github.com/node-fetch/node-fetch/commit/0959ca9739850bbd24e0721cc1296e7a0aa5c2bd#diff-d0f5704ae0738a7bd1f54aff42ddcb41
 // eslint-disable-next-line @typescript-eslint/unbound-method
-NodeResponse.redirect = function (url: string, status = 302) {
-  return new NodeResponse('', { status, headers: { location: url } })
+NodeResponse.redirect = function (location: string, status = 302) {
+  return new NodeResponse('', { status, headers: { location } })
 }
 
 export {}
@@ -90,6 +94,7 @@ declare global {
   namespace NodeJS {
     interface Global {
       server: ReturnType<typeof import('msw/node').setupServer>
+      uuids: Uuid[]
     }
   }
 }

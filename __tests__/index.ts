@@ -24,10 +24,12 @@ import { handleRequest } from '../src'
 import {
   mockKV,
   mockHttpGet,
-  returnText,
-  apiReturns,
-  mockApi,
-  returnMalformedJson,
+  returnsText,
+  givenUuid,
+  givenApi,
+  returnsMalformedJson,
+  givenStats,
+  defaultStatsServer,
 } from './__utils__'
 
 describe('Enforce HTTPS', () => {
@@ -38,7 +40,7 @@ describe('Enforce HTTPS', () => {
   })
 
   test('HTTPS URL', async () => {
-    mockHttpGet('https://foo.serlo.local/bar', returnText('content'))
+    mockHttpGet('https://foo.serlo.local/bar', returnsText('content'))
 
     const response = await handleUrl('https://foo.serlo.local/bar')
 
@@ -46,7 +48,7 @@ describe('Enforce HTTPS', () => {
   })
 
   test('Pact Broker', async () => {
-    mockHttpGet('http://pacts.serlo.local/bar', returnText('content'))
+    mockHttpGet('http://pacts.serlo.local/bar', returnsText('content'))
 
     const response = await handleUrl('http://pacts.serlo.local/bar')
 
@@ -97,20 +99,24 @@ describe('Redirects', () => {
   })
 
   describe('redirects to current path of an resource', () => {
+    beforeEach(() => {
+      givenUuid({
+        __typename: 'Page',
+        oldAlias: '/sexed',
+        alias: '/sex-ed',
+      })
+    })
+
     test('redirects when current path is different than given path', async () => {
-      apiReturns({ __typename: 'Article', alias: '/current-path' })
+      const response = await handleUrl('https://en.serlo.org/sexed')
 
-      const response = await handleUrl('https://en.serlo.org/path')
-
-      expectToBeRedirectTo(response, 'https://en.serlo.org/current-path', 301)
+      expectToBeRedirectTo(response, 'https://en.serlo.org/sex-ed', 301)
     })
 
     test('no redirect when current path is different than given path and XMLHttpRequest', async () => {
-      apiReturns({ __typename: 'Article', alias: '/current-path' })
+      mockHttpGet('https://en.serlo.org/sexed', returnsText('article content'))
 
-      mockHttpGet('https://en.serlo.org/path', returnText('article content'))
-
-      const request = new Request('https://en.serlo.org/path', {
+      const request = new Request('https://en.serlo.org/sexed', {
         headers: {
           'X-Requested-With': 'XMLHttpRequest',
         },
@@ -121,19 +127,67 @@ describe('Redirects', () => {
     })
 
     test('no redirect when current path is the same as given path', async () => {
-      apiReturns({ __typename: 'Article', alias: '/path' })
+      mockHttpGet('https://en.serlo.org/sex-ed', returnsText('article content'))
 
-      mockHttpGet('https://en.serlo.org/path', returnText('article content'))
-
-      const response = await handleUrl('https://en.serlo.org/path')
+      const response = await handleUrl('https://en.serlo.org/sex-ed')
 
       expect(await response.text()).toBe('article content')
     })
 
-    test('no redirect when current path cannot be requested', async () => {
-      mockApi(returnMalformedJson())
+    test('no redirect when requested entity has no alias', async () => {
+      givenUuid({ id: 128620, __typename: 'ArticleRevision' })
+      mockHttpGet('https://de.serlo.org/128620', returnsText('article content'))
 
-      mockHttpGet('https://en.serlo.org/path', returnText('article content'))
+      const response = await handleUrl('https://de.serlo.org/128620')
+
+      expect(await response.text()).toBe('article content')
+    })
+
+    test('redirects to first course page when requested entity is empty', async () => {
+      givenUuid({
+        id: 61682,
+        __typename: 'Course',
+        alias:
+          '/mathe/zahlen-gr%C3%B6%C3%9Fen/zahlenmengen%2C-rechenausdr%C3%BCcke-allgemeine-rechengesetze/zahlen/zahlenmengen-zahlengerade/ganze-zahlen',
+        pages: [
+          {
+            alias:
+              '/mathe/zahlen-gr%C3%B6%C3%9Fen/zahlenmengen%2C-rechenausdr%C3%BCcke-allgemeine-rechengesetze/zahlen/zahlenmengen-zahlengerade/ganze-zahlen/%C3%9Cbersicht',
+          },
+          {
+            alias:
+              '/mathe/zahlen-gr%C3%B6%C3%9Fen/zahlenmengen%2C-rechenausdr%C3%BCcke-allgemeine-rechengesetze/zahlen/zahlenmengen-zahlengerade/ganze-zahlen/negative-zahlen-alltag',
+          },
+        ],
+      })
+
+      const response = await handleUrl('https://de.serlo.org/61682')
+
+      expectToBeRedirectTo(
+        response,
+        'https://de.serlo.org/mathe/zahlen-gr%C3%B6%C3%9Fen/zahlenmengen%2C-rechenausdr%C3%BCcke-allgemeine-rechengesetze/zahlen/zahlenmengen-zahlengerade/ganze-zahlen/%C3%9Cbersicht',
+        301
+      )
+    })
+
+    test('redirects to alias of course when list of course pages is empty', async () => {
+      // TODO: Find an empty course at serlo.org
+      givenUuid({
+        id: 42,
+        __typename: 'Course',
+        alias: '/course',
+        pages: [],
+      })
+
+      const response = await handleUrl('https://en.serlo.org/42')
+
+      expectToBeRedirectTo(response, 'https://en.serlo.org/course', 301)
+    })
+
+    test('no redirect when current path cannot be requested', async () => {
+      givenApi(returnsMalformedJson())
+
+      mockHttpGet('https://en.serlo.org/path', returnsText('article content'))
 
       const response = await handleUrl('https://en.serlo.org/path')
 
@@ -141,14 +195,18 @@ describe('Redirects', () => {
     })
 
     test('handles URL encodings correctly', async () => {
-      apiReturns({ __typename: 'Article', alias: '/gr%C3%B6%C3%9Fen' })
-
+      givenUuid({
+        __typename: 'TaxonomyTerm',
+        alias: '/mathe/zahlen-größen/größen-einheiten',
+      })
       mockHttpGet(
-        'https://de.serlo.org/gr%C3%B6%C3%9Fen',
-        returnText('article content')
+        'https://de.serlo.org/mathe/zahlen-gr%C3%B6%C3%9Fen',
+        returnsText('article content')
       )
 
-      const response = await handleUrl('https://de.serlo.org/größen')
+      const response = await handleUrl(
+        'https://de.serlo.org/mathe/zahlen-größen'
+      )
 
       expect(await response.text()).toBe('article content')
     })
@@ -157,7 +215,7 @@ describe('Redirects', () => {
 
 describe('Semantic file names', () => {
   test('assets.serlo.org/meta/*', async () => {
-    mockHttpGet('https://assets.serlo.org/meta/foo', returnText('content'))
+    mockHttpGet('https://assets.serlo.org/meta/foo', returnsText('content'))
 
     const response = await handleUrl('https://assets.serlo.local/meta/foo')
 
@@ -165,7 +223,7 @@ describe('Semantic file names', () => {
   })
 
   test('assets.serlo.org/<hash>/<fileName>.<ext>', async () => {
-    mockHttpGet('https://assets.serlo.org/hash.ext', returnText('image'))
+    mockHttpGet('https://assets.serlo.org/hash.ext', returnsText('image'))
 
     const response = await handleUrl(
       'https://assets.serlo.local/hash/fileName.ext'
@@ -175,7 +233,10 @@ describe('Semantic file names', () => {
   })
 
   test('assets.serlo.org/legacy/<hash>/<fileName>.<ext>', async () => {
-    mockHttpGet('https://assets.serlo.org/legacy/hash.ext', returnText('image'))
+    mockHttpGet(
+      'https://assets.serlo.org/legacy/hash.ext',
+      returnsText('image')
+    )
 
     const response = await handleUrl(
       'https://assets.serlo.local/legacy/hash/fileName.ext'
@@ -190,7 +251,7 @@ describe('Packages', () => {
     mockKV('PACKAGES_KV', { foo: 'foo@1.0.0' })
     mockHttpGet(
       'https://packages.serlo.org/foo@1.0.0/bar',
-      returnText('content')
+      returnsText('content')
     )
 
     const response = await handleUrl('https://packages.serlo.local/foo/bar')
@@ -200,11 +261,36 @@ describe('Packages', () => {
 
   test('packages.serlo.org/<package>/<filePath> (invalid)', async () => {
     mockKV('PACKAGES_KV', { foo: 'foo@1.0.0' })
-    mockHttpGet('https://packages.serlo.org/foobar/bar', returnText('content'))
+    mockHttpGet('https://packages.serlo.org/foobar/bar', returnsText('content'))
 
     const response = await handleUrl('https://packages.serlo.local/foobar/bar')
 
     expect(await response.text()).toBe('content')
+  })
+})
+
+describe('HTTPS requests to stats.serlo.org are not altered', () => {
+  beforeEach(() => {
+    givenStats(defaultStatsServer())
+  })
+
+  test('when url is https://stats.serlo.org/', async () => {
+    const response = await handleUrl('https://stats.serlo.org/')
+
+    // TODO: msw seems to make automatically a redirect here which we
+    // won't have in the cloudflare worker. Look for a way to change the next
+    // line to:
+    //
+    // expectToBeRedirectTo(response, '/login', 302)
+    expect(response.url).toBe('https://stats.serlo.org/login')
+  })
+
+  test('when url is https://stats.serlo.org/login', async () => {
+    const response = await handleUrl('https://stats.serlo.org/login')
+
+    expect(await response.text()).toEqual(
+      expect.stringContaining('<title>Grafana</title>')
+    )
   })
 })
 

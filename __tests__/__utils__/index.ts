@@ -21,4 +21,5 @@
  */
 
 export * from './expect-helper'
-export * from './mock-helper'
+export * from './kv'
+export * from './services'
