@@ -28,7 +28,7 @@ import {
   apiReturns,
   mockApi,
   returnMalformedJson,
-} from './_helper'
+} from './__utils__'
 
 enum Backend {
   Frontend = 'frontend',
@@ -308,24 +308,6 @@ describe('handleRequest()', () => {
   })
 
   describe('special paths', () => {
-    test('requests to /user/profile/... resolve to legacy backend when `User` is not in FRONTEND_ALLOWED_TYPES', async () => {
-      global.FRONTEND_ALLOWED_TYPES = '[]'
-
-      const backendUrl = 'https://de.serlo.org/user/profile/inyono'
-      const response = await handleUrl(backendUrl)
-
-      expect(response).toBeNull()
-    })
-
-    test('requests to /user/profile/... resolve to frontend when `User` is in FRONTEND_ALLOWED_TYPES', async () => {
-      global.FRONTEND_ALLOWED_TYPES = '["User"]'
-
-      await expectResponseFrom({
-        backend: 'https://frontend.serlo.org/user/profile/inyono',
-        request: 'https://de.serlo.org/user/profile/inyono',
-      })
-    })
-
     test('requests to /api/auth/... always resolve to frontend', async () => {
       await expectResponseFrom({
         backend: 'https://frontend.serlo.org/api/auth/callback',

@@ -19,9 +19,6 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-/* eslint-disable @typescript-eslint/no-var-requires,import/no-commonjs */
-module.exports = {
-  preset: 'ts-jest',
-  testPathIgnorePatterns: ['/node_modules/', '/__tests__\\/__utils__/'],
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
-}
+
+export * from './expect-helper'
+export * from './mock-helper'

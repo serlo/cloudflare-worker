@@ -20,7 +20,7 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 import { handleRequest } from '../src'
-import { expectIsJsonResponse } from './_helper'
+import { expectIsJsonResponse } from './__utils__'
 
 test('Frontend Sector Identifier URI Validation (block localhost)', async () => {
   global.ALLOW_AUTH_FROM_LOCALHOST = 'false'

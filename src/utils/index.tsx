@@ -19,7 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { either as E, pipeable as P } from 'fp-ts'
+import { either as E } from 'fp-ts'
 import * as t from 'io-ts'
 import marked from 'marked'
 import { h, VNode } from 'preact'
@@ -42,16 +42,6 @@ export enum Instance {
 
 export function isInstance(code: string): code is Instance {
   return Object.values(Instance).some((x) => x === code)
-}
-
-export function decodePath(path: string): string {
-  return P.pipe(
-    E.tryCatch(
-      () => decodeURIComponent(path),
-      (e) => e
-    ),
-    E.getOrElse((_) => path)
-  )
 }
 
 export function getCookieValue(
@@ -77,7 +67,6 @@ const ApiResult = t.type({
       t.partial({
         alias: t.string,
         pages: t.array(t.type({ alias: t.string })),
-        username: t.string,
       }),
     ]),
   }),
@@ -87,12 +76,6 @@ export async function getPathInfo(
   lang: Instance,
   path: string
 ): Promise<PathInfo | null> {
-  const userProfilePrefix = '/user/profile/'
-  const userProfileId = /^\/user\/profile\/\d+$/
-
-  if (path.startsWith(userProfilePrefix) && !userProfileId.test(path))
-    return { typename: 'User', currentPath: path }
-
   const useCache = global.ENABLE_PATH_INFO_CACHE === 'true'
 
   const cacheKey = await toCacheKey(`/${lang}${path}`)
@@ -109,10 +92,10 @@ export async function getPathInfo(
   }
 
   const query = `
-    query TypenameAndCurrentPath($alias: AliasInput, $id: Int) {
-      uuid(alias: $alias, id: $id) {
+    query TypenameAndCurrentPath($alias: AliasInput) {
+      uuid(alias: $alias) {
         __typename
-        ... on User { username }
+        ... on User { alias }
         ... on Page { alias }
         ... on TaxonomyTerm { alias }
         ... on AbstractEntity { alias }
@@ -123,19 +106,7 @@ export async function getPathInfo(
         }
       }
     }`
-
-  let variables
-
-  if (/^\/\d+$/.test(path)) {
-    variables = { alias: null, id: Number(path.slice(1)) }
-  } else if (userProfileId.test(path)) {
-    variables = {
-      alias: null,
-      id: Number(path.substring(userProfilePrefix.length)),
-    }
-  } else {
-    variables = { alias: { instance: lang, path }, id: null }
-  }
+  const variables = { alias: { instance: lang, path } }
 
   let apiResponseBody: unknown
 
@@ -154,29 +125,23 @@ export async function getPathInfo(
 
   const apiResult = ApiResult.decode(apiResponseBody)
 
-  if (E.isRight(apiResult)) {
-    const uuid = apiResult.right.data.uuid
+  if (E.isLeft(apiResult)) return null
 
-    let currentPath = uuid.alias ?? path
+  const uuid = apiResult.right.data.uuid
+  const currentPath =
+    uuid.pages !== undefined && uuid.pages.length > 0
+      ? uuid.pages[0].alias
+      : uuid.alias ?? path
 
-    if (uuid.pages !== undefined && uuid.pages.length)
-      currentPath = uuid.pages[0].alias
+  const result = { typename: uuid.__typename, currentPath }
 
-    if (uuid.username !== undefined)
-      currentPath = `/user/profile/${uuid.username}`
-
-    const result = { typename: uuid.__typename, currentPath }
-
-    if (useCache) {
-      await global.PATH_INFO_KV.put(cacheKey, JSON.stringify(result), {
-        expirationTtl: 60 * 60,
-      })
-    }
-
-    return result
-  } else {
-    return null
+  if (useCache) {
+    await global.PATH_INFO_KV.put(cacheKey, JSON.stringify(result), {
+      expirationTtl: 60 * 60,
+    })
   }
+
+  return result
 }
 
 export function sanitizeHtml(html: string): string {

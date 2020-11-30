@@ -28,7 +28,7 @@ import {
   apiReturns,
   mockApi,
   returnMalformedJson,
-} from './_helper'
+} from './__utils__'
 
 describe('Enforce HTTPS', () => {
   test('HTTP URL', async () => {
@@ -140,41 +140,17 @@ describe('Redirects', () => {
       expect(await response.text()).toBe('article content')
     })
 
-    describe('handles URL encodings correctly', () => {
-      test('API result is URL encoded', async () => {
-        apiReturns({ __typename: 'Article', alias: '/gr%C3%B6%C3%9Fen' })
+    test('handles URL encodings correctly', async () => {
+      apiReturns({ __typename: 'Article', alias: '/gr%C3%B6%C3%9Fen' })
 
-        mockHttpGet(
-          'https://de.serlo.org/gr%C3%B6%C3%9Fen',
-          returnText('article content')
-        )
+      mockHttpGet(
+        'https://de.serlo.org/gr%C3%B6%C3%9Fen',
+        returnText('article content')
+      )
 
-        const response = await handleUrl('https://de.serlo.org/größen')
+      const response = await handleUrl('https://de.serlo.org/größen')
 
-        expect(await response.text()).toBe('article content')
-      })
-
-      test('API result is not URL encoded', async () => {
-        apiReturns({ __typename: 'Article', alias: '/größen' })
-
-        mockHttpGet(
-          'https://de.serlo.org/gr%C3%B6%C3%9Fen',
-          returnText('article content')
-        )
-
-        const response = await handleUrl('https://de.serlo.org/größen')
-
-        expect(await response.text()).toBe('article content')
-      })
-
-      test('API result is not URL encoded and cannot be decoded', async () => {
-        mockHttpGet('https://de.serlo.org/%%x%%', returnText('article content'))
-        apiReturns({ __typename: 'Article', alias: '/%%x%%' })
-
-        const response = await handleUrl('https://de.serlo.org/%%x%%')
-
-        expect(await response.text()).toBe('article content')
-      })
+      expect(await response.text()).toBe('article content')
     })
   })
 })

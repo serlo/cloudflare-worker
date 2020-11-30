@@ -29,7 +29,7 @@ import fetchNode, {
 } from 'node-fetch'
 import * as util from 'util'
 
-import { mockKV } from './__tests__/_helper'
+import { mockKV } from './__tests__/__utils__'
 
 global.server = setupServer()
 const randomCopy = Math.random
@@ -84,7 +84,8 @@ NodeResponse.redirect = function (url: string, status = 302) {
   return new NodeResponse('', { status, headers: { location: url } })
 }
 
-/* eslint-disable @typescript-eslint/no-namespace */
+export {}
+
 declare global {
   namespace NodeJS {
     interface Global {
