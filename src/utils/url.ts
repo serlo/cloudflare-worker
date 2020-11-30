@@ -19,6 +19,8 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
+import URL from 'core-js-pure/features/url'
+
 const contentApiParameters = [
   'contentOnly',
   'hideTopbar',
@@ -32,30 +34,38 @@ const contentApiParameters = [
   'fullWidth',
 ]
 
-export function getPathname(url: string): string {
-  return new URL(url).pathname
-}
+export class Url extends URL {
+  public get subdomain(): string {
+    return this.hostname.split('.').slice(0, -2).join('.')
+  }
 
-export function getPathnameWithoutTrailingSlash(url: string): string {
-  const pathname = getPathname(url)
+  public get domain(): string {
+    return this.hostname.split('.').slice(-2).join('.')
+  }
 
-  return pathname.endsWith('/')
-    ? pathname.substr(0, pathname.length - 1)
-    : pathname
-}
+  public set subdomain(subdomain: string) {
+    this.hostname = subdomain + (subdomain.length > 0 ? '.' : '') + this.domain
+  }
 
-export function getSubdomain(url: string): string | null {
-  const hostnameParts = new URL(url).hostname.split('.')
+  public get pathnameWithoutTrailingSlash(): string {
+    return this.pathname.endsWith('/')
+      ? this.pathname.slice(0, -1)
+      : this.pathname
+  }
 
-  return hostnameParts.length <= 2
-    ? null
-    : hostnameParts.splice(0, hostnameParts.length - 2).join('.')
-}
+  public hasContentApiParameters() {
+    return this.search
+      .slice(1)
+      .split('&')
+      .map((parameterWithValue) => parameterWithValue.split('=')[0])
+      .some((queryParameter) => contentApiParameters.includes(queryParameter))
+  }
 
-export function hasContentApiParameters(url: string) {
-  return new URL(url).search
-    .slice(1)
-    .split('&')
-    .map((parameterWithValue) => parameterWithValue.split('=')[0])
-    .some((queryParameter) => contentApiParameters.includes(queryParameter))
+  public toRedirect(status?: number) {
+    return Response.redirect(this.toString(), status)
+  }
+
+  public static fromRequest(request: Request): Url {
+    return new Url(request.url)
+  }
 }

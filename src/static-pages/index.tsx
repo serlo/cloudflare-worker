@@ -22,7 +22,6 @@
 import { Fragment, h } from 'preact'
 
 import { Template } from '../ui'
-import { getPathnameWithoutTrailingSlash, getSubdomain } from '../url-utils'
 import {
   createJsonResponse,
   createNotFoundResponse,
@@ -32,6 +31,7 @@ import {
   Instance,
   markdownToHtml,
   sanitizeHtml,
+  Url,
 } from '../utils'
 import {
   Config,
@@ -75,16 +75,14 @@ export async function staticPages(
   unrevisedConfig = defaultUnrevisedConfig,
   revisedConfig = defaultRevisedConfig
 ): Promise<Response | null> {
-  const lang = getSubdomain(request.url)
+  const url = Url.fromRequest(request)
 
-  if (lang === null) return null
-  if (!isInstance(lang)) return null
-
-  const path = getPathnameWithoutTrailingSlash(request.url)
+  if (url.subdomain === null) return null
+  if (!isInstance(url.subdomain)) return null
 
   for (const unrevisedType of Object.values(UnrevisedType)) {
-    if (path === `/${unrevisedType}`) {
-      const spec = getPage(unrevisedConfig, lang, unrevisedType)
+    if (url.pathnameWithoutTrailingSlash === `/${unrevisedType}`) {
+      const spec = getPage(unrevisedConfig, url.subdomain, unrevisedType)
       const page = spec === null ? null : await fetchContent(spec)
 
       if (page !== null) {
@@ -96,8 +94,8 @@ export async function staticPages(
   }
 
   for (const revisedType of Object.values(RevisedType)) {
-    if (path === `/${revisedType}/json`) {
-      const revisions = getRevisions(revisedConfig, lang, revisedType)
+    if (url.pathnameWithoutTrailingSlash === `/${revisedType}/json`) {
+      const revisions = getRevisions(revisedConfig, url.subdomain, revisedType)
 
       if (revisions !== null) {
         return createJsonResponse(revisions.map((x) => x.revision))
@@ -107,10 +105,12 @@ export async function staticPages(
     }
 
     const archivedRegex = `^\\/${revisedType}\\/archive\\/(\\d{4}-\\d{2}-\\d{2})$`
-    const archivedMatch = new RegExp(archivedRegex).exec(path)
+    const archivedMatch = new RegExp(archivedRegex).exec(
+      url.pathnameWithoutTrailingSlash
+    )
 
     if (archivedMatch) {
-      const revisions = getRevisions(revisedConfig, lang, revisedType)
+      const revisions = getRevisions(revisedConfig, url.subdomain, revisedType)
       const archived =
         revisions === null
           ? null
@@ -124,8 +124,8 @@ export async function staticPages(
       }
     }
 
-    if (path === `/${revisedType}/archive`) {
-      const revisions = getRevisions(revisedConfig, lang, revisedType)
+    if (url.pathnameWithoutTrailingSlash === `/${revisedType}/archive`) {
+      const revisions = getRevisions(revisedConfig, url.subdomain, revisedType)
 
       if (revisions !== null) {
         return createPreactResponse(<RevisionsOverview revisions={revisions} />)
@@ -134,8 +134,8 @@ export async function staticPages(
       }
     }
 
-    if (path === `/${revisedType}`) {
-      const revisions = getRevisions(revisedConfig, lang, revisedType)
+    if (url.pathnameWithoutTrailingSlash === `/${revisedType}`) {
+      const revisions = getRevisions(revisedConfig, url.subdomain, revisedType)
       const current = revisions === null ? null : revisions[0]
       const page = current === null ? null : await fetchContent(current)
 

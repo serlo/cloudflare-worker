@@ -19,29 +19,26 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { h } from 'preact'
+import { Instance, createJsonResponse, Url } from './utils'
 
-import {
-  createPreactResponse,
-  fetchWithCache,
-  getBasicAuthHeaders,
-  Url,
-} from '../utils'
-import { AreWeEdtrIoYet, AreWeEdtrIoYetProps } from './template'
-
-export async function edtrIoStats(request: Request) {
+export function authFrontendSectorIdentifierUriValidation(
+  request: Request
+): Response | null {
   const url = Url.fromRequest(request)
+  if (
+    url.subdomain !== '' ||
+    url.pathname !== '/auth/frontend-redirect-uris.json'
+  ) {
+    return null
+  }
+  const redirectUris = [
+    ...Object.values(Instance).map((instance) => {
+      return `https://${instance}.${global.DOMAIN}/api/auth/callback`
+    }),
+    ...(global.ALLOW_AUTH_FROM_LOCALHOST === 'true'
+      ? ['http://localhost:3000/api/auth/callback']
+      : []),
+  ]
 
-  if (url.subdomain !== 'are-we-edtr-io-yet') return null
-
-  url.subdomain = 'de'
-  url.pathname = '/entities/are-we-edtr-io-yet'
-
-  const data = await fetchWithCache(url.href, {
-    headers: getBasicAuthHeaders(),
-  })
-
-  return createPreactResponse(
-    <AreWeEdtrIoYet data={(await data.json()) as AreWeEdtrIoYetProps['data']} />
-  )
+  return createJsonResponse(redirectUris)
 }
