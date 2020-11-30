@@ -25,7 +25,7 @@ import { authFrontendSectorIdentifierUriValidation } from './auth'
 import { frontendProxy } from './frontend-proxy'
 import { maintenanceMode } from './maintenance'
 import { staticPages } from './static-pages'
-import { Url, decodePath, getPathInfo, isInstance } from './utils'
+import { Url, decodePath, getPathInfo, isInstance, Instance } from './utils'
 
 addEventListener('fetch', (event: Event) => {
   const e = event as FetchEvent
@@ -67,21 +67,21 @@ async function redirects(request: Request) {
   }
 
   if (
-    url.subdomain === 'de' &&
+    url.subdomain === Instance.De &&
     url.pathnameWithoutTrailingSlash === '/labschool'
   ) {
     return url.change({ subdomain: 'labschool', pathname: '/' }).toRedirect(301)
   }
 
   if (
-    url.subdomain === 'de' &&
+    url.subdomain === Instance.De &&
     url.pathnameWithoutTrailingSlash === '/hochschule'
   ) {
     return url.change({ pathname: '/mathe/universitaet/44323' }).toRedirect(301)
   }
 
   if (
-    url.subdomain === 'de' &&
+    url.subdomain === Instance.De &&
     url.pathnameWithoutTrailingSlash === '/beitreten'
   ) {
     return Response.redirect(
