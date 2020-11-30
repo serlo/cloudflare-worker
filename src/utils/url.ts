@@ -38,25 +38,25 @@ const contentApiParameters = [
 ]
 
 export class Url extends URL {
-  get subdomain(): string {
+  public get subdomain(): string {
     return this.hostname.split('.').slice(0, -2).join('.')
   }
 
-  get domain(): string {
+  public get domain(): string {
     return this.hostname.split('.').slice(-2).join('.')
   }
 
-  set subdomain(subdomain: string) {
+  public set subdomain(subdomain: string) {
     this.hostname = subdomain + (subdomain.length > 0 ? '.' : '') + this.domain
   }
 
-  get pathnameWithoutTrailingSlash(): string {
+  public get pathnameWithoutTrailingSlash(): string {
     return this.pathname.endsWith('/')
       ? this.pathname.slice(0, -1)
       : this.pathname
   }
 
-  change(changes: { [K in UrlProperties]?: string }): Url {
+  public change(changes: { [K in UrlProperties]?: string }): Url {
     for (const prop of UrlProperties) {
       const value = changes[prop]
 
@@ -66,7 +66,7 @@ export class Url extends URL {
     return this
   }
 
-  hasContentApiParameters() {
+  public hasContentApiParameters() {
     return this.search
       .slice(1)
       .split('&')
@@ -74,11 +74,11 @@ export class Url extends URL {
       .some((queryParameter) => contentApiParameters.includes(queryParameter))
   }
 
-  static fromRequest(request: Request): Url {
-    return new Url(request.url)
+  public toRedirect(status?: number) {
+    return Response.redirect(this.toString(), status)
   }
 
-  toRedirect(status?: number) {
-    return Response.redirect(this.toString(), status)
+  public static fromRequest(request: Request): Url {
+    return new Url(request.url)
   }
 }
