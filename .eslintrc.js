@@ -68,7 +68,10 @@ module.exports = {
         optionalDependencies: false,
       },
     ],
-    'import/no-internal-modules': ['error', { allow: ['msw/node'] }],
+    'import/no-internal-modules': [
+      'error',
+      { allow: ['msw/node', 'core-js-pure/features/*'] },
+    ],
     'import/no-mutable-exports': 'error',
     'import/no-self-import': 'error',
     'import/no-unassigned-import': 'error',

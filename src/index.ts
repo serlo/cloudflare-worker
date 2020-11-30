@@ -25,12 +25,7 @@ import { authFrontendSectorIdentifierUriValidation } from './auth'
 import { frontendProxy } from './frontend-proxy'
 import { maintenanceMode } from './maintenance'
 import { staticPages } from './static-pages'
-import {
-  getPathnameWithoutTrailingSlash,
-  getSubdomain,
-  getPathname,
-} from './url-utils'
-import { decodePath, getPathInfo, isInstance } from './utils'
+import { Url, decodePath, getPathInfo, isInstance, Instance } from './utils'
 
 addEventListener('fetch', (event: Event) => {
   const e = event as FetchEvent
@@ -53,90 +48,77 @@ export async function handleRequest(request: Request) {
   )
 }
 
-// eslint-disable-next-line @typescript-eslint/require-await
 async function enforceHttps(request: Request) {
-  if (getSubdomain(request.url) === 'pacts') return null
-  const url = new URL(request.url)
+  const url = Url.fromRequest(request)
+  if (url.subdomain === 'pacts') return null
   if (url.protocol !== 'http:') return null
   url.protocol = 'https:'
-  return Response.redirect(url.href)
+  return Promise.resolve(url.toRedirect())
 }
 
 async function redirects(request: Request) {
-  const subdomain = getSubdomain(request.url)
-  const path = getPathname(request.url)
-  const pathWithoutSlash = getPathnameWithoutTrailingSlash(request.url)
+  const url = Url.fromRequest(request)
 
-  if (subdomain === 'start') {
+  if (url.subdomain === 'start') {
     return Response.redirect(
       'https://docs.google.com/document/d/1qsgkXWNwC-mcgroyfqrQPkZyYqn7m1aimw2gwtDTmpM/',
       301
     )
   }
 
-  if (subdomain === 'de' && pathWithoutSlash === '/labschool') {
-    const url = new URL(request.url)
-
-    url.host = url.host.replace('de.', 'labschool.')
+  if (
+    url.subdomain === Instance.De &&
+    url.pathnameWithoutTrailingSlash === '/labschool'
+  ) {
+    url.subdomain = 'labschool'
     url.pathname = '/'
-
-    return Response.redirect(url.href, 301)
+    return url.toRedirect(301)
   }
 
-  if (subdomain === 'de' && pathWithoutSlash === '/hochschule') {
-    const url = new URL(request.url)
-
+  if (
+    url.subdomain === Instance.De &&
+    url.pathnameWithoutTrailingSlash === '/hochschule'
+  ) {
     url.pathname = '/mathe/universitaet/44323'
-
-    return Response.redirect(url.href, 301)
+    return url.toRedirect(301)
   }
 
-  if (subdomain === 'de' && pathWithoutSlash === '/beitreten') {
+  if (
+    url.subdomain === Instance.De &&
+    url.pathnameWithoutTrailingSlash === '/beitreten'
+  ) {
     return Response.redirect(
       'https://docs.google.com/forms/d/e/1FAIpQLSdEoyCcDVP_G_-G_u642S768e_sxz6wO6rJ3tad4Hb9z7Slwg/viewform',
       301
     )
   }
 
-  if (subdomain === 'www') {
-    const url = new URL(request.url)
-
-    url.host = url.host.replace('www.', 'de.')
-
-    return Response.redirect(url.href)
+  if (url.subdomain === 'www' || url.subdomain === '') {
+    url.subdomain = 'de'
+    return url.toRedirect()
   }
 
-  if (subdomain === null) {
-    const url = new URL(request.url)
-
-    url.host = `de.${url.host}`
-
-    return Response.redirect(url.href)
-  }
-
-  if (isInstance(subdomain)) {
-    const pathInfo = await getPathInfo(subdomain, path)
+  if (isInstance(url.subdomain)) {
+    const pathInfo = await getPathInfo(url.subdomain, url.pathname)
 
     // TODO: Remove decodeURIComponent() when we the API returns an
     // URL encoded alias
     if (
       request.headers.get('X-Requested-With') !== 'XMLHttpRequest' &&
       pathInfo !== null &&
-      decodePath(path) != decodePath(pathInfo.currentPath)
+      decodePath(url.pathname) != decodePath(pathInfo.currentPath)
     ) {
-      const url = new URL(request.url)
-
       url.pathname = pathInfo.currentPath
-
-      return Response.redirect(url.href, 301)
+      return url.toRedirect(301)
     }
   }
 }
 
 async function semanticFileNames(request: Request) {
-  if (getSubdomain(request.url) !== 'assets') return null
+  const url = Url.fromRequest(request)
 
-  const url = new URL(request.url)
+  if (url.subdomain !== 'assets') return null
+
   url.host = 'assets.serlo.org'
 
   const re = /^\/(legacy\/|)((?!legacy)\w+)\/([\w\-+]+)\.(\w+)$/
@@ -153,9 +135,10 @@ async function semanticFileNames(request: Request) {
 }
 
 async function packages(request: Request) {
-  if (getSubdomain(request.url) !== 'packages') return null
+  const url = Url.fromRequest(request)
 
-  const url = new URL(request.url)
+  if (url.subdomain !== 'packages') return null
+
   url.host = 'packages.serlo.org'
 
   const re = /([^/]+)\//
