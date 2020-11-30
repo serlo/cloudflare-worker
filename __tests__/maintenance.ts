@@ -22,7 +22,11 @@
 import { DateTime } from 'luxon'
 
 import { maintenanceMode } from '../src/maintenance'
-import { expectContentTypeIsHtml, expectContainsText, mockKV } from './_helper'
+import {
+  expectContentTypeIsHtml,
+  expectContainsText,
+  mockKV,
+} from './__utils__'
 
 describe('Maintenance mode', () => {
   test('Disabled (no maintenance planned)', async () => {

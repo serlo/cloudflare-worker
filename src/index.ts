@@ -25,7 +25,7 @@ import { authFrontendSectorIdentifierUriValidation } from './auth'
 import { frontendProxy } from './frontend-proxy'
 import { maintenanceMode } from './maintenance'
 import { staticPages } from './static-pages'
-import { Url, decodePath, getPathInfo, isInstance, Instance } from './utils'
+import { Url, getPathInfo, isInstance, Instance } from './utils'
 
 addEventListener('fetch', (event: Event) => {
   const e = event as FetchEvent
@@ -100,13 +100,10 @@ async function redirects(request: Request) {
 
   if (isInstance(url.subdomain)) {
     const pathInfo = await getPathInfo(url.subdomain, url.pathname)
-
-    // TODO: Remove decodeURIComponent() when we the API returns an
-    // URL encoded alias
     if (
       request.headers.get('X-Requested-With') !== 'XMLHttpRequest' &&
       pathInfo !== null &&
-      decodePath(url.pathname) != decodePath(pathInfo.currentPath)
+      url.pathname != pathInfo.currentPath
     ) {
       url.pathname = pathInfo.currentPath
       return url.toRedirect(301)
