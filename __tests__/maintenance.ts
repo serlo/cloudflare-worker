@@ -21,18 +21,26 @@
  */
 import { DateTime } from 'luxon'
 
-import { maintenanceMode } from '../src/maintenance'
+import { handleRequest } from '../src'
 import {
   expectContentTypeIsHtml,
   expectContainsText,
   mockKV,
+  mockHttpGet,
+  returnsText,
 } from './__utils__'
+import { setupProbabilityFor, Backend } from './frontend-proxy'
 
 describe('Maintenance mode', () => {
+  beforeEach(() => {
+    setupProbabilityFor(Backend.Legacy)
+    mockHttpGet('https://de.serlo.org/', returnsText('Startseite'))
+  })
+
   test('Disabled (no maintenance planned)', async () => {
     mockKV('MAINTENANCE_KV', {})
 
-    expect(await handleUrl('https://de.serlo.org')).toBeNull()
+    await expectNoMaintenanceMode()
   })
 
   test('Disabled (before scheduled maintenance)', async () => {
@@ -43,7 +51,7 @@ describe('Maintenance mode', () => {
     }
     mockKV('MAINTENANCE_KV', { enabled: JSON.stringify(value) })
 
-    expect(await handleUrl('https://de.serlo.org')).toBeNull()
+    await expectNoMaintenanceMode()
   })
 
   test('Disabled (after scheduled maintenance)', async () => {
@@ -54,7 +62,7 @@ describe('Maintenance mode', () => {
     }
     mockKV('MAINTENANCE_KV', { enabled: JSON.stringify(value) })
 
-    expect(await handleUrl('https://de.serlo.org')).toBeNull()
+    await expectNoMaintenanceMode()
   })
 
   test('Enabled (de, w/ end)', async () => {
@@ -136,7 +144,7 @@ describe('Maintenance mode', () => {
     }
     mockKV('MAINTENANCE_KV', { enabled: JSON.stringify(value) })
 
-    expect(await handleUrl('https://de.serlo.org')).toBeNull()
+    await expectNoMaintenanceMode()
   })
 
   test('Enabled (different subdomain, w/o end)', async () => {
@@ -146,10 +154,16 @@ describe('Maintenance mode', () => {
     }
     mockKV('MAINTENANCE_KV', { enabled: JSON.stringify(value) })
 
-    expect(await handleUrl('https://de.serlo.org')).toBeNull()
+    await expectNoMaintenanceMode()
   })
 })
 
+async function expectNoMaintenanceMode() {
+  const response = await handleUrl('https://de.serlo.org/')
+
+  expect(await response.text()).toBe('Startseite')
+}
+
 async function handleUrl(url: string): Promise<Response> {
-  return (await maintenanceMode(new Request(url))) as Response
+  return await handleRequest(new Request(url))
 }
