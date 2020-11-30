@@ -22,7 +22,6 @@
 import { rest } from 'msw'
 import * as R from 'ramda'
 
-import { Uuid } from './database'
 import { RestResolver } from './utils'
 
 export function givenApi(resolver: RestResolver) {
@@ -48,18 +47,10 @@ export function defaultApiServer(): RestResolver {
     if (path == null)
       return res(ctx.status(400, 'variable "alias" is not defined'))
 
-    let result: Uuid | undefined
-
-    const idMatch = /\/(\d+)/.exec(path)
-
-    if (idMatch) {
-      const id = parseInt(idMatch[1])
-      result = global.uuids.find((uuid) => uuid.id === id)
-    } else {
-      result = global.uuids.find(
-        (uuid) => uuid.alias === path || uuid.oldAlias === path
-      )
-    }
+    const id = getIdFromPath(path)
+    const result = id
+      ? global.uuids.find((u) => u.id === id)
+      : global.uuids.find((u) => u.alias === path || u.oldAlias === path)
 
     if (result === undefined) {
       const statusText = `Nothing found for "${path}"`
@@ -74,4 +65,19 @@ export function defaultApiServer(): RestResolver {
 
     return res(ctx.json({ data: { uuid } }))
   }
+}
+
+function getIdFromPath(path: string): number | null {
+  const regexes = [
+    new RegExp('^/(?<id>\\d+)$'),
+    new RegExp('(?<subject>[^/]+/)?(?<id>\\d+)/(?<title>[^/]*)$'),
+  ]
+
+  for (const regex of regexes) {
+    const match = regex.exec(path)
+
+    if (match) return parseInt(match?.groups?.id ?? '')
+  }
+
+  return null
 }
