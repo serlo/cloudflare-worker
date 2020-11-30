@@ -25,7 +25,7 @@ import { authFrontendSectorIdentifierUriValidation } from './auth'
 import { frontendProxy } from './frontend-proxy'
 import { maintenanceMode } from './maintenance'
 import { staticPages } from './static-pages'
-import { Url, decodePath, getPathInfo, isInstance, Instance } from './utils'
+import { Url, getPathInfo, isInstance, Instance } from './utils'
 
 addEventListener('fetch', (event: Event) => {
   const e = event as FetchEvent
