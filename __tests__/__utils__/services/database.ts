@@ -39,4 +39,5 @@ interface AbstractUuid<Typename extends string> {
   id?: number
   alias?: string
   oldAlias?: string
+  instance?: 'de' | 'en' | 'ta'
 }
