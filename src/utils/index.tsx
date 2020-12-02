@@ -76,6 +76,9 @@ export async function getPathInfo(
   lang: Instance,
   path: string
 ): Promise<PathInfo | null> {
+  if (path === '/user/me' || path === '/user/public')
+    return { typename: 'User', currentPath: path }
+
   const useCache = global.ENABLE_PATH_INFO_CACHE === 'true'
 
   const cacheKey = await toCacheKey(`/${lang}${path}`)
