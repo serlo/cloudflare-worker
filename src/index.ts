@@ -22,7 +22,11 @@
 import { api } from './api'
 import { edtrIoStats } from './are-we-edtr-io-yet'
 import { authFrontendSectorIdentifierUriValidation } from './auth'
-import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
+import {
+  frontendProxy,
+  frontendSpecialPaths,
+  specialPathRegex,
+} from './frontend-proxy'
 import { maintenanceMode } from './maintenance'
 import { staticPages } from './static-pages'
 import { Url, getPathInfo, isInstance, Instance } from './utils'
@@ -99,15 +103,21 @@ async function redirects(request: Request) {
     return url.toRedirect()
   }
 
-  if (isInstance(url.subdomain)) {
+  if (
+    isInstance(url.subdomain) &&
+    !specialPathRegex.some((regex) => regex.exec(url.pathname) !== null) &&
+    request.headers.get('X-Requested-With') !== 'XMLHttpRequest'
+  ) {
     const pathInfo = await getPathInfo(url.subdomain, url.pathname)
-    if (
-      request.headers.get('X-Requested-With') !== 'XMLHttpRequest' &&
-      pathInfo !== null &&
-      url.pathname != pathInfo.currentPath
-    ) {
-      url.pathname = pathInfo.currentPath
-      return url.toRedirect(301)
+
+    if (pathInfo !== null) {
+      const newUrl = new Url(url.href)
+      const { currentPath, instance } = pathInfo
+
+      if (instance && url.subdomain !== instance) newUrl.subdomain = instance
+      if (url.pathname !== currentPath) newUrl.pathname = currentPath
+
+      if (newUrl.href !== url.href) return newUrl.toRedirect(301)
     }
   }
 }

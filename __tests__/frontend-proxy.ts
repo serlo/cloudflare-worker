@@ -29,12 +29,9 @@ import {
   givenApi,
   returnsMalformedJson,
   returnsJson,
+  Backend,
+  setupProbabilityFor,
 } from './__utils__'
-
-export enum Backend {
-  Frontend = 'frontend',
-  Legacy = 'legacy',
-}
 
 describe('handleRequest()', () => {
   beforeEach(() => {
@@ -120,6 +117,33 @@ describe('handleRequest()', () => {
       })
     })
 
+    test('prepends language prefix for special path /spenden', async () => {
+      setupProbabilityFor(Backend.Frontend)
+
+      await expectResponseFrom({
+        backend: 'https://frontend.serlo.org/en/spenden',
+        request: 'https://en.serlo.org/spenden',
+      })
+    })
+
+    test('prepends language prefix for special path /user/notifications', async () => {
+      setupProbabilityFor(Backend.Frontend)
+
+      await expectResponseFrom({
+        backend: 'https://frontend.serlo.org/en/user/notifications',
+        request: 'https://en.serlo.org/user/notifications',
+      })
+    })
+
+    test('prepends language prefix for special path /license/detail/1', async () => {
+      setupProbabilityFor(Backend.Frontend)
+
+      await expectResponseFrom({
+        backend: 'https://frontend.serlo.org/en/license/detail/1',
+        request: 'https://en.serlo.org/license/detail/1',
+      })
+    })
+
     test('removes trailing slashes from the frontend url', async () => {
       setupProbabilityFor(Backend.Frontend)
 
@@ -131,7 +155,6 @@ describe('handleRequest()', () => {
 
     describe('special paths do not get a language prefix', () => {
       test.each([
-        'https://de.serlo.org/spenden',
         'https://de.serlo.org/_next/script.js',
         'https://de.serlo.org/_assets/image.png',
         'https://de.serlo.org/api/frontend/privacy',
@@ -185,16 +208,6 @@ describe('handleRequest()', () => {
 
         test('does not set cookie with random number', () => {
           expect(response.headers.get('Set-Cookie')).toBeNull()
-        })
-      })
-
-      test('/spenden go to legacy backend', async () => {
-        const request = new Request('https://de.serlo.org/spenden')
-        request.headers.set('Cookie', 'authenticated=1')
-
-        await expectResponseFrom({
-          backend: 'https://de.serlo.org/spenden',
-          request,
         })
       })
     })
@@ -353,31 +366,67 @@ describe('handleRequest()', () => {
       })
     })
 
-    test('requests to /spenden always resolve to frontend', async () => {
+    test('requests to /user/notifications always resolve to frontend', async () => {
       await expectResponseFrom({
-        backend: 'https://frontend.serlo.org/spenden',
-        request: 'https://de.serlo.org/spenden',
+        backend: 'https://frontend.serlo.org/user/notifications',
+        request: 'https://de.serlo.org/user/notifications',
       })
     })
 
     describe('special paths where the cookie determines the backend', () => {
-      describe.each(['https://de.serlo.org/search', 'https://de.serlo.org/'])(
-        'URL = %p',
-        (url) => {
-          test.each([Backend.Frontend, Backend.Legacy])(
-            'backend = %p',
-            async (backend) => {
-              setupProbabilityFor(backend)
-              Math.random = jest.fn().mockReturnValue(0.5)
+      describe.each([
+        'https://de.serlo.org/',
+        'https://de.serlo.org/search',
+        'https://de.serlo.org/spenden',
+        'https://de.serlo.org/license/detail/1',
+      ])('URL = %p', (url) => {
+        test.each([Backend.Frontend, Backend.Legacy])(
+          'backend = %p',
+          async (backend) => {
+            // Make sure that there is no redirect before the frontend is
+            // resolved
+            givenUuid({
+              __typename: 'Page',
+              oldAlias: '/spenden',
+              alias: '/21565/spenden',
+            })
+            givenUuid({
+              __typename: 'Page',
+              oldAlias: '/search',
+              alias: '/21565/spenden',
+            })
 
-              await expectResponseFrom({
-                backend: getUrlFor(backend, url),
-                request: url,
-              })
-            }
-          )
-        }
-      )
+            setupProbabilityFor(backend)
+            Math.random = jest.fn().mockReturnValue(0.5)
+
+            await expectResponseFrom({
+              backend: getUrlFor(backend, url),
+              request: url,
+            })
+          }
+        )
+      })
+    })
+
+    describe('special paths where the cookie determines the backend when USER is in FRONTEND_ALLOWED_TYPES', () => {
+      describe.each([
+        'https://de.serlo.org/user/public',
+        'https://de.serlo.org/user/me',
+      ])('URL = %p', (url) => {
+        test.each([Backend.Frontend, Backend.Legacy])(
+          'backend = %p',
+          async (backend) => {
+            global.FRONTEND_ALLOWED_TYPES = '["User"]'
+            setupProbabilityFor(backend)
+            Math.random = jest.fn().mockReturnValue(0.5)
+
+            await expectResponseFrom({
+              backend: getUrlFor(backend, url),
+              request: url,
+            })
+          }
+        )
+      })
     })
 
     describe('forwards authentication requests to legacy backend', () => {
@@ -441,7 +490,6 @@ describe('handleRequest()', () => {
 
     describe('Predetermined special paths do not set a cookie', () => {
       test.each([
-        'https://de.serlo.org/spenden',
         'https://de.serlo.org/_next/script.js',
         'https://de.serlo.org/_assets/image.png',
         'https://de.serlo.org/api/frontend/privacy',
@@ -570,10 +618,6 @@ describe('handleRequest()', () => {
     })
   })
 })
-
-export function setupProbabilityFor(backend: Backend) {
-  global.FRONTEND_PROBABILITY = backend === Backend.Frontend ? '1' : '0'
-}
 
 async function expectResponseFrom({
   backend,

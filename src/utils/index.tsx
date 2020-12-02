@@ -57,7 +57,10 @@ export function getCookieValue(
         .map((c) => c.substring(name.length + 1))[0] ?? null
 }
 
-const PathInfo = t.type({ typename: t.string, currentPath: t.string })
+const PathInfo = t.intersection([
+  t.type({ typename: t.string, currentPath: t.string }),
+  t.partial({ instance: t.string }),
+])
 type PathInfo = t.TypeOf<typeof PathInfo>
 
 const ApiResult = t.type({
@@ -66,6 +69,7 @@ const ApiResult = t.type({
       t.type({ __typename: t.string }),
       t.partial({
         alias: t.string,
+        instance: t.string,
         pages: t.array(t.type({ alias: t.string })),
       }),
     ]),
@@ -76,6 +80,9 @@ export async function getPathInfo(
   lang: Instance,
   path: string
 ): Promise<PathInfo | null> {
+  if (path === '/user/me' || path === '/user/public')
+    return { typename: 'User', currentPath: path }
+
   const useCache = global.ENABLE_PATH_INFO_CACHE === 'true'
 
   const cacheKey = await toCacheKey(`/${lang}${path}`)
@@ -97,6 +104,12 @@ export async function getPathInfo(
         __typename
         ... on AbstractUuid {
           alias
+        }
+        ... on TaxonomyTerm {
+          instance
+        }
+        ... on AbstractRepository {
+          instance
         }
         ... on Course {
           pages {
@@ -132,7 +145,11 @@ export async function getPathInfo(
       ? uuid.pages[0].alias
       : uuid.alias ?? path
 
-  const result = { typename: uuid.__typename, currentPath }
+  const result = {
+    typename: uuid.__typename,
+    currentPath,
+    instance: uuid.instance,
+  }
 
   if (useCache) {
     await global.PATH_INFO_KV.put(cacheKey, JSON.stringify(result), {

@@ -21,6 +21,13 @@
  */
 import { Url, getCookieValue, isInstance, Instance, getPathInfo } from './utils'
 
+export const specialPathRegex = [
+  /^\/$/,
+  /^\/search$/,
+  /^\/spenden$/,
+  /^\/license\/detail\/\d+$/,
+]
+
 export async function frontendSpecialPaths(
   request: Request
 ): Promise<Response | null> {
@@ -42,6 +49,14 @@ export async function frontendSpecialPaths(
     url.pathname.startsWith('/api/frontend/')
   )
     return await fetchBackend({ ...config, useFrontend: true, request })
+
+  if (url.pathname == '/user/notifications')
+    return await fetchBackend({
+      ...config,
+      useFrontend: true,
+      request,
+      pathPrefix: config.instance,
+    })
 
   if (
     url.pathname.startsWith('/auth/activate/') ||
@@ -76,10 +91,7 @@ export async function frontendProxy(
   )
     return await fetchBackend({ ...config, useFrontend: false, request })
 
-  if (url.pathname === '/spenden')
-    return await fetchBackend({ ...config, useFrontend: true, request })
-
-  if (url.pathname !== '/' && url.pathname !== '/search') {
+  if (!specialPathRegex.some((regex) => regex.exec(url.pathname) !== null)) {
     const pathInfo = await getPathInfo(config.instance, url.pathname)
     const typename = pathInfo?.typename ?? null
 
