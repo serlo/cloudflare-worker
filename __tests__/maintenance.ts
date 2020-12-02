@@ -28,8 +28,9 @@ import {
   mockKV,
   mockHttpGet,
   returnsText,
+  setupProbabilityFor,
+  Backend,
 } from './__utils__'
-import { setupProbabilityFor, Backend } from './frontend-proxy'
 
 describe('Maintenance mode', () => {
   beforeEach(() => {
