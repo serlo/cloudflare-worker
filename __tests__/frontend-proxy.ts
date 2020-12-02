@@ -126,6 +126,15 @@ describe('handleRequest()', () => {
       })
     })
 
+    test('prepends language prefix for special path /user/notifications', async () => {
+      setupProbabilityFor(Backend.Frontend)
+
+      await expectResponseFrom({
+        backend: 'https://frontend.serlo.org/en/user/notifications',
+        request: 'https://en.serlo.org/user/notifications',
+      })
+    })
+
     test('removes trailing slashes from the frontend url', async () => {
       setupProbabilityFor(Backend.Frontend)
 
@@ -345,6 +354,13 @@ describe('handleRequest()', () => {
       await expectResponseFrom({
         backend: 'https://frontend.serlo.org/_assets/img/picture.svg',
         request: 'https://de.serlo.org/_assets/img/picture.svg',
+      })
+    })
+
+    test('requests to /user/notifications always resolve to frontend', async () => {
+      await expectResponseFrom({
+        backend: 'https://frontend.serlo.org/user/notifications',
+        request: 'https://de.serlo.org/user/notifications',
       })
     })
 
