@@ -29,12 +29,9 @@ import {
   givenApi,
   returnsMalformedJson,
   returnsJson,
+  Backend,
+  setupProbabilityFor,
 } from './__utils__'
-
-export enum Backend {
-  Frontend = 'frontend',
-  Legacy = 'legacy',
-}
 
 describe('handleRequest()', () => {
   beforeEach(() => {
@@ -570,10 +567,6 @@ describe('handleRequest()', () => {
     })
   })
 })
-
-export function setupProbabilityFor(backend: Backend) {
-  global.FRONTEND_PROBABILITY = backend === Backend.Frontend ? '1' : '0'
-}
 
 async function expectResponseFrom({
   backend,
