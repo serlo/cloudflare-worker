@@ -22,7 +22,11 @@
 import { api } from './api'
 import { edtrIoStats } from './are-we-edtr-io-yet'
 import { authFrontendSectorIdentifierUriValidation } from './auth'
-import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
+import {
+  frontendProxy,
+  frontendSpecialPaths,
+  specialPaths,
+} from './frontend-proxy'
 import { maintenanceMode } from './maintenance'
 import { staticPages } from './static-pages'
 import { Url, getPathInfo, isInstance, Instance } from './utils'
@@ -99,7 +103,7 @@ async function redirects(request: Request) {
     return url.toRedirect()
   }
 
-  if (isInstance(url.subdomain)) {
+  if (isInstance(url.subdomain) && !specialPaths.includes(url.pathname)) {
     const pathInfo = await getPathInfo(url.subdomain, url.pathname)
     if (
       request.headers.get('X-Requested-With') !== 'XMLHttpRequest' &&
