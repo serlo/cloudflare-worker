@@ -135,6 +135,15 @@ describe('handleRequest()', () => {
       })
     })
 
+    test('prepends language prefix for special path /license/detail/1', async () => {
+      setupProbabilityFor(Backend.Frontend)
+
+      await expectResponseFrom({
+        backend: 'https://frontend.serlo.org/en/license/detail/1',
+        request: 'https://en.serlo.org/license/detail/1',
+      })
+    })
+
     test('removes trailing slashes from the frontend url', async () => {
       setupProbabilityFor(Backend.Frontend)
 
@@ -369,6 +378,7 @@ describe('handleRequest()', () => {
         'https://de.serlo.org/',
         'https://de.serlo.org/search',
         'https://de.serlo.org/spenden',
+        'https://de.serlo.org/license/detail/1',
       ])('URL = %p', (url) => {
         test.each([Backend.Frontend, Backend.Legacy])(
           'backend = %p',
