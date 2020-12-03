@@ -22,7 +22,7 @@
 
 import { handleRequest } from '../src'
 import {
-  mockKV,
+  createKV,
   mockHttpGet,
   returnsText,
   givenUuid,
@@ -248,7 +248,7 @@ describe('Semantic file names', () => {
 
 describe('Packages', () => {
   test('packages.serlo.org/<package>/<filePath>', async () => {
-    mockKV('PACKAGES_KV', { foo: 'foo@1.0.0' })
+    global.PACKAGES_KV = createKV( { foo: 'foo@1.0.0' })
     mockHttpGet(
       'https://packages.serlo.org/foo@1.0.0/bar',
       returnsText('content')
@@ -260,7 +260,7 @@ describe('Packages', () => {
   })
 
   test('packages.serlo.org/<package>/<filePath> (invalid)', async () => {
-    mockKV('PACKAGES_KV', { foo: 'foo@1.0.0' })
+    global.PACKAGES_KV = createKV({ foo: 'foo@1.0.0' })
     mockHttpGet('https://packages.serlo.org/foobar/bar', returnsText('content'))
 
     const response = await handleUrl('https://packages.serlo.local/foobar/bar')
