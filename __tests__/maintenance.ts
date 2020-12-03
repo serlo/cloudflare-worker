@@ -38,7 +38,7 @@ describe('Maintenance mode', () => {
   })
 
   test('Disabled (no maintenance planned)', async () => {
-    global.MAINTENANCE_KV = createKV({})
+    global.MAINTENANCE_KV = createKV()
 
     await expectNoMaintenanceMode()
   })
