@@ -248,7 +248,7 @@ describe('Semantic file names', () => {
 
 describe('Packages', () => {
   test('packages.serlo.org/<package>/<filePath>', async () => {
-    global.PACKAGES_KV = createKV( { foo: 'foo@1.0.0' })
+    global.PACKAGES_KV = createKV({ foo: 'foo@1.0.0' })
     mockHttpGet(
       'https://packages.serlo.org/foo@1.0.0/bar',
       returnsText('content')
