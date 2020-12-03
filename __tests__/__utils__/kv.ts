@@ -20,10 +20,8 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-type KV_NAMES = 'MAINTENANCE_KV' | 'PACKAGES_KV' | 'PATH_INFO_KV'
-
-export function mockKV(name: KV_NAMES, values: Record<string, string>) {
-  global[name] = {
+export function createKV(values: Record<string, string> = {}) {
+  return {
     async get(key: string): Promise<string | null> {
       return Promise.resolve(values[key] ?? null)
     },

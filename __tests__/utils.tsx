@@ -41,7 +41,7 @@ import {
   expectContentTypeIsHtml,
   expectIsJsonResponse,
   expectIsNotFoundResponse,
-  mockKV,
+  createKV,
   mockHttpGet,
   returnsText,
   givenApi,
@@ -91,7 +91,7 @@ describe('getCookieValue()', () => {
 
 describe('getPathInfo()', () => {
   beforeEach(() => {
-    mockKV('PATH_INFO_KV', {})
+    global.PATH_INFO_KV = createKV()
   })
 
   describe('returns null', () => {
