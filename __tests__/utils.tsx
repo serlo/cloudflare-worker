@@ -41,7 +41,6 @@ import {
   expectContentTypeIsHtml,
   expectIsJsonResponse,
   expectIsNotFoundResponse,
-  createKV,
   mockHttpGet,
   returnsText,
   givenApi,
@@ -90,10 +89,6 @@ describe('getCookieValue()', () => {
 })
 
 describe('getPathInfo()', () => {
-  beforeEach(() => {
-    global.PATH_INFO_KV = createKV()
-  })
-
   describe('returns null', () => {
     test('when there was an error with the api call', async () => {
       givenApi(hasInternalServerError())
