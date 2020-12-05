@@ -25,7 +25,13 @@ import { authFrontendSectorIdentifierUriValidation } from './auth'
 import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
 import { maintenanceMode } from './maintenance'
 import { staticPages } from './static-pages'
-import { Url, getPathInfo, isInstance, Instance } from './utils'
+import {
+  Url,
+  getPathInfo,
+  isInstance,
+  Instance,
+  createNotFoundResponse,
+} from './utils'
 
 addEventListener('fetch', (event: Event) => {
   const e = event as FetchEvent
@@ -72,6 +78,8 @@ async function redirects(request: Request) {
       return Response.redirect('https://meet.google.com/vtk-ncrc-rdp')
     } else if (url.pathname === '/dev') {
       return Response.redirect('https://meet.google.com/rci-pize-jow')
+    } else {
+      return createNotFoundResponse()
     }
   }
 
