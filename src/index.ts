@@ -60,18 +60,11 @@ async function enforceHttps(request: Request) {
 async function redirects(request: Request) {
   const url = Url.fromRequest(request)
 
-
-  if (url.subdomain === 'meet'  && url.pathname === '/') {
-    return Response.redirect(
-      'https://meet.google.com/vtk-ncrc-rdp',
-      302
-    )
+  if (url.subdomain === 'meet' && url.pathname === '/') {
+    return Response.redirect('https://meet.google.com/vtk-ncrc-rdp', 302)
   }
-  if (url.subdomain === 'meet' &&   url.pathname === '/dev') {
-    return Response.redirect(
-      'https://meet.google.com/rci-pize-jow',
-      302
-    )
+  if (url.subdomain === 'meet' && url.pathname === '/dev') {
+    return Response.redirect('https://meet.google.com/rci-pize-jow', 302)
   }
 
   if (url.subdomain === 'start') {
