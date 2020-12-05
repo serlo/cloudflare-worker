@@ -30,6 +30,7 @@ import {
   returnsMalformedJson,
   givenStats,
   defaultStatsServer,
+  expectIsNotFoundResponse,
 } from './__utils__'
 
 describe('Enforce HTTPS', () => {
@@ -57,17 +58,26 @@ describe('Enforce HTTPS', () => {
 })
 
 describe('Redirects', () => {
-  test('meet.serlo.org', async () => {
-    const response = await handleUrl('https://meet.serlo.local/')
+  describe('meet.serlo.org', () => {
+    test('meet.serlo.org', async () => {
+      const response = await handleUrl('https://meet.serlo.local/')
 
-    const target = 'https://meet.google.com/vtk-ncrc-rdp'
-    expectToBeRedirectTo(response, target, 302)
-  })
-  test('meet.serlo.org/dev', async () => {
-    const response = await handleUrl('https://meet.serlo.local/dev')
+      const target = 'https://meet.google.com/vtk-ncrc-rdp'
+      expectToBeRedirectTo(response, target, 302)
+    })
 
-    const target = 'https://meet.google.com/rci-pize-jow'
-    expectToBeRedirectTo(response, target, 302)
+    test('meet.serlo.org/dev', async () => {
+      const response = await handleUrl('https://meet.serlo.local/dev')
+
+      const target = 'https://meet.google.com/rci-pize-jow'
+      expectToBeRedirectTo(response, target, 302)
+    })
+
+    test('returns 404 when meet room is not defined', async () => {
+      const response = await handleUrl('https://meet.serlo.local/def')
+
+      await expectIsNotFoundResponse(response)
+    })
   })
 
   test('start.serlo.org', async () => {
