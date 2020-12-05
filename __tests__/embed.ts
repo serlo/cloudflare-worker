@@ -19,22 +19,30 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { rest } from 'msw'
+import { handleRequest } from '../src'
+import {mockHttpGet} from './__utils__'
 
-import { RestResolver } from './utils'
+describe('embed.serlo.org/thumbnail?url=...', () => {
+  test('returns thumbnail from youtube when url = https://www.youtube.com/watch?v=KtV2wlp9Ts4', async () => {
+    mockHttpGet(
+      'https://i.ytimg.com/vi/KtV2wlp9Ts4/hqdefault.jpg',
+      (_req, res, ctx) => {
+        return res(
+          ctx.set('content-type', 'image/jpeg'),
+          ctx.set('content-length', '11464')
+        )
+      }
+    )
 
-export function givenStats(resolver: RestResolver) {
-  global.server.use(rest.get('https://stats.serlo.org:path', resolver))
-}
+    const response = await handleRequest(
+      new Request(
+        `https://embed.serlo.org/thumbnail?url= ${encodeURIComponent(
+          'https://www.youtube.com/watch?v=KtV2wlp9Ts4'
+        )}`
+      )
+    )
 
-export function defaultStatsServer(): RestResolver {
-  return (req, res, ctx) => {
-    const path = req.params.path as string
-
-    if (path !== '/login') {
-      return res(ctx.status(302), ctx.set('location', '/login'))
-    }
-
-    return res(ctx.body('<title>Grafana</title>'))
-  }
-}
+    expect(response.headers.get('content-type')).toBe('image/jpeg')
+    expect(response.headers.get('content-length')).toBe('11464')
+  })
+})
