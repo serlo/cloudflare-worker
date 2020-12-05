@@ -60,18 +60,15 @@ describe('Redirects', () => {
   test('meet.serlo.org', async () => {
     const response = await handleUrl('https://meet.serlo.local/')
 
-    const target =
-     'https://meet.google.com/vtk-ncrc-rdp'
+    const target = 'https://meet.google.com/vtk-ncrc-rdp'
     expectToBeRedirectTo(response, target, 302)
   })
   test('meet.serlo.org/dev', async () => {
     const response = await handleUrl('https://meet.serlo.local/dev')
 
-    const target =
-      'https://meet.google.com/rci-pize-jow'
+    const target = 'https://meet.google.com/rci-pize-jow'
     expectToBeRedirectTo(response, target, 302)
   })
-
 
   test('start.serlo.org', async () => {
     const response = await handleUrl('https://start.serlo.local/')
