@@ -22,6 +22,7 @@
 import { api } from './api'
 import { edtrIoStats } from './are-we-edtr-io-yet'
 import { authFrontendSectorIdentifierUriValidation } from './auth'
+import { embed } from './embed'
 import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
 import { maintenanceMode } from './maintenance'
 import { staticPages } from './static-pages'
@@ -48,32 +49,6 @@ export async function handleRequest(request: Request) {
     (await frontendProxy(request)) ||
     (await fetch(request))
   )
-}
-
-async function embed(request: Request): Promise<Response | null> {
-  const url = Url.fromRequest(request)
-
-  if (url.subdomain !== "embed") return null
-
-  // embed.serlo.org/thumbnail?url=...
-
-  const urlParam = url.searchParams.get("url")
-
-  // TODO
-  if (urlParam === null) return null
-
-  const videoUrl = new Url(urlParam)
-
-  if (videoUrl.domain === "youtube.com") {
-    const vParam = videoUrl.searchParams.get("v")
-
-    // TODO
-    if (vParam === null) return null
-
-    return await fetch(`https://i.ytimg.com/vi/${vParam}/hqdefault.jpg`)
-  }
-
-  return null
 }
 
 async function enforceHttps(request: Request) {
