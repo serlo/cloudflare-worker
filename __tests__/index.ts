@@ -22,7 +22,7 @@
 
 import { handleRequest } from '../src'
 import {
-  mockKV,
+  createKV,
   mockHttpGet,
   returnsText,
   givenUuid,
@@ -30,6 +30,7 @@ import {
   returnsMalformedJson,
   givenStats,
   defaultStatsServer,
+  expectIsNotFoundResponse,
 } from './__utils__'
 
 describe('Enforce HTTPS', () => {
@@ -57,6 +58,28 @@ describe('Enforce HTTPS', () => {
 })
 
 describe('Redirects', () => {
+  describe('meet.serlo.org', () => {
+    test('meet.serlo.org', async () => {
+      const response = await handleUrl('https://meet.serlo.local/')
+
+      const target = 'https://meet.google.com/vtk-ncrc-rdp'
+      expectToBeRedirectTo(response, target, 302)
+    })
+
+    test('meet.serlo.org/dev', async () => {
+      const response = await handleUrl('https://meet.serlo.local/dev')
+
+      const target = 'https://meet.google.com/rci-pize-jow'
+      expectToBeRedirectTo(response, target, 302)
+    })
+
+    test('returns 404 when meet room is not defined', async () => {
+      const response = await handleUrl('https://meet.serlo.local/def')
+
+      await expectIsNotFoundResponse(response)
+    })
+  })
+
   test('start.serlo.org', async () => {
     const response = await handleUrl('https://start.serlo.local/')
 
@@ -248,7 +271,7 @@ describe('Semantic file names', () => {
 
 describe('Packages', () => {
   test('packages.serlo.org/<package>/<filePath>', async () => {
-    mockKV('PACKAGES_KV', { foo: 'foo@1.0.0' })
+    global.PACKAGES_KV = createKV({ foo: 'foo@1.0.0' })
     mockHttpGet(
       'https://packages.serlo.org/foo@1.0.0/bar',
       returnsText('content')
@@ -260,7 +283,7 @@ describe('Packages', () => {
   })
 
   test('packages.serlo.org/<package>/<filePath> (invalid)', async () => {
-    mockKV('PACKAGES_KV', { foo: 'foo@1.0.0' })
+    global.PACKAGES_KV = createKV({ foo: 'foo@1.0.0' })
     mockHttpGet('https://packages.serlo.org/foobar/bar', returnsText('content'))
 
     const response = await handleUrl('https://packages.serlo.local/foobar/bar')

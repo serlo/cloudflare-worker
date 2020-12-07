@@ -29,7 +29,13 @@ import {
 } from './frontend-proxy'
 import { maintenanceMode } from './maintenance'
 import { staticPages } from './static-pages'
-import { Url, getPathInfo, isInstance, Instance } from './utils'
+import {
+  Url,
+  getPathInfo,
+  isInstance,
+  Instance,
+  createNotFoundResponse,
+} from './utils'
 
 addEventListener('fetch', (event: Event) => {
   const e = event as FetchEvent
@@ -69,6 +75,16 @@ async function redirects(request: Request) {
       'https://docs.google.com/document/d/1qsgkXWNwC-mcgroyfqrQPkZyYqn7m1aimw2gwtDTmpM/',
       301
     )
+  }
+
+  if (url.subdomain === 'meet') {
+    if (url.pathname === '/') {
+      return Response.redirect('https://meet.google.com/vtk-ncrc-rdp')
+    } else if (url.pathname === '/dev') {
+      return Response.redirect('https://meet.google.com/rci-pize-jow')
+    } else {
+      return createNotFoundResponse()
+    }
   }
 
   if (

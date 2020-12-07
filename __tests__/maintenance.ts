@@ -25,7 +25,7 @@ import { handleRequest } from '../src'
 import {
   expectContentTypeIsHtml,
   expectContainsText,
-  mockKV,
+  createKV,
   mockHttpGet,
   returnsText,
   setupProbabilityFor,
@@ -39,7 +39,7 @@ describe('Maintenance mode', () => {
   })
 
   test('Disabled (no maintenance planned)', async () => {
-    mockKV('MAINTENANCE_KV', {})
+    global.MAINTENANCE_KV = createKV()
 
     await expectNoMaintenanceMode()
   })
@@ -50,7 +50,7 @@ describe('Maintenance mode', () => {
       end: DateTime.local().plus({ minutes: 20 }).toISO(),
       subdomains: ['de'],
     }
-    mockKV('MAINTENANCE_KV', { enabled: JSON.stringify(value) })
+    global.MAINTENANCE_KV = createKV({ enabled: JSON.stringify(value) })
 
     await expectNoMaintenanceMode()
   })
@@ -61,7 +61,7 @@ describe('Maintenance mode', () => {
       end: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['de'],
     }
-    mockKV('MAINTENANCE_KV', { enabled: JSON.stringify(value) })
+    global.MAINTENANCE_KV = createKV({ enabled: JSON.stringify(value) })
 
     await expectNoMaintenanceMode()
   })
@@ -73,7 +73,7 @@ describe('Maintenance mode', () => {
       end: end.toISO(),
       subdomains: ['de'],
     }
-    mockKV('MAINTENANCE_KV', { enabled: JSON.stringify(value) })
+    global.MAINTENANCE_KV = createKV({ enabled: JSON.stringify(value) })
 
     const response = await handleUrl('https://de.serlo.org')
     expect(response.status).toEqual(503)
@@ -92,7 +92,7 @@ describe('Maintenance mode', () => {
       end: end.toISO(),
       subdomains: ['en'],
     }
-    mockKV('MAINTENANCE_KV', { enabled: JSON.stringify(value) })
+    global.MAINTENANCE_KV = createKV({ enabled: JSON.stringify(value) })
 
     const response = await handleUrl('https://en.serlo.org')
     expect(response.status).toEqual(503)
@@ -109,7 +109,7 @@ describe('Maintenance mode', () => {
       start: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['de'],
     }
-    mockKV('MAINTENANCE_KV', { enabled: JSON.stringify(value) })
+    global.MAINTENANCE_KV = createKV({ enabled: JSON.stringify(value) })
 
     const response = await handleUrl('https://de.serlo.org')
     expect(response.status).toEqual(503)
@@ -125,7 +125,7 @@ describe('Maintenance mode', () => {
       start: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['en'],
     }
-    mockKV('MAINTENANCE_KV', { enabled: JSON.stringify(value) })
+    global.MAINTENANCE_KV = createKV({ enabled: JSON.stringify(value) })
 
     const response = await handleUrl('https://en.serlo.org')
     expect(response.status).toEqual(503)
@@ -143,7 +143,7 @@ describe('Maintenance mode', () => {
       end: end.toISO(),
       subdomains: ['en'],
     }
-    mockKV('MAINTENANCE_KV', { enabled: JSON.stringify(value) })
+    global.MAINTENANCE_KV = createKV({ enabled: JSON.stringify(value) })
 
     await expectNoMaintenanceMode()
   })
@@ -153,7 +153,7 @@ describe('Maintenance mode', () => {
       start: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['en'],
     }
-    mockKV('MAINTENANCE_KV', { enabled: JSON.stringify(value) })
+    global.MAINTENANCE_KV = createKV({ enabled: JSON.stringify(value) })
 
     await expectNoMaintenanceMode()
   })
