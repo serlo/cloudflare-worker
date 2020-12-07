@@ -29,7 +29,12 @@ import fetchNode, {
 } from 'node-fetch'
 import * as util from 'util'
 
-import { mockKV, givenApi, defaultApiServer, Uuid } from './__tests__/__utils__'
+import {
+  createKV,
+  givenApi,
+  defaultApiServer,
+  Uuid,
+} from './__tests__/__utils__'
 
 const randomCopy = Math.random
 
@@ -48,8 +53,8 @@ beforeEach(() => {
   // TODO: Remove this since this tests an implementation details
   global.fetch = jest.fn().mockImplementation(fetchNode)
 
-  mockKV('MAINTENANCE_KV', {})
-  mockKV('PATH_INFO_KV', {})
+  global.MAINTENANCE_KV = createKV()
+  global.PATH_INFO_KV = createKV()
 
   global.uuids = new Array<Uuid>()
 
