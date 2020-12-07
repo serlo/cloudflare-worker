@@ -34,6 +34,13 @@ const contentApiParameters = [
   'fullWidth',
 ]
 
+const pathsFrontendSupportsWithoutUuids = [
+  /^\/$/,
+  /^\/search$/,
+  /^\/spenden$/,
+  /^\/license\/detail\/\d+$/,
+]
+
 export class Url extends URL {
   public get subdomain(): string {
     return this.hostname.split('.').slice(0, -2).join('.')
@@ -59,6 +66,18 @@ export class Url extends URL {
       .split('&')
       .map((parameterWithValue) => parameterWithValue.split('=')[0])
       .some((queryParameter) => contentApiParameters.includes(queryParameter))
+  }
+
+  public isProbablyUuid(): boolean {
+    // TODO: Only after we have deleted the old alias system we know for sure
+    // which paths resolve to an uuid. So far we can do the following:
+    return this.isFrontendSupportedAndProbablyUuid()
+  }
+
+  public isFrontendSupportedAndProbablyUuid(): boolean {
+    return !pathsFrontendSupportsWithoutUuids.some(
+      (regex) => regex.exec(this.pathname) !== null
+    )
   }
 
   public toRedirect(status?: number) {
