@@ -24,28 +24,22 @@ import { mockHttpGet } from './__utils__'
 
 describe('embed.serlo.org/thumbnail?url=...', () => {
   test('returns placeholder png for empty requests', async () => {
-    const response = await handleRequest(
-      new Request('https://embed.serlo.org/thumbnail?url=')
-    )
+    const response = await requestThumbnail('')
 
     expect(response.headers.get('content-type')).toBe('image/png')
     expect(response.headers.get('content-length')).toBe('135')
   })
 
   test('returns placeholder png for unsupported urls', async () => {
-    const response = await handleRequest(
-      new Request(
-        `https://embed.serlo.org/thumbnail?url=${encodeURIComponent(
-          'https://www.twitch.tv/videos/824398155'
-        )}`
-      )
+    const response = await requestThumbnail(
+      'https://www.twitch.tv/videos/824398155'
     )
 
     expect(response.headers.get('content-type')).toBe('image/png')
     expect(response.headers.get('content-length')).toBe('135')
   })
 
-  test('returns thumbnail from youtube when url = https://www.youtube.com/watch?v=KtV2wlp9Ts4', async () => {
+  test('returns thumbnail from youtube when url is youtube url', async () => {
     mockHttpGet(
       'https://i.ytimg.com/vi/KtV2wlp9Ts4/hqdefault.jpg',
       (_req, res, ctx) => {
@@ -56,15 +50,18 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       }
     )
 
-    const response = await handleRequest(
-      new Request(
-        `https://embed.serlo.org/thumbnail?url=${encodeURIComponent(
-          'https://www.youtube.com/watch?v=KtV2wlp9Ts4'
-        )}`
-      )
+    const response = await requestThumbnail(
+      'https://www.youtube.com/watch?v=KtV2wlp9Ts4'
     )
 
     expect(response.headers.get('content-type')).toBe('image/jpeg')
     expect(response.headers.get('content-length')).toBe('11464')
   })
 })
+
+function requestThumbnail(url: string): Promise<Response> {
+  const requestUrl =
+    'https://embed.serlo.org/thumbnail?url=' + encodeURIComponent(url)
+
+  return handleRequest(new Request(requestUrl))
+}
