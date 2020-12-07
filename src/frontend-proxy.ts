@@ -21,13 +21,6 @@
  */
 import { Url, getCookieValue, isInstance, Instance, getPathInfo } from './utils'
 
-export const specialPathRegex = [
-  /^\/$/,
-  /^\/search$/,
-  /^\/spenden$/,
-  /^\/license\/detail\/\d+$/,
-]
-
 export async function frontendSpecialPaths(
   request: Request
 ): Promise<Response | null> {
@@ -91,7 +84,7 @@ export async function frontendProxy(
   )
     return await fetchBackend({ ...config, useFrontend: false, request })
 
-  if (!specialPathRegex.some((regex) => regex.exec(url.pathname) !== null)) {
+  if (url.isFrontendSupportedAndProbablyUuid()) {
     const pathInfo = await getPathInfo(config.instance, url.pathname)
     const typename = pathInfo?.typename ?? null
 
