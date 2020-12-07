@@ -20,9 +20,31 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 import { handleRequest } from '../src'
-import {mockHttpGet} from './__utils__'
+import { mockHttpGet } from './__utils__'
 
 describe('embed.serlo.org/thumbnail?url=...', () => {
+  test('returns placeholder png for empty requests', async () => {
+    const response = await handleRequest(
+      new Request('https://embed.serlo.org/thumbnail?url=')
+    )
+
+    expect(response.headers.get('content-type')).toBe('image/png')
+    expect(response.headers.get('content-length')).toBe('135')
+  })
+
+  test('returns placeholder png for unsupported urls', async () => {
+    const response = await handleRequest(
+      new Request(
+        `https://embed.serlo.org/thumbnail?url=${encodeURIComponent(
+          'https://www.twitch.tv/videos/824398155'
+        )}`
+      )
+    )
+
+    expect(response.headers.get('content-type')).toBe('image/png')
+    expect(response.headers.get('content-length')).toBe('135')
+  })
+
   test('returns thumbnail from youtube when url = https://www.youtube.com/watch?v=KtV2wlp9Ts4', async () => {
     mockHttpGet(
       'https://i.ytimg.com/vi/KtV2wlp9Ts4/hqdefault.jpg',
@@ -36,7 +58,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
     const response = await handleRequest(
       new Request(
-        `https://embed.serlo.org/thumbnail?url= ${encodeURIComponent(
+        `https://embed.serlo.org/thumbnail?url=${encodeURIComponent(
           'https://www.youtube.com/watch?v=KtV2wlp9Ts4'
         )}`
       )
