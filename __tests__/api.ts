@@ -37,7 +37,6 @@ describe('api calls', () => {
     })
     const response = await handleRequest(req)
 
-    expect(response.statusText).toBe('OK')
     expect(await response.json()).toEqual({
       data: { uuid: { __typename: 'Page', alias: '/math' } },
     })
