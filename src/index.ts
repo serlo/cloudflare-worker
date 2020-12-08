@@ -60,6 +60,19 @@ async function enforceHttps(request: Request) {
 async function redirects(request: Request) {
   const url = Url.fromRequest(request)
 
+  if (url.subdomain === 'meet' && url.pathname === '/einbindung') {
+    return Response.redirect('https://meet.google.com/qzv-ojgk-xqw', 302)
+  }
+  if (url.subdomain === 'meet' && url.pathname === '/begleitung') {
+    return Response.redirect('https://meet.google.com/kon-wdmt-yhb', 302)
+  }
+  if (url.subdomain === 'meet' && url.pathname === '/reviewing') {
+    return Response.redirect('https://meet.google.com/kon-wdmt-yhb', 302)
+  }
+  if (url.subdomain === 'meet' && url.pathname === '/labschool') {
+    return Response.redirect('https://meet.google.com/cvd-pame-zod', 302)
+  }
+
   if (url.subdomain === 'meet' && url.pathname === '/') {
     return Response.redirect('https://meet.google.com/vtk-ncrc-rdp', 302)
   }
