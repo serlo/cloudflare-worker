@@ -39,7 +39,6 @@ export enum Backend {
 describe('handleRequest()', () => {
   beforeEach(() => {
     global.FRONTEND_DOMAIN = 'frontend.serlo.org'
-    global.FRONTEND_SUPPORT_INTERNATIONALIZATION = 'true'
     global.FRONTEND_ALLOWED_TYPES = '["Page"]'
     global.FRONTEND_PROBABILITY = '0.5'
     Math.random = jest.fn().mockReturnValue(0.5)

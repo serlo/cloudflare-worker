@@ -29,7 +29,6 @@ declare namespace NodeJS {
     FRONTEND_ALLOWED_TYPES: string
     FRONTEND_DOMAIN: string
     FRONTEND_PROBABILITY: string
-    FRONTEND_SUPPORT_INTERNATIONALIZATION: string
     REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND: 'true' | 'false'
     fetch: typeof fetch
   }
