@@ -27,6 +27,7 @@ import {
   frontendSpecialPaths,
   specialPaths,
 } from './frontend-proxy'
+import { embed } from './embed'
 import { maintenanceMode } from './maintenance'
 import { staticPages } from './static-pages'
 import {
@@ -50,6 +51,7 @@ export async function handleRequest(request: Request) {
     (await enforceHttps(request)) ||
     (await frontendSpecialPaths(request)) ||
     (await redirects(request)) ||
+    (await embed(request)) ||
     (await staticPages(request)) ||
     (await semanticFileNames(request)) ||
     (await packages(request)) ||
