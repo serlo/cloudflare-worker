@@ -21,6 +21,7 @@
  */
 
 import { handleRequest } from '../src'
+import { Instance } from '../src/utils'
 import {
   createKV,
   mockHttpGet,
@@ -152,14 +153,22 @@ describe('Redirects', () => {
   describe('redirects to current path of an resource', () => {
     beforeEach(() => {
       givenUuid({
+        id: 78337,
         __typename: 'Page',
         oldAlias: '/sexed',
         alias: '/sex-ed',
+        instance: Instance.En,
       })
     })
 
-    test('redirects when current path is different than given path', async () => {
+    test('redirects when current path is different than target path', async () => {
       const response = await handleUrl('https://en.serlo.org/sexed')
+
+      expectToBeRedirectTo(response, 'https://en.serlo.org/sex-ed', 301)
+    })
+
+    test('redirects when current instance is different than target instance', async () => {
+      const response = await handleUrl('https://de.serlo.org/78337')
 
       expectToBeRedirectTo(response, 'https://en.serlo.org/sex-ed', 301)
     })

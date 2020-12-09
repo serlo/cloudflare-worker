@@ -20,6 +20,8 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
+import { Instance } from '../../../src/utils'
+
 export function givenUuid(uuid: Uuid) {
   global.uuids.push(uuid)
 }
@@ -39,4 +41,5 @@ interface AbstractUuid<Typename extends string> {
   id?: number
   alias?: string
   oldAlias?: string
+  instance?: Instance
 }
