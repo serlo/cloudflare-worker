@@ -21,6 +21,7 @@
  */
 
 import { handleRequest } from '../src'
+import { Instance } from '../src/utils'
 import {
   createKV,
   mockHttpGet,
@@ -70,6 +71,34 @@ describe('Redirects', () => {
       const response = await handleUrl('https://meet.serlo.local/dev')
 
       const target = 'https://meet.google.com/rci-pize-jow'
+      expectToBeRedirectTo(response, target, 302)
+    })
+
+    test('meet.serlo.org/einbindung ', async () => {
+      const response = await handleUrl('https://meet.serlo.local/einbindung')
+
+      const target = 'https://meet.google.com/qzv-ojgk-xqw'
+      expectToBeRedirectTo(response, target, 302)
+    })
+
+    test('meet.serlo.org/begleitung', async () => {
+      const response = await handleUrl('https://meet.serlo.local/begleitung')
+
+      const target = 'https://meet.google.com/kon-wdmt-yhb'
+      expectToBeRedirectTo(response, target, 302)
+    })
+
+    test('meet.serlo.org/reviewing', async () => {
+      const response = await handleUrl('https://meet.serlo.local/reviewing')
+
+      const target = 'https://meet.google.com/kon-wdmt-yhb'
+      expectToBeRedirectTo(response, target, 302)
+    })
+
+    test('meet.serlo.org/labschool ', async () => {
+      const response = await handleUrl('https://meet.serlo.local/labschool')
+
+      const target = 'https://meet.google.com/cvd-pame-zod'
       expectToBeRedirectTo(response, target, 302)
     })
 
@@ -124,14 +153,22 @@ describe('Redirects', () => {
   describe('redirects to current path of an resource', () => {
     beforeEach(() => {
       givenUuid({
+        id: 78337,
         __typename: 'Page',
         oldAlias: '/sexed',
         alias: '/sex-ed',
+        instance: Instance.En,
       })
     })
 
-    test('redirects when current path is different than given path', async () => {
+    test('redirects when current path is different than target path', async () => {
       const response = await handleUrl('https://en.serlo.org/sexed')
+
+      expectToBeRedirectTo(response, 'https://en.serlo.org/sex-ed', 301)
+    })
+
+    test('redirects when current instance is different than target instance', async () => {
+      const response = await handleUrl('https://de.serlo.org/78337')
 
       expectToBeRedirectTo(response, 'https://en.serlo.org/sex-ed', 301)
     })

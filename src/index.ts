@@ -80,6 +80,14 @@ async function redirects(request: Request) {
       return Response.redirect('https://meet.google.com/vtk-ncrc-rdp')
     } else if (url.pathname === '/dev') {
       return Response.redirect('https://meet.google.com/rci-pize-jow')
+    } else if (url.pathname === '/einbindung') {
+      return Response.redirect('https://meet.google.com/qzv-ojgk-xqw')
+    } else if (url.pathname === '/begleitung') {
+      return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
+    } else if (url.pathname === '/reviewing') {
+      return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
+    } else if (url.pathname === '/labschool') {
+      return Response.redirect('https://meet.google.com/cvd-pame-zod')
     } else {
       return createNotFoundResponse()
     }
@@ -117,15 +125,21 @@ async function redirects(request: Request) {
     return url.toRedirect()
   }
 
-  if (isInstance(url.subdomain)) {
+  if (
+    isInstance(url.subdomain) &&
+    url.isProbablyUuid() &&
+    request.headers.get('X-Requested-With') !== 'XMLHttpRequest'
+  ) {
     const pathInfo = await getPathInfo(url.subdomain, url.pathname)
-    if (
-      request.headers.get('X-Requested-With') !== 'XMLHttpRequest' &&
-      pathInfo !== null &&
-      url.pathname != pathInfo.currentPath
-    ) {
-      url.pathname = pathInfo.currentPath
-      return url.toRedirect(301)
+
+    if (pathInfo !== null) {
+      const newUrl = new Url(url.href)
+      const { currentPath, instance } = pathInfo
+
+      if (instance && url.subdomain !== instance) newUrl.subdomain = instance
+      if (url.pathname !== currentPath) newUrl.pathname = currentPath
+
+      if (newUrl.href !== url.href) return newUrl.toRedirect(301)
     }
   }
 }
