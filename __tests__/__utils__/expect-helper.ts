@@ -36,7 +36,6 @@ export function expectContentTypeIsHtml(response: Response): void {
 export function expectHasOkStatus(response: Response): void {
   expect(response).not.toBeNull()
   expect(response.status).toBe(200)
-  expect(response.statusText).toBe('OK')
 }
 
 export async function expectIsNotFoundResponse(
@@ -44,7 +43,6 @@ export async function expectIsNotFoundResponse(
 ): Promise<void> {
   expect(response).not.toBeNull()
   expect(response.status).toBe(404)
-  expect(response.statusText).toBe('Not Found')
   expect(await response.text()).toEqual(
     expect.stringContaining('Page not found')
   )
