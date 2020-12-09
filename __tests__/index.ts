@@ -21,6 +21,7 @@
  */
 
 import { handleRequest } from '../src'
+import { Instance } from '../src/utils'
 import {
   mockKV,
   mockHttpGet,
@@ -105,7 +106,7 @@ describe('Redirects', () => {
         __typename: 'Page',
         oldAlias: '/sexed',
         alias: '/sex-ed',
-        instance: 'en',
+        instance: Instance.En,
       })
     })
 
