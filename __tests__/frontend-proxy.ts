@@ -88,8 +88,7 @@ describe('handleRequest()', () => {
     })
   })
 
-  //prepends language code to path when backend is frontend
-  test('removes trailing slashes from the frontend url', async () => {
+  test('removes trailing slashes and prepends language code when the backend is frontend', async () => {
     setupProbabilityFor(Backend.Frontend)
 
     await expectResponseFrom({
@@ -172,7 +171,6 @@ describe('handleRequest()', () => {
     })
   })
 
-  //does not change path when backend is legacy backend
   describe('when request contains content api parameter', () => {
     const url = 'https://de.serlo.org/math?contentOnly'
     let response: Response
