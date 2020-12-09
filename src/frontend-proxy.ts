@@ -111,7 +111,6 @@ export async function frontendProxy(
 
 async function fetchBackend({
   frontendDomain,
-  supportInternationalization,
   pathPrefix,
   request,
   useFrontend,
@@ -125,7 +124,7 @@ async function fetchBackend({
   if (useFrontend) {
     backendUrl.hostname = frontendDomain
 
-    if (supportInternationalization && pathPrefix !== undefined)
+    if (pathPrefix !== undefined)
       backendUrl.pathname = `/${pathPrefix}${backendUrl.pathname}`
 
     backendUrl.pathname = backendUrl.pathnameWithoutTrailingSlash
@@ -153,16 +152,10 @@ function setCookieUseFrontend(res: Response, useFrontend: number) {
 }
 
 function getConfig(request: Request): Config {
-  const supportInternationalization =
-    global.FRONTEND_SUPPORT_INTERNATIONALIZATION === 'true'
   const url = Url.fromRequest(request)
   const cookies = request.headers.get('Cookie')
 
-  if (
-    !isInstance(url.subdomain) ||
-    (!supportInternationalization && url.subdomain !== Instance.De)
-  )
-    return { relevantRequest: false }
+  if (!isInstance(url.subdomain)) return { relevantRequest: false }
 
   return {
     relevantRequest: true,
@@ -171,7 +164,6 @@ function getConfig(request: Request): Config {
       getCookieValue('frontendDomain', cookies) ?? global.FRONTEND_DOMAIN,
     instance: url.subdomain,
     probability: Number(global.FRONTEND_PROBABILITY),
-    supportInternationalization,
   }
 }
 
@@ -183,7 +175,6 @@ interface RelevantRequestConfig {
   allowedTypes: string[]
   probability: number
   frontendDomain: string
-  supportInternationalization: boolean
 }
 
 interface IrrelevantRequestConfig {
