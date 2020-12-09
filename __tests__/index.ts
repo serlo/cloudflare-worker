@@ -73,6 +73,34 @@ describe('Redirects', () => {
       expectToBeRedirectTo(response, target, 302)
     })
 
+    test('meet.serlo.org/einbindung ', async () => {
+      const response = await handleUrl('https://meet.serlo.local/einbindung')
+
+      const target = 'https://meet.google.com/qzv-ojgk-xqw'
+      expectToBeRedirectTo(response, target, 302)
+    })
+
+    test('meet.serlo.org/begleitung', async () => {
+      const response = await handleUrl('https://meet.serlo.local/begleitung')
+
+      const target = 'https://meet.google.com/kon-wdmt-yhb'
+      expectToBeRedirectTo(response, target, 302)
+    })
+
+    test('meet.serlo.org/reviewing', async () => {
+      const response = await handleUrl('https://meet.serlo.local/reviewing')
+
+      const target = 'https://meet.google.com/kon-wdmt-yhb'
+      expectToBeRedirectTo(response, target, 302)
+    })
+
+    test('meet.serlo.org/labschool ', async () => {
+      const response = await handleUrl('https://meet.serlo.local/labschool')
+
+      const target = 'https://meet.google.com/cvd-pame-zod'
+      expectToBeRedirectTo(response, target, 302)
+    })
+
     test('returns 404 when meet room is not defined', async () => {
       const response = await handleUrl('https://meet.serlo.local/def')
 
