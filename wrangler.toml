@@ -21,7 +21,6 @@ ENABLE_PATH_INFO_CACHE = "true"
 FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "GroupedExercise", "Exercise", "ExerciseGroup", "Event", "Page", "Solution", "TaxonomyTerm", "User", "Video"]'
 FRONTEND_DOMAIN = "frontend-git-staging.serlo.vercel.app"
 FRONTEND_PROBABILITY = "0.50"
-FRONTEND_SUPPORT_INTERNATIONALIZATION = "true"
 REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = "false"
 
 [env.staging]
@@ -43,7 +42,6 @@ ENABLE_PATH_INFO_CACHE = "true"
 FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "GroupedExercise", "Exercise", "ExerciseGroup", "Event", "Page", "Solution", "TaxonomyTerm", "User", "Video"]'
 FRONTEND_DOMAIN = "frontend-git-staging.serlo.vercel.app"
 FRONTEND_PROBABILITY = "0.50"
-FRONTEND_SUPPORT_INTERNATIONALIZATION = "true"
 REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = "false"
 
 [env.production]
@@ -65,5 +63,4 @@ ENABLE_PATH_INFO_CACHE = "true"
 FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "Exercise", "ExerciseGroup", "Event", "Page", "TaxonomyTerm", "Video"]'
 FRONTEND_DOMAIN = "frontend.serlo.org"
 FRONTEND_PROBABILITY = "0.1"
-FRONTEND_SUPPORT_INTERNATIONALIZATION = "true"
 REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = "true"
