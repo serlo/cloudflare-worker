@@ -26,7 +26,7 @@ import { embed } from './embed'
 import {
   frontendProxy,
   frontendSpecialPaths,
-  specialPaths,
+  specialPathRegex,
 } from './frontend-proxy'
 import { maintenanceMode } from './maintenance'
 import { staticPages } from './static-pages'
@@ -129,7 +129,10 @@ async function redirects(request: Request) {
     return url.toRedirect()
   }
 
-  if (isInstance(url.subdomain) && !specialPaths.includes(url.pathname)) {
+  if (
+    isInstance(url.subdomain) &&
+    !specialPathRegex.some((regex) => regex.exec(url.pathname) !== null)
+  ) {
     const pathInfo = await getPathInfo(url.subdomain, url.pathname)
     if (
       request.headers.get('X-Requested-With') !== 'XMLHttpRequest' &&
