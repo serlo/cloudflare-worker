@@ -75,8 +75,8 @@ export class Url extends URL {
   }
 
   public isFrontendSupportedAndProbablyUuid(): boolean {
-    return !pathsFrontendSupportsWithoutUuids.some(
-      (regex) => regex.exec(this.pathname) !== null
+    return pathsFrontendSupportsWithoutUuids.every(
+      (regex) => regex.exec(this.pathname) === null
     )
   }
 
