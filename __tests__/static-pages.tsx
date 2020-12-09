@@ -49,8 +49,9 @@ import {
   mockHttpGet,
   returnsText,
   hasInternalServerError,
+  setupProbabilityFor,
+  Backend,
 } from './__utils__'
-import { setupProbabilityFor, Backend } from './frontend-proxy'
 
 describe('handleRequest()', () => {
   const unrevisedConfig: UnrevisedConfig = {
