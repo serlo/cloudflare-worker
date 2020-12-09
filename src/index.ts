@@ -22,10 +22,21 @@
 import { api } from './api'
 import { edtrIoStats } from './are-we-edtr-io-yet'
 import { authFrontendSectorIdentifierUriValidation } from './auth'
-import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
+import { embed } from './embed'
+import {
+  frontendProxy,
+  frontendSpecialPaths,
+  specialPaths,
+} from './frontend-proxy'
 import { maintenanceMode } from './maintenance'
 import { staticPages } from './static-pages'
-import { Url, getPathInfo, isInstance, Instance } from './utils'
+import {
+  Url,
+  getPathInfo,
+  isInstance,
+  Instance,
+  createNotFoundResponse,
+} from './utils'
 
 addEventListener('fetch', (event: Event) => {
   const e = event as FetchEvent
@@ -40,6 +51,7 @@ export async function handleRequest(request: Request) {
     (await enforceHttps(request)) ||
     (await frontendSpecialPaths(request)) ||
     (await redirects(request)) ||
+    (await embed(request)) ||
     (await staticPages(request)) ||
     (await semanticFileNames(request)) ||
     (await packages(request)) ||
@@ -60,31 +72,29 @@ async function enforceHttps(request: Request) {
 async function redirects(request: Request) {
   const url = Url.fromRequest(request)
 
-  if (url.subdomain === 'meet' && url.pathname === '/einbindung') {
-    return Response.redirect('https://meet.google.com/qzv-ojgk-xqw', 302)
-  }
-  if (url.subdomain === 'meet' && url.pathname === '/begleitung') {
-    return Response.redirect('https://meet.google.com/kon-wdmt-yhb', 302)
-  }
-  if (url.subdomain === 'meet' && url.pathname === '/reviewing') {
-    return Response.redirect('https://meet.google.com/kon-wdmt-yhb', 302)
-  }
-  if (url.subdomain === 'meet' && url.pathname === '/labschool') {
-    return Response.redirect('https://meet.google.com/cvd-pame-zod', 302)
-  }
-
-  if (url.subdomain === 'meet' && url.pathname === '/') {
-    return Response.redirect('https://meet.google.com/vtk-ncrc-rdp', 302)
-  }
-  if (url.subdomain === 'meet' && url.pathname === '/dev') {
-    return Response.redirect('https://meet.google.com/rci-pize-jow', 302)
-  }
-
   if (url.subdomain === 'start') {
     return Response.redirect(
       'https://docs.google.com/document/d/1qsgkXWNwC-mcgroyfqrQPkZyYqn7m1aimw2gwtDTmpM/',
       301
     )
+  }
+
+  if (url.subdomain === 'meet') {
+    if (url.pathname === '/') {
+      return Response.redirect('https://meet.google.com/vtk-ncrc-rdp')
+    } else if (url.pathname === '/dev') {
+      return Response.redirect('https://meet.google.com/rci-pize-jow')
+    } else if (url.pathname === '/einbindung') {
+      return Response.redirect('https://meet.google.com/qzv-ojgk-xqw')
+    } else if (url.pathname === '/begleitung') {
+      return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
+    } else if (url.pathname === '/reviewing') {
+      return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
+    } else if (url.pathname === '/labschool') {
+      return Response.redirect('https://meet.google.com/cvd-pame-zod')
+    } else {
+      return createNotFoundResponse()
+    }
   }
 
   if (
@@ -119,7 +129,7 @@ async function redirects(request: Request) {
     return url.toRedirect()
   }
 
-  if (isInstance(url.subdomain)) {
+  if (isInstance(url.subdomain) && !specialPaths.includes(url.pathname)) {
     const pathInfo = await getPathInfo(url.subdomain, url.pathname)
     if (
       request.headers.get('X-Requested-With') !== 'XMLHttpRequest' &&

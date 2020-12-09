@@ -42,3 +42,7 @@ The following variables define the behavior:
 - `FRONTEND_PROBABILITY`: The percentage of user which shall be redirected to the new frontend.
 
 With the cookie `frontendDomain` you can override the variable of `FRONTEND_DOMAIN`.
+
+## Preview Images
+
+Via `embed.serlo.org/thumbnail?url=${videoUrl|appletUrl}` you can request thumbnail images for supported providers (YouTube, Vimeo, Wikimedia Commons and Geogebra).
