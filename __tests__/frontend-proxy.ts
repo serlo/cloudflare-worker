@@ -126,6 +126,24 @@ describe('handleRequest()', () => {
       })
     })
 
+    test('prepends language prefix for special path /user/notifications', async () => {
+      setupProbabilityFor(Backend.Frontend)
+
+      await expectResponseFrom({
+        backend: 'https://frontend.serlo.org/en/user/notifications',
+        request: 'https://en.serlo.org/user/notifications',
+      })
+    })
+
+    test('prepends language prefix for special path /license/detail/1', async () => {
+      setupProbabilityFor(Backend.Frontend)
+
+      await expectResponseFrom({
+        backend: 'https://frontend.serlo.org/en/license/detail/1',
+        request: 'https://en.serlo.org/license/detail/1',
+      })
+    })
+
     test('removes trailing slashes from the frontend url', async () => {
       setupProbabilityFor(Backend.Frontend)
 
@@ -348,11 +366,19 @@ describe('handleRequest()', () => {
       })
     })
 
+    test('requests to /user/notifications always resolve to frontend', async () => {
+      await expectResponseFrom({
+        backend: 'https://frontend.serlo.org/user/notifications',
+        request: 'https://de.serlo.org/user/notifications',
+      })
+    })
+
     describe('special paths where the cookie determines the backend', () => {
       describe.each([
         'https://de.serlo.org/',
         'https://de.serlo.org/search',
         'https://de.serlo.org/spenden',
+        'https://de.serlo.org/license/detail/1',
       ])('URL = %p', (url) => {
         test.each([Backend.Frontend, Backend.Legacy])(
           'backend = %p',
@@ -370,6 +396,27 @@ describe('handleRequest()', () => {
               alias: '/21565/spenden',
             })
 
+            setupProbabilityFor(backend)
+            Math.random = jest.fn().mockReturnValue(0.5)
+
+            await expectResponseFrom({
+              backend: getUrlFor(backend, url),
+              request: url,
+            })
+          }
+        )
+      })
+    })
+
+    describe('special paths where the cookie determines the backend when USER is in FRONTEND_ALLOWED_TYPES', () => {
+      describe.each([
+        'https://de.serlo.org/user/public',
+        'https://de.serlo.org/user/me',
+      ])('URL = %p', (url) => {
+        test.each([Backend.Frontend, Backend.Legacy])(
+          'backend = %p',
+          async (backend) => {
+            global.FRONTEND_ALLOWED_TYPES = '["User"]'
             setupProbabilityFor(backend)
             Math.random = jest.fn().mockReturnValue(0.5)
 
