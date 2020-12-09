@@ -21,6 +21,8 @@
  */
 import { Url, getCookieValue, isInstance, Instance, getPathInfo } from './utils'
 
+export const specialPaths = ['/', '/search', '/spenden']
+
 export async function frontendSpecialPaths(
   request: Request
 ): Promise<Response | null> {
@@ -76,10 +78,7 @@ export async function frontendProxy(
   )
     return await fetchBackend({ ...config, useFrontend: false, request })
 
-  if (url.pathname === '/spenden')
-    return await fetchBackend({ ...config, useFrontend: true, request })
-
-  if (url.pathname !== '/' && url.pathname !== '/search') {
+  if (!specialPaths.includes(url.pathname)) {
     const pathInfo = await getPathInfo(config.instance, url.pathname)
     const typename = pathInfo?.typename ?? null
 
