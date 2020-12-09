@@ -84,6 +84,14 @@ async function redirects(request: Request) {
       return Response.redirect('https://meet.google.com/vtk-ncrc-rdp')
     } else if (url.pathname === '/dev') {
       return Response.redirect('https://meet.google.com/rci-pize-jow')
+    } else if (url.pathname === '/einbindung') {
+      return Response.redirect('https://meet.google.com/qzv-ojgk-xqw')
+    } else if (url.pathname === '/begleitung') {
+      return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
+    } else if (url.pathname === '/reviewing') {
+      return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
+    } else if (url.pathname === '/labschool') {
+      return Response.redirect('https://meet.google.com/cvd-pame-zod')
     } else {
       return createNotFoundResponse()
     }
