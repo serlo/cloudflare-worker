@@ -22,12 +22,12 @@
 import { api } from './api'
 import { edtrIoStats } from './are-we-edtr-io-yet'
 import { authFrontendSectorIdentifierUriValidation } from './auth'
+import { embed } from './embed'
 import {
   frontendProxy,
   frontendSpecialPaths,
   specialPaths,
 } from './frontend-proxy'
-import { embed } from './embed'
 import { maintenanceMode } from './maintenance'
 import { staticPages } from './static-pages'
 import {
