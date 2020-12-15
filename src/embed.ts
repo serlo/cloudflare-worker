@@ -41,7 +41,10 @@ export async function embed(request: Request): Promise<Response | null> {
     // TODO
     if (vParam === null) return null
 
-    return await fetch(`https://i.ytimg.com/vi/${vParam}/hqdefault.jpg`)
+    return (
+      (await fetch(`https://i.ytimg.com/vi/${vParam}/hqdefault.jpg`)) ||
+      fetch(`https://i.ytimg.com/vi/${vParam}/sddefault.jpg`)
+    )
   }
 
   return returnPlaceholder()

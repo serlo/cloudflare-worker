@@ -57,7 +57,47 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     expect(response.headers.get('content-type')).toBe('image/jpeg')
     expect(response.headers.get('content-length')).toBe('11464')
   })
-})
+
+  test('returns thumbnail from youtube when url is not youtube url', async () => {
+    mockHttpGet(
+      `https://i.ytimg.com/vi/Wtvyw4NjJWc/sddefault.jpg`,
+      (_req, res, ctx) => {
+        return res(
+          ctx.set('content-type', 'image/jpeg'),
+          ctx.set('content-length', '11464')
+        )
+      }
+    )
+
+    const response = await requestThumbnail(
+      'https://www.youtube.com/watch?v=Wtvyw4NjJWc'
+    )
+
+    expect(response.headers.get('content-type')).toBe('image/jpeg')
+    expect(response.headers.get('content-length')).toBe('11464')
+  })
+  test('returns thumbnail from vimeo when url not vimeo url', async () => {
+    mockHttpGet(
+      'https://vimeo.com/api/oembed.json?url=',
+      (_req, res, ctx) => {
+        return res(
+          ctx.json(''),
+          ctx.set('content-length', '11464')
+        )
+      }
+    )
+  
+    //how to determine the content length?
+
+    const response = await requestThumbnail(
+      'https://vimeo.com/api/oembed.json?url='
+    )
+
+    expect(response.headers.get('content-type')).toBe('image/jpeg')
+    expect(response.headers.get('content-length')).toBe('11464')
+  })
+
+
 
 function requestThumbnail(url: string): Promise<Response> {
   const requestUrl =
