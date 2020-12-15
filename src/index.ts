@@ -25,6 +25,7 @@ import { authFrontendSectorIdentifierUriValidation } from './auth'
 import { embed } from './embed'
 import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
 import { maintenanceMode } from './maintenance'
+import { urlCheck1, urlCheck2 } from './redirects'
 import { staticPages } from './static-pages'
 import {
   Url,
@@ -68,30 +69,52 @@ async function enforceHttps(request: Request) {
 async function redirects(request: Request) {
   const url = Url.fromRequest(request)
 
-  if (url.subdomain === 'start') {
-    return Response.redirect(
-      'https://docs.google.com/document/d/1qsgkXWNwC-mcgroyfqrQPkZyYqn7m1aimw2gwtDTmpM/',
-      301
-    )
-  }
-
-  if (url.subdomain === 'meet') {
-    if (url.pathname === '/') {
-      return Response.redirect('https://meet.google.com/vtk-ncrc-rdp')
-    } else if (url.pathname === '/dev') {
-      return Response.redirect('https://meet.google.com/rci-pize-jow')
-    } else if (url.pathname === '/einbindung') {
-      return Response.redirect('https://meet.google.com/qzv-ojgk-xqw')
-    } else if (url.pathname === '/begleitung') {
-      return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
-    } else if (url.pathname === '/reviewing') {
-      return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
-    } else if (url.pathname === '/labschool') {
-      return Response.redirect('https://meet.google.com/cvd-pame-zod')
-    } else {
-      return createNotFoundResponse()
-    }
-  }
+  urlCheck1(
+    url,
+    'start',
+    'https://docs.google.com/document/d/1qsgkXWNwC-mcgroyfqrQPkZyYqn7m1aimw2gwtDTmpM/',
+    301
+  )
+  // if (url.subdomain === 'start') {
+  //   return Response.redirect(
+  //     'https://docs.google.com/document/d/1qsgkXWNwC-mcgroyfqrQPkZyYqn7m1aimw2gwtDTmpM/',
+  //     301
+  //   )
+  // }
+  urlCheck2(
+    url,
+    'meet',
+    { sign: '/', link: 'https://meet.google.com/vtk-ncrc-rdp' },
+    { sign: '/dev', link: 'https://meet.google.com/rci-pize-jow' },
+    { sign: '/einbindung', link: 'https://meet.google.com/qzv-ojgk-xqw' },
+    { sign: '/begleitung', link: 'https://meet.google.com/kon-wdmt-yhb' },
+    { sign: '/reviewing', link: 'https://meet.google.com/kon-wdmt-yhb' },
+    { sign: '/labschool', link: 'https://meet.google.com/cvd-pame-zod' }
+  )
+  // if (url.subdomain === 'meet') {
+  //   switch (url.pathname) {
+  //     case '/':
+  //       return Response.redirect('https://meet.google.com/vtk-ncrc-rdp')
+  //       break
+  //     case '/dev':
+  //       return Response.redirect('https://meet.google.com/rci-pize-jow')
+  //       break
+  //     case '/einbindung':
+  //       return Response.redirect('https://meet.google.com/qzv-ojgk-xqw')
+  //       break
+  //     case '/begleitung':
+  //       return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
+  //       break
+  //     case '/reviewing':
+  //       return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
+  //       break
+  //     case '/labschool':
+  //       return Response.redirect('https://meet.google.com/cvd-pame-zod')
+  //       break
+  //     default:
+  //       return createNotFoundResponse()
+  //   }
+  // }
 
   if (
     url.subdomain === Instance.De &&
