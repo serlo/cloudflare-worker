@@ -25,6 +25,7 @@ import { authFrontendSectorIdentifierUriValidation } from './auth'
 import { embed } from './embed'
 import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
 import { maintenanceMode } from './maintenance'
+import { redirects } from './redirects'
 import { staticPages } from './static-pages'
 import {
   Url,
@@ -63,85 +64,6 @@ async function enforceHttps(request: Request) {
   if (url.protocol !== 'http:') return null
   url.protocol = 'https:'
   return Promise.resolve(url.toRedirect())
-}
-
-async function redirects(request: Request) {
-  const url = Url.fromRequest(request)
-
-  if (url.subdomain === 'start') {
-    return Response.redirect(
-      'https://docs.google.com/document/d/1qsgkXWNwC-mcgroyfqrQPkZyYqn7m1aimw2gwtDTmpM/',
-      301
-    )
-  }
-
-  if (url.subdomain === 'meet') {
-    if (url.pathname === '/') {
-      return Response.redirect('https://meet.google.com/vtk-ncrc-rdp')
-    } else if (url.pathname === '/dev') {
-      return Response.redirect('https://meet.google.com/rci-pize-jow')
-    } else if (url.pathname === '/einbindung') {
-      return Response.redirect('https://meet.google.com/qzv-ojgk-xqw')
-    } else if (url.pathname === '/begleitung') {
-      return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
-    } else if (url.pathname === '/reviewing') {
-      return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
-    } else if (url.pathname === '/labschool') {
-      return Response.redirect('https://meet.google.com/cvd-pame-zod')
-    } else {
-      return createNotFoundResponse()
-    }
-  }
-
-  if (
-    url.subdomain === Instance.De &&
-    url.pathnameWithoutTrailingSlash === '/labschool'
-  ) {
-    url.subdomain = 'labschool'
-    url.pathname = '/'
-    return url.toRedirect(301)
-  }
-
-  if (
-    url.subdomain === Instance.De &&
-    url.pathnameWithoutTrailingSlash === '/hochschule'
-  ) {
-    url.pathname = '/mathe/universitaet/44323'
-    return url.toRedirect(301)
-  }
-
-  if (
-    url.subdomain === Instance.De &&
-    url.pathnameWithoutTrailingSlash === '/beitreten'
-  ) {
-    return Response.redirect(
-      'https://docs.google.com/forms/d/e/1FAIpQLSdEoyCcDVP_G_-G_u642S768e_sxz6wO6rJ3tad4Hb9z7Slwg/viewform',
-      301
-    )
-  }
-
-  if (url.subdomain === 'www' || url.subdomain === '') {
-    url.subdomain = 'de'
-    return url.toRedirect()
-  }
-
-  if (
-    isInstance(url.subdomain) &&
-    url.isProbablyUuid() &&
-    request.headers.get('X-Requested-With') !== 'XMLHttpRequest'
-  ) {
-    const pathInfo = await getPathInfo(url.subdomain, url.pathname)
-
-    if (pathInfo !== null) {
-      const newUrl = new Url(url.href)
-      const { currentPath, instance } = pathInfo
-
-      if (instance && url.subdomain !== instance) newUrl.subdomain = instance
-      if (url.pathname !== currentPath) newUrl.pathname = currentPath
-
-      if (newUrl.href !== url.href) return newUrl.toRedirect(301)
-    }
-  }
 }
 
 async function semanticFileNames(request: Request) {
