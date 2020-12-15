@@ -76,21 +76,28 @@ async function redirects(request: Request) {
   }
 
   if (url.subdomain === 'meet') {
-    if (url.pathname === '/') {
-      return Response.redirect('https://meet.google.com/vtk-ncrc-rdp')
-    } else if (url.pathname === '/dev') {
-      return Response.redirect('https://meet.google.com/rci-pize-jow')
-    } else if (url.pathname === '/einbindung') {
-      return Response.redirect('https://meet.google.com/qzv-ojgk-xqw')
-    } else if (url.pathname === '/begleitung') {
-      return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
-    } else if (url.pathname === '/reviewing') {
-      return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
-    } else if (url.pathname === '/labschool') {
-      return Response.redirect('https://meet.google.com/cvd-pame-zod')
-    } else {
-      return createNotFoundResponse()
-    }
+      switch(url.pathname){
+    case '/':
+        return Response.redirect('https://meet.google.com/vtk-ncrc-rdp')
+        break;
+    case '/dev':
+        return Response.redirect('https://meet.google.com/rci-pize-jow')
+        break;    
+    case '/einbindung':
+        return Response.redirect('https://meet.google.com/qzv-ojgk-xqw')
+        break;
+    case '/begleitung':
+        return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
+        break;  
+    case '/reviewing':
+        return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
+        break; 
+    case '/labschool':
+        return Response.redirect('https://meet.google.com/cvd-pame-zod')
+        break; 
+    default:
+        return createNotFoundResponse()
+  }
   }
 
   if (
