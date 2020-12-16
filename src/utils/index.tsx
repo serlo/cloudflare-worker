@@ -70,7 +70,6 @@ const ApiResult = t.type({
       t.partial({
         alias: t.string,
         instance: t.string,
-        username: t.string,
         pages: t.array(t.type({ alias: t.string })),
       }),
     ]),
@@ -112,7 +111,7 @@ export async function getPathInfo(
           instance
         }
         ... on User {
-          username
+          alias
         }
         ... on Course {
           pages {
@@ -143,13 +142,10 @@ export async function getPathInfo(
   if (E.isLeft(apiResult)) return null
 
   const uuid = apiResult.right.data.uuid
-  let currentPath =
+  const currentPath =
     uuid.pages !== undefined && uuid.pages.length > 0
       ? uuid.pages[0].alias
       : uuid.alias ?? path
-
-  if (uuid.username !== undefined)
-    currentPath = '/user/profile/' + uuid.username
 
   const result = {
     typename: uuid.__typename,
