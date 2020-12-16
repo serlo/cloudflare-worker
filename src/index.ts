@@ -76,28 +76,22 @@ async function redirects(request: Request) {
   }
 
   if (url.subdomain === 'meet') {
-      switch(url.pathname){
-    case '/':
+    switch (url.pathname) {
+      case '/':
         return Response.redirect('https://meet.google.com/vtk-ncrc-rdp')
-        break;
-    case '/dev':
+      case '/dev':
         return Response.redirect('https://meet.google.com/rci-pize-jow')
-        break;    
-    case '/einbindung':
+      case '/einbindung':
         return Response.redirect('https://meet.google.com/qzv-ojgk-xqw')
-        break;
-    case '/begleitung':
+      case '/begleitung':
         return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
-        break;  
-    case '/reviewing':
+      case '/reviewing':
         return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
-        break; 
-    case '/labschool':
+      case '/labschool':
         return Response.redirect('https://meet.google.com/cvd-pame-zod')
-        break; 
-    default:
+      default:
         return createNotFoundResponse()
-  }
+    }
   }
 
   if (
