@@ -27,13 +27,7 @@ import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
 import { maintenanceMode } from './maintenance'
 import { redirects } from './redirects'
 import { staticPages } from './static-pages'
-import {
-  Url,
-  getPathInfo,
-  isInstance,
-  Instance,
-  createNotFoundResponse,
-} from './utils'
+import { Url } from './utils'
 
 addEventListener('fetch', (event: Event) => {
   const e = event as FetchEvent

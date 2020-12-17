@@ -21,17 +21,12 @@
  */
 
 import { handleRequest } from '../src'
-import { Instance } from '../src/utils'
 import {
   createKV,
   mockHttpGet,
   returnsText,
-  givenUuid,
-  givenApi,
-  returnsMalformedJson,
   givenStats,
   defaultStatsServer,
-  expectIsNotFoundResponse,
 } from './__utils__'
 
 describe('Enforce HTTPS', () => {
