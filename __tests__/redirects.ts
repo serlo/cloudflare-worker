@@ -74,46 +74,41 @@ describe('meet.serlo.org', () => {
     const target = 'https://meet.google.com/cvd-pame-zod'
     expectToBeRedirectTo(response, target, 302)
   })
+
   test('meet.serlo.org/1 ', async () => {
     const response = await handleUrl('https://meet.serlo.local/1')
 
-    const target =
-      'https://docs.google.com/document/d/1FhDqkRBZZEkxN-j9edfP-k0kdbnjurKZ3nwoSMxlilI/edit#'
+    const target = 'https://meet.google.com/fxn-iprp-ezx'
     expectToBeRedirectTo(response, target, 302)
   })
   test('meet.serlo.org/2 ', async () => {
     const response = await handleUrl('https://meet.serlo.local/2')
 
-    const target =
-      'https://docs.google.com/document/d/1FhDqkRBZZEkxN-j9edfP-k0kdbnjurKZ3nwoSMxlilI/edit#'
+    const target = 'https://meet.google.com/yku-aksd-fkk'
     expectToBeRedirectTo(response, target, 302)
   })
   test('meet.serlo.org/3 ', async () => {
     const response = await handleUrl('https://meet.serlo.local/3')
 
-    const target =
-      'https://docs.google.com/document/d/1FhDqkRBZZEkxN-j9edfP-k0kdbnjurKZ3nwoSMxlilI/edit#'
+    const target = 'https://meet.google.com/qma-zouf-vcz'
     expectToBeRedirectTo(response, target, 302)
   })
   test('meet.serlo.org/4 ', async () => {
     const response = await handleUrl('https://meet.serlo.local/4')
 
-    const target =
-      'https://docs.google.com/document/d/1FhDqkRBZZEkxN-j9edfP-k0kdbnjurKZ3nwoSMxlilI/edit#'
+    const target = 'https://meet.google.com/iskddmh-wrh'
     expectToBeRedirectTo(response, target, 302)
   })
   test('meet.serlo.org/5 ', async () => {
     const response = await handleUrl('https://meet.serlo.local/5')
 
-    const target =
-      'https://docs.google.com/document/d/1FhDqkRBZZEkxN-j9edfP-k0kdbnjurKZ3nwoSMxlilI/edit#'
+    const target = 'https://meet.google.com/yig-sxgw-zwx'
     expectToBeRedirectTo(response, target, 302)
   })
   test('meet.serlo.org/6 ', async () => {
     const response = await handleUrl('https://meet.serlo.local/6')
 
-    const target =
-      'https://docs.google.com/document/d/1FhDqkRBZZEkxN-j9edfP-k0kdbnjurKZ3nwoSMxlilI/edit#'
+    const target = 'https://meet.google.com/icu-cubt-wgs'
     expectToBeRedirectTo(response, target, 302)
   })
   test('returns 404 when meet room is not defined', async () => {
