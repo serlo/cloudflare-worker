@@ -56,3 +56,12 @@ export async function expectIsJsonResponse(
   expect(response.headers.get('Content-Type')).toBe('application/json')
   expect(JSON.parse(await response.text())).toEqual(targetJson)
 }
+
+export function expectToBeRedirectTo(
+  response: Response,
+  url: string,
+  status: number
+) {
+  expect(response.headers.get('Location')).toBe(url)
+  expect(response.status).toBe(status)
+}
