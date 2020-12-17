@@ -52,6 +52,30 @@ export async function redirects(request: Request) {
         return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
       case '/labschool':
         return Response.redirect('https://meet.google.com/cvd-pame-zod')
+      case '/1':
+        return Response.redirect(
+          'https://docs.google.com/document/d/1FhDqkRBZZEkxN-j9edfP-k0kdbnjurKZ3nwoSMxlilI/edit#'
+        )
+      case '/2':
+        return Response.redirect(
+          'https://docs.google.com/document/d/1FhDqkRBZZEkxN-j9edfP-k0kdbnjurKZ3nwoSMxlilI/edit#'
+        )
+      case '/3':
+        return Response.redirect(
+          'https://docs.google.com/document/d/1FhDqkRBZZEkxN-j9edfP-k0kdbnjurKZ3nwoSMxlilI/edit#'
+        )
+      case '/4':
+        return Response.redirect(
+          'https://docs.google.com/document/d/1FhDqkRBZZEkxN-j9edfP-k0kdbnjurKZ3nwoSMxlilI/edit#'
+        )
+      case '/5':
+        return Response.redirect(
+          'https://docs.google.com/document/d/1FhDqkRBZZEkxN-j9edfP-k0kdbnjurKZ3nwoSMxlilI/edit#'
+        )
+      case '/6':
+        return Response.redirect(
+          'https://docs.google.com/document/d/1FhDqkRBZZEkxN-j9edfP-k0kdbnjurKZ3nwoSMxlilI/edit#'
+        )
       default:
         return createNotFoundResponse()
     }
