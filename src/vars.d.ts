@@ -25,7 +25,6 @@ declare namespace NodeJS {
     API_ENDPOINT: string
     DOMAIN: string
     ENABLE_BASIC_AUTH: 'true' | 'false'
-    ENABLE_PATH_INFO_CACHE: 'true' | 'false'
     FRONTEND_ALLOWED_TYPES: string
     FRONTEND_DOMAIN: string
     FRONTEND_PROBABILITY: string
