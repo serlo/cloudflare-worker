@@ -30,9 +30,10 @@ export async function embed(request: Request): Promise<Response | null> {
 
   const urlParam = url.searchParams.get('url')
 
-  // TODO
-  if (urlParam === null || urlParam === '') return returnPlaceholder()
+  // TODO: test fehlt
+  if (urlParam === null) return returnPlaceholder()
 
+  // TODO: catch exception
   const videoUrl = new Url(urlParam)
 
   if (videoUrl.domain === 'youtube.com') {
