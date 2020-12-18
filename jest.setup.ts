@@ -46,7 +46,6 @@ beforeAll(() => {
 
 beforeEach(() => {
   global.API_SECRET = 'secret'
-  global.ENABLE_PATH_INFO_CACHE = 'true'
   global.FRONTEND_DOMAIN = 'frontend.serlo.org'
   global.FRONTEND_PROBABILITY = '1'
   global.FRONTEND_ALLOWED_TYPES = '[]'
