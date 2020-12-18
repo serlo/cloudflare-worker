@@ -33,87 +33,23 @@ import {
 } from './__utils__'
 
 describe('meet.serlo.org', () => {
-  test('meet.serlo.org', async () => {
-    const response = await handleUrl('https://meet.serlo.local/')
+  test.each([
+    ['/', '/vtk-ncrc-rdp'],
+    ['/dev', '/rci-pize-jow'],
+    ['/einbindung', '/qzv-ojgk-xqw'],
+    ['/begleitung', '/kon-wdmt-yhb'],
+    ['/reviewing', '/kon-wdmt-yhb'],
+    ['/labschool', '/cvd-pame-zod'],
+    ['/1', '/fxn-iprp-ezx'],
+    ['/2', '/yku-aksd-fkk'],
+    ['/3', '/qma-zouf-vcz'],
+    ['/4', '/iskddmh-wrh'],
+    ['/5', '/yig-sxgw-zwx'],
+    ['/6', '/icu-cubt-wgs'],
+  ])('meet.serlo.org%s', async (path, googleMeetRoom) => {
+    const response = await handleUrl(`https://meet.serlo.local${path}`)
 
-    const target = 'https://meet.google.com/vtk-ncrc-rdp'
-    expectToBeRedirectTo(response, target, 302)
-  })
-
-  test('meet.serlo.org/dev', async () => {
-    const response = await handleUrl('https://meet.serlo.local/dev')
-
-    const target = 'https://meet.google.com/rci-pize-jow'
-    expectToBeRedirectTo(response, target, 302)
-  })
-
-  test('meet.serlo.org/einbindung ', async () => {
-    const response = await handleUrl('https://meet.serlo.local/einbindung')
-
-    const target = 'https://meet.google.com/qzv-ojgk-xqw'
-    expectToBeRedirectTo(response, target, 302)
-  })
-
-  test('meet.serlo.org/begleitung', async () => {
-    const response = await handleUrl('https://meet.serlo.local/begleitung')
-
-    const target = 'https://meet.google.com/kon-wdmt-yhb'
-    expectToBeRedirectTo(response, target, 302)
-  })
-
-  test('meet.serlo.org/reviewing', async () => {
-    const response = await handleUrl('https://meet.serlo.local/reviewing')
-
-    const target = 'https://meet.google.com/kon-wdmt-yhb'
-    expectToBeRedirectTo(response, target, 302)
-  })
-
-  test('meet.serlo.org/labschool ', async () => {
-    const response = await handleUrl('https://meet.serlo.local/labschool')
-
-    const target = 'https://meet.google.com/cvd-pame-zod'
-    expectToBeRedirectTo(response, target, 302)
-  })
-
-  test('meet.serlo.org/1 ', async () => {
-    const response = await handleUrl('https://meet.serlo.local/1')
-
-    const target = 'https://meet.google.com/fxn-iprp-ezx'
-    expectToBeRedirectTo(response, target, 302)
-  })
-
-  test('meet.serlo.org/2 ', async () => {
-    const response = await handleUrl('https://meet.serlo.local/2')
-
-    const target = 'https://meet.google.com/yku-aksd-fkk'
-    expectToBeRedirectTo(response, target, 302)
-  })
-
-  test('meet.serlo.org/3 ', async () => {
-    const response = await handleUrl('https://meet.serlo.local/3')
-
-    const target = 'https://meet.google.com/qma-zouf-vcz'
-    expectToBeRedirectTo(response, target, 302)
-  })
-
-  test('meet.serlo.org/4 ', async () => {
-    const response = await handleUrl('https://meet.serlo.local/4')
-
-    const target = 'https://meet.google.com/iskddmh-wrh'
-    expectToBeRedirectTo(response, target, 302)
-  })
-
-  test('meet.serlo.org/5 ', async () => {
-    const response = await handleUrl('https://meet.serlo.local/5')
-
-    const target = 'https://meet.google.com/yig-sxgw-zwx'
-    expectToBeRedirectTo(response, target, 302)
-  })
-
-  test('meet.serlo.org/6 ', async () => {
-    const response = await handleUrl('https://meet.serlo.local/6')
-
-    const target = 'https://meet.google.com/icu-cubt-wgs'
+    const target = `https://meet.google.com${googleMeetRoom}`
     expectToBeRedirectTo(response, target, 302)
   })
 
