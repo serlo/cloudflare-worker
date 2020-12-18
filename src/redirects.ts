@@ -52,6 +52,18 @@ export async function redirects(request: Request) {
         return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
       case '/labschool':
         return Response.redirect('https://meet.google.com/cvd-pame-zod')
+      case '/1':
+        return Response.redirect('https://meet.google.com/fxn-iprp-ezx')
+      case '/2':
+        return Response.redirect('https://meet.google.com/yku-aksd-fkk')
+      case '/3':
+        return Response.redirect('https://meet.google.com/qma-zouf-vcz')
+      case '/4':
+        return Response.redirect('https://meet.google.com/iskddmh-wrh')
+      case '/5':
+        return Response.redirect('https://meet.google.com/yig-sxgw-zwx')
+      case '/6':
+        return Response.redirect('https://meet.google.com/icu-cubt-wgs')
       default:
         return createNotFoundResponse()
     }
