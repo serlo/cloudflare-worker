@@ -44,8 +44,8 @@ describe('meet.serlo.org', () => {
     ['/2', '/yku-aksd-fkk'],
     ['/3', '/qma-zouf-vcz'],
     ['/4', '/iskddmh-wrh'],
-    ['/5', '/yig-sxgw-zwx'],
-    ['/6', '/icu-cubt-wgs'],
+    ['/5', '/xqt-cdpm-nco'],
+    ['/6', '/sui-yuwv-suh'],
   ])('meet.serlo.org%s', async (path, googleMeetRoom) => {
     const response = await handleUrl(`https://meet.serlo.local${path}`)
 
