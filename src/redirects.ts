@@ -61,9 +61,9 @@ export async function redirects(request: Request) {
       case '/4':
         return Response.redirect('https://meet.google.com/iskddmh-wrh')
       case '/5':
-        return Response.redirect('https://meet.google.com/yig-sxgw-zwx')
+        return Response.redirect('https://meet.google.com/xqt-cdpm-nco')
       case '/6':
-        return Response.redirect('https://meet.google.com/icu-cubt-wgs')
+        return Response.redirect('https://meet.google.com/sui-yuwv-suh')
       default:
         return createNotFoundResponse()
     }
