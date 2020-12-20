@@ -25,7 +25,7 @@ import * as R from 'ramda'
 import { RestResolver } from './utils'
 
 export function givenApi(resolver: RestResolver) {
-  global.server.use(rest.post(global.API_ENDPOINT, resolver))
+  global.server.use(rest.post(/https:\/\/api.*\/graphql/, resolver))
 }
 
 export function defaultApiServer(): RestResolver {
