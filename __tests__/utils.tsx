@@ -155,6 +155,7 @@ describe('getPathInfo()', () => {
       givenUuid({
         __typename: 'Article',
         alias: longTamilPath,
+        instance: Instance.Ta
       })
 
       await getPathInfo(Instance.Ta, longTamilPath)
@@ -164,6 +165,7 @@ describe('getPathInfo()', () => {
         JSON.stringify({
           typename: 'Article',
           currentPath: encode(longTamilPath),
+          instance: Instance.Ta
         })
       )
     })

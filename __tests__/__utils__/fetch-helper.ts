@@ -21,22 +21,7 @@
  */
 
 import { handleRequest } from '../../src'
-
-interface PartialUrlSpec {
-  subdomain?: string
-  pathname?: string
-}
-
-interface UrlSpec extends PartialUrlSpec {
-  environment: TestEnvironment
-}
-
-enum TestEnvironment {
-  Local = 'local',
-  Dev = 'dev',
-  Staging = 'staging',
-  Production = 'production',
-}
+import { TestEnvironment, domains } from './test-environment'
 
 export function fetchTestEnvironment(spec: PartialUrlSpec, init?: RequestInit) {
   return fetchAt({ ...spec, environment: getTestEnvironment() }, init)
@@ -54,7 +39,7 @@ function fetchAt(
     'https://' +
     subdomain +
     (subdomain.length > 0 ? '.' : '') +
-    getDomain(environment) +
+    domains[environment] +
     pathname
   const request = new Request(url, init)
 
@@ -68,19 +53,6 @@ function fetchAt(
   }
 }
 
-function getDomain(environment: TestEnvironment): string {
-  switch (environment) {
-    case TestEnvironment.Production:
-      return 'serlo.org'
-    case TestEnvironment.Staging:
-      return 'serlo-staging.dev'
-    case TestEnvironment.Dev:
-      return 'serlo-development.dev'
-    case TestEnvironment.Local:
-      return 'serlo.local'
-  }
-}
-
 function getTestEnvironment(): TestEnvironment {
   const environment = (process.env.TEST_ENVIRONMENT ?? '').toLowerCase()
 
@@ -89,4 +61,13 @@ function getTestEnvironment(): TestEnvironment {
 
 function isTestEnvironment(env: string): env is TestEnvironment {
   return Object.values(TestEnvironment).includes(env as TestEnvironment)
+}
+
+interface PartialUrlSpec {
+  subdomain?: string
+  pathname?: string
+}
+
+interface UrlSpec extends PartialUrlSpec {
+  environment: TestEnvironment
 }
