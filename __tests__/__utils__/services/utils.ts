@@ -21,6 +21,8 @@
  */
 import { rest, ResponseResolver, restContext, MockedRequest } from 'msw'
 
+import { domains } from '../test-environment'
+
 export type RestResolver = ResponseResolver<MockedRequest, typeof restContext>
 
 export function mockHttpGet(url: string, resolver: RestResolver) {
@@ -48,4 +50,29 @@ export function returnsJson(data: unknown): RestResolver {
 
 export function hasInternalServerError(): RestResolver {
   return (_req, res, ctx) => res(ctx.status(500))
+}
+
+export function createUrlRegex({
+  subdomains,
+  pathname = /\/.*/,
+}: {
+  subdomains: string[]
+  pathname?: RegExp | string
+}): RegExp {
+  return new RegExp(
+    'https:\\/\\/' +
+      matchStrings(subdomains) +
+      '\\.' +
+      matchStrings(Object.values(domains)) +
+      (typeof pathname === 'string' ? escapeRegex(pathname) : pathname.source)
+  )
+}
+
+function matchStrings(strings: string[]) {
+  return '(' + strings.map(escapeRegex).join('|') + ')'
+}
+
+function escapeRegex(text: string): string {
+  // https://stackoverflow.com/a/3561711
+  return text.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')
 }

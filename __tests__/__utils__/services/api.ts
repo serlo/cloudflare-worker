@@ -22,10 +22,16 @@
 import { rest } from 'msw'
 import * as R from 'ramda'
 
-import { RestResolver } from './utils'
+import { getUuid } from './database'
+import { RestResolver, createUrlRegex } from './utils'
 
 export function givenApi(resolver: RestResolver) {
-  global.server.use(rest.post(/https:\/\/api.*\/graphql/, resolver))
+  global.server.use(
+    rest.post(
+      createUrlRegex({ subdomains: ['api'], pathname: '/graphql' }),
+      resolver
+    )
+  )
 }
 
 export function defaultApiServer(): RestResolver {
@@ -42,42 +48,27 @@ export function defaultApiServer(): RestResolver {
       return res(ctx.status(400, 'Content-Type is not application/json'))
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const path = req.body?.variables?.alias?.path as string | undefined
+    const { instance, path } = (req.body?.variables?.alias ?? {}) as {
+      instance: string
+      path: string
+    }
 
-    if (path == null)
-      return res(ctx.status(400, 'variable "alias" is not defined'))
+    if (path == null || instance == null)
+      return res(ctx.status(400, 'variable "alias" wrongly defined'))
 
-    const id = getIdFromPath(path)
-    const result = id
-      ? global.uuids.find((u) => u.id === id)
-      : global.uuids.find((u) => u.alias === path || u.oldAlias === path)
+    const uuid = getUuid(instance, path)
 
-    if (result === undefined) {
+    if (uuid === undefined) {
       const statusText = `Nothing found for "${path}"`
 
       return res(ctx.status(404, statusText))
     }
 
-    const uuid = R.omit(['id', 'oldAlias'], result)
+    const result = R.omit(['id', 'oldAlias'], uuid)
 
-    if (uuid.alias !== undefined)
-      uuid.alias = encodeURIComponent(uuid.alias).replace(/%2F/g, '/')
+    if (result.alias !== undefined)
+      result.alias = encodeURIComponent(result.alias).replace(/%2F/g, '/')
 
-    return res(ctx.json({ data: { uuid } }))
+    return res(ctx.json({ data: { uuid: result } }))
   }
-}
-
-function getIdFromPath(path: string): number | null {
-  const regexes = [
-    new RegExp('^/(?<id>\\d+)$'),
-    new RegExp('(?<subject>[^/]+/)?(?<id>\\d+)/(?<title>[^/]*)$'),
-  ]
-
-  for (const regex of regexes) {
-    const match = regex.exec(path)
-
-    if (match) return parseInt(match?.groups?.id ?? '')
-  }
-
-  return null
 }
