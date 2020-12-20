@@ -19,8 +19,25 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-export * from './api'
-export * from './database'
-export * from './serlo'
-export * from './stats'
-export * from './utils'
+import { rest } from 'msw'
+
+import { Url, Instance } from '../../../src/utils'
+import { getUuid } from './database'
+import { RestResolver, createUrlRegex } from './utils'
+
+export function givenSerlo(resolver: RestResolver) {
+  global.server.use(
+    rest.get(createUrlRegex({ subdomains: Object.values(Instance) }), resolver)
+  )
+}
+
+export function defaultSerloServer(): RestResolver {
+  return (req, res, ctx) => {
+    const url = new Url(req.url.href)
+    const uuid = getUuid(url.subdomain, url.pathname)
+
+    return uuid == null
+      ? res(ctx.status(404))
+      : res(ctx.body('<html class="fuelux"\n' + (uuid.content ?? '')))
+  }
+}
