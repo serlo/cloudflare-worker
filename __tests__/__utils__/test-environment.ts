@@ -32,3 +32,13 @@ export const domains: Record<TestEnvironment, string> = {
   [TestEnvironment.Staging]: 'serlo-staging.dev',
   [TestEnvironment.Production]: 'serlo.org',
 }
+
+export function getTestEnvironment(): TestEnvironment {
+  const environment = (process.env.TEST_ENVIRONMENT ?? '').toLowerCase()
+
+  return isTestEnvironment(environment) ? environment : TestEnvironment.Local
+}
+
+function isTestEnvironment(env: string): env is TestEnvironment {
+  return Object.values(TestEnvironment).includes(env as TestEnvironment)
+}
