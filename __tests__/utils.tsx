@@ -154,8 +154,8 @@ describe('getPathInfo()', () => {
         '%AE%B3%E0%AF%8D'
       givenUuid({
         __typename: 'Article',
-        alias: longTamilPath,
-        instance: Instance.Ta
+        alias: decodeURIComponent(longTamilPath),
+        instance: Instance.Ta,
       })
 
       await getPathInfo(Instance.Ta, longTamilPath)
@@ -164,8 +164,8 @@ describe('getPathInfo()', () => {
       expect(await global.PATH_INFO_KV.get(cacheKey)).toEqual(
         JSON.stringify({
           typename: 'Article',
-          currentPath: encode(longTamilPath),
-          instance: Instance.Ta
+          currentPath: longTamilPath,
+          instance: Instance.Ta,
         })
       )
     })
@@ -204,10 +204,6 @@ describe('getPathInfo()', () => {
         )
       })
     })
-
-    function encode(text: string) {
-      return encodeURIComponent(text).replace(/%2F/g, '/')
-    }
   })
 })
 

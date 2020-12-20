@@ -27,9 +27,8 @@ import {
   expectToBeRedirectTo,
   givenApi,
   givenUuid,
-  mockHttpGet,
   returnsMalformedJson,
-  returnsText,
+  expectContainsText,
 } from './__utils__'
 
 describe('meet.serlo.org', () => {
@@ -108,6 +107,7 @@ describe('redirects to current path of an resource', () => {
       __typename: 'Page',
       oldAlias: '/sexed',
       alias: '/sex-ed',
+      content: 'Sex Education',
       instance: Instance.En,
     })
   })
@@ -125,8 +125,6 @@ describe('redirects to current path of an resource', () => {
   })
 
   test('no redirect when current path is different than given path and XMLHttpRequest', async () => {
-    mockHttpGet('https://en.serlo.org/sexed', returnsText('article content'))
-
     const request = new Request('https://en.serlo.org/sexed', {
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
@@ -134,24 +132,25 @@ describe('redirects to current path of an resource', () => {
     })
     const response = await handleRequest(request)
 
-    expect(await response.text()).toBe('article content')
+    await expectContainsText(response, ['Sex Education'])
   })
 
   test('no redirect when current path is the same as given path', async () => {
-    mockHttpGet('https://en.serlo.org/sex-ed', returnsText('article content'))
-
     const response = await handleUrl('https://en.serlo.org/sex-ed')
 
-    expect(await response.text()).toBe('article content')
+    await expectContainsText(response, ['Sex Education'])
   })
 
   test('no redirect when requested entity has no alias', async () => {
-    givenUuid({ id: 128620, __typename: 'ArticleRevision' })
-    mockHttpGet('https://de.serlo.org/128620', returnsText('article content'))
+    givenUuid({
+      id: 128620,
+      __typename: 'ArticleRevision',
+      content: 'Vorherige Version',
+    })
 
     const response = await handleUrl('https://de.serlo.org/128620')
 
-    expect(await response.text()).toBe('article content')
+    await expectContainsText(response, ['Vorherige Version'])
   })
 
   test('redirects to first course page when requested entity is empty', async () => {
@@ -197,27 +196,29 @@ describe('redirects to current path of an resource', () => {
 
   test('no redirect when current path cannot be requested', async () => {
     givenApi(returnsMalformedJson())
-
-    mockHttpGet('https://en.serlo.org/path', returnsText('article content'))
+    givenUuid({
+      __typename: 'Article',
+      alias: '/path',
+      content: 'article content',
+      instance: Instance.En,
+    })
 
     const response = await handleUrl('https://en.serlo.org/path')
 
-    expect(await response.text()).toBe('article content')
+    await expectContainsText(response, ['article content'])
   })
 
   test('handles URL encodings correctly', async () => {
     givenUuid({
       __typename: 'TaxonomyTerm',
-      alias: '/mathe/zahlen-größen/größen-einheiten',
+      alias: '/mathe/zahlen-größen',
+      instance: Instance.De,
+      content: 'Zahlen und Größen',
     })
-    mockHttpGet(
-      'https://de.serlo.org/mathe/zahlen-gr%C3%B6%C3%9Fen',
-      returnsText('article content')
-    )
 
     const response = await handleUrl('https://de.serlo.org/mathe/zahlen-größen')
 
-    expect(await response.text()).toBe('article content')
+    await expectContainsText(response, ['Zahlen und Größen'])
   })
 })
 

@@ -42,7 +42,9 @@ export function getUuid(instance: string, path: string) {
   }
 
   return global.uuids.find(
-    (u) => u.instance === instance && [u.alias, u.oldAlias].includes(path)
+    (u) =>
+      u.instance === instance &&
+      [u.alias, u.oldAlias].includes(decodeURIComponent(path))
   )
 }
 
@@ -62,4 +64,5 @@ interface AbstractUuid<Typename extends string> {
   alias?: string
   oldAlias?: string
   instance?: Instance
+  content?: string
 }

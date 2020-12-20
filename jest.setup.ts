@@ -34,6 +34,8 @@ import {
   givenApi,
   defaultApiServer,
   Uuid,
+  givenSerlo,
+  defaultSerloServer,
 } from './__tests__/__utils__'
 
 const randomCopy = Math.random
@@ -58,6 +60,7 @@ beforeEach(() => {
   global.uuids = new Array<Uuid>()
 
   givenApi(defaultApiServer())
+  givenSerlo(defaultSerloServer())
 })
 
 afterEach(() => {
