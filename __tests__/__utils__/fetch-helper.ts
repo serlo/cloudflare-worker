@@ -21,53 +21,55 @@
  */
 
 import { handleRequest } from '../../src'
-import { TestEnvironment, domains } from './test-environment'
+import {
+  TestEnvironment,
+  domains,
+  getTestEnvironment,
+} from './test-environment'
 
-export function fetchTestEnvironment(spec: PartialUrlSpec, init?: RequestInit) {
+export function fetchTestEnvironment(spec: UrlSpec, init?: RequestInit) {
   return fetchAt({ ...spec, environment: getTestEnvironment() }, init)
 }
 
-export function fetchLocally(spec: PartialUrlSpec, init?: RequestInit) {
+export function fetchLocally(spec: UrlSpec, init?: RequestInit) {
   return fetchAt({ ...spec, environment: TestEnvironment.Local }, init)
 }
 
 function fetchAt(
-  { subdomain = '', pathname = '/', environment }: UrlSpec,
+  spec: UrlSpec & Required<TestEnvironmentSpec>,
   init?: RequestInit
 ) {
-  const url =
-    'https://' +
-    subdomain +
-    (subdomain.length > 0 ? '.' : '') +
-    domains[environment] +
-    pathname
-  const request = new Request(url, init)
+  const request = new Request(createUrl(spec), init)
 
-  if (environment === TestEnvironment.Local) {
+  if (spec.environment === TestEnvironment.Local) {
     return handleRequest(request)
   } else {
     // See https://github.com/mswjs/msw/blob/master/src/context/fetch.ts
     request.headers.set('x-msw-bypass', 'true')
 
-    return fetch(request)
+    return fetch(request, { redirect: 'manual' })
   }
 }
 
-function getTestEnvironment(): TestEnvironment {
-  const environment = (process.env.TEST_ENVIRONMENT ?? '').toLowerCase()
-
-  return isTestEnvironment(environment) ? environment : TestEnvironment.Local
+export function createUrl({
+  subdomain = '',
+  pathname = '/',
+  environment = getTestEnvironment(),
+}: UrlSpec & TestEnvironmentSpec) {
+  return (
+    'https://' +
+    subdomain +
+    (subdomain.length > 0 ? '.' : '') +
+    domains[environment] +
+    pathname
+  )
 }
 
-function isTestEnvironment(env: string): env is TestEnvironment {
-  return Object.values(TestEnvironment).includes(env as TestEnvironment)
-}
-
-interface PartialUrlSpec {
+interface UrlSpec {
   subdomain?: string
   pathname?: string
 }
 
-interface UrlSpec extends PartialUrlSpec {
-  environment: TestEnvironment
+interface TestEnvironmentSpec {
+  environment?: TestEnvironment
 }
