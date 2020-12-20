@@ -19,27 +19,41 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { handleRequest } from '../src'
-import { givenUuid } from './__utils__'
+import { givenUuid, fetchTestEnvironment } from './__utils__'
 
 describe('api calls', () => {
   test('get a signature', async () => {
     givenUuid({
       id: 23591,
       __typename: 'Page',
-      alias: '/math',
+      alias: '/23591/math',
     })
 
-    const req = new Request(global.API_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ variables: { alias: { path: '/23591' } } }),
-    })
-    const response = await handleRequest(req)
+    const query = `
+      query($alias: AliasInput) {
+        uuid(alias: $alias) {
+          __typename
+          ... on Page {
+            alias
+          }
+        }
+      }
+    `
+    const response = await fetchTestEnvironment(
+      { subdomain: 'api', pathname: '/graphql' },
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query,
+          variables: { alias: { instance: 'de', path: '/23591' } },
+        }),
+      }
+    )
 
     expect(response.status).toBe(200)
     expect(await response.json()).toEqual({
-      data: { uuid: { __typename: 'Page', alias: '/math' } },
+      data: { uuid: { __typename: 'Page', alias: '/23591/math' } },
     })
   })
 })
