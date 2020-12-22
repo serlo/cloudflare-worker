@@ -27,10 +27,10 @@ declare namespace NodeJS {
   }
 }
 
-declare interface KV<Keys extends string> {
-  get: (key: string) => Promise<string | null>
+declare interface KV<Key extends string> {
+  get: (key: Key) => Promise<string | null>
   put: (
-    key: string,
+    key: Key,
     value: string,
     options?: { expirationTtl: number }
   ) => Promise<void>
