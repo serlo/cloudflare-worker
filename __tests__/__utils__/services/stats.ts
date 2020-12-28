@@ -24,12 +24,12 @@ import { rest } from 'msw'
 import { RestResolver } from './utils'
 
 export function givenStats(resolver: RestResolver) {
-  global.server.use(rest.get('https://stats.serlo.org:path', resolver))
+  global.server.use(rest.get('https://stats.serlo.org/*', resolver))
 }
 
 export function defaultStatsServer(): RestResolver {
   return (req, res, ctx) => {
-    const path = req.params.path as string
+    const path = req.url.pathname
 
     if (path !== '/login') {
       return res(ctx.status(302), ctx.set('location', '/login'))
