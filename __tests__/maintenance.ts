@@ -50,7 +50,7 @@ describe('Maintenance mode', () => {
       end: DateTime.local().plus({ minutes: 20 }).toISO(),
       subdomains: ['de'],
     }
-    await global.MAINTENANCE_KV.put("enabled", JSON.stringify(value))
+    await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
     await expectNoMaintenanceMode()
   })
 
@@ -60,7 +60,7 @@ describe('Maintenance mode', () => {
       end: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['de'],
     }
-    await global.MAINTENANCE_KV.put("enabled", JSON.stringify(value))
+    await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
     await expectNoMaintenanceMode()
   })
 
@@ -71,7 +71,7 @@ describe('Maintenance mode', () => {
       end: end.toISO(),
       subdomains: ['de'],
     }
-    await global.MAINTENANCE_KV.put("enabled", JSON.stringify(value))
+    await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
     const response = await handleUrl('https://de.serlo.org')
     expect(response.status).toEqual(503)
     expectContentTypeIsHtml(response)
@@ -89,7 +89,7 @@ describe('Maintenance mode', () => {
       end: end.toISO(),
       subdomains: ['en'],
     }
-    await global.MAINTENANCE_KV.put("enabled", JSON.stringify(value))
+    await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
     const response = await handleUrl('https://en.serlo.org')
     expect(response.status).toEqual(503)
     expectContentTypeIsHtml(response)
@@ -105,7 +105,7 @@ describe('Maintenance mode', () => {
       start: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['de'],
     }
-    await global.MAINTENANCE_KV.put("enabled", JSON.stringify(value))
+    await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
     const response = await handleUrl('https://de.serlo.org')
     expect(response.status).toEqual(503)
     expectContentTypeIsHtml(response)
@@ -120,7 +120,7 @@ describe('Maintenance mode', () => {
       start: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['en'],
     }
-    await global.MAINTENANCE_KV.put("enabled", JSON.stringify(value))
+    await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
     const response = await handleUrl('https://en.serlo.org')
     expect(response.status).toEqual(503)
     expectContentTypeIsHtml(response)
@@ -137,7 +137,7 @@ describe('Maintenance mode', () => {
       end: end.toISO(),
       subdomains: ['en'],
     }
-    await global.MAINTENANCE_KV.put("enabled", JSON.stringify(value))
+    await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
     await expectNoMaintenanceMode()
   })
 
@@ -146,7 +146,7 @@ describe('Maintenance mode', () => {
       start: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['en'],
     }
-    await global.MAINTENANCE_KV.put("enabled", JSON.stringify(value))
+    await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
     await expectNoMaintenanceMode()
   })
 })
