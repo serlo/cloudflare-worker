@@ -20,14 +20,15 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-export function createKV(values: Record<string, string> = {}) {
+export function createKV<Key extends string>(): KV<Key> {
+  const values = {} as Record<Key, string | undefined>
   return {
-    async get(key: string): Promise<string | null> {
+    async get(key: Key): Promise<string | null> {
       return Promise.resolve(values[key] ?? null)
     },
 
     // eslint-disable-next-line @typescript-eslint/require-await
-    async put(key: string, value: string, _?: { expirationTtl: number }) {
+    async put(key: Key, value: string, _?: { expirationTtl: number }) {
       values[key] = value
     },
   }

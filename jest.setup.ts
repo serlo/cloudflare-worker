@@ -54,6 +54,7 @@ beforeEach(() => {
 
   global.MAINTENANCE_KV = createKV()
   global.PATH_INFO_KV = createKV()
+  global.PACKAGES_KV = createKV()
 
   global.uuids = new Array<Uuid>()
 
