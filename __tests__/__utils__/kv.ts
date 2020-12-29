@@ -30,6 +30,11 @@ export function createKV<Key extends string>(): KV<Key> {
     // eslint-disable-next-line @typescript-eslint/require-await
     async put(key: Key, value: string, _?: { expirationTtl: number }) {
       values[key] = value
+      expect(key.length).toBeLessThanOrEqual(512)
     },
   }
 }
+
+// function encode(text: string) {
+//   return encodeURIComponent(text).replace(/%2F/g, '/')
+// }
