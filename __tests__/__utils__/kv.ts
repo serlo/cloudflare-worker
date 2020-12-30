@@ -29,10 +29,10 @@ export function createKV<Key extends string>(): KV<Key> {
 
     // eslint-disable-next-line @typescript-eslint/require-await
     async put(key: Key, value: string, _?: { expirationTtl: number }) {
-      values[key] = value
       if (key.length > 512) {
-        throw 'Error: key longer than 512 characters.'
+        throw new Error('Error: key longer than 512 characters.')
       }
+      values[key] = value
     },
   }
 }
