@@ -36,7 +36,6 @@ export function expectContentTypeIsHtml(response: Response): void {
 export function expectHasOkStatus(response: Response): void {
   expect(response).not.toBeNull()
   expect(response.status).toBe(200)
-  expect(response.statusText).toBe('OK')
 }
 
 export async function expectIsNotFoundResponse(
@@ -44,7 +43,6 @@ export async function expectIsNotFoundResponse(
 ): Promise<void> {
   expect(response).not.toBeNull()
   expect(response.status).toBe(404)
-  expect(response.statusText).toBe('Not Found')
   expect(await response.text()).toEqual(
     expect.stringContaining('Page not found')
   )
@@ -57,4 +55,13 @@ export async function expectIsJsonResponse(
   expectHasOkStatus(response)
   expect(response.headers.get('Content-Type')).toBe('application/json')
   expect(JSON.parse(await response.text())).toEqual(targetJson)
+}
+
+export function expectToBeRedirectTo(
+  response: Response,
+  url: string,
+  status: number
+) {
+  expect(response.headers.get('Location')).toBe(url)
+  expect(response.status).toBe(status)
 }

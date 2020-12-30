@@ -83,10 +83,8 @@ export async function getPathInfo(
   if (path === '/user/me' || path === '/user/public')
     return { typename: 'User', currentPath: path }
 
-  const useCache = global.ENABLE_PATH_INFO_CACHE === 'true'
-
   const cacheKey = await toCacheKey(`/${lang}${path}`)
-  const cachedValue = useCache ? await global.PATH_INFO_KV.get(cacheKey) : null
+  const cachedValue = await global.PATH_INFO_KV.get(cacheKey)
 
   if (cachedValue !== null) {
     try {
@@ -151,11 +149,9 @@ export async function getPathInfo(
     instance: uuid.instance,
   }
 
-  if (useCache) {
-    await global.PATH_INFO_KV.put(cacheKey, JSON.stringify(result), {
-      expirationTtl: 60 * 60,
-    })
-  }
+  await global.PATH_INFO_KV.put(cacheKey, JSON.stringify(result), {
+    expirationTtl: 60 * 60,
+  })
 
   return result
 }
