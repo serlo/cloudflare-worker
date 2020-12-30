@@ -155,11 +155,16 @@ describe('getPathInfo()', () => {
       givenUuid({
         __typename: 'Article',
         alias: longTamilPath,
+        instance: Instance.Ta,
       })
 
-      await getPathInfo(Instance.Ta, longTamilPath)
+      const pathInfo = await getPathInfo(Instance.Ta, longTamilPath)
 
-      // const cacheKey = '23e2e346e649c466a41fabf38d7e8bf03333b007'
+      expect(pathInfo).toEqual({
+        typename: 'Article',
+        currentPath: longTamilPath,
+        instance: Instance.Ta,
+      })
     })
 
     describe('ignores malformed cache values', () => {
