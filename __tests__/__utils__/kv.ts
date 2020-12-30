@@ -20,16 +20,18 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-type KV_NAMES = 'MAINTENANCE_KV' | 'PACKAGES_KV' | 'PATH_INFO_KV'
-
-export function mockKV(name: KV_NAMES, values: Record<string, string>) {
-  global[name] = {
-    async get(key: string): Promise<string | null> {
+export function createKV<Key extends string>(): KV<Key> {
+  const values = {} as Record<Key, string | undefined>
+  return {
+    async get(key: Key): Promise<string | null> {
       return Promise.resolve(values[key] ?? null)
     },
 
     // eslint-disable-next-line @typescript-eslint/require-await
-    async put(key: string, value: string, _?: { expirationTtl: number }) {
+    async put(key: Key, value: string, _?: { expirationTtl: number }) {
+      if (key.length > 512) {
+        throw new Error('Error: key longer than 512 characters.')
+      }
       values[key] = value
     },
   }

@@ -29,7 +29,12 @@ import fetchNode, {
 } from 'node-fetch'
 import * as util from 'util'
 
-import { mockKV, givenApi, defaultApiServer, Uuid } from './__tests__/__utils__'
+import {
+  createKV,
+  givenApi,
+  defaultApiServer,
+  Uuid,
+} from './__tests__/__utils__'
 
 const randomCopy = Math.random
 
@@ -41,15 +46,15 @@ beforeAll(() => {
 
 beforeEach(() => {
   global.API_SECRET = 'secret'
-  global.ENABLE_PATH_INFO_CACHE = 'true'
   global.FRONTEND_DOMAIN = 'frontend.serlo.org'
   global.FRONTEND_PROBABILITY = '1'
   global.FRONTEND_ALLOWED_TYPES = '[]'
   // TODO: Remove this since this tests an implementation details
   global.fetch = jest.fn().mockImplementation(fetchNode)
 
-  mockKV('MAINTENANCE_KV', {})
-  mockKV('PATH_INFO_KV', {})
+  global.MAINTENANCE_KV = createKV()
+  global.PATH_INFO_KV = createKV()
+  global.PACKAGES_KV = createKV()
 
   global.uuids = new Array<Uuid>()
 
@@ -80,13 +85,6 @@ global.crypto = ({
   },
 } as unknown) as typeof crypto
 global.TextEncoder = util.TextEncoder
-
-// FIXME: Delete the following mock, when node-fetch is available in version 3.0.0
-// See https://github.com/node-fetch/node-fetch/commit/0959ca9739850bbd24e0721cc1296e7a0aa5c2bd#diff-d0f5704ae0738a7bd1f54aff42ddcb41
-// eslint-disable-next-line @typescript-eslint/unbound-method
-NodeResponse.redirect = function (location: string, status = 302) {
-  return new NodeResponse('', { status, headers: { location } })
-}
 
 export {}
 
