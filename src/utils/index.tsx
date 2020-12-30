@@ -103,10 +103,7 @@ export async function getPathInfo(
         ... on AbstractUuid {
           alias
         }
-        ... on TaxonomyTerm {
-          instance
-        }
-        ... on AbstractRepository {
+        ... on InstanceAware {
           instance
         }
         ... on Course {
