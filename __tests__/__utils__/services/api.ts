@@ -60,9 +60,6 @@ export function defaultApiServer(): RestResolver {
 
     const uuid = R.omit(['id', 'oldAlias'], result)
 
-    if (uuid.alias !== undefined)
-      uuid.alias = encodeURIComponent(uuid.alias).replace(/%2F/g, '/')
-
     return res(ctx.json({ data: { uuid } }))
   }
 }
