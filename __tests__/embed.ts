@@ -81,7 +81,6 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       expect(response.headers.get('content-type')).toBe('image/png')
       expect(response.headers.get('content-length')).toBe('135')
     })
-
     // TODO: Test, dass URL fehlerhaft ist
     // embed.serlo.org/thumbnail?url=42
     test('when url does not exist', async () => {
