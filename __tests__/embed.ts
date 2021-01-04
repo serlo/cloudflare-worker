@@ -84,8 +84,22 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
     // TODO: Test, dass URL fehlerhaft ist
     // embed.serlo.org/thumbnail?url=42
+    test('when url does not exist', async () => {
+      // TODO Fix this test
+      const response = await requestThumbnail('42')
+
+      expect(response.headers.get('content-type')).toBe('image/png')
+      expect(response.headers.get('content-length')).toBe('135')
+    })
 
     // Youtube-Link ohne v-Parameter
+    test('when youtube.link does not have a V-param', async () => {
+      // TODO Fix this test
+      const response = await requestThumbnail('https://www.youtube.com/watch?')
+
+      expect(response.headers.get('content-type')).toBe('image/png')
+      expect(response.headers.get('content-length')).toBe('135')
+    })
 
     test('when unsupported url is unsupported', async () => {
       const response = await requestThumbnail(
