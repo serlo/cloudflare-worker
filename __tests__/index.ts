@@ -1,7 +1,7 @@
 /**
  * This file is part of Serlo.org Cloudflare Worker.
  *
- * Copyright (c) 2020 Serlo Education e.V.
+ * Copyright (c) 2021 Serlo Education e.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License
@@ -15,14 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @copyright Copyright (c) 2020 Serlo Education e.V.
+ * @copyright Copyright (c) 2021 Serlo Education e.V.
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
 import { handleRequest } from '../src'
 import {
-  createKV,
   mockHttpGet,
   returnsText,
   givenStats,
@@ -88,7 +87,7 @@ describe('Semantic file names', () => {
 
 describe('Packages', () => {
   test('packages.serlo.org/<package>/<filePath>', async () => {
-    global.PACKAGES_KV = createKV({ foo: 'foo@1.0.0' })
+    await global.PACKAGES_KV.put('foo', 'foo@1.0.0')
     mockHttpGet(
       'https://packages.serlo.org/foo@1.0.0/bar',
       returnsText('content')
@@ -100,7 +99,7 @@ describe('Packages', () => {
   })
 
   test('packages.serlo.org/<package>/<filePath> (invalid)', async () => {
-    global.PACKAGES_KV = createKV({ foo: 'foo@1.0.0' })
+    await global.PACKAGES_KV.put('foo', 'foo@1.0.0')
     mockHttpGet('https://packages.serlo.org/foobar/bar', returnsText('content'))
 
     const response = await handleUrl('https://packages.serlo.local/foobar/bar')

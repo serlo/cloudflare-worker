@@ -1,7 +1,7 @@
 /**
  * This file is part of Serlo.org Cloudflare Worker.
  *
- * Copyright (c) 2020 Serlo Education e.V.
+ * Copyright (c) 2021 Serlo Education e.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @copyright Copyright (c) 2020 Serlo Education e.V.
+ * @copyright Copyright (c) 2021 Serlo Education e.V.
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
@@ -120,7 +120,7 @@ describe('handleRequest()', () => {
     expectContentTypeIsHtml(response)
     await expectContainsText(response, [
       '<p>Hello</p>',
-      'wirksam ab dem 12/11/2020',
+      'wirksam ab dem 11.12.2020',
     ])
   })
 
@@ -134,7 +134,7 @@ describe('handleRequest()', () => {
     expectContentTypeIsHtml(response)
     await expectContainsText(response, [
       '<p>Hello</p>',
-      'wirksam ab dem 10/9/1999',
+      'wirksam ab dem 9.10.1999',
     ])
   })
 
@@ -147,7 +147,7 @@ describe('handleRequest()', () => {
     await expectContainsText(response, [
       '<h1>Aktualisierungen: Datenschutzerklärung</h1>',
       'Aktuelle Version',
-      '10/9/1999',
+      '9.10.1999',
     ])
   })
 
