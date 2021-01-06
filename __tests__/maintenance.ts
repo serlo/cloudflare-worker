@@ -1,7 +1,7 @@
 /**
  * This file is part of Serlo.org Cloudflare Worker.
  *
- * Copyright (c) 2020 Serlo Education e.V.
+ * Copyright (c) 2021 Serlo Education e.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @copyright Copyright (c) 2020 Serlo Education e.V.
+ * @copyright Copyright (c) 2021 Serlo Education e.V.
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
@@ -50,8 +50,7 @@ describe('Maintenance mode', () => {
       end: DateTime.local().plus({ minutes: 20 }).toISO(),
       subdomains: ['de'],
     }
-    global.MAINTENANCE_KV = createKV({ enabled: JSON.stringify(value) })
-
+    await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
     await expectNoMaintenanceMode()
   })
 
@@ -61,8 +60,7 @@ describe('Maintenance mode', () => {
       end: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['de'],
     }
-    global.MAINTENANCE_KV = createKV({ enabled: JSON.stringify(value) })
-
+    await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
     await expectNoMaintenanceMode()
   })
 
@@ -73,8 +71,7 @@ describe('Maintenance mode', () => {
       end: end.toISO(),
       subdomains: ['de'],
     }
-    global.MAINTENANCE_KV = createKV({ enabled: JSON.stringify(value) })
-
+    await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
     const response = await handleUrl('https://de.serlo.org')
     expect(response.status).toEqual(503)
     expectContentTypeIsHtml(response)
@@ -92,8 +89,7 @@ describe('Maintenance mode', () => {
       end: end.toISO(),
       subdomains: ['en'],
     }
-    global.MAINTENANCE_KV = createKV({ enabled: JSON.stringify(value) })
-
+    await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
     const response = await handleUrl('https://en.serlo.org')
     expect(response.status).toEqual(503)
     expectContentTypeIsHtml(response)
@@ -109,8 +105,7 @@ describe('Maintenance mode', () => {
       start: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['de'],
     }
-    global.MAINTENANCE_KV = createKV({ enabled: JSON.stringify(value) })
-
+    await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
     const response = await handleUrl('https://de.serlo.org')
     expect(response.status).toEqual(503)
     expectContentTypeIsHtml(response)
@@ -125,8 +120,7 @@ describe('Maintenance mode', () => {
       start: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['en'],
     }
-    global.MAINTENANCE_KV = createKV({ enabled: JSON.stringify(value) })
-
+    await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
     const response = await handleUrl('https://en.serlo.org')
     expect(response.status).toEqual(503)
     expectContentTypeIsHtml(response)
@@ -143,8 +137,7 @@ describe('Maintenance mode', () => {
       end: end.toISO(),
       subdomains: ['en'],
     }
-    global.MAINTENANCE_KV = createKV({ enabled: JSON.stringify(value) })
-
+    await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
     await expectNoMaintenanceMode()
   })
 
@@ -153,8 +146,7 @@ describe('Maintenance mode', () => {
       start: DateTime.local().minus({ minutes: 10 }).toISO(),
       subdomains: ['en'],
     }
-    global.MAINTENANCE_KV = createKV({ enabled: JSON.stringify(value) })
-
+    await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
     await expectNoMaintenanceMode()
   })
 })
