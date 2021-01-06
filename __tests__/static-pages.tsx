@@ -67,6 +67,165 @@ describe('serlo.org/terms', () => {
       expect.stringContaining('Informationen für Weiternutzer')
     )
   })
+  test('is in English at en.serlo.org/terms', async () => {
+    mockLegalPage('en/terms.md', 'Terms of Use')
+
+    const response = await fetchTestEnvironment({
+      subdomain: 'en',
+      pathname: '/terms',
+    })
+
+    expect(await response.text()).toEqual(
+      expect.stringContaining('Terms of Use')
+    )
+  })
+})
+
+describe('serlo.org/imprint', () => {
+  test('is in German at de.serlo.org/imprint', async () => {
+    mockLegalPage('de/imprint.md', 'Impressum')
+
+    const response = await fetchTestEnvironment({
+      subdomain: 'de',
+      pathname: '/imprint',
+    })
+
+    expect(await response.text()).toEqual(expect.stringContaining('Impressum'))
+  })
+  test('is in English at en.serlo.org/imprint', async () => {
+    mockLegalPage('en/imprint.md', 'Imprint')
+
+    const response = await fetchTestEnvironment({
+      subdomain: 'en',
+      pathname: '/imprint',
+    })
+
+    expect(await response.text()).toEqual(expect.stringContaining('Imprint'))
+  })
+})
+
+describe('English version as default version', () => {
+  test('fr.serlo.org/terms gives the terms', async () => {
+    mockLegalPage('en/terms.md', 'Terms of Use')
+
+    const response = await fetchTestEnvironment({
+      subdomain: 'fr',
+      pathname: '/terms',
+    })
+
+    expect(await response.text()).toEqual(
+      expect.stringContaining('Terms of Use')
+    )
+  })
+  test('fr.serlo.org/imprint gives the imprint', async () => {
+    mockLegalPage('en/imprint.md', 'Imprint')
+
+    const response = await fetchTestEnvironment({
+      subdomain: 'fr',
+      pathname: '/imprint',
+    })
+
+    expect(await response.text()).toEqual(expect.stringContaining('Imprint'))
+  })
+  test('fr.serlo.org/privacy gives the privacy policy', async () => {
+    mockLegalPage('en/privacy.md', 'Privacy Policy')
+
+    const response = await fetchTestEnvironment({
+      subdomain: 'fr',
+      pathname: '/privacy',
+    })
+
+    expect(await response.text()).toEqual(
+      expect.stringContaining('Privacy Policy')
+    )
+  })
+})
+
+describe('serlo.org/privacy', () => {
+  test('is in German at de.serlo.org/privacy', async () => {
+    mockLegalPage('de/privacy.md', 'Datenschutzerklärung')
+
+    const response = await fetchTestEnvironment({
+      subdomain: 'de',
+      pathname: '/privacy',
+    })
+
+    expect(await response.text()).toEqual(
+      expect.stringContaining('Datenschutzerklärung')
+    )
+  })
+  test('link to the archive', async () => {
+    mockLegalPage('de/privacy.md', '<a href="/privacy/archive">Archiv</a>')
+
+    const response = await fetchTestEnvironment({
+      subdomain: 'de',
+      pathname: '/privacy',
+    })
+
+    expect(await response.text()).toEqual(
+      expect.stringContaining('<a href="/privacy/archive">Archiv</a>')
+    )
+  })
+
+  test('is in English at en.serlo.org/privacy', async () => {
+    mockLegalPage('en/privacy.md', 'Privacy Policy')
+
+    const response = await fetchTestEnvironment({
+      subdomain: 'en',
+      pathname: '/privacy',
+    })
+
+    expect(await response.text()).toEqual(
+      expect.stringContaining('Privacy Policy')
+    )
+  })
+})
+
+describe('serlo.org/privacy/archive/2020-02-10', () => {
+  test('is in German at de.serlo.org/privacy/archive/2020-02-10', async () => {
+    mockLegalPage('de/privacy/archive/2020-02-10.md', 'Datenschutzerklärung')
+
+    const response = await fetchTestEnvironment({
+      subdomain: 'de',
+      pathname: '/privacy/archive/2020-02-10',
+    })
+
+    expect(await response.text()).toEqual(
+      expect.stringContaining('Datenschutzerklärung')
+    )
+  })
+  test('links to the archive and the current version', async () => {
+    mockLegalPage(
+      'de/privacy/archive/2020-02-10.md',
+      'Dies ist eine archivierte Version. Schaue Dir die <a href="/privacy">aktuelle Version</a> oder <a href="/privacy/archive">frühere Versionen</a> an.'
+    )
+
+    const response = await fetchTestEnvironment({
+      subdomain: 'de',
+      pathname: '/privacy/archive/2020-02-10',
+    })
+
+    expect(await response.text()).toEqual(
+      expect.stringContaining(
+        'Dies ist eine archivierte Version. Schaue Dir die <a href="/privacy">aktuelle Version</a> oder <a href="/privacy/archive">frühere Versionen</a> an.'
+      )
+    )
+  })
+  test('is not the same website as serlo.org/privacy', async () => {
+    mockLegalPage(
+      'de/privacy/archive/2020-02-10.md',
+      'wirksam ab dem 10.2.2020'
+    )
+
+    const response = await fetchTestEnvironment({
+      subdomain: 'de',
+      pathname: '/privacy/archive/2020-02-10',
+    })
+
+    expect(await response.text()).toEqual(
+      expect.stringContaining('wirksam ab dem 10.2.2020')
+    )
+  })
 })
 
 function mockLegalPage(path: string, text: string) {
