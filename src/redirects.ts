@@ -38,6 +38,17 @@ export async function redirects(request: Request) {
     )
   }
 
+  if (url.subdomain === 'de') {
+    switch (url.pathname) {
+      case '/datenschutz':
+        return Response.redirect('https://de.serlo.org/privacy', 301)
+      case '/impressum':
+        return Response.redirect('https://de.serlo.org/imprint', 301)
+      case '/nutzungsbedingungen':
+        return Response.redirect('https://de.serlo.org/terms', 301)
+    }
+  }
+
   if (url.subdomain === 'meet') {
     switch (url.pathname) {
       case '/':
