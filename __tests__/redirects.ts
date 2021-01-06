@@ -64,21 +64,21 @@ test('de.serlo.org/datenschutz', async () => {
   const response = await handleUrl('https://de.serlo.local/datenschutz')
 
   const target = 'https://de.serlo.org/privacy'
-  expectToBeRedirectTo(response, target, 302)
+  expectToBeRedirectTo(response, target, 301)
 })
 
 test('de.serlo.org/impressum', async () => {
   const response = await handleUrl('https://de.serlo.local/impressum')
 
   const target = 'https://de.serlo.org/imprint'
-  expectToBeRedirectTo(response, target, 302)
+  expectToBeRedirectTo(response, target, 301)
 })
 
 test('de.serlo.org/nutzungsbedingungen ', async () => {
   const response = await handleUrl('https://de.serlo.local/nutzungsbedingungen')
 
   const target = 'https://de.serlo.org/terms'
-  expectToBeRedirectTo(response, target, 302)
+  expectToBeRedirectTo(response, target, 301)
 })
 
 test('start.serlo.org', async () => {
