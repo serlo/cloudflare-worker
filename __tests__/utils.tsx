@@ -154,7 +154,7 @@ describe('getPathInfo()', () => {
         '%AE%B3%E0%AF%8D'
       givenUuid({
         __typename: 'Article',
-        alias: longTamilPath,
+        alias: decodeURIComponent(longTamilPath),
         instance: Instance.Ta,
       })
 

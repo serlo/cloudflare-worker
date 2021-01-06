@@ -34,9 +34,17 @@ import {
   givenApi,
   defaultApiServer,
   Uuid,
+  givenSerlo,
+  defaultSerloServer,
+  getTestEnvironment,
+  TestEnvironment,
 } from './__tests__/__utils__'
 
 const randomCopy = Math.random
+
+if (getTestEnvironment() !== TestEnvironment.Local) {
+  jest.setTimeout(20000)
+}
 
 beforeAll(() => {
   global.API_ENDPOINT = 'https://api.serlo.org/graphql'
@@ -59,6 +67,7 @@ beforeEach(() => {
   global.uuids = new Array<Uuid>()
 
   givenApi(defaultApiServer())
+  givenSerlo(defaultSerloServer())
 })
 
 afterEach(() => {

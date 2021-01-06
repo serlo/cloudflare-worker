@@ -20,16 +20,18 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-import { handleRequest } from '../src'
 import { Instance } from '../src/utils'
 import {
   expectIsNotFoundResponse,
   expectToBeRedirectTo,
   givenApi,
   givenUuid,
-  mockHttpGet,
   returnsMalformedJson,
-  returnsText,
+  expectContainsText,
+  fetchTestEnvironment,
+  createUrl,
+  fetchLocally,
+  TestEnvironment,
 } from './__utils__'
 
 describe('meet.serlo.org', () => {
@@ -46,80 +48,109 @@ describe('meet.serlo.org', () => {
     ['/4', '/iskddmh-wrh'],
     ['/5', '/xqt-cdpm-nco'],
     ['/6', '/sui-yuwv-suh'],
-  ])('meet.serlo.org%s', async (path, googleMeetRoom) => {
-    const response = await handleUrl(`https://meet.serlo.local${path}`)
+  ])('meet.serlo.org%s', async (pathname, googleMeetRoom) => {
+    const response = await fetchTestEnvironment({ subdomain: 'meet', pathname })
 
     const target = `https://meet.google.com${googleMeetRoom}`
     expectToBeRedirectTo(response, target, 302)
   })
 
   test('returns 404 when meet room is not defined', async () => {
-    const response = await handleUrl('https://meet.serlo.local/def')
+    const response = await fetchTestEnvironment({
+      subdomain: 'meet',
+      pathname: '/foo',
+    })
 
     await expectIsNotFoundResponse(response)
   })
 })
 
 test('de.serlo.org/datenschutz', async () => {
-  const response = await handleUrl('https://de.serlo.local/datenschutz')
+  const response = await fetchTestEnvironment({
+    subdomain: 'de',
+    pathname: '/datenschutz',
+  })
 
   const target = 'https://de.serlo.org/privacy'
   expectToBeRedirectTo(response, target, 301)
 })
 
 test('de.serlo.org/impressum', async () => {
-  const response = await handleUrl('https://de.serlo.local/impressum')
+  const response = await fetchTestEnvironment({
+    subdomain: 'de',
+    pathname: '/impressum',
+  })
 
   const target = 'https://de.serlo.org/imprint'
   expectToBeRedirectTo(response, target, 301)
 })
 
 test('de.serlo.org/nutzungsbedingungen ', async () => {
-  const response = await handleUrl('https://de.serlo.local/nutzungsbedingungen')
+  const response = await fetchTestEnvironment({
+    subdomain: 'de',
+    pathname: '/nutzungsbedingungen',
+  })
 
   const target = 'https://de.serlo.org/terms'
   expectToBeRedirectTo(response, target, 301)
 })
 
 test('start.serlo.org', async () => {
-  const response = await handleUrl('https://start.serlo.local/')
+  const response = await fetchTestEnvironment({ subdomain: 'start' })
 
   const target =
     'https://docs.google.com/document/d/1qsgkXWNwC-mcgroyfqrQPkZyYqn7m1aimw2gwtDTmpM/'
   expectToBeRedirectTo(response, target, 301)
 })
 
-test.each(['/labschool', '/labschool/'])('serlo.org%s', async (path) => {
-  const response = await handleUrl(`https://de.serlo.local${path}`)
+test.each(['/labschool', '/labschool/'])(
+  'de.serlo.org%s redirects to labschool homepage',
+  async (pathname) => {
+    const response = await fetchTestEnvironment({ subdomain: 'de', pathname })
 
-  expectToBeRedirectTo(response, 'https://labschool.serlo.local/', 301)
+    expectToBeRedirectTo(response, createUrl({ subdomain: 'labschool' }), 301)
+  }
+)
+
+test.each(['/hochschule', '/hochschule/'])(
+  'de.serlo.org%s redirects to taxonomy term of higher education',
+  async (pathname) => {
+    const response = await fetchTestEnvironment({ subdomain: 'de', pathname })
+
+    const target = createUrl({
+      subdomain: 'de',
+      pathname: '/mathe/universitaet/44323',
+    })
+    expectToBeRedirectTo(response, target, 301)
+  }
+)
+
+test.each(['/beitreten', '/beitreten/'])(
+  'de.serlo.org%s redirects to form for joining Serlo Education e.V.',
+  async (pathname) => {
+    const response = await fetchTestEnvironment({ subdomain: 'de', pathname })
+
+    const target =
+      'https://docs.google.com/forms/d/e/1FAIpQLSdEoyCcDVP_G_-G_u642S768e_sxz6wO6rJ3tad4Hb9z7Slwg/viewform'
+    expectToBeRedirectTo(response, target, 301)
+  }
+)
+
+test('serlo.org/* redirects to de.serlo.org/*', async () => {
+  const response = await fetchTestEnvironment({ pathname: '/foo' })
+
+  const target = createUrl({ subdomain: 'de', pathname: '/foo' })
+  expectToBeRedirectTo(response, target, 302)
 })
 
-test.each(['/hochschule', '/hochschule/'])('serlo.org%s', async (path) => {
-  const response = await handleUrl(`https://de.serlo.local${path}`)
+test('www.serlo.org/* redirects to de.serlo.org/*', async () => {
+  const response = await fetchTestEnvironment({
+    subdomain: 'www',
+    pathname: '/foo',
+  })
 
-  const target = 'https://de.serlo.local/mathe/universitaet/44323'
-  expectToBeRedirectTo(response, target, 301)
-})
-
-test.each(['/beitreten', '/beitreten/'])('serlo.org%s', async (path) => {
-  const response = await handleUrl(`https://de.serlo.local${path}`)
-
-  const target =
-    'https://docs.google.com/forms/d/e/1FAIpQLSdEoyCcDVP_G_-G_u642S768e_sxz6wO6rJ3tad4Hb9z7Slwg/viewform'
-  expectToBeRedirectTo(response, target, 301)
-})
-
-test('serlo.org/*', async () => {
-  const response = await handleUrl('https://serlo.local/foo')
-
-  expectToBeRedirectTo(response, 'https://de.serlo.local/foo', 302)
-})
-
-test('www.serlo.org/*', async () => {
-  const response = await handleUrl('https://www.serlo.local/foo')
-
-  expectToBeRedirectTo(response, 'https://de.serlo.local/foo', 302)
+  const target = createUrl({ subdomain: 'de', pathname: '/foo' })
+  expectToBeRedirectTo(response, target, 302)
 })
 
 describe('redirects to current path of an resource', () => {
@@ -128,78 +159,92 @@ describe('redirects to current path of an resource', () => {
       id: 78337,
       __typename: 'Page',
       oldAlias: '/sexed',
-      alias: '/sex-ed',
+      alias: '/78337/sex-education',
+      content: 'Sex Education',
       instance: Instance.En,
     })
   })
 
   test('redirects when current path is different than target path', async () => {
-    const response = await handleUrl('https://en.serlo.org/sexed')
+    const response = await fetchTestEnvironment({
+      subdomain: 'en',
+      pathname: '/sexed',
+    })
 
-    expectToBeRedirectTo(response, 'https://en.serlo.org/sex-ed', 301)
+    const target = createUrl({
+      subdomain: 'en',
+      pathname: '/78337/sex-education',
+    })
+    expectToBeRedirectTo(response, target, 301)
   })
 
   test('redirects when current instance is different than target instance', async () => {
-    const response = await handleUrl('https://de.serlo.org/78337')
+    const response = await fetchTestEnvironment({
+      subdomain: 'de',
+      pathname: '/78337',
+    })
 
-    expectToBeRedirectTo(response, 'https://en.serlo.org/sex-ed', 301)
+    const target = createUrl({
+      subdomain: 'en',
+      pathname: '/78337/sex-education',
+    })
+    expectToBeRedirectTo(response, target, 301)
   })
 
   test('no redirect when current path is different than given path and XMLHttpRequest', async () => {
-    mockHttpGet('https://en.serlo.org/sexed', returnsText('article content'))
+    const response = await fetchTestEnvironment(
+      { subdomain: 'en', pathname: '/sexed' },
+      { headers: { 'X-Requested-With': 'XMLHttpRequest' } }
+    )
 
-    const request = new Request('https://en.serlo.org/sexed', {
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest',
-      },
-    })
-    const response = await handleRequest(request)
-
-    expect(await response.text()).toBe('article content')
+    await expectContainsText(response, ['Sex Education'])
   })
 
   test('no redirect when current path is the same as given path', async () => {
-    mockHttpGet('https://en.serlo.org/sex-ed', returnsText('article content'))
+    const response = await fetchTestEnvironment({
+      subdomain: 'en',
+      pathname: '/78337/sex-education',
+    })
 
-    const response = await handleUrl('https://en.serlo.org/sex-ed')
-
-    expect(await response.text()).toBe('article content')
+    await expectContainsText(response, ['Sex Education'])
   })
 
   test('no redirect when requested entity has no alias', async () => {
-    givenUuid({ id: 128620, __typename: 'ArticleRevision' })
-    mockHttpGet('https://de.serlo.org/128620', returnsText('article content'))
+    givenUuid({
+      id: 128620,
+      __typename: 'ArticleRevision',
+      content: 'Vorherige Version',
+    })
 
-    const response = await handleUrl('https://de.serlo.org/128620')
+    const response = await fetchTestEnvironment({
+      subdomain: 'de',
+      pathname: '/128620',
+    })
 
-    expect(await response.text()).toBe('article content')
+    await expectContainsText(response, ['Vorherige Version'])
   })
 
-  test('redirects to first course page when requested entity is empty', async () => {
+  test('redirects to first course page when requested entity is a course', async () => {
     givenUuid({
       id: 61682,
       __typename: 'Course',
-      alias:
-        '/mathe/zahlen-gr%C3%B6%C3%9Fen/zahlenmengen%2C-rechenausdr%C3%BCcke-allgemeine-rechengesetze/zahlen/zahlenmengen-zahlengerade/ganze-zahlen',
+      alias: 'course-alias',
       pages: [
-        {
-          alias:
-            '/mathe/zahlen-gr%C3%B6%C3%9Fen/zahlenmengen%2C-rechenausdr%C3%BCcke-allgemeine-rechengesetze/zahlen/zahlenmengen-zahlengerade/ganze-zahlen/%C3%9Cbersicht',
-        },
-        {
-          alias:
-            '/mathe/zahlen-gr%C3%B6%C3%9Fen/zahlenmengen%2C-rechenausdr%C3%BCcke-allgemeine-rechengesetze/zahlen/zahlenmengen-zahlengerade/ganze-zahlen/negative-zahlen-alltag',
-        },
+        { alias: '/mathe/61911/%C3%9Cbersicht' },
+        { alias: '/mathe/61686/negative-zahlen-im-alltag' },
       ],
     })
 
-    const response = await handleUrl('https://de.serlo.org/61682')
+    const response = await fetchTestEnvironment({
+      subdomain: 'de',
+      pathname: '/61682',
+    })
 
-    expectToBeRedirectTo(
-      response,
-      'https://de.serlo.org/mathe/zahlen-gr%C3%B6%C3%9Fen/zahlenmengen%2C-rechenausdr%C3%BCcke-allgemeine-rechengesetze/zahlen/zahlenmengen-zahlengerade/ganze-zahlen/%C3%9Cbersicht',
-      301
-    )
+    const target = createUrl({
+      subdomain: 'de',
+      pathname: '/mathe/61911/%C3%9Cbersicht',
+    })
+    expectToBeRedirectTo(response, target, 301)
   })
 
   test('redirects to alias of course when list of course pages is empty', async () => {
@@ -211,37 +256,43 @@ describe('redirects to current path of an resource', () => {
       pages: [],
     })
 
-    const response = await handleUrl('https://en.serlo.org/42')
+    const response = await fetchLocally({ subdomain: 'en', pathname: '/42' })
 
-    expectToBeRedirectTo(response, 'https://en.serlo.org/course', 301)
+    const target = createUrl({
+      subdomain: 'en',
+      pathname: '/course',
+      environment: TestEnvironment.Local,
+    })
+    expectToBeRedirectTo(response, target, 301)
   })
 
   test('no redirect when current path cannot be requested', async () => {
     givenApi(returnsMalformedJson())
+    givenUuid({
+      __typename: 'Article',
+      alias: '/path',
+      content: 'article content',
+      instance: Instance.En,
+    })
 
-    mockHttpGet('https://en.serlo.org/path', returnsText('article content'))
+    const response = await fetchLocally({ subdomain: 'en', pathname: '/path' })
 
-    const response = await handleUrl('https://en.serlo.org/path')
-
-    expect(await response.text()).toBe('article content')
+    await expectContainsText(response, ['article content'])
   })
 
   test('handles URL encodings correctly', async () => {
     givenUuid({
       __typename: 'TaxonomyTerm',
-      alias: '/mathe/zahlen-größen/größen-einheiten',
+      alias: '/mathe/zahlen-größen',
+      instance: Instance.De,
+      content: 'Zahlen und Größen',
     })
-    mockHttpGet(
-      'https://de.serlo.org/mathe/zahlen-gr%C3%B6%C3%9Fen',
-      returnsText('article content')
-    )
 
-    const response = await handleUrl('https://de.serlo.org/mathe/zahlen-größen')
+    const response = await fetchTestEnvironment({
+      subdomain: 'de',
+      pathname: '/mathe/zahlen-größen',
+    })
 
-    expect(await response.text()).toBe('article content')
+    await expectContainsText(response, ['Zahlen und Größen'])
   })
 })
-
-async function handleUrl(url: string): Promise<Response> {
-  return await handleRequest(new Request(url))
-}
