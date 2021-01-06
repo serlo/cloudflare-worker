@@ -51,7 +51,30 @@ import {
   hasInternalServerError,
   setupProbabilityFor,
   Backend,
+  fetchTestEnvironment,
 } from './__utils__'
+
+describe('serlo.org/terms', () => {
+  test('is in German at de.serlo.org/terms', async () => {
+    mockLegalPage('de/terms.md', 'Informationen für Weiternutzer')
+
+    const response = await fetchTestEnvironment({
+      subdomain: 'de',
+      pathname: '/terms',
+    })
+
+    expect(await response.text()).toEqual(
+      expect.stringContaining('Informationen für Weiternutzer')
+    )
+  })
+})
+
+function mockLegalPage(path: string, text: string) {
+  mockHttpGet(
+    `https://raw.githubusercontent.com/serlo/serlo.org-legal/master/${path}`,
+    returnsText(text)
+  )
+}
 
 describe('handleRequest()', () => {
   const unrevisedConfig: UnrevisedConfig = {
