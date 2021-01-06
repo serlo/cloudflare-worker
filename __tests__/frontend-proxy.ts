@@ -20,7 +20,7 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 import { handleRequest } from '../src'
-import { Url } from '../src/utils'
+import { Url, Instance } from '../src/utils'
 import {
   expectHasOkStatus,
   mockHttpGet,
@@ -44,6 +44,7 @@ describe('handleRequest()', () => {
       id: 23591,
       __typename: 'Page',
       alias: '/math',
+      instance: Instance.En,
     })
   })
 
@@ -53,8 +54,8 @@ describe('handleRequest()', () => {
       Math.random = jest.fn().mockReturnValue(0.5)
 
       await expectResponseFrom({
-        backend: 'https://frontend.serlo.org/de/math',
-        request: 'https://de.serlo.org/math',
+        backend: 'https://frontend.serlo.org/en/math',
+        request: 'https://en.serlo.org/math',
       })
     })
 
@@ -63,8 +64,8 @@ describe('handleRequest()', () => {
       Math.random = jest.fn().mockReturnValue(0.75)
 
       await expectResponseFrom({
-        backend: 'https://de.serlo.org/math',
-        request: 'https://de.serlo.org/math',
+        backend: 'https://en.serlo.org/math',
+        request: 'https://en.serlo.org/math',
       })
     })
   })
@@ -72,13 +73,13 @@ describe('handleRequest()', () => {
   describe('returned response set cookie with calculated random number', () => {
     test.each([Backend.Frontend, Backend.Legacy])('%p', async (backend) => {
       global.DOMAIN = 'serlo.org'
-      const backendUrl = getUrlFor(backend, 'https://de.serlo.org/math')
+      const backendUrl = getUrlFor(backend, 'https://en.serlo.org/math')
 
       setupProbabilityFor(backend)
       mockHttpGet(backendUrl, returnsText(''))
       Math.random = jest.fn().mockReturnValue(0.25)
 
-      const response = await handleUrl('https://de.serlo.org/math')
+      const response = await handleUrl('https://en.serlo.org/math')
 
       const cookieHeader = response.headers.get('Set-Cookie')
       expect(cookieHeader).toBe('useFrontend=0.25; path=/; domain=.serlo.org')
@@ -124,9 +125,9 @@ describe('handleRequest()', () => {
         beforeEach(async () => {
           givenApi(returnsMalformedJson())
 
-          mockHttpGet('https://de.serlo.org/math', returnsText('content'))
+          mockHttpGet('https://en.serlo.org/math', returnsText('content'))
 
-          const request = new Request('https://de.serlo.org/math')
+          const request = new Request('https://en.serlo.org/math')
           request.headers.set('Cookie', 'authenticated=1')
           response = await handleRequest(request)
         })
@@ -146,11 +147,11 @@ describe('handleRequest()', () => {
         global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = 'false'
         setupProbabilityFor(Backend.Frontend)
 
-        const request = new Request('https://de.serlo.org/math')
+        const request = new Request('https://en.serlo.org/math')
         request.headers.set('Cookie', 'authenticated=1')
 
         await expectResponseFrom({
-          backend: 'https://frontend.serlo.org/de/math',
+          backend: 'https://frontend.serlo.org/en/math',
           request,
         })
       })
@@ -196,7 +197,7 @@ describe('handleRequest()', () => {
       let response: Response
 
       beforeEach(async () => {
-        const url = 'https://de.serlo.org/math'
+        const url = 'https://en.serlo.org/math'
         const backendUrl = getUrlFor(backend, url)
 
         mockHttpGet(backendUrl, returnsText('content'))
@@ -219,11 +220,11 @@ describe('handleRequest()', () => {
   test('uses cookie "frontendUrl" to determine the url of the frontend', async () => {
     setupProbabilityFor(Backend.Frontend)
 
-    const request = new Request('https://de.serlo.org/math')
+    const request = new Request('https://en.serlo.org/math')
     request.headers.set('Cookie', 'frontendDomain=myfrontend.org')
 
     await expectResponseFrom({
-      backend: 'https://myfrontend.org/de/math',
+      backend: 'https://myfrontend.org/en/math',
       request,
     })
   })
@@ -231,11 +232,11 @@ describe('handleRequest()', () => {
   test('ignore wrongly formatted cookie values', async () => {
     setupProbabilityFor(Backend.Frontend)
 
-    const request = new Request('https://de.serlo.org/math')
+    const request = new Request('https://en.serlo.org/math')
     request.headers.set('Cookie', 'useFrontend=foo')
 
     await expectResponseFrom({
-      backend: 'https://frontend.serlo.org/de/math',
+      backend: 'https://frontend.serlo.org/en/math',
       request,
     })
     expect(Math.random).toHaveBeenCalled()

@@ -26,6 +26,28 @@ export function givenUuid(uuid: Uuid) {
   global.uuids.push(uuid)
 }
 
+export function getUuid(instance: string, path: string) {
+  const regexes = [
+    new RegExp('^/(?<id>\\d+)$'),
+    new RegExp('(?<subject>[^/]+/)?(?<id>\\d+)/(?<title>[^/]*)$'),
+  ]
+
+  for (const regex of regexes) {
+    const match = regex.exec(path)
+
+    if (match) {
+      const id = parseInt(match?.groups?.id ?? '')
+      return global.uuids.find((u) => u.id === id)
+    }
+  }
+
+  return global.uuids.find(
+    (u) =>
+      u.instance === instance &&
+      [u.alias, u.oldAlias].includes(decodeURIComponent(path))
+  )
+}
+
 export type Uuid = GenericUuid | Course
 
 interface Course extends AbstractUuid<'Course'> {
@@ -42,4 +64,5 @@ interface AbstractUuid<Typename extends string> {
   alias?: string
   oldAlias?: string
   instance?: Instance
+  content?: string
 }

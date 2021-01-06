@@ -1,7 +1,7 @@
 /**
  * This file is part of Serlo.org Cloudflare Worker.
  *
- * Copyright (c) 2021 Serlo Education e.V.
+ * Copyright (c) 2020 Serlo Education e.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License
@@ -15,22 +15,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @copyright Copyright (c) 2021 Serlo Education e.V.
+ * @copyright Copyright (c) 2020 Serlo Education e.V.
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-
-export * from './expect-helper'
-export * from './fetch-helper'
-export * from './kv'
-export * from './services'
-export * from './test-environment'
-
-export enum Backend {
-  Frontend = 'frontend',
-  Legacy = 'legacy',
+export enum TestEnvironment {
+  Local = 'local',
+  Dev = 'dev',
+  Staging = 'staging',
+  Production = 'production',
 }
 
-export function setupProbabilityFor(backend: Backend) {
-  global.FRONTEND_PROBABILITY = backend === Backend.Frontend ? '1' : '0'
+export const domains: Record<TestEnvironment, string> = {
+  [TestEnvironment.Local]: 'serlo.local',
+  [TestEnvironment.Dev]: 'serlo-development.dev',
+  [TestEnvironment.Staging]: 'serlo-staging.dev',
+  [TestEnvironment.Production]: 'serlo.org',
+}
+
+export function getTestEnvironment(): TestEnvironment {
+  const environment = (process.env.TEST_ENVIRONMENT ?? '').toLowerCase()
+
+  return isTestEnvironment(environment) ? environment : TestEnvironment.Local
+}
+
+function isTestEnvironment(env: string): env is TestEnvironment {
+  return Object.values(TestEnvironment).includes(env as TestEnvironment)
 }
