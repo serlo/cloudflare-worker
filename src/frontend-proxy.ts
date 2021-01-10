@@ -94,7 +94,7 @@ export async function frontendProxy(
 
   if (
     global.REDIRECT_MOBILE_USERS_TO_FRONTEND === 'true' &&
-    (request.headers.get('user-agent') || '').indexOf('Mobi') > -1
+    (request.headers.get('user-agent') ?? '').indexOf('Mobi') > -1
   )
     return await fetchBackend({
       ...config,
