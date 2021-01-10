@@ -36,13 +36,13 @@ export async function embed(request: Request): Promise<Response | null> {
     switch (videoUrl.domain) {
       case 'youtube.com':
       case 'youtube-nocookie.com':
-        return getYoutubeThumbnail(videoUrl)
-      case 'wikimedia.org':
-        return getWikimediaThumbnail(videoUrl)
-      case 'geogebra.org':
-        return getGeogebraThumbnail(videoUrl)
-      case 'vimeo.com':
-        return getVimeoThumbnail(videoUrl)
+        return await getYoutubeThumbnail(videoUrl)
+      // case 'wikimedia.org':
+      //   return await getWikimediaThumbnail(videoUrl)
+      // case 'geogebra.org':
+      //   return await getGeogebraThumbnail(videoUrl)
+      // case 'vimeo.com':
+      //   return await getVimeoThumbnail(videoUrl)
     }
   } catch (e) {
     //Invalid URL
@@ -66,35 +66,40 @@ function getPlaceholder() {
   })
 }
 
-function getYoutubeThumbnail(url: URL) {
-  console.log(url)
-  //for now
-  return getPlaceholder()
+async function getYoutubeThumbnail(url: URL) {
+  //example url https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&html5…
 
-  //  if (videoUrl.domain === 'youtube.com') {
-  //    const vParam = videoUrl.searchParams.get('v')
+  const videoId = url.pathname.replace('/embed/', '')
 
-  //    // TODO
-  //    if (vParam === null) return null
+  if (!videoId || !RegExp('[a-zA-Z0-9_-]{11}').test(videoId)) {
+    getPlaceholder()
+  }
 
-  //    return await fetch(`https://i.ytimg.com/vi/${vParam}/hqdefault.jpg`)
-  //  }
-}
+  const baseUrl = `https://i.ytimg.com/vi/${videoId}`
 
-function getVimeoThumbnail(url: URL) {
-  console.log(url)
-  //for now
-  return getPlaceholder()
-}
+  const bigImgRes = await fetch(`${baseUrl}/sddefault.jpg`)
+  if (bigImgRes.status === 200) return bigImgRes
 
-function getGeogebraThumbnail(url: URL) {
-  console.log(url)
-  //for now
+  const fallbackImgRes = await fetch(`${baseUrl}/hqdefault.jpg`)
+  if (fallbackImgRes.status === 200) return fallbackImgRes
+
   return getPlaceholder()
 }
 
-function getWikimediaThumbnail(url: URL) {
-  console.log(url)
-  //for now
-  return getPlaceholder()
-}
+// async function getVimeoThumbnail(url: URL) {
+//   console.log(url)
+//   //for now
+//   return getPlaceholder()
+// }
+
+// async function getGeogebraThumbnail(url: URL) {
+//   console.log(url)
+//   //for now
+//   return getPlaceholder()
+// }
+
+// async function getWikimediaThumbnail(url: URL) {
+//   console.log(url)
+//   //for now
+//   return getPlaceholder()
+// }
