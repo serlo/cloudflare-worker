@@ -34,7 +34,6 @@ export async function embed(request: Request): Promise<Response | null> {
   try {
     const videoUrl = new Url(urlParam) || null
     switch (videoUrl.domain) {
-      case 'youtube.com':
       case 'youtube-nocookie.com':
         return await getYoutubeThumbnail(videoUrl)
       case 'vimeo.com':
@@ -46,7 +45,6 @@ export async function embed(request: Request): Promise<Response | null> {
     }
   } catch (e) {
     //Invalid URL
-    return getPlaceholder()
   }
 
   return getPlaceholder()
@@ -72,7 +70,7 @@ async function getYoutubeThumbnail(url: URL) {
   const videoId = url.pathname.replace('/embed/', '')
 
   if (!videoId || !RegExp('[a-zA-Z0-9_-]{11}').test(videoId)) {
-    getPlaceholder()
+    return getPlaceholder()
   }
 
   const baseUrl = `https://i.ytimg.com/vi/${videoId}`
