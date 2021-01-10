@@ -41,8 +41,8 @@ export async function embed(request: Request): Promise<Response | null> {
         return await getVimeoThumbnail(videoUrl)
       case 'wikimedia.org':
         return await getWikimediaThumbnail(videoUrl)
-      // case 'geogebra.org':
-      //   return await getGeogebraThumbnail(videoUrl)
+      case 'geogebra.org':
+        return await getGeogebraThumbnail(videoUrl)
     }
   } catch (e) {
     //Invalid URL
@@ -111,11 +111,56 @@ async function getVimeoThumbnail(url: URL) {
   return getPlaceholder()
 }
 
-// async function getGeogebraThumbnail(url: URL) {
-//   console.log(url)
-//   //for now
-//   return getPlaceholder()
-// }
+async function getGeogebraThumbnail(url: URL) {
+  //example url https://www.geogebra.org/material/iframe/id/100
+
+  const appletId = url.pathname.replace('/material/iframe/id/', '')
+
+  if (!appletId || !RegExp('[0-9]+').test(appletId)) return getPlaceholder()
+
+  const apiResponse = await fetch('https://www.geogebra.org/api/json.php', {
+    method: 'POST',
+    body: JSON.stringify({
+      request: {
+        '-api': '1.0.0',
+        task: {
+          '-type': 'fetch',
+          fields: {
+            field: [
+              { '-name': 'width' },
+              { '-name': 'height' },
+              { '-name': 'preview_url' },
+            ],
+          },
+          filters: {
+            field: [{ '-name': 'id', '#text': appletId }],
+          },
+          limit: { '-num': '1' },
+        },
+      },
+    }),
+  })
+
+  const data = (await apiResponse.json()) as {
+    responses: {
+      response: {
+        '-type': string
+        item: Record<string, unknown> & {
+          previewUrl: string
+          width: string
+          height: string
+        }
+      }
+    }
+  }
+
+  const thumbnailUrl = data.responses.response.item.previewUrl
+
+  const imgRes = await fetch(thumbnailUrl)
+  if (imgRes.status === 200) return imgRes
+
+  return getPlaceholder()
+}
 
 async function getWikimediaThumbnail(url: URL) {
   const filenameWithPath = url.pathname.replace('/wikipedia/commons/', '') // e.g. '1/15/filename.webm'
