@@ -141,6 +141,48 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     })
   })
 
+  describe('Wikimedia', () => {
+    const video = {
+      embedUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/1/15/Inerter_vibration_isolation_experiment.webm',
+      contentLength: '74280',
+      thumbnailUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Inerter_vibration_isolation_experiment.webm/800px--Inerter_vibration_isolation_experiment.webm.jpg',
+    }
+    const missingVideo = {
+      embedUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/2/55/must_see.webm',
+      thumbnailUrl: '',
+    }
+
+    beforeEach(() => {
+      mockHttpGetNoCheck(
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/*',
+        (req, res, ctx) => {
+          if (req.url.toString() === video.thumbnailUrl) {
+            return res(
+              ctx.set('content-type', 'image/jpeg'),
+              ctx.set('content-length', video.contentLength)
+            )
+          }
+          return res(ctx.status(404))
+        }
+      )
+    })
+
+    test('returns thumbnail', async () => {
+      const response = await requestThumbnail(video.embedUrl)
+
+      expect(response.headers.get('content-length')).toBe(video.contentLength)
+      expect(response.headers.get('content-type')).toBe('image/jpeg')
+    })
+
+    test('returns placeholder when video/thumbnail does not exist', async () => {
+      const response = await requestThumbnail(missingVideo.embedUrl)
+      expect(checkPlaceholderResponse(response))
+    })
+  })
+
   describe('returns placeholder', () => {
     test('when url parameter is empty', async () => {
       const response = await requestThumbnail('')
