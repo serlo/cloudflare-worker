@@ -29,6 +29,7 @@ declare namespace NodeJS {
     FRONTEND_DOMAIN: string
     FRONTEND_PROBABILITY: string
     REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND: 'true' | 'false'
+    REDIRECT_MOBILE_USERS_TO_FRONTEND: 'true' | 'false'
     fetch: typeof fetch
   }
 }

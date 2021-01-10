@@ -92,13 +92,20 @@ export async function frontendProxy(
       return null
   }
 
-  const probablyMobile =
+  if (
+    global.REDIRECT_MOBILE_USERS_TO_FRONTEND === 'true' &&
     (request.headers.get('user-agent') || '').indexOf('Mobi') > -1
+  )
+    return await fetchBackend({
+      ...config,
+      useFrontend: true,
+      pathPrefix: config.instance,
+      request,
+    })
+
   const cookieValue = Number(getCookieValue('useFrontend', cookies) ?? 'NaN')
   const useFrontendNumber = Number.isNaN(cookieValue)
-    ? probablyMobile
-      ? 0
-      : Math.random()
+    ? Math.random()
     : cookieValue
 
   const response = await fetchBackend({
