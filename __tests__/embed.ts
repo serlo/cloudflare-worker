@@ -19,6 +19,8 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
+import { rest } from 'msw'
+
 import { handleRequest } from '../src'
 import { mockHttpGetNoCheck } from './__utils__'
 
@@ -137,7 +139,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       const response = await requestThumbnail(
         `https://player.vimeo.com/video/999999999?autoplay=1`
       )
-      expect(checkPlaceholderResponse(response))
+      expect(isPlaceholderResponse(response))
     })
   })
 
@@ -179,37 +181,96 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
     test('returns placeholder when video/thumbnail does not exist', async () => {
       const response = await requestThumbnail(missingVideo.embedUrl)
-      expect(checkPlaceholderResponse(response))
+      expect(isPlaceholderResponse(response))
+    })
+  })
+
+  describe('Geogebra', () => {
+    const applet = {
+      id: '100',
+      contentLength: '10336',
+      thumbnailUrl:
+        'https://cdn.geogebra.org/resource/q9gNCVsS/lIoGcSJdoALG1cTd/material-q9gNCVsS.png',
+    }
+    beforeEach(() => {
+      global.server.use(
+        rest.post('https://www.geogebra.org/api/json.php', (req, res, ctx) => {
+          if (typeof req.body === 'string') {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            const appletId = JSON.parse(req.body).request?.task?.filters
+              ?.field[0]['#text'] as string
+
+            if (appletId == applet.id)
+              return res(
+                ctx.json({
+                  responses: {
+                    response: {
+                      item: {
+                        previewUrl: applet.thumbnailUrl,
+                      },
+                    },
+                  },
+                })
+              )
+          }
+
+          return res(ctx.status(404))
+        })
+      )
+      mockHttpGetNoCheck(
+        'https://cdn.geogebra.org/resource/q9gNCVsS/lIoGcSJdoALG1cTd/material-q9gNCVsS.png',
+        (req, res, ctx) => {
+          return res(
+            ctx.set('content-type', 'image/png'),
+            ctx.set('content-length', applet.contentLength)
+          )
+        }
+      )
+    })
+
+    test('returns thumbnail', async () => {
+      const response = await requestThumbnail(
+        `https://www.geogebra.org/material/iframe/id/${applet.id}`
+      )
+      expect(response.headers.get('content-length')).toBe(applet.contentLength)
+      expect(response.headers.get('content-type')).toBe('image/png')
+    })
+
+    test('returns placeholder with incorrect embed url', async () => {
+      const response = await requestThumbnail(
+        `https://www.geogebra.org/material/iframe/id/001`
+      )
+      expect(isPlaceholderResponse(response))
     })
   })
 
   describe('returns placeholder', () => {
     test('when url parameter is empty', async () => {
       const response = await requestThumbnail('')
-      expect(checkPlaceholderResponse(response))
+      expect(isPlaceholderResponse(response))
     })
 
     test('when url is invalid', async () => {
       const response = await requestThumbnail('42')
-      expect(checkPlaceholderResponse(response))
+      expect(isPlaceholderResponse(response))
     })
 
     test('when url is unsupported', async () => {
       const response = await requestThumbnail(
         'https://www.twitch.tv/videos/824398155'
       )
-      expect(checkPlaceholderResponse(response))
+      expect(isPlaceholderResponse(response))
     })
 
     test('when path is not thumbnail', async () => {
       const requestUrl = 'https://embed.serlo.org/foo'
       const response = await handleRequest(new Request(requestUrl))
-      expect(checkPlaceholderResponse(response))
+      expect(isPlaceholderResponse(response))
     })
   })
 })
 
-function checkPlaceholderResponse(response: Response) {
+function isPlaceholderResponse(response: Response) {
   expect(response.headers.get('content-type')).toBe('image/png')
   expect(response.headers.get('content-length')).toBe('135')
 }
