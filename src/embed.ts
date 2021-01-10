@@ -39,8 +39,8 @@ export async function embed(request: Request): Promise<Response | null> {
         return await getYoutubeThumbnail(videoUrl)
       case 'vimeo.com':
         return await getVimeoThumbnail(videoUrl)
-      // case 'wikimedia.org':
-      //   return await getWikimediaThumbnail(videoUrl)
+      case 'wikimedia.org':
+        return await getWikimediaThumbnail(videoUrl)
       // case 'geogebra.org':
       //   return await getGeogebraThumbnail(videoUrl)
     }
@@ -117,8 +117,15 @@ async function getVimeoThumbnail(url: URL) {
 //   return getPlaceholder()
 // }
 
-// async function getWikimediaThumbnail(url: URL) {
-//   console.log(url)
-//   //for now
-//   return getPlaceholder()
-// }
+async function getWikimediaThumbnail(url: URL) {
+  const filenameWithPath = url.pathname.replace('/wikipedia/commons/', '') // e.g. '1/15/filename.webm'
+  const filename = filenameWithPath.substring(
+    filenameWithPath.lastIndexOf('/') + 1
+  )
+  const previewImageUrl = `https://upload.wikimedia.org/wikipedia/commons/thumb/${filenameWithPath}/800px--${filename}.jpg`
+
+  const imgRes = await fetch(previewImageUrl)
+  if (imgRes.status === 200) return imgRes
+
+  return getPlaceholder()
+}
