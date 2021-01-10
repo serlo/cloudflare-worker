@@ -26,13 +26,13 @@ import { mockHttpGetNoCheck } from './__utils__'
 
 describe('embed.serlo.org/thumbnail?url=...', () => {
   describe('Youtube', () => {
-    const videoHQ = {
-      videoId: 'Wtvyw4NjJWc',
-      contentLength: '17270',
+    const videoHighQuality = {
+      id: 'Wtvyw4NjJWc',
+      contentLength: '20000',
     }
-    const videoSD = {
-      videoId: 'KtV2wlp9Ts4',
-      contentLength: '11464',
+    const videoLowQuality = {
+      id: 'KtV2wlp9Ts4',
+      contentLength: '10000',
     }
     beforeEach(() => {
       mockHttpGetNoCheck(
@@ -42,54 +42,64 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
             videoId: string
             format: string
           }
-          let contentLength: string | null = null
+          const isHQ = videoId === videoHighQuality.id
 
-          if (videoId === videoHQ.videoId && format === 'sddefault.jpg')
-            contentLength = videoHQ.contentLength
-          if (videoId === videoSD.videoId) {
-            if (format === 'sddefault.jpg') return res(ctx.status(404))
-            if (format === 'hqdefault.jpg')
-              contentLength = videoSD.contentLength
-          }
-
-          if (contentLength) {
+          if (
+            (isHQ && format === 'sddefault.jpg') ||
+            (videoId === videoLowQuality.id && format === 'hqdefault.jpg')
+          ) {
             return res(
               ctx.set('content-type', 'image/jpeg'),
-              ctx.set('content-length', contentLength)
+              ctx.set(
+                'content-length',
+                isHQ
+                  ? videoHighQuality.contentLength
+                  : videoLowQuality.contentLength
+              )
             )
-          } else {
-            return res(ctx.status(404))
           }
+          return res(ctx.status(404))
         }
       )
     })
 
     test('returns sddefault.jpg thumbnail when it exists', async () => {
       const response = await requestThumbnail(
-        `https://www.youtube-nocookie.com/embed/${videoHQ.videoId}?autoplay=1&html5=1`
+        `https://www.youtube-nocookie.com/embed/${videoHighQuality.id}?autoplay=1&html5=1`
       )
-
-      expect(response.headers.get('content-length')).toBe(videoHQ.contentLength)
+      expect(response.headers.get('content-length')).toBe(
+        videoHighQuality.contentLength
+      )
       expect(response.headers.get('content-type')).toBe('image/jpeg')
     })
 
     test('returns hqdefault.jpg thumbnail when sddefault.jpg does not exist', async () => {
       const response = await requestThumbnail(
-        `https://www.youtube-nocookie.com/embed/${videoSD.videoId}?autoplay=1&html5=1`
+        `https://www.youtube-nocookie.com/embed/${videoLowQuality.id}?autoplay=1&html5=1`
       )
-
-      expect(response.headers.get('content-length')).toBe(videoSD.contentLength)
+      expect(response.headers.get('content-length')).toBe(
+        videoLowQuality.contentLength
+      )
       expect(response.headers.get('content-type')).toBe('image/jpeg')
+    })
+
+    test('returns placeholder when no image is available', async () => {
+      const response = await requestThumbnail(
+        `https://www.youtube-nocookie.com/embed/AaaAaaAaaAa?autoplay=1&html5=1`
+      )
+      expect(isPlaceholderResponse(response))
     })
   })
 
   describe('Vimeo', () => {
     const video = {
-      videoId: '117611037',
-      contentLength: '40664',
+      id: '117611037',
+      contentLength: '40000',
       thumbnailFilename: '505834070.webp',
+      thumbnailUrl: 'https://i.vimeocdn.com/video/505834070_640.webp',
     }
     beforeEach(() => {
+      //mock oembed endpoint
       mockHttpGetNoCheck(
         'https://vimeo.com/api/oembed.json?url=https%3A%2F%2Fvimeo.com%2F:videoId',
         (req, res, ctx) => {
@@ -98,12 +108,11 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
               ?.get('url')
               ?.replace('https://vimeo.com/', '') || ''
 
-          if (videoId === video.videoId) {
+          if (videoId === video.id) {
             return res(
               ctx.json({
                 type: 'video',
-                thumbnail_url:
-                  'https://i.vimeocdn.com/video/505834070_640.webp',
+                thumbnail_url: video.thumbnailUrl,
               })
             )
           }
@@ -129,7 +138,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
     test('returns thumbnail as webp', async () => {
       const response = await requestThumbnail(
-        `https://player.vimeo.com/video/${video.videoId}?autoplay=1`
+        `https://player.vimeo.com/video/${video.id}?autoplay=1`
       )
       expect(response.headers.get('content-length')).toBe(video.contentLength)
       expect(response.headers.get('content-type')).toBe('image/webp')
@@ -150,11 +159,6 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       contentLength: '74280',
       thumbnailUrl:
         'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Inerter_vibration_isolation_experiment.webm/800px--Inerter_vibration_isolation_experiment.webm.jpg',
-    }
-    const missingVideo = {
-      embedUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/2/55/must_see.webm',
-      thumbnailUrl: '',
     }
 
     beforeEach(() => {
@@ -180,7 +184,9 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     })
 
     test('returns placeholder when video/thumbnail does not exist', async () => {
-      const response = await requestThumbnail(missingVideo.embedUrl)
+      const response = await requestThumbnail(
+        'https://upload.wikimedia.org/wikipedia/commons/2/55/must_see.webm'
+      )
       expect(isPlaceholderResponse(response))
     })
   })
@@ -193,6 +199,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         'https://cdn.geogebra.org/resource/q9gNCVsS/lIoGcSJdoALG1cTd/material-q9gNCVsS.png',
     }
     beforeEach(() => {
+      //mock geogebra api
       global.server.use(
         rest.post('https://www.geogebra.org/api/json.php', (req, res, ctx) => {
           if (typeof req.body === 'string') {
