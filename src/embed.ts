@@ -37,12 +37,12 @@ export async function embed(request: Request): Promise<Response | null> {
       case 'youtube.com':
       case 'youtube-nocookie.com':
         return await getYoutubeThumbnail(videoUrl)
+      case 'vimeo.com':
+        return await getVimeoThumbnail(videoUrl)
       // case 'wikimedia.org':
       //   return await getWikimediaThumbnail(videoUrl)
       // case 'geogebra.org':
       //   return await getGeogebraThumbnail(videoUrl)
-      // case 'vimeo.com':
-      //   return await getVimeoThumbnail(videoUrl)
     }
   } catch (e) {
     //Invalid URL
@@ -86,11 +86,30 @@ async function getYoutubeThumbnail(url: URL) {
   return getPlaceholder()
 }
 
-// async function getVimeoThumbnail(url: URL) {
-//   console.log(url)
-//   //for now
-//   return getPlaceholder()
-// }
+async function getVimeoThumbnail(url: URL) {
+  // exmaple url https://player.vimeo.com/video/${id}?autoplay=1
+
+  const videoId = url.pathname.replace('/video/', '')
+
+  if (!videoId || !RegExp('[0-9]+').test(videoId)) {
+    return getPlaceholder()
+  }
+  const apiResponse = await fetch(
+    'https://vimeo.com/api/oembed.json?url=' +
+      encodeURIComponent(`https://vimeo.com/${videoId}`)
+  )
+  if (apiResponse.status !== 200) return getPlaceholder()
+
+  const videoData = (await apiResponse.json()) as Record<string, unknown> & {
+    thumbnail_url: string
+  }
+  const thumbnailUrl = videoData.thumbnail_url.replace(/_[0-9|x]+/, '')
+
+  const imgRes = await fetch(thumbnailUrl)
+  if (imgRes.status === 200) return imgRes
+
+  return getPlaceholder()
+}
 
 // async function getGeogebraThumbnail(url: URL) {
 //   console.log(url)

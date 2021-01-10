@@ -81,6 +81,66 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     })
   })
 
+  describe('Vimeo', () => {
+    const video = {
+      videoId: '117611037',
+      contentLength: '40664',
+      thumbnailFilename: '505834070.webp',
+    }
+    beforeEach(() => {
+      mockHttpGetNoCheck(
+        'https://vimeo.com/api/oembed.json?url=https%3A%2F%2Fvimeo.com%2F:videoId',
+        (req, res, ctx) => {
+          const videoId =
+            req.url?.searchParams
+              ?.get('url')
+              ?.replace('https://vimeo.com/', '') || ''
+
+          if (videoId === video.videoId) {
+            return res(
+              ctx.json({
+                type: 'video',
+                thumbnail_url:
+                  'https://i.vimeocdn.com/video/505834070_640.webp',
+              })
+            )
+          }
+          return res(ctx.status(403))
+        }
+      )
+      mockHttpGetNoCheck(
+        'https://i.vimeocdn.com/video/:thumbnailFilename',
+        (req, res, ctx) => {
+          const { thumbnailFilename } = req.params as {
+            thumbnailFilename: string
+          }
+          if (thumbnailFilename === video.thumbnailFilename) {
+            return res(
+              ctx.set('content-type', 'image/webp'),
+              ctx.set('content-length', video.contentLength)
+            )
+          }
+          return res(ctx.status(404))
+        }
+      )
+    })
+
+    test('returns thumbnail as webp', async () => {
+      const response = await requestThumbnail(
+        `https://player.vimeo.com/video/${video.videoId}?autoplay=1`
+      )
+      expect(response.headers.get('content-length')).toBe(video.contentLength)
+      expect(response.headers.get('content-type')).toBe('image/webp')
+    })
+
+    test('returns placeholder when video does not exist', async () => {
+      const response = await requestThumbnail(
+        `https://player.vimeo.com/video/999999999?autoplay=1`
+      )
+      expect(checkPlaceholderResponse(response))
+    })
+  })
+
   describe('returns placeholder', () => {
     test('when url parameter is empty', async () => {
       const response = await requestThumbnail('')
@@ -91,11 +151,6 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       const response = await requestThumbnail('42')
       expect(checkPlaceholderResponse(response))
     })
-
-    // test('when youtube.link does not have a V-param', async () => {
-    //   const response = await requestThumbnail('https://www.youtube.com/watch?')
-    //   expect(checkPlaceholderResponse(response))
-    // })
 
     test('when url is unsupported', async () => {
       const response = await requestThumbnail(
@@ -109,13 +164,13 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       const response = await handleRequest(new Request(requestUrl))
       expect(checkPlaceholderResponse(response))
     })
-
-    function checkPlaceholderResponse(response: Response) {
-      expect(response.headers.get('content-type')).toBe('image/png')
-      expect(response.headers.get('content-length')).toBe('135')
-    }
   })
 })
+
+function checkPlaceholderResponse(response: Response) {
+  expect(response.headers.get('content-type')).toBe('image/png')
+  expect(response.headers.get('content-length')).toBe('135')
+}
 
 function requestThumbnail(url: string): Promise<Response> {
   const requestUrl =
