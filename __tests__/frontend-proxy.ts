@@ -86,6 +86,28 @@ describe('handleRequest()', () => {
     })
   })
 
+  describe('returned response set cookie to 0 on mobile browser', () => {
+    //TODO: Backend Legacy fails if I set user-agent to 0 // Backend.Legacy
+    test.each([Backend.Frontend])('%p', async (backend) => {
+      global.DOMAIN = 'serlo.org'
+      const backendUrl = getUrlFor(backend, 'https://en.serlo.org/math')
+
+      setupProbabilityFor(backend)
+      mockHttpGet(backendUrl, returnsText(''))
+      Math.random = jest.fn().mockReturnValue(0.25)
+
+      const request = new Request('https://en.serlo.org/math')
+      request.headers.set(
+        'user-agent',
+        'Mozilla/5.0 (Linux; U; Android 4.0.3; de-ch; HTC Sensation Build/IML74K) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30'
+      )
+      const response = await handleRequest(request)
+
+      const cookieHeader = response.headers.get('Set-Cookie')
+      expect(cookieHeader).toBe('useFrontend=0; path=/; domain=.serlo.org')
+    })
+  })
+
   test('removes trailing slashes and prepends language code when the backend is frontend', async () => {
     setupProbabilityFor(Backend.Frontend)
 
