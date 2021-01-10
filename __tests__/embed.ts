@@ -24,6 +24,14 @@ import { mockHttpGet } from './__utils__'
 
 describe('embed.serlo.org/thumbnail?url=...', () => {
   describe('Youtube', () => {
+    const videoHQ = {
+      videoId: 'Wtvyw4NjJWc',
+      contentLength: '17270',
+    }
+    const videoSD = {
+      videoId: 'KtV2wlp9Ts4',
+      contentLength: '11464',
+    }
     beforeEach(() => {
       mockHttpGet(
         'https://i.ytimg.com/vi/:videoId/:format',
@@ -33,22 +41,23 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
             format: string
           }
 
-          let contentLength: number | null = null
+          let contentLength: string | null = null
 
-          if (videoId === 'Wtvyw4NjJWc' && format === 'sddefault.jpg')
-            contentLength = 17270
-          if (videoId === 'KtV2wlp9Ts4') {
+          if (videoId === videoHQ.videoId && format === 'sddefault.jpg')
+            contentLength = videoHQ.contentLength
+          if (videoId === videoSD.videoId) {
             if (format === 'sddefault.jpg') return res(ctx.status(404))
-            if (format === 'hqdefault.jpg') contentLength = 11464
+            if (format === 'hqdefault.jpg')
+              contentLength = videoSD.contentLength
           }
 
           if (contentLength) {
             return res(
               ctx.set('content-type', 'image/jpeg'),
-              ctx.set('content-length', contentLength.toString())
+              ctx.set('content-length', contentLength)
             )
           } else {
-            return res(ctx.status(400, 'Bad Request'))
+            return res(ctx.status(404))
           }
         }
       )
@@ -56,66 +65,57 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
     test('returns sddefault.jpg thumbnail when it exists', async () => {
       const response = await requestThumbnail(
-        'https://www.youtube.com/watch?v=Wtvyw4NjJWc'
+        `https://www.youtube.com/watch?v=${videoHQ.videoId}`
       )
 
       expect(response.headers.get('content-type')).toBe('image/jpeg')
-      expect(response.headers.get('content-length')).toBe('17270')
+      expect(response.headers.get('content-length')).toBe(videoHQ.contentLength)
     })
 
     test('returns hqdefault.jpg thumbnail when sddefault.jpg does not exist', async () => {
       const response = await requestThumbnail(
-        'https://www.youtube.com/watch?v=KtV2wlp9Ts4'
+        `https://www.youtube.com/watch?v=${videoSD.videoId}`
       )
 
       expect(response.headers.get('content-type')).toBe('image/jpeg')
-      expect(response.headers.get('content-length')).toBe('11464')
+      expect(response.headers.get('content-length')).toBe(videoSD.contentLength)
     })
   })
 
   describe('returns placeholder', () => {
-    test('when url parameter is not defined', async () => {
-      // TODO Fix this test
+    test('when url parameter is empty', async () => {
       const response = await requestThumbnail('')
-
-      expect(response.headers.get('content-type')).toBe('image/png')
-      expect(response.headers.get('content-length')).toBe('135')
+      expect(checkPlaceholderResponse(response))
     })
-    // TODO: Test, dass URL fehlerhaft ist
-    // embed.serlo.org/thumbnail?url=42
-    test('when url does not exist', async () => {
-      // TODO Fix this test
+
+    test('when url is invalid', async () => {
       const response = await requestThumbnail('42')
-
-      expect(response.headers.get('content-type')).toBe('image/png')
-      expect(response.headers.get('content-length')).toBe('135')
+      expect(checkPlaceholderResponse(response))
     })
 
-    // Youtube-Link ohne v-Parameter
     test('when youtube.link does not have a V-param', async () => {
-      // TODO Fix this test
       const response = await requestThumbnail('https://www.youtube.com/watch?')
-
-      expect(response.headers.get('content-type')).toBe('image/png')
-      expect(response.headers.get('content-length')).toBe('135')
+      expect(checkPlaceholderResponse(response))
     })
 
-    test('when unsupported url is unsupported', async () => {
+    test('when url is unsupported', async () => {
       const response = await requestThumbnail(
         'https://www.twitch.tv/videos/824398155'
       )
-
-      expect(response.headers.get('content-type')).toBe('image/png')
-      expect(response.headers.get('content-length')).toBe('135')
+      expect(checkPlaceholderResponse(response))
     })
 
-    function expectPlacholderResponse(response: Response) {
-      // TODO
+    test('when path is not thumbnail', async () => {
+      const requestUrl = 'https://embed.serlo.org/foo'
+      const response = await handleRequest(new Request(requestUrl))
+      expect(checkPlaceholderResponse(response))
+    })
+
+    function checkPlaceholderResponse(response: Response) {
+      expect(response.headers.get('content-type')).toBe('image/png')
+      expect(response.headers.get('content-length')).toBe('135')
     }
   })
-
-  // Test, dass path nicht thumbnail
-  // embed.serlo.org/foo -> 404 exception
 })
 
 function requestThumbnail(url: string): Promise<Response> {
