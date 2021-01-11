@@ -1,16 +1,16 @@
-type = "webpack"
 account_id = "3bfabc4463c2c3c340f7301d22ed18c0"
+type = "webpack"
 webpack_config = "webpack.config.js"
 
 [env.dev]
-name = "serlo-dev"
-zone_id = "cedde9a4ab2980cd92bfc3765dc2e475"
-route = "*serlo-development.dev/*"
 kv-namespaces = [
-    { binding = "MAINTENANCE_KV", id = "d5f281b897f643b8824881cfe2a24dd2", preview_id = "d5f281b897f643b8824881cfe2a24dd2" },
-    { binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be", preview_id = "19f90dc8e6ff49cd8bc42f51346409be" },
-    { binding = "PATH_INFO_KV", id = "fb28139b91f64cd2a23645195b019ecb", preview_id = "fb28139b91f64cd2a23645195b019ecb" },
+  {binding = "MAINTENANCE_KV", id = "d5f281b897f643b8824881cfe2a24dd2", preview_id = "d5f281b897f643b8824881cfe2a24dd2"},
+  {binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be", preview_id = "19f90dc8e6ff49cd8bc42f51346409be"},
+  {binding = "PATH_INFO_KV", id = "fb28139b91f64cd2a23645195b019ecb", preview_id = "fb28139b91f64cd2a23645195b019ecb"},
 ]
+name = "serlo-dev"
+route = "*serlo-development.dev/*"
+zone_id = "cedde9a4ab2980cd92bfc3765dc2e475"
 
 [env.dev.vars]
 ALLOW_AUTH_FROM_LOCALHOST = "true"
@@ -19,18 +19,20 @@ DOMAIN = "serlo-development.dev"
 ENABLE_BASIC_AUTH = "true"
 FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "GroupedExercise", "Exercise", "ExerciseGroup", "Event", "Page", "Solution", "TaxonomyTerm", "User", "Video"]'
 FRONTEND_DOMAIN = "frontend-git-staging.serlo.vercel.app"
-FRONTEND_PROBABILITY = "0.50"
+FRONTEND_PROBABILITY_AUTHENTICATED = "0.5"
+FRONTEND_PROBABILITY_DESKTOP = "0.5"
+FRONTEND_PROBABILITY_MOBILE = "0.5"
 REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = "false"
 
 [env.staging]
-name = "serlo-staging"
-zone_id = "0067b08b108fbcf88ddaeaae4ac3d6ac"
-route = "*serlo-staging.dev/*"
 kv-namespaces = [
-    { binding = "MAINTENANCE_KV", id = "3c3c25aba0b94b7e99f855f013f5b09c", preview_id = "3c3c25aba0b94b7e99f855f013f5b09c" },
-    { binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be", preview_id = "19f90dc8e6ff49cd8bc42f51346409be" },
-    { binding = "PATH_INFO_KV", id = "839198b2f0a242b491e5723a8c59b7e2", preview_id = "839198b2f0a242b491e5723a8c59b7e2" },
+  {binding = "MAINTENANCE_KV", id = "3c3c25aba0b94b7e99f855f013f5b09c", preview_id = "3c3c25aba0b94b7e99f855f013f5b09c"},
+  {binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be", preview_id = "19f90dc8e6ff49cd8bc42f51346409be"},
+  {binding = "PATH_INFO_KV", id = "839198b2f0a242b491e5723a8c59b7e2", preview_id = "839198b2f0a242b491e5723a8c59b7e2"},
 ]
+name = "serlo-staging"
+route = "*serlo-staging.dev/*"
+zone_id = "0067b08b108fbcf88ddaeaae4ac3d6ac"
 
 [env.staging.vars]
 ALLOW_AUTH_FROM_LOCALHOST = "true"
@@ -39,18 +41,20 @@ DOMAIN = "serlo-staging.dev"
 ENABLE_BASIC_AUTH = "true"
 FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "GroupedExercise", "Exercise", "ExerciseGroup", "Event", "Page", "Solution", "TaxonomyTerm", "User", "Video"]'
 FRONTEND_DOMAIN = "frontend-git-staging.serlo.vercel.app"
-FRONTEND_PROBABILITY = "0.50"
+FRONTEND_PROBABILITY_AUTHENTICATED = "0.50"
+FRONTEND_PROBABILITY_DESKTOP = "0.50"
+FRONTEND_PROBABILITY_MOBILE = "0.50"
 REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = "false"
 
 [env.production]
-name = "serlo-production"
-zone_id = "1a4afa776acb2e40c3c8a135248328ae"
-route = "*serlo.org/*"
 kv-namespaces = [
-    { binding = "MAINTENANCE_KV", id = "b1f17ebbe39c4fd9b49d1368ce225faa" },
-    { binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be" },
-    { binding = "PATH_INFO_KV", id = "c3412114bdb04cfd8a367ec5bad46173" },
+  {binding = "MAINTENANCE_KV", id = "b1f17ebbe39c4fd9b49d1368ce225faa"},
+  {binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be"},
+  {binding = "PATH_INFO_KV", id = "c3412114bdb04cfd8a367ec5bad46173"},
 ]
+name = "serlo-production"
+route = "*serlo.org/*"
+zone_id = "1a4afa776acb2e40c3c8a135248328ae"
 
 [env.production.vars]
 ALLOW_AUTH_FROM_LOCALHOST = "false"
@@ -59,6 +63,7 @@ DOMAIN = "serlo.org"
 ENABLE_BASIC_AUTH = "false"
 FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "GroupedExercise", "Exercise", "ExerciseGroup", "Event", "Page", "Solution", "TaxonomyTerm", "User", "Video"]'
 FRONTEND_DOMAIN = "frontend.serlo.org"
-FRONTEND_PROBABILITY = "0.25"
+FRONTEND_PROBABILITY_AUTHENTICATED = "0"
+FRONTEND_PROBABILITY_DESKTOP = "0.25"
+FRONTEND_PROBABILITY_MOBILE = "0.50"
 REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = "true"
-
