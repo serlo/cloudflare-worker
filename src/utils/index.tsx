@@ -71,6 +71,7 @@ const ApiResult = t.type({
         alias: t.string,
         instance: t.string,
         pages: t.array(t.type({ alias: t.string })),
+        exercise: t.type({ alias: t.string }),
       }),
     ]),
   }),
@@ -111,6 +112,11 @@ export async function getPathInfo(
             alias
           }
         }
+        ... on Solution {
+          exercise {
+            alias
+          }
+        }
       }
     }`
   const variables = { alias: { instance: lang, path } }
@@ -139,6 +145,7 @@ export async function getPathInfo(
     uuid.pages !== undefined && uuid.pages.length > 0
       ? uuid.pages[0].alias
       : uuid.alias ?? path
+  uuid.exercise !== undefined ? uuid.exercise.alias : uuid.alias ?? path
 
   const result = {
     typename: uuid.__typename,
