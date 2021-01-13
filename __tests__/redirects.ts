@@ -250,7 +250,7 @@ describe('redirects to current path of an resource', () => {
     givenUuid({
       id: 57353,
       __typename: 'Solution',
-      alias: '/mathe/57351/57351',
+      alias: '/mathe/57353/57353',
       exercise: { alias: '/mathe/57351/57351' },
     })
 

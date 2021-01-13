@@ -142,10 +142,11 @@ export async function getPathInfo(
 
   const uuid = apiResult.right.data.uuid
   const currentPath =
-    uuid.pages !== undefined && uuid.pages.length > 0
+    uuid.exercise !== undefined
+      ? uuid.exercise.alias
+      : uuid.pages !== undefined && uuid.pages.length > 0
       ? uuid.pages[0].alias
       : uuid.alias ?? path
-  uuid.exercise !== undefined ? uuid.exercise.alias : uuid.alias ?? path
 
   const result = {
     typename: uuid.__typename,

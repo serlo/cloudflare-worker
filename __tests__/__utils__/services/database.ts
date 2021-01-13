@@ -59,12 +59,7 @@ interface Solution extends AbstractUuid<'Solution'> {
 
 interface GenericUuid extends AbstractUuid<GenericTypenames> {}
 
-type GenericTypenames =
-  | 'Page'
-  | 'Article'
-  | 'TaxonomyTerm'
-  | 'ArticleRevision'
-  | 'Solution'
+type GenericTypenames = 'Page' | 'Article' | 'TaxonomyTerm' | 'ArticleRevision'
 
 interface AbstractUuid<Typename extends string> {
   __typename: Typename
