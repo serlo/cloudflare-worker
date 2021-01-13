@@ -19,7 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { pipeable, option as O } from 'fp-ts'
+import { pipeable, taskEither as TE, either as E } from 'fp-ts'
 import * as t from 'io-ts'
 
 import { Url } from './utils'
@@ -94,38 +94,33 @@ const VimeoApiResponse = t.type({
 })
 
 async function getVimeoThumbnail(url: URL) {
-  // exmaple url: https://player.vimeo.com/video/${id}?autoplay=1
+  const error = () => 'error' as unknown
 
-  const videoId = url.pathname.replace('/video/', '')
-
-  if (!RegExp('[0-9]+').test(videoId)) {
-    return getPlaceholder()
-  }
-  const apiResponse = await fetch(
-    'https://vimeo.com/api/oembed.json?url=' +
-      encodeURIComponent(`https://vimeo.com/${videoId}`)
-  )
-  if (apiResponse.status !== 200) return getPlaceholder()
-
-  try {
-    const thumbnailUrl = pipeable.pipe(
-      VimeoApiResponse.decode(await apiResponse.json()),
-      O.fromEither,
-      O.map((response) => response.thumbnail_url.replace(/_[0-9|x]+/, '')),
-      O.chain((url) => O.tryCatch(() => new Url(url))),
-      O.chain(O.fromPredicate((url) => url.domain === 'vimeocdn.com'))
-    )
-
-    if (O.isNone(thumbnailUrl)) return getPlaceholder()
-
-    const imgRes = await fetch(thumbnailUrl.value.href)
-
-    return imgRes.status === 200 ? imgRes : getPlaceholder()
-  } catch (e) {
-    // Error with parsing the json request
-  }
-
-  return getPlaceholder()
+  return pipeable.pipe(
+    TE.of(url.pathname.replace('/video/', '')),
+    TE.chain(TE.fromPredicate((videoId) => /[0-9]+/.test(videoId), error)),
+    TE.chain((videoId) =>
+      TE.fromTask(() =>
+        fetch(
+          'https://vimeo.com/api/oembed.json?url=' +
+            encodeURIComponent(`https://vimeo.com/${videoId}`)
+        )
+      )
+    ),
+    TE.chain(
+      TE.fromPredicate((apiResponse) => apiResponse.status === 200, error)
+    ),
+    TE.chain((apiResponse) => TE.tryCatch(() => apiResponse.json(), error)),
+    TE.chain((data) =>
+      TE.fromEither(E.mapLeft(error)(VimeoApiResponse.decode(data)))
+    ),
+    TE.map((data) => data.thumbnail_url.replace(/_[0-9|x]+/, '')),
+    TE.chain((url) => TE.fromEither(E.tryCatch(() => new Url(url), error))),
+    TE.chain(TE.fromPredicate((url) => url.domain === 'vimeocdn.com', error)),
+    TE.chain((url) => TE.fromTask(() => fetch(url.href))),
+    TE.chain(TE.fromPredicate((response) => response.status === 200, error)),
+    TE.getOrElse(() => () => Promise.resolve(getPlaceholder()))
+  )()
 }
 
 async function getGeogebraThumbnail(url: URL) {
