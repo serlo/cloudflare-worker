@@ -29,68 +29,75 @@ import {
 
 describe('embed.serlo.org/thumbnail?url=...', () => {
   describe('Youtube', () => {
-    const videoHighQuality = {
-      id: 'Wtvyw4NjJWc',
-      contentLength: '20000',
+    const videos = {
+      highQuality: {
+        id: 'Wtvyw4NjJWc',
+        contentLength: '17270',
+        format: 'sddefault.jpg',
+      },
+      lowQuality: {
+        id: 'KtV2wlp9Ts4',
+        contentLength: '11464',
+        format: 'hqdefault.jpg',
+      },
     }
-    const videoLowQuality = {
-      id: 'KtV2wlp9Ts4',
-      contentLength: '10000',
-    }
-    beforeEach(() => {
-      mockHttpGetNoCheck(
-        'https://i.ytimg.com/vi/:videoId/:format',
-        (req, res, ctx) => {
-          const { videoId, format } = req.params as {
-            videoId: string
-            format: string
-          }
-          const isHQ = videoId === videoHighQuality.id
 
-          if (
-            (isHQ && format === 'sddefault.jpg') ||
-            (videoId === videoLowQuality.id && format === 'hqdefault.jpg')
-          ) {
-            return res(
-              ctx.set('content-type', 'image/jpeg'),
-              ctx.set(
-                'content-length',
-                isHQ
-                  ? videoHighQuality.contentLength
-                  : videoLowQuality.contentLength
-              )
-            )
+    beforeEach(() => {
+      global.server.use(
+        rest.get<never, any, { videoId: string; format: string }>(
+          'https://i.ytimg.com/vi/:videoId/:format',
+          (req, res, ctx) => {
+            const { videoId, format } = req.params
+
+            for (const spec of Object.values(videos)) {
+              if (videoId === spec.id && format === spec.format) {
+                return res(
+                  ctx.set('content-type', 'image/jpeg'),
+                  ctx.set('content-length', spec.contentLength)
+                )
+              }
+            }
+
+            return res(ctx.status(404))
           }
-          return res(ctx.status(404))
-        }
+        )
       )
     })
 
     test('returns sddefault.jpg thumbnail when it exists', async () => {
       const response = await requestThumbnail(
-        `https://www.youtube-nocookie.com/embed/${videoHighQuality.id}?autoplay=1&html5=1`
+        `https://www.youtube-nocookie.com/embed/${videos.highQuality.id}?autoplay=1&html5=1`
       )
       expect(response.headers.get('content-length')).toBe(
-        videoHighQuality.contentLength
+        videos.highQuality.contentLength
       )
       expect(response.headers.get('content-type')).toBe('image/jpeg')
     })
 
     test('returns hqdefault.jpg thumbnail when sddefault.jpg does not exist', async () => {
       const response = await requestThumbnail(
-        `https://www.youtube-nocookie.com/embed/${videoLowQuality.id}?autoplay=1&html5=1`
+        `https://www.youtube-nocookie.com/embed/${videos.lowQuality.id}?autoplay=1&html5=1`
       )
       expect(response.headers.get('content-length')).toBe(
-        videoLowQuality.contentLength
+        videos.lowQuality.contentLength
       )
       expect(response.headers.get('content-type')).toBe('image/jpeg')
     })
 
-    test('returns placeholder when no image is available', async () => {
-      const response = await requestThumbnail(
-        `https://www.youtube-nocookie.com/embed/AaaAaaAaaAa?autoplay=1&html5=1`
-      )
-      expect(isPlaceholderResponse(response))
+    describe('returns placeholder', () => {
+      test('when no image is available', async () => {
+        const response = await requestThumbnail(
+          `https://www.youtube-nocookie.com/embed/AaaAaaAaaAa?autoplay=1&html5=1`
+        )
+        expect(isPlaceholderResponse(response))
+      })
+
+      test('when video id is malformed', async () => {
+        const response = await requestThumbnail(
+          `https://www.youtube-nocookie.com/embed/foo:pass@en.serlo.org/math`
+        )
+        expect(isPlaceholderResponse(response))
+      })
     })
   })
 
