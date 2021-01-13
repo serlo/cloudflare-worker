@@ -109,9 +109,8 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
   describe('Vimeo', () => {
     const video = {
       id: '117611037',
-      contentLength: '17172',
-      thumbnailFilename: '505834070.webp',
-      thumbnailUrl: 'https://i.vimeocdn.com/video/505834070_640.webp',
+      contentLength: '60215',
+      thumbnailUrl: 'https://i.vimeocdn.com/video/505834070.jpg',
     }
     beforeEach(() => {
       givenVimeoApi(defaultVimeoApi())
@@ -123,7 +122,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         `https://player.vimeo.com/video/${video.id}?autoplay=1`
       )
       expect(response.headers.get('content-length')).toBe(video.contentLength)
-      expect(response.headers.get('content-type')).toBe('image/webp')
+      expect(response.headers.get('content-type')).toBe('image/jpeg')
     })
 
     describe('returns placeholder', () => {
@@ -226,10 +225,9 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
     function defaultVimeoCdn(): RestResolver {
       return (req, res, ctx) => {
-        const { thumbnailFilename } = req.params
-        if (thumbnailFilename === video.thumbnailFilename) {
+        if (req.url.href === video.thumbnailUrl) {
           return res(
-            ctx.set('content-type', 'image/webp'),
+            ctx.set('content-type', 'image/jpeg'),
             ctx.set('content-length', video.contentLength)
           )
         }
@@ -264,7 +262,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     const video = {
       embedUrl:
         'https://upload.wikimedia.org/wikipedia/commons/1/15/Inerter_vibration_isolation_experiment.webm',
-      contentLength: '74280',
+      contentLength: '54373',
       thumbnailUrl:
         'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Inerter_vibration_isolation_experiment.webm/800px--Inerter_vibration_isolation_experiment.webm.jpg',
     }
