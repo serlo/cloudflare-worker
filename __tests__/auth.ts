@@ -19,16 +19,16 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { handleRequest } from '../src'
-import { expectIsJsonResponse } from './__utils__'
+
+import { expectIsJsonResponse, fetchTestEnvironment } from './__utils__'
 
 test('Frontend Sector Identifier URI Validation (block localhost)', async () => {
   global.ALLOW_AUTH_FROM_LOCALHOST = 'false'
   global.DOMAIN = 'serlo.org'
+  const response = await fetchTestEnvironment({
+    pathname: '/auth/frontend-redirect-uris.json',
+  })
 
-  const response = await handleRequest(
-    new Request('https://serlo.org/auth/frontend-redirect-uris.json')
-  )
   await expectIsJsonResponse(response, [
     'https://de.serlo.org/api/auth/callback',
     'https://en.serlo.org/api/auth/callback',
@@ -42,9 +42,10 @@ test('Frontend Sector Identifier URI Validation (block localhost)', async () => 
 test('Frontend Sector Identifier URI Validation (allow localhost)', async () => {
   global.ALLOW_AUTH_FROM_LOCALHOST = 'true'
   global.DOMAIN = 'serlo.org'
-  const response = await handleRequest(
-    new Request('https://serlo.org/auth/frontend-redirect-uris.json')
-  )
+  const response = await fetchTestEnvironment({
+    pathname: '/auth/frontend-redirect-uris.json',
+  })
+
   await expectIsJsonResponse(response, [
     'https://de.serlo.org/api/auth/callback',
     'https://en.serlo.org/api/auth/callback',
