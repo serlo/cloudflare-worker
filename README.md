@@ -8,9 +8,9 @@ This repository contains the source code for the cloudflare worker of Serlo ([ht
 
 You can run tests with `yarn test`. We use [jest](https://jestjs.io/) and thus all [jest command line options](https://jestjs.io/docs/en/cli) can be used. It is also possible to run tests against other environments:
 
-- `TEST_ENVIRONMENT=dev yarn test` – Test against `serlo-development.dev`
-- `TEST_ENVIRONMENT=staging yarn test` – Test against `serlo-staging.dev`
-- `TEST_ENVIRONMENT=production yarn test` – Test against `serlo.org`
+- `yarn test:dev` – Test against `serlo-development.dev`
+- `yarn test:staging` – Test against `serlo-staging.dev`
+- `yarn test:production` – Test against `serlo.org`
 
 ### Write tests
 
