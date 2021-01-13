@@ -27,8 +27,13 @@ import {
   getTestEnvironment,
 } from './test-environment'
 
-export function fetchTestEnvironment(spec: UrlSpec, init?: RequestInit) {
-  return fetchAt({ ...spec, environment: getTestEnvironment() }, init)
+export function fetchTestEnvironment(
+  spec: UrlSpec & TestEnvironmentSpec,
+  init?: RequestInit
+) {
+  const { subdomain, pathname, environment = getTestEnvironment() } = spec
+
+  return fetchAt({ subdomain, pathname, environment }, init)
 }
 
 export function fetchLocally(spec: UrlSpec, init?: RequestInit) {

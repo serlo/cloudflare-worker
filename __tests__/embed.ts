@@ -21,8 +21,11 @@
  */
 import { rest } from 'msw'
 
-import { handleRequest } from '../src'
-import { mockHttpGetNoCheck } from './__utils__'
+import {
+  fetchTestEnvironment,
+  mockHttpGetNoCheck,
+  TestEnvironment,
+} from './__utils__'
 
 describe('embed.serlo.org/thumbnail?url=...', () => {
   describe('Youtube', () => {
@@ -226,7 +229,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       )
       mockHttpGetNoCheck(
         'https://cdn.geogebra.org/resource/q9gNCVsS/lIoGcSJdoALG1cTd/material-q9gNCVsS.png',
-        (req, res, ctx) => {
+        (_req, res, ctx) => {
           return res(
             ctx.set('content-type', 'image/png'),
             ctx.set('content-length', applet.contentLength)
@@ -270,8 +273,10 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     })
 
     test('when path is not thumbnail', async () => {
-      const requestUrl = 'https://embed.serlo.org/foo'
-      const response = await handleRequest(new Request(requestUrl))
+      const response = await fetchTestEnvironment({
+        subdomain: 'embed',
+        pathname: '/foo',
+      })
       expect(isPlaceholderResponse(response))
     })
   })
@@ -282,9 +287,13 @@ function isPlaceholderResponse(response: Response) {
   expect(response.headers.get('content-length')).toBe('135')
 }
 
-function requestThumbnail(url: string): Promise<Response> {
-  const requestUrl =
-    'https://embed.serlo.org/thumbnail?url=' + encodeURIComponent(url)
-
-  return handleRequest(new Request(requestUrl))
+async function requestThumbnail(
+  url: string,
+  environment?: TestEnvironment
+): Promise<Response> {
+  return await fetchTestEnvironment({
+    subdomain: 'embed',
+    pathname: '/thumbnail?url=' + encodeURIComponent(url),
+    environment,
+  })
 }
