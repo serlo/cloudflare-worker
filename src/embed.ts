@@ -144,16 +144,8 @@ async function getGeogebraThumbnail(url: URL) {
         '-api': '1.0.0',
         task: {
           '-type': 'fetch',
-          fields: {
-            field: [
-              { '-name': 'width' },
-              { '-name': 'height' },
-              { '-name': 'preview_url' },
-            ],
-          },
-          filters: {
-            field: [{ '-name': 'id', '#text': appletId }],
-          },
+          fields: { field: [{ '-name': 'preview_url' }] },
+          filters: { field: [{ '-name': 'id', '#text': appletId }] },
           limit: { '-num': '1' },
         },
       },
