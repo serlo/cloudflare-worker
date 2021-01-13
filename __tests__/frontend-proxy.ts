@@ -37,7 +37,7 @@ describe('handleRequest()', () => {
   beforeEach(() => {
     global.FRONTEND_DOMAIN = 'frontend.serlo.org'
     global.FRONTEND_ALLOWED_TYPES = '["Page"]'
-    global.FRONTEND_PROBABILITY = '0.5'
+    global.FRONTEND_PROBABILITY_DESKTOP = '0.5'
     Math.random = jest.fn().mockReturnValue(0.5)
 
     givenUuid({
@@ -49,24 +49,60 @@ describe('handleRequest()', () => {
   })
 
   describe('chooses backend based on random number', () => {
-    test('chooses frontend when random number <= probability', async () => {
-      global.FRONTEND_PROBABILITY = '0.5'
-      Math.random = jest.fn().mockReturnValue(0.5)
+    describe('for desktop', () => {
+      test('chooses frontend when random number <= probability', async () => {
+        global.FRONTEND_PROBABILITY_DESKTOP = '0.5'
+        Math.random = jest.fn().mockReturnValue(0.5)
 
-      await expectResponseFrom({
-        backend: 'https://frontend.serlo.org/en/math',
-        request: 'https://en.serlo.org/math',
+        await expectResponseFrom({
+          backend: 'https://frontend.serlo.org/en/math',
+          request: 'https://en.serlo.org/math',
+        })
+      })
+
+      test('chooses legacy backend for random number > probability', async () => {
+        global.FRONTEND_PROBABILITY_DESKTOP = '0.5'
+        Math.random = jest.fn().mockReturnValue(0.75)
+
+        await expectResponseFrom({
+          backend: 'https://en.serlo.org/math',
+          request: 'https://en.serlo.org/math',
+        })
       })
     })
 
-    test('chose legacy backend for random number > probability', async () => {
-      global.FRONTEND_PROBABILITY = '0.5'
-      Math.random = jest.fn().mockReturnValue(0.75)
+    describe('for mobile', () => {
+      test('chooses frontend when random number <= probability', async () => {
+        setupProbabilityFor(Backend.Legacy)
+        global.FRONTEND_PROBABILITY_MOBILE = '0.5'
+        Math.random = jest.fn().mockReturnValue(0.5)
 
-      await expectResponseFrom({
-        backend: 'https://en.serlo.org/math',
-        request: 'https://en.serlo.org/math',
+        await expectResponseFrom({
+          backend: 'https://frontend.serlo.org/en/math',
+          request: getMobileRequest(),
+        })
       })
+
+      test('chooses legacy backend for random number > probability', async () => {
+        setupProbabilityFor(Backend.Frontend)
+        global.FRONTEND_PROBABILITY_MOBILE = '0.5'
+        Math.random = jest.fn().mockReturnValue(0.75)
+
+        await expectResponseFrom({
+          backend: 'https://en.serlo.org/math',
+          request: getMobileRequest(),
+        })
+      })
+
+      function getMobileRequest() {
+        const userAgent =
+          'Mozilla/5.0 (Android 4.0.3; de-ch) Version/4.0 Mobile Safari/534.30'
+        const request = new Request('https://en.serlo.org/math')
+
+        request.headers.set('user-agent', userAgent)
+
+        return request
+      }
     })
   })
 
@@ -119,43 +155,54 @@ describe('handleRequest()', () => {
         setupProbabilityFor(Backend.Frontend)
       })
 
-      describe('when an entity is accessed', () => {
-        let response: Response
-
-        beforeEach(async () => {
-          givenApi(returnsMalformedJson())
-
-          mockHttpGet('https://en.serlo.org/math', returnsText('content'))
-
-          const request = new Request('https://en.serlo.org/math')
-          request.headers.set('Cookie', 'authenticated=1')
-          response = await handleRequest(request)
+      test('chooses legacy backend', async () => {
+        await expectResponseFrom({
+          backend: 'https://en.serlo.org/math',
+          request: getAuthedRequest(),
         })
+      })
 
-        test('chooses legacy backend', async () => {
-          expect(await response.text()).toBe('content')
-        })
-
-        test('does not set cookie with random number', () => {
-          expect(response.headers.get('Set-Cookie')).toBeNull()
-        })
+      test('does not set cookie with random number', async () => {
+        mockHttpGet(Backend.Legacy, returnsText(''))
+        const response = await handleRequest(getAuthedRequest())
+        expect(response.headers.get('Set-Cookie')).toBeNull()
       })
     })
 
     describe('when REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = false', () => {
-      test('does not choose legacy backend', async () => {
+      beforeEach(() => {
         global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = 'false'
         setupProbabilityFor(Backend.Frontend)
+      })
 
-        const request = new Request('https://en.serlo.org/math')
-        request.headers.set('Cookie', 'authenticated=1')
+      test('chooses frontend when random number <= probability', async () => {
+        setupProbabilityFor(Backend.Legacy)
+        global.FRONTEND_PROBABILITY_AUTHENTICATED = '0.5'
+        Math.random = jest.fn().mockReturnValue(0.5)
 
         await expectResponseFrom({
           backend: 'https://frontend.serlo.org/en/math',
-          request,
+          request: getAuthedRequest(),
+        })
+      })
+
+      test('chooses legacy backend for random number > probability', async () => {
+        setupProbabilityFor(Backend.Frontend)
+        global.FRONTEND_PROBABILITY_AUTHENTICATED = '0.5'
+        Math.random = jest.fn().mockReturnValue(0.75)
+
+        await expectResponseFrom({
+          backend: 'https://en.serlo.org/math',
+          request: getAuthedRequest(),
         })
       })
     })
+
+    function getAuthedRequest() {
+      const request = new Request('https://en.serlo.org/math')
+      request.headers.set('Cookie', 'authenticated=1')
+      return request
+    }
   })
 
   describe('when request contains content api parameter', () => {
@@ -201,7 +248,7 @@ describe('handleRequest()', () => {
         const backendUrl = getUrlFor(backend, url)
 
         mockHttpGet(backendUrl, returnsText('content'))
-        global.FRONTEND_PROBABILITY = '0.5'
+        global.FRONTEND_PROBABILITY_DESKTOP = '0.5'
 
         const request = new Request(url, { headers: { Cookie: cookieValue } })
         response = await handleRequest(request)
