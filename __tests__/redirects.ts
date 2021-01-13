@@ -246,6 +246,7 @@ describe('redirects to current path of an resource', () => {
     })
     expectToBeRedirectTo(response, target, 301)
   })
+
   test('redirects to exercise when requested entity is a solution', async () => {
     givenUuid({
       id: 57353,
