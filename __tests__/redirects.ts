@@ -247,6 +247,26 @@ describe('redirects to current path of an resource', () => {
     expectToBeRedirectTo(response, target, 301)
   })
 
+  test('redirects to exercise when requested entity is a solution', async () => {
+    givenUuid({
+      id: 57353,
+      __typename: 'Solution',
+      alias: '/mathe/57353/57353',
+      exercise: { alias: '/mathe/57351/57351' },
+    })
+
+    const response = await fetchTestEnvironment({
+      subdomain: 'de',
+      pathname: '/57353',
+    })
+
+    const target = createUrl({
+      subdomain: 'de',
+      pathname: '/mathe/57351/57351',
+    })
+    expectToBeRedirectTo(response, target, 301)
+  })
+
   test('redirects to alias of course when list of course pages is empty', async () => {
     // TODO: Find an empty course at serlo.org
     givenUuid({
