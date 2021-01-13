@@ -279,10 +279,19 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       })
       expect(isPlaceholderResponse(response))
     })
+
+    test('when url parameter is missing', async () => {
+      const response = await fetchTestEnvironment({
+        subdomain: 'embed',
+        pathname: '/thumbnail',
+      })
+      expect(isPlaceholderResponse(response))
+    })
   })
 })
 
 function isPlaceholderResponse(response: Response) {
+  expect(response.status).toBe(200)
   expect(response.headers.get('content-type')).toBe('image/png')
   expect(response.headers.get('content-length')).toBe('135')
 }
