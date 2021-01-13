@@ -66,11 +66,11 @@ function getPlaceholder() {
 }
 
 async function getYoutubeThumbnail(url: URL) {
-  //example url https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&html5…
+  // example url: https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&html5
 
   const videoId = url.pathname.replace('/embed/', '')
 
-  if (!videoId || !RegExp('[a-zA-Z0-9_-]{11}').test(videoId)) {
+  if (!/[a-zA-Z0-9_-]{11}/.test(videoId)) {
     return getPlaceholder()
   }
 
