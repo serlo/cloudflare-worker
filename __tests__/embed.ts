@@ -33,6 +33,11 @@ import {
 } from './__utils__'
 
 describe('embed.serlo.org/thumbnail?url=...', () => {
+  beforeEach(() => {
+    mockHttpGet('https://malware.com/*', returnsText('bad'))
+    mockHttpGet('http://malware.com/*', returnsText('bad'))
+  })
+
   describe('Youtube', () => {
     const videos = {
       highQuality: {
@@ -99,7 +104,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
       test('when video id is malformed', async () => {
         const response = await requestThumbnail(
-          `https://www.youtube-nocookie.com/embed/foo:pass@en.serlo.org/math`
+          `https://www.youtube-nocookie.com/embed/foo:pass@malware.com`
         )
         expect(isPlaceholderResponse(response))
       })
@@ -135,7 +140,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
       test('when video id is malformed', async () => {
         const response = await requestThumbnail(
-          `https://player.vimeo.com/video/foo:password@en.serlo.org/math`
+          `https://player.vimeo.com/video/foo:password@malware.com`
         )
         expect(isPlaceholderResponse(response))
       })
@@ -188,11 +193,10 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       })
 
       test('when vimeo api returns a thumbnail_url not pointing to vimeocdn.com', async () => {
-        mockHttpGet('https://malware.com/bad', returnsText('bad'))
         givenVimeoApi(
           returnsJson({
             type: 'video',
-            thumbnail_url: 'https://malware.com/bad',
+            thumbnail_url: 'https://malware.com/',
           })
         )
 
@@ -381,7 +385,6 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
       test('when host of geogebra preview url is not cdn.geogebra.org', async () => {
         givenGeogebraApi(returnsPreviewUrl('http://malware.com/'))
-        mockHttpGet('http://malware.com/', returnsText('bad'))
 
         const response = await requestThumbnail(
           `https://www.geogebra.org/material/iframe/id/${applet.id}`,
