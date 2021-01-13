@@ -17,8 +17,7 @@ You can run tests with `yarn test`. We use [jest](https://jestjs.io/) and thus a
 At [`__test__/__utils__`](./__tests__/__utils__) there are utility functions for writing tests:
 
 - [`fetch-helper.ts`](./__tests__/__utils__/fetch-helper.ts):
-  - `fetchTestingEnvironment()` - Fetch against the current testing environment. Use this function whenever possible.
-  - `fetchLocally()` – Fetch always against the local source code. Use this function when testing against a testing environment is not possible since you need to mock something.
+  - `fetchSerlo()` - Fetch against the current testing environment. Use this function whenever possible. By setting `{ environment: TestEnvironment.Locally }` you can always test against the local environment.
 - [`epxect-helper.ts`](./__tests__/__utils__/expect-helper.ts): Various assertation helper you can use.
 
 ## Static pages

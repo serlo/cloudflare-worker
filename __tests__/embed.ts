@@ -22,7 +22,7 @@
 import { rest } from 'msw'
 
 import {
-  fetchTestEnvironment,
+  fetchSerlo,
   hasInternalServerError,
   RestResolver,
   returnsMalformedJson,
@@ -473,7 +473,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     })
 
     test('when path is not thumbnail', async () => {
-      const response = await fetchTestEnvironment({
+      const response = await fetchSerlo({
         subdomain: 'embed',
         pathname: '/foo',
       })
@@ -481,7 +481,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     })
 
     test('when url parameter is missing', async () => {
-      const response = await fetchTestEnvironment({
+      const response = await fetchSerlo({
         subdomain: 'embed',
         pathname: '/thumbnail',
       })
@@ -500,7 +500,7 @@ async function requestThumbnail(
   url: string,
   environment?: TestEnvironment
 ): Promise<Response> {
-  return await fetchTestEnvironment({
+  return await fetchSerlo({
     subdomain: 'embed',
     pathname: '/thumbnail?url=' + encodeURIComponent(url),
     environment,

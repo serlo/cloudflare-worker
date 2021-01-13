@@ -28,9 +28,8 @@ import {
   givenUuid,
   returnsMalformedJson,
   expectContainsText,
-  fetchTestEnvironment,
+  fetchSerlo,
   createUrl,
-  fetchLocally,
   TestEnvironment,
 } from './__utils__'
 
@@ -49,14 +48,14 @@ describe('meet.serlo.org', () => {
     ['/5', '/xqt-cdpm-nco'],
     ['/6', '/sui-yuwv-suh'],
   ])('meet.serlo.org%s', async (pathname, googleMeetRoom) => {
-    const response = await fetchTestEnvironment({ subdomain: 'meet', pathname })
+    const response = await fetchSerlo({ subdomain: 'meet', pathname })
 
     const target = `https://meet.google.com${googleMeetRoom}`
     expectToBeRedirectTo(response, target, 302)
   })
 
   test('returns 404 when meet room is not defined', async () => {
-    const response = await fetchTestEnvironment({
+    const response = await fetchSerlo({
       subdomain: 'meet',
       pathname: '/foo',
     })
@@ -66,7 +65,7 @@ describe('meet.serlo.org', () => {
 })
 
 test('de.serlo.org/datenschutz', async () => {
-  const response = await fetchTestEnvironment({
+  const response = await fetchSerlo({
     subdomain: 'de',
     pathname: '/datenschutz',
   })
@@ -76,7 +75,7 @@ test('de.serlo.org/datenschutz', async () => {
 })
 
 test('de.serlo.org/impressum', async () => {
-  const response = await fetchTestEnvironment({
+  const response = await fetchSerlo({
     subdomain: 'de',
     pathname: '/impressum',
   })
@@ -86,7 +85,7 @@ test('de.serlo.org/impressum', async () => {
 })
 
 test('de.serlo.org/nutzungsbedingungen ', async () => {
-  const response = await fetchTestEnvironment({
+  const response = await fetchSerlo({
     subdomain: 'de',
     pathname: '/nutzungsbedingungen',
   })
@@ -96,7 +95,7 @@ test('de.serlo.org/nutzungsbedingungen ', async () => {
 })
 
 test('start.serlo.org', async () => {
-  const response = await fetchTestEnvironment({ subdomain: 'start' })
+  const response = await fetchSerlo({ subdomain: 'start' })
 
   const target =
     'https://docs.google.com/document/d/1qsgkXWNwC-mcgroyfqrQPkZyYqn7m1aimw2gwtDTmpM/'
@@ -106,7 +105,7 @@ test('start.serlo.org', async () => {
 test.each(['/labschool', '/labschool/'])(
   'de.serlo.org%s redirects to labschool homepage',
   async (pathname) => {
-    const response = await fetchTestEnvironment({ subdomain: 'de', pathname })
+    const response = await fetchSerlo({ subdomain: 'de', pathname })
 
     expectToBeRedirectTo(response, createUrl({ subdomain: 'labschool' }), 301)
   }
@@ -115,7 +114,7 @@ test.each(['/labschool', '/labschool/'])(
 test.each(['/hochschule', '/hochschule/'])(
   'de.serlo.org%s redirects to taxonomy term of higher education',
   async (pathname) => {
-    const response = await fetchTestEnvironment({ subdomain: 'de', pathname })
+    const response = await fetchSerlo({ subdomain: 'de', pathname })
 
     const target = createUrl({
       subdomain: 'de',
@@ -128,7 +127,7 @@ test.each(['/hochschule', '/hochschule/'])(
 test.each(['/beitreten', '/beitreten/'])(
   'de.serlo.org%s redirects to form for joining Serlo Education e.V.',
   async (pathname) => {
-    const response = await fetchTestEnvironment({ subdomain: 'de', pathname })
+    const response = await fetchSerlo({ subdomain: 'de', pathname })
 
     const target =
       'https://docs.google.com/forms/d/e/1FAIpQLSdEoyCcDVP_G_-G_u642S768e_sxz6wO6rJ3tad4Hb9z7Slwg/viewform'
@@ -137,14 +136,14 @@ test.each(['/beitreten', '/beitreten/'])(
 )
 
 test('serlo.org/* redirects to de.serlo.org/*', async () => {
-  const response = await fetchTestEnvironment({ pathname: '/foo' })
+  const response = await fetchSerlo({ pathname: '/foo' })
 
   const target = createUrl({ subdomain: 'de', pathname: '/foo' })
   expectToBeRedirectTo(response, target, 302)
 })
 
 test('www.serlo.org/* redirects to de.serlo.org/*', async () => {
-  const response = await fetchTestEnvironment({
+  const response = await fetchSerlo({
     subdomain: 'www',
     pathname: '/foo',
   })
@@ -166,7 +165,7 @@ describe('redirects to current path of an resource', () => {
   })
 
   test('redirects when current path is different than target path', async () => {
-    const response = await fetchTestEnvironment({
+    const response = await fetchSerlo({
       subdomain: 'en',
       pathname: '/sexed',
     })
@@ -179,7 +178,7 @@ describe('redirects to current path of an resource', () => {
   })
 
   test('redirects when current instance is different than target instance', async () => {
-    const response = await fetchTestEnvironment({
+    const response = await fetchSerlo({
       subdomain: 'de',
       pathname: '/78337',
     })
@@ -192,7 +191,7 @@ describe('redirects to current path of an resource', () => {
   })
 
   test('no redirect when current path is different than given path and XMLHttpRequest', async () => {
-    const response = await fetchTestEnvironment(
+    const response = await fetchSerlo(
       { subdomain: 'en', pathname: '/sexed' },
       { headers: { 'X-Requested-With': 'XMLHttpRequest' } }
     )
@@ -201,7 +200,7 @@ describe('redirects to current path of an resource', () => {
   })
 
   test('no redirect when current path is the same as given path', async () => {
-    const response = await fetchTestEnvironment({
+    const response = await fetchSerlo({
       subdomain: 'en',
       pathname: '/78337/sex-education',
     })
@@ -216,7 +215,7 @@ describe('redirects to current path of an resource', () => {
       content: 'Vorherige Version',
     })
 
-    const response = await fetchTestEnvironment({
+    const response = await fetchSerlo({
       subdomain: 'de',
       pathname: '/128620',
     })
@@ -235,7 +234,7 @@ describe('redirects to current path of an resource', () => {
       ],
     })
 
-    const response = await fetchTestEnvironment({
+    const response = await fetchSerlo({
       subdomain: 'de',
       pathname: '/61682',
     })
@@ -256,7 +255,7 @@ describe('redirects to current path of an resource', () => {
       pages: [],
     })
 
-    const response = await fetchLocally({ subdomain: 'en', pathname: '/42' })
+    const response = await fetchSerlo({ subdomain: 'en', pathname: '/42' })
 
     const target = createUrl({
       subdomain: 'en',
@@ -275,7 +274,7 @@ describe('redirects to current path of an resource', () => {
       instance: Instance.En,
     })
 
-    const response = await fetchLocally({ subdomain: 'en', pathname: '/path' })
+    const response = await fetchSerlo({ subdomain: 'en', pathname: '/path' })
 
     await expectContainsText(response, ['article content'])
   })
@@ -288,7 +287,7 @@ describe('redirects to current path of an resource', () => {
       content: 'Zahlen und Größen',
     })
 
-    const response = await fetchTestEnvironment({
+    const response = await fetchSerlo({
       subdomain: 'de',
       pathname: '/mathe/zahlen-größen',
     })
