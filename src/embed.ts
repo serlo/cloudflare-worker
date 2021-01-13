@@ -22,9 +22,9 @@
 import { Url } from './utils'
 
 export async function embed(request: Request): Promise<Response | null> {
+  // example url: embed.serlo.org/thumbnail?url=...
   const url = Url.fromRequest(request)
 
-  // embed.serlo.org/thumbnail?url=...
   if (url.subdomain !== 'embed') return null
 
   const urlParam = url.searchParams.get('url')
@@ -32,7 +32,8 @@ export async function embed(request: Request): Promise<Response | null> {
   if (!urlParam) return getPlaceholder()
 
   try {
-    const videoUrl = new Url(urlParam) || null
+    const videoUrl = new Url(urlParam)
+
     switch (videoUrl.domain) {
       case 'youtube-nocookie.com':
         return await getYoutubeThumbnail(videoUrl)
