@@ -308,40 +308,8 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         'https://cdn.geogebra.org/resource/q9gNCVsS/lIoGcSJdoALG1cTd/material-q9gNCVsS.png',
     }
     beforeEach(() => {
-      //mock geogebra api
-      global.server.use(
-        rest.post('https://www.geogebra.org/api/json.php', (req, res, ctx) => {
-          if (typeof req.body === 'string') {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            const appletId = JSON.parse(req.body).request?.task?.filters
-              ?.field[0]['#text'] as string
-
-            if (appletId == applet.id)
-              return res(
-                ctx.json({
-                  responses: {
-                    response: {
-                      item: {
-                        previewUrl: applet.thumbnailUrl,
-                      },
-                    },
-                  },
-                })
-              )
-          }
-
-          return res(ctx.status(404))
-        })
-      )
-      mockHttpGetNoCheck(
-        'https://cdn.geogebra.org/resource/q9gNCVsS/lIoGcSJdoALG1cTd/material-q9gNCVsS.png',
-        (_req, res, ctx) => {
-          return res(
-            ctx.set('content-type', 'image/png'),
-            ctx.set('content-length', applet.contentLength)
-          )
-        }
-      )
+      givenGeogebraApi(defaultGeogebraApi())
+      givenGeogebraFile(defaultGeogebraFile())
     })
 
     test('returns thumbnail', async () => {
@@ -352,12 +320,136 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       expect(response.headers.get('content-type')).toBe('image/png')
     })
 
-    test('returns placeholder with incorrect embed url', async () => {
-      const response = await requestThumbnail(
-        `https://www.geogebra.org/material/iframe/id/001`
-      )
-      expect(isPlaceholderResponse(response))
+    describe('returns placeholder', () => {
+      test('when geogebra id contains non digit characters', async () => {
+        const response = await requestThumbnail(
+          `https://www.geogebra.org/material/iframe/id/abc%@`
+        )
+
+        expect(isPlaceholderResponse(response))
+      })
+
+      test('when geogebra file does not exist', async () => {
+        const response = await requestThumbnail(
+          `https://www.geogebra.org/material/iframe/id/001`
+        )
+        expect(isPlaceholderResponse(response))
+      })
+
+      test('when geogebra api returns with a non 200 respond', async () => {
+        givenGeogebraApi(hasInternalServerError())
+
+        const response = await requestThumbnail(
+          `https://www.geogebra.org/material/iframe/id/${applet.id}`,
+          TestEnvironment.Local
+        )
+
+        expect(isPlaceholderResponse(response))
+      })
+
+      test('when geogebra api returns malformed json', async () => {
+        givenGeogebraApi(returnsMalformedJson())
+
+        const response = await requestThumbnail(
+          `https://www.geogebra.org/material/iframe/id/${applet.id}`,
+          TestEnvironment.Local
+        )
+
+        expect(isPlaceholderResponse(response))
+      })
+
+      test('when geogebra api returns unknwon json response', async () => {
+        givenGeogebraApi(returnsJson({ type: 'video' }))
+
+        const response = await requestThumbnail(
+          `https://www.geogebra.org/material/iframe/id/${applet.id}`,
+          TestEnvironment.Local
+        )
+
+        expect(isPlaceholderResponse(response))
+      })
+
+      test('when geogebra api returns malformed preview url', async () => {
+        givenGeogebraApi(returnsPreviewUrl('bad'))
+
+        const response = await requestThumbnail(
+          `https://www.geogebra.org/material/iframe/id/${applet.id}`,
+          TestEnvironment.Local
+        )
+
+        expect(isPlaceholderResponse(response))
+      })
+
+      test('when host of geogebra preview url is not cdn.geogebra.org', async () => {
+        givenGeogebraApi(returnsPreviewUrl('http://malware.com/'))
+        mockHttpGet('http://malware.com/', returnsText('bad'))
+
+        const response = await requestThumbnail(
+          `https://www.geogebra.org/material/iframe/id/${applet.id}`,
+          TestEnvironment.Local
+        )
+
+        expect(isPlaceholderResponse(response))
+      })
+
+      test('when geogebra file does not exists', async () => {
+        givenGeogebraFile(hasInternalServerError())
+
+        const response = await requestThumbnail(
+          `https://www.geogebra.org/material/iframe/id/${applet.id}`,
+          TestEnvironment.Local
+        )
+
+        expect(isPlaceholderResponse(response))
+      })
     })
+
+    function givenGeogebraApi(resolver: RestResolver) {
+      global.server.use(
+        rest.post('https://www.geogebra.org/api/json.php', resolver)
+      )
+    }
+
+    function defaultGeogebraApi(): RestResolver<any> {
+      return (req, res, ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const appletId = req.body?.request?.task?.filters?.field?.[0]?.[
+          '#text'
+        ] as string
+
+        if (appletId == applet.id)
+          return res(
+            ctx.json({
+              responses: {
+                response: {
+                  item: {
+                    previewUrl: applet.thumbnailUrl,
+                  },
+                },
+              },
+            })
+          )
+
+        return res(ctx.status(404))
+      }
+    }
+
+    function returnsPreviewUrl(previewUrl: string) {
+      return returnsJson({ responses: { response: { item: { previewUrl } } } })
+    }
+
+    function givenGeogebraFile(resolver: RestResolver) {
+      global.server.use(rest.get(applet.thumbnailUrl, resolver))
+    }
+
+    function defaultGeogebraFile(): RestResolver {
+      return (_req, res, ctx) => {
+        return res(
+          ctx.set('content-type', 'image/png'),
+          ctx.set('content-length', applet.contentLength)
+        )
+      }
+    }
   })
 
   describe('returns placeholder', () => {
