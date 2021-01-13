@@ -19,7 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { pipeable, taskEither as TE, either as E } from 'fp-ts'
+import { pipeable, taskEither as TE, either as E, option as O } from 'fp-ts'
 import * as t from 'io-ts'
 
 import { Url } from './utils'
@@ -123,15 +123,22 @@ async function getVimeoThumbnail(url: URL) {
   )()
 }
 
+const GeogebraApiResponse = t.type({
+  responses: t.type({
+    response: t.type({ item: t.type({ previewUrl: t.string }) }),
+  }),
+})
+
 async function getGeogebraThumbnail(url: URL) {
   //example url https://www.geogebra.org/material/iframe/id/100
 
   const appletId = url.pathname.replace('/material/iframe/id/', '')
 
-  if (!appletId || !RegExp('[0-9]+').test(appletId)) return getPlaceholder()
+  if (!/[0-9]+/.test(appletId)) return getPlaceholder()
 
   const apiResponse = await fetch('https://www.geogebra.org/api/json.php', {
     method: 'POST',
+    headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
       request: {
         '-api': '1.0.0',
@@ -153,23 +160,24 @@ async function getGeogebraThumbnail(url: URL) {
     }),
   })
 
-  const data = (await apiResponse.json()) as {
-    responses: {
-      response: {
-        '-type': string
-        item: Record<string, unknown> & {
-          previewUrl: string
-          width: string
-          height: string
-        }
-      }
-    }
+  if (apiResponse.status !== 200) return getPlaceholder()
+
+  try {
+    const data = O.fromEither(
+      GeogebraApiResponse.decode(await apiResponse.json())
+    )
+
+    if (O.isNone(data)) return getPlaceholder()
+
+    const thumbnailUrl = new Url(data.value.responses.response.item.previewUrl)
+
+    if (thumbnailUrl.hostname !== 'cdn.geogebra.org') return getPlaceholder()
+
+    const imgRes = await fetch(thumbnailUrl.href)
+    if (imgRes.status === 200) return imgRes
+  } catch (e) {
+    // JSON cannot be parsed or preview url cannot be parsed
   }
-
-  const thumbnailUrl = data.responses.response.item.previewUrl
-
-  const imgRes = await fetch(thumbnailUrl)
-  if (imgRes.status === 200) return imgRes
 
   return getPlaceholder()
 }
