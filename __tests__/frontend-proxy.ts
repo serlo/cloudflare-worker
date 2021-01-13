@@ -60,7 +60,7 @@ describe('handleRequest()', () => {
         })
       })
 
-      test('chose legacy backend for random number > probability', async () => {
+      test('chooses legacy backend for random number > probability', async () => {
         global.FRONTEND_PROBABILITY_DESKTOP = '0.5'
         Math.random = jest.fn().mockReturnValue(0.75)
 
@@ -73,7 +73,7 @@ describe('handleRequest()', () => {
 
     describe('for mobile', () => {
       test('chooses frontend when random number <= probability', async () => {
-        global.FRONTEND_PROBABILITY_DESKTOP = '0'
+        setupProbabilityFor(Backend.Legacy)
         global.FRONTEND_PROBABILITY_MOBILE = '0.5'
         Math.random = jest.fn().mockReturnValue(0.5)
 
@@ -83,8 +83,8 @@ describe('handleRequest()', () => {
         })
       })
 
-      test('chose legacy backend for random number > probability', async () => {
-        global.FRONTEND_PROBABILITY_DESKTOP = '1'
+      test('chooses legacy backend for random number > probability', async () => {
+        setupProbabilityFor(Backend.Frontend)
         global.FRONTEND_PROBABILITY_MOBILE = '0.5'
         Math.random = jest.fn().mockReturnValue(0.75)
 
@@ -93,17 +93,17 @@ describe('handleRequest()', () => {
           request: getMobileRequest(),
         })
       })
+
       function getMobileRequest() {
+        const userAgent =
+          'Mozilla/5.0 (Android 4.0.3; de-ch) Version/4.0 Mobile Safari/534.30'
         const request = new Request('https://en.serlo.org/math')
-        request.headers.set(
-          'user-agent',
-          'Mozilla/5.0 (Linux; U; Android 4.0.3; de-ch; HTC Sensation Build/IML74K) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30'
-        )
+
+        request.headers.set('user-agent', userAgent)
+
         return request
       }
     })
-
-    //test for authenticated users below
   })
 
   describe('returned response set cookie with calculated random number', () => {
@@ -155,19 +155,17 @@ describe('handleRequest()', () => {
         setupProbabilityFor(Backend.Frontend)
       })
 
-      describe('when an entity is accessed', () => {
-        test('chooses legacy backend', async () => {
-          await expectResponseFrom({
-            backend: 'https://en.serlo.org/math',
-            request: getAuthedRequest(),
-          })
+      test('chooses legacy backend', async () => {
+        await expectResponseFrom({
+          backend: 'https://en.serlo.org/math',
+          request: getAuthedRequest(),
         })
+      })
 
-        test('does not set cookie with random number', async () => {
-          mockHttpGet(Backend.Legacy, returnsText(''))
-          const response = await handleRequest(getAuthedRequest())
-          expect(response.headers.get('Set-Cookie')).toBeNull()
-        })
+      test('does not set cookie with random number', async () => {
+        mockHttpGet(Backend.Legacy, returnsText(''))
+        const response = await handleRequest(getAuthedRequest())
+        expect(response.headers.get('Set-Cookie')).toBeNull()
       })
     })
 
@@ -177,27 +175,25 @@ describe('handleRequest()', () => {
         setupProbabilityFor(Backend.Frontend)
       })
 
-      describe('when an entity is accessed', () => {
-        test('chooses frontend when random number <= probability', async () => {
-          setupProbabilityFor(Backend.Legacy)
-          global.FRONTEND_PROBABILITY_AUTHENTICATED = '0.5'
-          Math.random = jest.fn().mockReturnValue(0.5)
+      test('chooses frontend when random number <= probability', async () => {
+        setupProbabilityFor(Backend.Legacy)
+        global.FRONTEND_PROBABILITY_AUTHENTICATED = '0.5'
+        Math.random = jest.fn().mockReturnValue(0.5)
 
-          await expectResponseFrom({
-            backend: 'https://frontend.serlo.org/en/math',
-            request: getAuthedRequest(),
-          })
+        await expectResponseFrom({
+          backend: 'https://frontend.serlo.org/en/math',
+          request: getAuthedRequest(),
         })
+      })
 
-        test('chose legacy backend for random number > probability', async () => {
-          setupProbabilityFor(Backend.Frontend)
-          global.FRONTEND_PROBABILITY_AUTHENTICATED = '0.5'
-          Math.random = jest.fn().mockReturnValue(0.75)
+      test('chooses legacy backend for random number > probability', async () => {
+        setupProbabilityFor(Backend.Frontend)
+        global.FRONTEND_PROBABILITY_AUTHENTICATED = '0.5'
+        Math.random = jest.fn().mockReturnValue(0.75)
 
-          await expectResponseFrom({
-            backend: 'https://en.serlo.org/math',
-            request: getAuthedRequest(),
-          })
+        await expectResponseFrom({
+          backend: 'https://en.serlo.org/math',
+          request: getAuthedRequest(),
         })
       })
     })
