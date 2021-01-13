@@ -19,6 +19,9 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
+import { pipeable, option as O } from 'fp-ts'
+import * as t from 'io-ts'
+
 import { Url } from './utils'
 
 export async function embed(request: Request): Promise<Response | null> {
@@ -85,12 +88,17 @@ async function getYoutubeThumbnail(url: URL) {
   return getPlaceholder()
 }
 
+const VimeoApiResponse = t.type({
+  type: t.literal('video'),
+  thumbnail_url: t.string,
+})
+
 async function getVimeoThumbnail(url: URL) {
-  // exmaple url https://player.vimeo.com/video/${id}?autoplay=1
+  // exmaple url: https://player.vimeo.com/video/${id}?autoplay=1
 
   const videoId = url.pathname.replace('/video/', '')
 
-  if (!videoId || !RegExp('[0-9]+').test(videoId)) {
+  if (!RegExp('[0-9]+').test(videoId)) {
     return getPlaceholder()
   }
   const apiResponse = await fetch(
@@ -99,13 +107,23 @@ async function getVimeoThumbnail(url: URL) {
   )
   if (apiResponse.status !== 200) return getPlaceholder()
 
-  const videoData = (await apiResponse.json()) as Record<string, unknown> & {
-    thumbnail_url: string
-  }
-  const thumbnailUrl = videoData.thumbnail_url.replace(/_[0-9|x]+/, '')
+  try {
+    const thumbnailUrl = pipeable.pipe(
+      VimeoApiResponse.decode(await apiResponse.json()),
+      O.fromEither,
+      O.map((response) => response.thumbnail_url.replace(/_[0-9|x]+/, '')),
+      O.chain((url) => O.tryCatch(() => new Url(url))),
+      O.chain(O.fromPredicate((url) => url.domain === 'vimeocdn.com'))
+    )
 
-  const imgRes = await fetch(thumbnailUrl)
-  if (imgRes.status === 200) return imgRes
+    if (O.isNone(thumbnailUrl)) return getPlaceholder()
+
+    const imgRes = await fetch(thumbnailUrl.value.href)
+
+    return imgRes.status === 200 ? imgRes : getPlaceholder()
+  } catch (e) {
+    // Error with parsing the json request
+  }
 
   return getPlaceholder()
 }
