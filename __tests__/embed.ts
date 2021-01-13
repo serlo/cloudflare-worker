@@ -24,7 +24,13 @@ import { rest } from 'msw'
 import {
   fetchTestEnvironment,
   mockHttpGetNoCheck,
+  hasInternalServerError,
+  RestResolver,
+  returnsMalformedJson,
   TestEnvironment,
+  returnsJson,
+  mockHttpGet,
+  returnsText,
 } from './__utils__'
 
 describe('embed.serlo.org/thumbnail?url=...', () => {
@@ -104,46 +110,13 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
   describe('Vimeo', () => {
     const video = {
       id: '117611037',
-      contentLength: '40000',
+      contentLength: '17172',
       thumbnailFilename: '505834070.webp',
       thumbnailUrl: 'https://i.vimeocdn.com/video/505834070_640.webp',
     }
     beforeEach(() => {
-      //mock oembed endpoint
-      mockHttpGetNoCheck(
-        'https://vimeo.com/api/oembed.json?url=https%3A%2F%2Fvimeo.com%2F:videoId',
-        (req, res, ctx) => {
-          const videoId =
-            req.url?.searchParams
-              ?.get('url')
-              ?.replace('https://vimeo.com/', '') || ''
-
-          if (videoId === video.id) {
-            return res(
-              ctx.json({
-                type: 'video',
-                thumbnail_url: video.thumbnailUrl,
-              })
-            )
-          }
-          return res(ctx.status(403))
-        }
-      )
-      mockHttpGetNoCheck(
-        'https://i.vimeocdn.com/video/:thumbnailFilename',
-        (req, res, ctx) => {
-          const { thumbnailFilename } = req.params as {
-            thumbnailFilename: string
-          }
-          if (thumbnailFilename === video.thumbnailFilename) {
-            return res(
-              ctx.set('content-type', 'image/webp'),
-              ctx.set('content-length', video.contentLength)
-            )
-          }
-          return res(ctx.status(404))
-        }
-      )
+      givenVimeoApi(defaultVimeoApi())
+      givenVimeoCdn(defaultVimeoCdn())
     })
 
     test('returns thumbnail as webp', async () => {
@@ -154,12 +127,138 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       expect(response.headers.get('content-type')).toBe('image/webp')
     })
 
-    test('returns placeholder when video does not exist', async () => {
-      const response = await requestThumbnail(
-        `https://player.vimeo.com/video/999999999?autoplay=1`
-      )
-      expect(isPlaceholderResponse(response))
+    describe('returns placeholder', () => {
+      test('when video does not exist', async () => {
+        const response = await requestThumbnail(
+          `https://player.vimeo.com/video/999999999?autoplay=1`
+        )
+        expect(isPlaceholderResponse(response))
+      })
+
+      test('when video id is malformed', async () => {
+        const response = await requestThumbnail(
+          `https://player.vimeo.com/video/foo:password@en.serlo.org/math`
+        )
+        expect(isPlaceholderResponse(response))
+      })
+
+      test('when request to vimeo api fails', async () => {
+        givenVimeoApi(hasInternalServerError())
+
+        const response = await requestThumbnail(
+          `https://player.vimeo.com/video/${video.id}?autoplay=1`,
+
+          TestEnvironment.Local
+        )
+        expect(isPlaceholderResponse(response))
+      })
+
+      test('when vimeo api returns malformed json', async () => {
+        givenVimeoApi(returnsMalformedJson())
+
+        const response = await requestThumbnail(
+          `https://player.vimeo.com/video/${video.id}?autoplay=1`,
+          TestEnvironment.Local
+        )
+        expect(isPlaceholderResponse(response))
+      })
+
+      describe('when vimeo api returns a malformed response', () => {
+        test.each([
+          42,
+          { type: 'video' },
+          { thumbnail_url: video.thumbnailUrl },
+        ])('%p', async (data) => {
+          givenVimeoApi(returnsJson(data))
+
+          const response = await requestThumbnail(
+            `https://player.vimeo.com/video/${video.id}?autoplay=1`,
+            TestEnvironment.Local
+          )
+          expect(isPlaceholderResponse(response))
+        })
+      })
+
+      test('when vimeo api returns a malformed thumbnail_url', async () => {
+        givenVimeoApi(returnsJson({ type: 'video', thumbnail_url: '42' }))
+
+        const response = await requestThumbnail(
+          `https://player.vimeo.com/video/${video.id}?autoplay=1`,
+          TestEnvironment.Local
+        )
+        expect(isPlaceholderResponse(response))
+      })
+
+      test('when vimeo api returns a thumbnail_url not pointing to vimeocdn.com', async () => {
+        mockHttpGet('https://malware.com/bad', returnsText('bad'))
+        givenVimeoApi(
+          returnsJson({
+            type: 'video',
+            thumbnail_url: 'https://malware.com/bad',
+          })
+        )
+
+        const response = await requestThumbnail(
+          `https://player.vimeo.com/video/${video.id}?autoplay=1`,
+          TestEnvironment.Local
+        )
+        expect(isPlaceholderResponse(response))
+      })
+
+      test('when vimeo cdn does not responed with 200', async () => {
+        givenVimeoCdn(hasInternalServerError())
+
+        const response = await requestThumbnail(
+          `https://player.vimeo.com/video/${video.id}?autoplay=1`,
+          TestEnvironment.Local
+        )
+        expect(isPlaceholderResponse(response))
+      })
     })
+
+    function givenVimeoCdn(resolver: RestResolver) {
+      global.server.use(
+        rest.get<never, any, { thumbnailFilename: string }>(
+          'https://i.vimeocdn.com/video/:thumbnailFilename',
+          resolver
+        )
+      )
+    }
+
+    function defaultVimeoCdn(): RestResolver {
+      return (req, res, ctx) => {
+        const { thumbnailFilename } = req.params
+        if (thumbnailFilename === video.thumbnailFilename) {
+          return res(
+            ctx.set('content-type', 'image/webp'),
+            ctx.set('content-length', video.contentLength)
+          )
+        }
+        return res(ctx.status(404))
+      }
+    }
+
+    function givenVimeoApi(resolver: RestResolver) {
+      global.server.use(rest.get('https://vimeo.com/api/oembed.json', resolver))
+    }
+
+    function defaultVimeoApi(): RestResolver {
+      return (req, res, ctx) => {
+        const videoId =
+          req.url.searchParams?.get('url')?.replace('https://vimeo.com/', '') ??
+          ''
+
+        if (videoId === video.id) {
+          return res(
+            ctx.json({
+              type: 'video',
+              thumbnail_url: video.thumbnailUrl,
+            })
+          )
+        }
+        return res(ctx.status(403))
+      }
+    }
   })
 
   describe('Wikimedia', () => {
