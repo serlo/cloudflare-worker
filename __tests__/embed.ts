@@ -23,7 +23,6 @@ import { rest } from 'msw'
 
 import {
   fetchTestEnvironment,
-  mockHttpGetNoCheck,
   hasInternalServerError,
   RestResolver,
   returnsMalformedJson,
@@ -271,17 +270,19 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     }
 
     beforeEach(() => {
-      mockHttpGetNoCheck(
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/*',
-        (req, res, ctx) => {
-          if (req.url.toString() === video.thumbnailUrl) {
-            return res(
-              ctx.set('content-type', 'image/jpeg'),
-              ctx.set('content-length', video.contentLength)
-            )
+      global.server.use(
+        rest.get(
+          'https://upload.wikimedia.org/wikipedia/commons/thumb/*',
+          (req, res, ctx) => {
+            if (req.url.toString() === video.thumbnailUrl) {
+              return res(
+                ctx.set('content-type', 'image/jpeg'),
+                ctx.set('content-length', video.contentLength)
+              )
+            }
+            return res(ctx.status(404))
           }
-          return res(ctx.status(404))
-        }
+        )
       )
     })
 

@@ -49,14 +49,6 @@ export function mockHttpGet(url: string, resolver: RestResolver) {
   )
 }
 
-export function mockHttpGetNoCheck(url: string, resolver: RestResolver) {
-  global.server.use(
-    rest.get(url, (req, res, ctx) => {
-      return resolver(req, res, ctx)
-    })
-  )
-}
-
 export function returnsText(body: string): RestResolver {
   return (_req, res, ctx) => res.once(ctx.body(body))
 }
