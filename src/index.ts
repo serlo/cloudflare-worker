@@ -40,10 +40,10 @@ export async function handleRequest(request: Request) {
     (await edtrIoStats(request)) ||
     (await maintenanceMode(request)) ||
     (await enforceHttps(request)) ||
+    (await staticPages(request)) ||
     (await frontendSpecialPaths(request)) ||
     (await redirects(request)) ||
     (await embed(request)) ||
-    (await staticPages(request)) ||
     (await semanticFileNames(request)) ||
     (await packages(request)) ||
     (await api(request)) ||
