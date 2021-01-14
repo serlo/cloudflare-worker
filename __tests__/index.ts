@@ -26,11 +26,16 @@ import {
   returnsText,
   givenStats,
   defaultStatsServer,
+  fetchSerlo,
 } from './__utils__'
 
 describe('Enforce HTTPS', () => {
   test('HTTP URL', async () => {
-    const response = await handleUrl('http://foo.serlo.local/bar')
+    const response = await fetchSerlo({
+      subdomain: 'foo',
+      pathname: '/bar',
+      protocol: 'http:',
+    })
 
     expectToBeRedirectTo(response, 'https://foo.serlo.local/bar', 302)
   })

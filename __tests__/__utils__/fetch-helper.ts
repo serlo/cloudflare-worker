@@ -44,9 +44,10 @@ export function createUrl({
   subdomain = '',
   pathname = '/',
   environment = getTestEnvironment(),
+  protocol = '',
 }: UrlSpec) {
   return (
-    'https://' +
+    (protocol.length > 0 ? protocol : 'https://') +
     subdomain +
     (subdomain.length > 0 ? '.' : '') +
     domains[environment] +
@@ -58,4 +59,5 @@ interface UrlSpec {
   subdomain?: string
   pathname?: string
   environment?: TestEnvironment
+  protocol?: string
 }
