@@ -55,7 +55,9 @@ beforeAll(() => {
 beforeEach(() => {
   global.API_SECRET = 'secret'
   global.FRONTEND_DOMAIN = 'frontend.serlo.org'
-  global.FRONTEND_PROBABILITY = '1'
+  global.FRONTEND_PROBABILITY_DESKTOP = '1'
+  global.FRONTEND_PROBABILITY_MOBILE = '1'
+  global.FRONTEND_PROBABILITY_AUTHENTICATED = '1'
   global.FRONTEND_ALLOWED_TYPES = '[]'
   // TODO: Remove this since this tests an implementation details
   global.fetch = jest.fn().mockImplementation(fetchNode)

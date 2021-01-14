@@ -211,17 +211,17 @@ describe('redirects to current path of an resource', () => {
 
   test('no redirect when requested entity has no alias', async () => {
     givenUuid({
-      id: 128620,
-      __typename: 'ArticleRevision',
-      content: 'Vorherige Version',
+      id: 27778,
+      __typename: 'Comment',
+      content: 'Applets vertauscht?',
     })
 
     const response = await fetchTestEnvironment({
       subdomain: 'de',
-      pathname: '/128620',
+      pathname: '/27778',
     })
 
-    await expectContainsText(response, ['Vorherige Version'])
+    await expectContainsText(response, ['Applets vertauscht'])
   })
 
   test('redirects to first course page when requested entity is a course', async () => {
@@ -243,6 +243,26 @@ describe('redirects to current path of an resource', () => {
     const target = createUrl({
       subdomain: 'de',
       pathname: '/mathe/61911/%C3%9Cbersicht',
+    })
+    expectToBeRedirectTo(response, target, 301)
+  })
+
+  test('redirects to exercise when requested entity is a solution', async () => {
+    givenUuid({
+      id: 57353,
+      __typename: 'Solution',
+      alias: '/mathe/57353/57353',
+      exercise: { alias: '/mathe/57351/57351' },
+    })
+
+    const response = await fetchTestEnvironment({
+      subdomain: 'de',
+      pathname: '/57353',
+    })
+
+    const target = createUrl({
+      subdomain: 'de',
+      pathname: '/mathe/57351/57351',
     })
     expectToBeRedirectTo(response, target, 301)
   })
@@ -282,15 +302,16 @@ describe('redirects to current path of an resource', () => {
 
   test('handles URL encodings correctly', async () => {
     givenUuid({
+      id: 1385,
       __typename: 'TaxonomyTerm',
-      alias: '/mathe/zahlen-größen',
+      alias: '/mathe/1385/zahlen-und-größen',
       instance: Instance.De,
       content: 'Zahlen und Größen',
     })
 
     const response = await fetchTestEnvironment({
       subdomain: 'de',
-      pathname: '/mathe/zahlen-größen',
+      pathname: '/mathe/1385/zahlen-und-größen',
     })
 
     await expectContainsText(response, ['Zahlen und Größen'])
