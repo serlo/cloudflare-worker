@@ -74,13 +74,14 @@ export async function frontendProxy(
   const config = getConfig(request)
   const url = Url.fromRequest(request)
   const cookies = request.headers.get('Cookie')
+  const isAuthenticated = getCookieValue('authenticated', cookies) === '1'
 
   if (!config.relevantRequest) return null
 
   if (
     url.hasContentApiParameters() ||
     (global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND === 'true' &&
-      getCookieValue('authenticated', cookies) === '1')
+      isAuthenticated)
   )
     return await fetchBackend({ ...config, useFrontend: false, request })
 
@@ -96,10 +97,18 @@ export async function frontendProxy(
   const useFrontendNumber = Number.isNaN(cookieValue)
     ? Math.random()
     : cookieValue
+  const isProbablyMobile =
+    (request.headers.get('user-agent') ?? '').indexOf('Mobi') > -1
+
+  const probability = isProbablyMobile
+    ? config.probabilityMobile
+    : isAuthenticated
+    ? config.probabilityAuthenticated
+    : config.probabilityDesktop
 
   const response = await fetchBackend({
     ...config,
-    useFrontend: useFrontendNumber <= config.probability,
+    useFrontend: useFrontendNumber <= probability,
     pathPrefix: config.instance,
     request,
   })
@@ -163,7 +172,9 @@ function getConfig(request: Request): Config {
     frontendDomain:
       getCookieValue('frontendDomain', cookies) ?? global.FRONTEND_DOMAIN,
     instance: url.subdomain,
-    probability: Number(global.FRONTEND_PROBABILITY),
+    probabilityDesktop: Number(global.FRONTEND_PROBABILITY_DESKTOP),
+    probabilityMobile: Number(global.FRONTEND_PROBABILITY_MOBILE),
+    probabilityAuthenticated: Number(global.FRONTEND_PROBABILITY_AUTHENTICATED),
   }
 }
 
@@ -173,7 +184,9 @@ interface RelevantRequestConfig {
   relevantRequest: true
   instance: Instance
   allowedTypes: string[]
-  probability: number
+  probabilityDesktop: number
+  probabilityMobile: number
+  probabilityAuthenticated: number
   frontendDomain: string
 }
 
