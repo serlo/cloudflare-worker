@@ -32,5 +32,9 @@ export enum Backend {
 }
 
 export function setupProbabilityFor(backend: Backend) {
-  global.FRONTEND_PROBABILITY = backend === Backend.Frontend ? '1' : '0'
+  const probability = backend === Backend.Frontend ? '1' : '0'
+
+  global.FRONTEND_PROBABILITY_DESKTOP = probability
+  global.FRONTEND_PROBABILITY_MOBILE = probability
+  global.FRONTEND_PROBABILITY_AUTHENTICATED = probability
 }
