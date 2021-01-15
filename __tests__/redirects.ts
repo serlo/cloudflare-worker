@@ -210,17 +210,17 @@ describe('redirects to current path of an resource', () => {
 
   test('no redirect when requested entity has no alias', async () => {
     givenUuid({
-      id: 128620,
-      __typename: 'ArticleRevision',
-      content: 'Vorherige Version',
+      id: 27778,
+      __typename: 'Comment',
+      content: 'Applets vertauscht?',
     })
 
     const response = await fetchSerlo({
       subdomain: 'de',
-      pathname: '/128620',
+      pathname: '/27778',
     })
 
-    await expectContainsText(response, ['Vorherige Version'])
+    await expectContainsText(response, ['Applets vertauscht'])
   })
 
   test('redirects to first course page when requested entity is a course', async () => {
@@ -229,7 +229,7 @@ describe('redirects to current path of an resource', () => {
       __typename: 'Course',
       alias: 'course-alias',
       pages: [
-        { alias: '/mathe/61911/%C3%9Cbersicht' },
+        { alias: '/mathe/61911/%C3%BCbersicht' },
         { alias: '/mathe/61686/negative-zahlen-im-alltag' },
       ],
     })
@@ -241,7 +241,7 @@ describe('redirects to current path of an resource', () => {
 
     const target = createUrl({
       subdomain: 'de',
-      pathname: '/mathe/61911/%C3%9Cbersicht',
+      pathname: '/mathe/61911/%C3%BCbersicht',
     })
     expectToBeRedirectTo(response, target, 301)
   })
@@ -275,7 +275,11 @@ describe('redirects to current path of an resource', () => {
       pages: [],
     })
 
-    const response = await fetchSerlo({ subdomain: 'en', pathname: '/42' })
+    const response = await fetchSerlo({
+      subdomain: 'en',
+      pathname: '/42',
+      environment: TestEnvironment.Local,
+    })
 
     const target = createUrl({
       subdomain: 'en',
@@ -294,22 +298,27 @@ describe('redirects to current path of an resource', () => {
       instance: Instance.En,
     })
 
-    const response = await fetchSerlo({ subdomain: 'en', pathname: '/path' })
+    const response = await fetchSerlo({
+      subdomain: 'en',
+      pathname: '/path',
+      environment: TestEnvironment.Local,
+    })
 
     await expectContainsText(response, ['article content'])
   })
 
   test('handles URL encodings correctly', async () => {
     givenUuid({
+      id: 1385,
       __typename: 'TaxonomyTerm',
-      alias: '/mathe/zahlen-größen',
+      alias: '/mathe/1385/zahlen-und-größen',
       instance: Instance.De,
       content: 'Zahlen und Größen',
     })
 
     const response = await fetchSerlo({
       subdomain: 'de',
-      pathname: '/mathe/zahlen-größen',
+      pathname: '/mathe/1385/zahlen-und-größen',
     })
 
     await expectContainsText(response, ['Zahlen und Größen'])
