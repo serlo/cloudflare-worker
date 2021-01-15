@@ -60,5 +60,5 @@ interface UrlSpec {
   subdomain?: string
   pathname?: string
   environment?: TestEnvironment
-  protocol?: string
+  protocol?: 'http' | 'https'
 }
