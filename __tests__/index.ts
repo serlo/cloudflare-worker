@@ -21,6 +21,7 @@
  */
 
 import { handleRequest } from '../src'
+import { Instance } from '../src/utils'
 import {
   mockHttpGet,
   returnsText,
@@ -29,39 +30,34 @@ import {
   fetchSerlo,
   setupProbabilityFor,
   Backend,
+  givenUuid,
+  createUrl,
 } from './__utils__'
 
 describe('Enforce HTTPS', () => {
   test('HTTP URL', async () => {
     const response = await fetchSerlo({
-      subdomain: 'foo',
-      pathname: '/bar',
+      subdomain: 'en',
       protocol: 'http',
     })
 
-    expectToBeRedirectTo(response, 'https://foo.serlo.local/bar', 302)
+    const target = createUrl({ subdomain: 'en' })
+    expectToBeRedirectTo(response, target, 302)
   })
 
   test('HTTPS URL', async () => {
-    mockHttpGet('https://foo.serlo.local/bar', returnsText('content'))
-
-    const response = await fetchSerlo({
-      subdomain: 'foo',
-      pathname: '/bar',
-      protocol: 'https',
-    })
-
-    expect(await response.text()).toBe('content')
-  })
-
-  test('HTTPS URL real website', async () => {
     setupProbabilityFor(Backend.Legacy)
-    mockHttpGet('https://de.serlo.local/', returnsText('Startseite'))
+    givenUuid({
+      __typename: 'Page',
+      alias: '/',
+      instance: Instance.De,
+      content: 'Startseite',
+    })
     const response = await fetchSerlo({
       subdomain: 'de',
       protocol: 'https',
     })
-    expect(await response.text()).toBe('Startseite')
+    expect(await response.text()).toEqual(expect.stringContaining('Startseite'))
   })
 
   test('Pact Broker', async () => {
