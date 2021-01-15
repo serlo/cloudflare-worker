@@ -27,6 +27,8 @@ import {
   givenStats,
   defaultStatsServer,
   fetchSerlo,
+  setupProbabilityFor,
+  Backend,
 } from './__utils__'
 
 describe('Enforce HTTPS', () => {
@@ -34,7 +36,7 @@ describe('Enforce HTTPS', () => {
     const response = await fetchSerlo({
       subdomain: 'foo',
       pathname: '/bar',
-      protocol: 'http:',
+      protocol: 'http',
     })
 
     expectToBeRedirectTo(response, 'https://foo.serlo.local/bar', 302)
@@ -43,9 +45,23 @@ describe('Enforce HTTPS', () => {
   test('HTTPS URL', async () => {
     mockHttpGet('https://foo.serlo.local/bar', returnsText('content'))
 
-    const response = await handleUrl('https://foo.serlo.local/bar')
+    const response = await fetchSerlo({
+      subdomain: 'foo',
+      pathname: '/bar',
+      protocol: 'https',
+    })
 
     expect(await response.text()).toBe('content')
+  })
+
+  test('HTTPS URL real website', async () => {
+    setupProbabilityFor(Backend.Legacy)
+    mockHttpGet('https://de.serlo.local/', returnsText('Startseite'))
+    const response = await fetchSerlo({
+      subdomain: 'de',
+      protocol: 'https',
+    })
+    expect(await response.text()).toBe('Startseite')
   })
 
   test('Pact Broker', async () => {
