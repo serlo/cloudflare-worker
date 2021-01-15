@@ -230,7 +230,7 @@ describe('redirects to current path of an resource', () => {
       __typename: 'Course',
       alias: 'course-alias',
       pages: [
-        { alias: '/mathe/61911/%C3%9Cbersicht' },
+        { alias: '/mathe/61911/%C3%BCbersicht' },
         { alias: '/mathe/61686/negative-zahlen-im-alltag' },
       ],
     })
@@ -242,7 +242,7 @@ describe('redirects to current path of an resource', () => {
 
     const target = createUrl({
       subdomain: 'de',
-      pathname: '/mathe/61911/%C3%9Cbersicht',
+      pathname: '/mathe/61911/%C3%BCbersicht',
     })
     expectToBeRedirectTo(response, target, 301)
   })
