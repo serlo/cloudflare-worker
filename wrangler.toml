@@ -4,9 +4,9 @@ webpack_config = "webpack.config.js"
 
 [env.staging]
 kv-namespaces = [
-  { binding = "MAINTENANCE_KV", id = "3c3c25aba0b94b7e99f855f013f5b09c", preview_id = "3c3c25aba0b94b7e99f855f013f5b09c" },
-  { binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be", preview_id = "19f90dc8e6ff49cd8bc42f51346409be" },
-  { binding = "PATH_INFO_KV", id = "839198b2f0a242b491e5723a8c59b7e2", preview_id = "839198b2f0a242b491e5723a8c59b7e2" },
+  {binding = "MAINTENANCE_KV", id = "3c3c25aba0b94b7e99f855f013f5b09c", preview_id = "3c3c25aba0b94b7e99f855f013f5b09c"},
+  {binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be", preview_id = "19f90dc8e6ff49cd8bc42f51346409be"},
+  {binding = "PATH_INFO_KV", id = "839198b2f0a242b491e5723a8c59b7e2", preview_id = "839198b2f0a242b491e5723a8c59b7e2"},
 ]
 name = "serlo-staging"
 route = "*serlo-staging.dev/*"
@@ -17,7 +17,7 @@ ALLOW_AUTH_FROM_LOCALHOST = "true"
 API_ENDPOINT = "https://api.serlo-staging.dev/graphql"
 DOMAIN = "serlo-staging.dev"
 ENABLE_BASIC_AUTH = "true"
-FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "GroupedExercise", "Exercise", "ExerciseGroup", "Event", "Page", "Solution", "TaxonomyTerm", "User", "Video"]'
+FRONTEND_ALLOWED_TYPES = '["Applet","AppletRevision","Article","ArticleRevision","Course","CourseRevision","CoursePage","CoursePageRevision","GroupedExercise","GroupedExerciseRevision","Exercise","ExerciseRevision","ExerciseGroup","ExerciseGroupRevision","Event","EventRevision","Page","PageRevision","Solution","SolutionRevision","TaxonomyTerm","User","Video","VideoRevision","Comment"]'
 FRONTEND_DOMAIN = "frontend-git-staging.serlo.vercel.app"
 FRONTEND_PROBABILITY_AUTHENTICATED = "0.50"
 FRONTEND_PROBABILITY_DESKTOP = "0.50"
@@ -26,9 +26,9 @@ REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = "false"
 
 [env.production]
 kv-namespaces = [
-  { binding = "MAINTENANCE_KV", id = "b1f17ebbe39c4fd9b49d1368ce225faa" },
-  { binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be" },
-  { binding = "PATH_INFO_KV", id = "c3412114bdb04cfd8a367ec5bad46173" },
+  {binding = "MAINTENANCE_KV", id = "b1f17ebbe39c4fd9b49d1368ce225faa"},
+  {binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be"},
+  {binding = "PATH_INFO_KV", id = "c3412114bdb04cfd8a367ec5bad46173"},
 ]
 name = "serlo-production"
 route = "*serlo.org/*"
