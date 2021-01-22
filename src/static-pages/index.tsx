@@ -163,7 +163,7 @@ export function RevisedPage({ page }: { page: WithContent<RevisedPage> }) {
   return (
     <Template title={page.title} lang={page.lang}>
       {page.isCurrentRevision ? null : (
-        <div className="alert alert-info" style="margin-top: 20px;">
+        <div className="alert alert-info" style="margin-top: 30px;">
           {getAlert()}
         </div>
       )}
@@ -171,9 +171,44 @@ export function RevisedPage({ page }: { page: WithContent<RevisedPage> }) {
         {page.title} <small>{getSubHeader()}</small>
       </h1>
       {page.isCurrentRevision ? <p>{getArchiveDescription()}</p> : null}
+      <div className="alert alert-info" style="margin: 30px 0;">
+        {getConsentPageLink()}
+      </div>
       <div dangerouslySetInnerHTML={{ __html: page.content }} />
     </Template>
   )
+
+  function getConsentPageLink() {
+    switch (page.lang) {
+      case Instance.De:
+        return (
+          <Fragment>
+            <b>Einwilligungen für externe Inhalte</b>
+            <p>
+              Deine Einwilligungen kannst Du{' '}
+              <a href="/consent" style="text-decoration: underline;">
+                hier überprüfen und zurückrufen
+              </a>
+              .
+            </p>
+          </Fragment>
+        )
+      case Instance.En:
+      default:
+        return (
+          <Fragment>
+            <b>Consent for external content</b>
+            <p>
+              You can check and revoke your given consent{' '}
+              <a href="/consent" style="text-decoration: underline;">
+                here
+              </a>
+              .
+            </p>
+          </Fragment>
+        )
+    }
+  }
 
   function getAlert() {
     switch (page.lang) {

@@ -139,6 +139,9 @@ export function Template({
                   <a href="/privacy">Datenschutz</a>
                 </li>
                 <li>
+                  <a href="/consent">Einwilligungen widerrufen</a>
+                </li>
+                <li>
                   <a href="/imprint">Impressum</a>
                 </li>
               </ul>
@@ -164,6 +167,9 @@ export function Template({
                 </li>
                 <li>
                   <a href="/privacy">Privacy Policy</a>
+                </li>
+                <li>
+                  <a href="/consent">Revoke consent</a>
                 </li>
                 <li>
                   <a href="/imprint">Imprint</a>
