@@ -2,28 +2,6 @@ account_id = "3bfabc4463c2c3c340f7301d22ed18c0"
 type = "webpack"
 webpack_config = "webpack.config.js"
 
-[env.dev]
-kv-namespaces = [
-  {binding = "MAINTENANCE_KV", id = "d5f281b897f643b8824881cfe2a24dd2", preview_id = "d5f281b897f643b8824881cfe2a24dd2"},
-  {binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be", preview_id = "19f90dc8e6ff49cd8bc42f51346409be"},
-  {binding = "PATH_INFO_KV", id = "fb28139b91f64cd2a23645195b019ecb", preview_id = "fb28139b91f64cd2a23645195b019ecb"},
-]
-name = "serlo-dev"
-route = "*serlo-development.dev/*"
-zone_id = "cedde9a4ab2980cd92bfc3765dc2e475"
-
-[env.dev.vars]
-ALLOW_AUTH_FROM_LOCALHOST = "true"
-API_ENDPOINT = "https://api.serlo-development.dev/graphql"
-DOMAIN = "serlo-development.dev"
-ENABLE_BASIC_AUTH = "true"
-FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "GroupedExercise", "Exercise", "ExerciseGroup", "Event", "Page", "Solution", "TaxonomyTerm", "User", "Video"]'
-FRONTEND_DOMAIN = "frontend-git-staging.serlo.vercel.app"
-FRONTEND_PROBABILITY_AUTHENTICATED = "0.5"
-FRONTEND_PROBABILITY_DESKTOP = "0.5"
-FRONTEND_PROBABILITY_MOBILE = "0.5"
-REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = "false"
-
 [env.staging]
 kv-namespaces = [
   {binding = "MAINTENANCE_KV", id = "3c3c25aba0b94b7e99f855f013f5b09c", preview_id = "3c3c25aba0b94b7e99f855f013f5b09c"},
@@ -39,11 +17,11 @@ ALLOW_AUTH_FROM_LOCALHOST = "true"
 API_ENDPOINT = "https://api.serlo-staging.dev/graphql"
 DOMAIN = "serlo-staging.dev"
 ENABLE_BASIC_AUTH = "true"
-FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "GroupedExercise", "Exercise", "ExerciseGroup", "Event", "Page", "Solution", "TaxonomyTerm", "User", "Video"]'
+FRONTEND_ALLOWED_TYPES = '["Applet","AppletRevision","Article","ArticleRevision","Course","CourseRevision","CoursePage","CoursePageRevision","GroupedExercise","GroupedExerciseRevision","Exercise","ExerciseRevision","ExerciseGroup","ExerciseGroupRevision","Event","EventRevision","Page","PageRevision","Solution","SolutionRevision","TaxonomyTerm","User","Video","VideoRevision"]'
 FRONTEND_DOMAIN = "frontend-git-staging.serlo.vercel.app"
 FRONTEND_PROBABILITY_AUTHENTICATED = "0.50"
 FRONTEND_PROBABILITY_DESKTOP = "0.50"
-FRONTEND_PROBABILITY_MOBILE = "0.50"
+FRONTEND_PROBABILITY_MOBILE = "1"
 REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = "false"
 
 [env.production]
@@ -65,5 +43,5 @@ FRONTEND_ALLOWED_TYPES = '["Article", "Applet", "Course", "CoursePage", "Grouped
 FRONTEND_DOMAIN = "frontend.serlo.org"
 FRONTEND_PROBABILITY_AUTHENTICATED = "0"
 FRONTEND_PROBABILITY_DESKTOP = "0.25"
-FRONTEND_PROBABILITY_MOBILE = "0.25"
+FRONTEND_PROBABILITY_MOBILE = "1"
 REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = "true"
