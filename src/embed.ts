@@ -19,7 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { pipeable, taskEither as TE, either as E, option as O } from 'fp-ts'
+import { either as E, option as O } from 'fp-ts'
 import * as t from 'io-ts'
 
 import { Url } from './utils'
@@ -94,33 +94,35 @@ const VimeoApiResponse = t.type({
 })
 
 async function getVimeoThumbnail(url: URL) {
-  const error = () => 'error' as unknown
+  const videoId = url.pathname.replace('/video/', '')
 
-  return pipeable.pipe(
-    TE.of(url.pathname.replace('/video/', '')),
-    TE.chain(TE.fromPredicate((videoId) => /[0-9]+/.test(videoId), error)),
-    TE.chain((videoId) =>
-      TE.fromTask(() =>
-        fetch(
-          'https://vimeo.com/api/oembed.json?url=' +
-            encodeURIComponent(`https://vimeo.com/${videoId}`)
-        )
-      )
-    ),
-    TE.chain(
-      TE.fromPredicate((apiResponse) => apiResponse.status === 200, error)
-    ),
-    TE.chain((apiResponse) => TE.tryCatch(() => apiResponse.json(), error)),
-    TE.chain((data) =>
-      TE.fromEither(E.mapLeft(error)(VimeoApiResponse.decode(data)))
-    ),
-    TE.map((data) => data.thumbnail_url.replace(/_[0-9|x]+/, '')),
-    TE.chain((url) => TE.fromEither(E.tryCatch(() => new Url(url), error))),
-    TE.chain(TE.fromPredicate((url) => url.domain === 'vimeocdn.com', error)),
-    TE.chain((url) => TE.fromTask(() => fetch(url.href))),
-    TE.chain(TE.fromPredicate((response) => response.status === 200, error)),
-    TE.getOrElse(() => () => Promise.resolve(getPlaceholder()))
-  )()
+  if (!/[0-9]+/.test(videoId)) return getPlaceholder()
+
+  const apiResponse = await fetch(
+    'https://vimeo.com/api/oembed.json?url=' +
+      encodeURIComponent(`https://vimeo.com/${videoId}`)
+  )
+
+  if (apiResponse.status !== 200) return getPlaceholder()
+
+  try {
+    const data = VimeoApiResponse.decode(await apiResponse.json())
+
+    if (E.isLeft(data)) return getPlaceholder()
+
+    const url = new Url(data.right.thumbnail_url.replace(/_[0-9|x]+/, ''))
+
+    if (url.domain !== 'vimeocdn.com') return getPlaceholder()
+
+    const imageResponse = await fetch(url.href)
+
+    if (imageResponse.status !== 200) return getPlaceholder()
+
+    return imageResponse
+  } catch (e) {
+    // error in parsing the api response or in parsing the thumbnail url
+    return getPlaceholder()
+  }
 }
 
 const GeogebraApiResponse = t.type({
