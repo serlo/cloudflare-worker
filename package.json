@@ -9,7 +9,7 @@
   "author": "Serlo Education e.V.",
   "scripts": {
     "build": "wrangler build",
-    "dev": "wrangler dev --env dev",
+    "dev": "wrangler dev --env staging",
     "deploy": "wrangler publish",
     "format": "npm-run-all -c format:*",
     "format:eslint": "yarn _eslint --fix",
