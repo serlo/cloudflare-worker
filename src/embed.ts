@@ -80,10 +80,10 @@ async function getYoutubeThumbnail(url: URL) {
   const baseUrl = `https://i.ytimg.com/vi/${videoId}`
 
   const bigImgRes = await fetch(`${baseUrl}/sddefault.jpg`)
-  if (bigImgRes.status === 200) return bigImgRes
+  if (isImageResponse(bigImgRes)) return bigImgRes
 
   const fallbackImgRes = await fetch(`${baseUrl}/hqdefault.jpg`)
-  if (fallbackImgRes.status === 200) return fallbackImgRes
+  if (isImageResponse(fallbackImgRes)) return fallbackImgRes
 
   return getPlaceholder()
 }
@@ -110,13 +110,11 @@ async function getVimeoThumbnail(url: URL) {
 
     if (E.isLeft(data)) return getPlaceholder()
 
-    const url = new Url(data.right.thumbnail_url.replace(/_[0-9|x]+/, ''))
+    const url = data.right.thumbnail_url.replace(/_[0-9|x]+/, '')
 
-    if (url.domain !== 'vimeocdn.com') return getPlaceholder()
+    const imageResponse = await fetch(url)
 
-    const imageResponse = await fetch(url.href)
-
-    if (imageResponse.status !== 200) return getPlaceholder()
+    if (!isImageResponse(imageResponse)) return getPlaceholder()
 
     return imageResponse
   } catch (e) {
@@ -163,12 +161,10 @@ async function getGeogebraThumbnail(url: URL) {
 
     if (O.isNone(data)) return getPlaceholder()
 
-    const thumbnailUrl = new Url(data.value.responses.response.item.previewUrl)
+    const thumbnailUrl = data.value.responses.response.item.previewUrl
 
-    if (thumbnailUrl.hostname !== 'cdn.geogebra.org') return getPlaceholder()
-
-    const imgRes = await fetch(thumbnailUrl.href)
-    if (imgRes.status === 200) return imgRes
+    const imgRes = await fetch(thumbnailUrl)
+    if (isImageResponse(imgRes)) return imgRes
   } catch (e) {
     // JSON cannot be parsed or preview url cannot be parsed
   }
@@ -184,7 +180,12 @@ async function getWikimediaThumbnail(url: URL) {
   const previewImageUrl = `https://upload.wikimedia.org/wikipedia/commons/thumb/${filenameWithPath}/800px--${filename}.jpg`
 
   const imgRes = await fetch(previewImageUrl)
-  if (imgRes.status === 200) return imgRes
+  if (isImageResponse(imgRes)) return imgRes
 
   return getPlaceholder()
+}
+
+function isImageResponse(res: Response): boolean {
+  const contentType = res.headers.get('content-type') ?? ''
+  return res.status === 200 && contentType.startsWith('image/')
 }
