@@ -22,7 +22,7 @@
 import { rest } from 'msw'
 
 import {
-  fetchTestEnvironment,
+  fetchSerlo,
   hasInternalServerError,
   RestResolver,
   returnsMalformedJson,
@@ -42,12 +42,12 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     const videos = {
       highQuality: {
         id: 'Wtvyw4NjJWc',
-        contentLength: '17270',
+        contentLength: 17270,
         format: 'sddefault.jpg',
       },
       lowQuality: {
         id: 'KtV2wlp9Ts4',
-        contentLength: '11464',
+        contentLength: 11464,
         format: 'hqdefault.jpg',
       },
     }
@@ -63,7 +63,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
               if (videoId === spec.id && format === spec.format) {
                 return res(
                   ctx.set('content-type', 'image/jpeg'),
-                  ctx.set('content-length', spec.contentLength)
+                  ctx.set('content-length', spec.contentLength.toString())
                 )
               }
             }
@@ -78,9 +78,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       const response = await requestThumbnail(
         `https://www.youtube-nocookie.com/embed/${videos.highQuality.id}?autoplay=1&html5=1`
       )
-      expect(response.headers.get('content-length')).toBe(
-        videos.highQuality.contentLength
-      )
+      expectContentLength(response, videos.highQuality.contentLength)
       expect(response.headers.get('content-type')).toBe('image/jpeg')
     })
 
@@ -88,9 +86,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       const response = await requestThumbnail(
         `https://www.youtube-nocookie.com/embed/${videos.lowQuality.id}?autoplay=1&html5=1`
       )
-      expect(response.headers.get('content-length')).toBe(
-        videos.lowQuality.contentLength
-      )
+      expectContentLength(response, videos.lowQuality.contentLength)
       expect(response.headers.get('content-type')).toBe('image/jpeg')
     })
 
@@ -114,7 +110,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
   describe('Vimeo', () => {
     const video = {
       id: '117611037',
-      contentLength: '60215',
+      contentLength: 60215,
       thumbnailUrl: 'https://i.vimeocdn.com/video/505834070.jpg',
     }
     beforeEach(() => {
@@ -126,7 +122,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       const response = await requestThumbnail(
         `https://player.vimeo.com/video/${video.id}?autoplay=1`
       )
-      expect(response.headers.get('content-length')).toBe(video.contentLength)
+      expectContentLength(response, video.contentLength)
       expect(response.headers.get('content-type')).toBe('image/jpeg')
     })
 
@@ -232,7 +228,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         if (req.url.href === video.thumbnailUrl) {
           return res(
             ctx.set('content-type', 'image/jpeg'),
-            ctx.set('content-length', video.contentLength)
+            ctx.set('content-length', video.contentLength.toString())
           )
         }
         return res(ctx.status(404))
@@ -266,7 +262,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     const video = {
       embedUrl:
         'https://upload.wikimedia.org/wikipedia/commons/1/15/Inerter_vibration_isolation_experiment.webm',
-      contentLength: '54373',
+      contentLength: 54373,
       thumbnailUrl:
         'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Inerter_vibration_isolation_experiment.webm/800px--Inerter_vibration_isolation_experiment.webm.jpg',
     }
@@ -279,7 +275,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
             if (req.url.toString() === video.thumbnailUrl) {
               return res(
                 ctx.set('content-type', 'image/jpeg'),
-                ctx.set('content-length', video.contentLength)
+                ctx.set('content-length', video.contentLength.toString())
               )
             }
             return res(ctx.status(404))
@@ -291,7 +287,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     test('returns thumbnail', async () => {
       const response = await requestThumbnail(video.embedUrl)
 
-      expect(response.headers.get('content-length')).toBe(video.contentLength)
+      expectContentLength(response, video.contentLength)
       expect(response.headers.get('content-type')).toBe('image/jpeg')
     })
 
@@ -306,7 +302,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
   describe('Geogebra', () => {
     const applet = {
       id: '100',
-      contentLength: '10336',
+      contentLength: 10336,
       thumbnailUrl:
         'https://cdn.geogebra.org/resource/q9gNCVsS/lIoGcSJdoALG1cTd/material-q9gNCVsS.png',
     }
@@ -319,7 +315,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       const response = await requestThumbnail(
         `https://www.geogebra.org/material/iframe/id/${applet.id}`
       )
-      expect(response.headers.get('content-length')).toBe(applet.contentLength)
+      expectContentLength(response, applet.contentLength)
       expect(response.headers.get('content-type')).toBe('image/png')
     })
 
@@ -448,7 +444,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       return (_req, res, ctx) => {
         return res(
           ctx.set('content-type', 'image/png'),
-          ctx.set('content-length', applet.contentLength)
+          ctx.set('content-length', applet.contentLength.toString())
         )
       }
     }
@@ -473,7 +469,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     })
 
     test('when path is not thumbnail', async () => {
-      const response = await fetchTestEnvironment({
+      const response = await fetchSerlo({
         subdomain: 'embed',
         pathname: '/foo',
       })
@@ -481,7 +477,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     })
 
     test('when url parameter is missing', async () => {
-      const response = await fetchTestEnvironment({
+      const response = await fetchSerlo({
         subdomain: 'embed',
         pathname: '/thumbnail',
       })
@@ -489,6 +485,18 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     })
   })
 })
+
+function expectContentLength(
+  response: Response,
+  expectedContentLength: number,
+  maxError = 0.1
+) {
+  const contentLength = parseInt(response.headers.get('content-length') ?? '')
+
+  expect(
+    Math.abs(contentLength - expectedContentLength) / expectedContentLength
+  ).toBeLessThanOrEqual(maxError)
+}
 
 function isPlaceholderResponse(response: Response) {
   expect(response.status).toBe(200)
@@ -500,7 +508,7 @@ async function requestThumbnail(
   url: string,
   environment?: TestEnvironment
 ): Promise<Response> {
-  return await fetchTestEnvironment({
+  return await fetchSerlo({
     subdomain: 'embed',
     pathname: '/thumbnail?url=' + encodeURIComponent(url),
     environment,
