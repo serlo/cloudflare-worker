@@ -6,7 +6,9 @@ This repository contains the source code for the cloudflare worker of Serlo ([ht
 
 ### Running tests
 
-You can run tests with `yarn test`. We use [jest](https://jestjs.io/) and thus all [jest command line options](https://jestjs.io/docs/en/cli) can be used. It is also possible to run tests against other environments:
+You can run tests with `yarn test`. We use [jest](https://jestjs.io/) and thus all [jest command line options](https://jestjs.io/docs/en/cli) can be used.
+
+It is also possible to run tests against other environments (the default environment is testing against the local source code):
 
 - `yarn test:dev` – Test against `serlo-development.dev`
 - `yarn test:staging` – Test against `serlo-staging.dev`
@@ -17,7 +19,7 @@ You can run tests with `yarn test`. We use [jest](https://jestjs.io/) and thus a
 At [`__test__/__utils__`](./__tests__/__utils__) there are utility functions for writing tests:
 
 - [`fetch-helper.ts`](./__tests__/__utils__/fetch-helper.ts):
-  - `fetchSerlo()` - Fetch against the current testing environment. Use this function whenever possible. By setting `{ environment: TestEnvironment.Locally }` you can always test against the local environment.
+  - `fetchSerlo()` - does an request at the current testing environment. For example when `TEST_ENVIRONMENT=staging` it makes a request at `*.serlo-staging.dev`. Use this function whenever possible. By setting `{ environment: TestEnvironment.Locally }` you can always test against the local environment.
 - [`epxect-helper.ts`](./__tests__/__utils__/expect-helper.ts): Various assertation helper you can use.
 
 ## Static pages
