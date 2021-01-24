@@ -27,6 +27,8 @@ import {
   fetchSerlo,
   TestEnvironment,
   RestResolver,
+  hasInternalServerError,
+  expectIsNotFoundResponse,
 } from './__utils__'
 
 describe('serlo.org/terms', () => {
@@ -246,8 +248,17 @@ describe('trailing slashes are allowed in accessing the legal pages', () => {
   })
 })
 
-// TODO: Repo returns malformed json
-// TODO: Repo has internal server Error
+test('returns 404 response when current version of legal page cannot be requested', async () => {
+  givenLegalPage('en/terms.md', hasInternalServerError())
+
+  const response = await fetchSerlo({
+    subdomain: 'en',
+    pathname: '/terms/',
+    environment: TestEnvironment.Local,
+  })
+
+  await expectIsNotFoundResponse(response)
+})
 
 describe('html of legal pages is sanitized', () => {
   test.each([
