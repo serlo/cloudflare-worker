@@ -42,30 +42,16 @@ export async function embed(request: Request): Promise<Response | null> {
         return await getYoutubeThumbnail(videoUrl)
       case 'vimeo.com':
         return await getVimeoThumbnail(videoUrl)
-      case 'wikimedia.org':
-        return await getWikimediaThumbnail(videoUrl)
       case 'geogebra.org':
         return await getGeogebraThumbnail(videoUrl)
+      case 'wikimedia.org':
+        return await getWikimediaThumbnail(videoUrl)
     }
   } catch (e) {
     //Invalid URL
   }
 
   return getPlaceholder()
-}
-
-function getPlaceholder() {
-  const placeholderB64 =
-    'iVBORw0KGgoAAAANSUhEUgAAAwAAAAGwAQMAAAAkGpCRAAAAA1BMVEXv9/t0VvapAAAAP0lEQVR42u3BMQEAAADCIPuntsUuYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQOqOwAAHrgHqAAAAAAElFTkSuQmCC'
-  const buffer = Buffer.from(placeholderB64, 'base64')
-  return new Response(buffer, {
-    status: 200,
-    statusText: 'OK',
-    headers: {
-      'Content-Type': 'image/png',
-      'Content-Length': Buffer.byteLength(buffer).toString(),
-    },
-  })
 }
 
 async function getYoutubeThumbnail(url: URL) {
@@ -183,6 +169,20 @@ async function getWikimediaThumbnail(url: URL) {
   if (isImageResponse(imgRes)) return imgRes
 
   return getPlaceholder()
+}
+
+function getPlaceholder() {
+  const placeholderB64 =
+    'iVBORw0KGgoAAAANSUhEUgAAAwAAAAGwAQMAAAAkGpCRAAAAA1BMVEXv9/t0VvapAAAAP0lEQVR42u3BMQEAAADCIPuntsUuYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQOqOwAAHrgHqAAAAAAElFTkSuQmCC'
+  const buffer = Buffer.from(placeholderB64, 'base64')
+  return new Response(buffer, {
+    status: 200,
+    statusText: 'OK',
+    headers: {
+      'Content-Type': 'image/png',
+      'Content-Length': Buffer.byteLength(buffer).toString(),
+    },
+  })
 }
 
 function isImageResponse(res: Response): boolean {
