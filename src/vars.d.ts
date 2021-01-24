@@ -27,7 +27,9 @@ declare namespace NodeJS {
     ENABLE_BASIC_AUTH: 'true' | 'false'
     FRONTEND_ALLOWED_TYPES: string
     FRONTEND_DOMAIN: string
-    FRONTEND_PROBABILITY: string
+    FRONTEND_PROBABILITY_DESKTOP: string
+    FRONTEND_PROBABILITY_MOBILE: string
+    FRONTEND_PROBABILITY_AUTHENTICATED: string
     REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND: 'true' | 'false'
     fetch: typeof fetch
   }
