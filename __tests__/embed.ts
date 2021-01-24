@@ -53,25 +53,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     }
 
     beforeEach(() => {
-      global.server.use(
-        rest.get<never, any, { videoId: string; format: string }>(
-          'https://i.ytimg.com/vi/:videoId/:format',
-          (req, res, ctx) => {
-            const { videoId, format } = req.params
-
-            for (const spec of Object.values(videos)) {
-              if (videoId === spec.id && format === spec.format) {
-                return res(
-                  ctx.set('content-type', 'image/jpeg'),
-                  ctx.set('content-length', spec.contentLength.toString())
-                )
-              }
-            }
-
-            return res(ctx.status(404))
-          }
-        )
-      )
+      givenYoutube(defaultYoutubeServer())
     })
 
     test('returns sddefault.jpg thumbnail when it exists', async () => {
@@ -104,7 +86,40 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         )
         expect(isPlaceholderResponse(response))
       })
+
+      test('when youtube does not return an image', async () => {
+        givenYoutube(returnsText('Hello'))
+
+        const response = await requestThumbnail(
+          `https://www.youtube-nocookie.com/embed/${videos.highQuality.id}?autoplay=1&html5=1`,
+          TestEnvironment.Local
+        )
+        expect(isPlaceholderResponse(response))
+      })
     })
+
+    function givenYoutube(resolver: RestResolver) {
+      global.server.use(
+        rest.get('https://i.ytimg.com/vi/:videoId/:format', resolver)
+      )
+    }
+
+    function defaultYoutubeServer(): RestResolver {
+      return (req, res, ctx) => {
+        const { videoId, format } = req.params
+
+        for (const spec of Object.values(videos)) {
+          if (videoId === spec.id && format === spec.format) {
+            return res(
+              ctx.set('content-type', 'image/jpeg'),
+              ctx.set('content-length', spec.contentLength.toString())
+            )
+          }
+        }
+
+        return res(ctx.status(404))
+      }
+    }
   })
 
   describe('Vimeo', () => {
@@ -188,13 +203,8 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         expect(isPlaceholderResponse(response))
       })
 
-      test('when vimeo api returns a thumbnail_url not pointing to vimeocdn.com', async () => {
-        givenVimeoApi(
-          returnsJson({
-            type: 'video',
-            thumbnail_url: 'https://malware.com/',
-          })
-        )
+      test('when vimeo cdn doesn not return an image', async () => {
+        givenVimeoCdn(returnsText('Hello'))
 
         const response = await requestThumbnail(
           `https://player.vimeo.com/video/${video.id}?autoplay=1`,
@@ -247,10 +257,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         if (videoId === video.id) {
           return res(
-            ctx.json({
-              type: 'video',
-              thumbnail_url: video.thumbnailUrl,
-            })
+            ctx.json({ type: 'video', thumbnail_url: video.thumbnailUrl })
           )
         }
         return res(ctx.status(403))
@@ -268,20 +275,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     }
 
     beforeEach(() => {
-      global.server.use(
-        rest.get(
-          'https://upload.wikimedia.org/wikipedia/commons/thumb/*',
-          (req, res, ctx) => {
-            if (req.url.toString() === video.thumbnailUrl) {
-              return res(
-                ctx.set('content-type', 'image/jpeg'),
-                ctx.set('content-length', video.contentLength.toString())
-              )
-            }
-            return res(ctx.status(404))
-          }
-        )
-      )
+      givenWikimedia(defaultWikimediaServer())
     })
 
     test('returns thumbnail', async () => {
@@ -297,6 +291,37 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       )
       expect(isPlaceholderResponse(response))
     })
+
+    test('returns placeholder when wikimedia does not return an image', async () => {
+      givenWikimedia(returnsText('Hello'))
+
+      const response = await requestThumbnail(
+        video.embedUrl,
+        TestEnvironment.Local
+      )
+
+      expect(isPlaceholderResponse(response))
+    })
+
+    function givenWikimedia(resolver: RestResolver) {
+      global.server.use(
+        rest.get(
+          'https://upload.wikimedia.org/wikipedia/commons/thumb/*',
+          resolver
+        )
+      )
+    }
+
+    function defaultWikimediaServer(): RestResolver {
+      return (req, res, ctx) => {
+        return req.url.toString() === video.thumbnailUrl
+          ? res(
+              ctx.set('content-type', 'image/jpeg'),
+              ctx.set('content-length', video.contentLength.toString())
+            )
+          : res(ctx.status(404))
+      }
+    }
   })
 
   describe('Geogebra', () => {
@@ -379,8 +404,8 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         expect(isPlaceholderResponse(response))
       })
 
-      test('when host of geogebra preview url is not cdn.geogebra.org', async () => {
-        givenGeogebraApi(returnsPreviewUrl('http://malware.com/'))
+      test('when geogebra cdn does not respond with an image', async () => {
+        givenGeogebraFile(returnsText('Some text'))
 
         const response = await requestThumbnail(
           `https://www.geogebra.org/material/iframe/id/${applet.id}`,
@@ -419,11 +444,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           return res(
             ctx.json({
               responses: {
-                response: {
-                  item: {
-                    previewUrl: applet.thumbnailUrl,
-                  },
-                },
+                response: { item: { previewUrl: applet.thumbnailUrl } },
               },
             })
           )
