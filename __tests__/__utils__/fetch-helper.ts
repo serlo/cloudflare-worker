@@ -27,21 +27,10 @@ import {
   getTestEnvironment,
 } from './test-environment'
 
-export function fetchTestEnvironment(spec: UrlSpec, init?: RequestInit) {
-  return fetchAt({ ...spec, environment: getTestEnvironment() }, init)
-}
-
-export function fetchLocally(spec: UrlSpec, init?: RequestInit) {
-  return fetchAt({ ...spec, environment: TestEnvironment.Local }, init)
-}
-
-function fetchAt(
-  spec: UrlSpec & Required<TestEnvironmentSpec>,
-  init?: RequestInit
-) {
+export function fetchSerlo(spec: UrlSpec, init?: RequestInit) {
   const request = new Request(createUrl(spec), init)
 
-  if (spec.environment === TestEnvironment.Local) {
+  if ((spec.environment ?? getTestEnvironment()) === TestEnvironment.Local) {
     return handleRequest(request)
   } else {
     // See https://github.com/mswjs/msw/blob/master/src/context/fetch.ts
@@ -55,9 +44,11 @@ export function createUrl({
   subdomain = '',
   pathname = '/',
   environment = getTestEnvironment(),
-}: UrlSpec & TestEnvironmentSpec) {
+  protocol = 'https',
+}: UrlSpec) {
   return (
-    'https://' +
+    protocol +
+    '://' +
     subdomain +
     (subdomain.length > 0 ? '.' : '') +
     domains[environment] +
@@ -68,8 +59,6 @@ export function createUrl({
 interface UrlSpec {
   subdomain?: string
   pathname?: string
-}
-
-interface TestEnvironmentSpec {
   environment?: TestEnvironment
+  protocol?: 'http' | 'https'
 }

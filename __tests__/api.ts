@@ -19,7 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { givenUuid, fetchTestEnvironment } from './__utils__'
+import { givenUuid, fetchSerlo } from './__utils__'
 
 describe('api calls', () => {
   test('get a signature', async () => {
@@ -39,7 +39,7 @@ describe('api calls', () => {
         }
       }
     `
-    const response = await fetchTestEnvironment(
+    const response = await fetchSerlo(
       { subdomain: 'api', pathname: '/graphql' },
       {
         method: 'POST',
