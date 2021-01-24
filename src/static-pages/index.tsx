@@ -48,28 +48,6 @@ import {
 
 const defaultLanguage = Instance.En
 
-export {
-  RevisedType,
-  UnrevisedType,
-  Spec,
-  RevisedSpec,
-  UnrevisedConfig,
-  RevisedConfig,
-} from './config'
-
-export interface Page extends Spec {
-  title: string
-  lang: Instance
-}
-
-export interface RevisedPage extends Page, RevisedSpec {
-  isCurrentRevision: boolean
-  revisionDate: Date
-  revisedType: string
-}
-
-export type WithContent<A extends Spec> = A & { content: string }
-
 export async function staticPages(
   request: Request,
   unrevisedConfig = defaultUnrevisedConfig,
@@ -279,18 +257,18 @@ export function RevisionsOverview({ revisions }: { revisions: RevisedPage[] }) {
     <Template title={title} lang={current.lang}>
       <h1>{title}</h1>
       <p>{getDescription()}</p>
-      <ul>
-        {revisions.map((rev) => {
-          const link = `/${rev.revisedType}/archive/${rev.revision}`
-          return (
-            <li key={rev.revisionDate}>
-              <a href={link}>{renderRevision(rev)}</a>
-            </li>
-          )
-        })}
-      </ul>
+      <ul>{revisions.map(toLink)}</ul>
     </Template>
   )
+
+  function toLink(rev: RevisedPage) {
+    const link = `/${rev.revisedType}/archive/${rev.revision}`
+    return (
+      <li key={rev.revisionDate}>
+        <a href={link}>{renderRevision(rev)}</a>
+      </li>
+    )
+  }
 
   function getTitle() {
     switch (current.lang) {
@@ -337,7 +315,7 @@ export function RevisionsOverview({ revisions }: { revisions: RevisedPage[] }) {
   }
 }
 
-export async function fetchContent<A extends Page>(
+async function fetchContent<A extends Page>(
   page: A
 ): Promise<WithContent<A> | null> {
   const response = await fetchWithCache(page.url)
@@ -357,14 +335,14 @@ export async function fetchContent<A extends Page>(
   }
 }
 
-export function findRevisionById<A extends RevisedSpec>(
+function findRevisionById<A extends RevisedSpec>(
   revisions: A[],
   id: string
 ): A | null {
   return revisions.find((x) => x.revision === id) ?? null
 }
 
-export function getRevisions(
+function getRevisions(
   config: RevisedConfig,
   lang: Instance,
   revisedType: RevisedType,
@@ -391,7 +369,7 @@ export function getRevisions(
   }
 }
 
-export function getPage(
+function getPage(
   config: UnrevisedConfig,
   lang: Instance,
   unrevisedType: UnrevisedType,
@@ -421,3 +399,16 @@ function getSpecAndLanguage<A extends string, B>(
     return null
   }
 }
+
+interface Page extends Spec {
+  title: string
+  lang: Instance
+}
+
+interface RevisedPage extends Page, RevisedSpec {
+  isCurrentRevision: boolean
+  revisionDate: Date
+  revisedType: string
+}
+
+type WithContent<A extends Spec> = A & { content: string }
