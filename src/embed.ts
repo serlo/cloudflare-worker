@@ -19,7 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { pipeable, taskEither as TE, either as E, option as O } from 'fp-ts'
+import { either as E, option as O } from 'fp-ts'
 import * as t from 'io-ts'
 
 import { Url } from './utils'
@@ -42,30 +42,16 @@ export async function embed(request: Request): Promise<Response | null> {
         return await getYoutubeThumbnail(videoUrl)
       case 'vimeo.com':
         return await getVimeoThumbnail(videoUrl)
-      case 'wikimedia.org':
-        return await getWikimediaThumbnail(videoUrl)
       case 'geogebra.org':
         return await getGeogebraThumbnail(videoUrl)
+      case 'wikimedia.org':
+        return await getWikimediaThumbnail(videoUrl)
     }
   } catch (e) {
     //Invalid URL
   }
 
   return getPlaceholder()
-}
-
-function getPlaceholder() {
-  const placeholderB64 =
-    'iVBORw0KGgoAAAANSUhEUgAAAwAAAAGwAQMAAAAkGpCRAAAAA1BMVEXv9/t0VvapAAAAP0lEQVR42u3BMQEAAADCIPuntsUuYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQOqOwAAHrgHqAAAAAAElFTkSuQmCC'
-  const buffer = Buffer.from(placeholderB64, 'base64')
-  return new Response(buffer, {
-    status: 200,
-    statusText: 'OK',
-    headers: {
-      'Content-Type': 'image/png',
-      'Content-Length': Buffer.byteLength(buffer).toString(),
-    },
-  })
 }
 
 async function getYoutubeThumbnail(url: URL) {
@@ -80,10 +66,10 @@ async function getYoutubeThumbnail(url: URL) {
   const baseUrl = `https://i.ytimg.com/vi/${videoId}`
 
   const bigImgRes = await fetch(`${baseUrl}/sddefault.jpg`)
-  if (bigImgRes.status === 200) return bigImgRes
+  if (isImageResponse(bigImgRes)) return bigImgRes
 
   const fallbackImgRes = await fetch(`${baseUrl}/hqdefault.jpg`)
-  if (fallbackImgRes.status === 200) return fallbackImgRes
+  if (isImageResponse(fallbackImgRes)) return fallbackImgRes
 
   return getPlaceholder()
 }
@@ -94,33 +80,33 @@ const VimeoApiResponse = t.type({
 })
 
 async function getVimeoThumbnail(url: URL) {
-  const error = () => 'error' as unknown
+  const videoId = url.pathname.replace('/video/', '')
 
-  return pipeable.pipe(
-    TE.of(url.pathname.replace('/video/', '')),
-    TE.chain(TE.fromPredicate((videoId) => /[0-9]+/.test(videoId), error)),
-    TE.chain((videoId) =>
-      TE.fromTask(() =>
-        fetch(
-          'https://vimeo.com/api/oembed.json?url=' +
-            encodeURIComponent(`https://vimeo.com/${videoId}`)
-        )
-      )
-    ),
-    TE.chain(
-      TE.fromPredicate((apiResponse) => apiResponse.status === 200, error)
-    ),
-    TE.chain((apiResponse) => TE.tryCatch(() => apiResponse.json(), error)),
-    TE.chain((data) =>
-      TE.fromEither(E.mapLeft(error)(VimeoApiResponse.decode(data)))
-    ),
-    TE.map((data) => data.thumbnail_url.replace(/_[0-9|x]+/, '')),
-    TE.chain((url) => TE.fromEither(E.tryCatch(() => new Url(url), error))),
-    TE.chain(TE.fromPredicate((url) => url.domain === 'vimeocdn.com', error)),
-    TE.chain((url) => TE.fromTask(() => fetch(url.href))),
-    TE.chain(TE.fromPredicate((response) => response.status === 200, error)),
-    TE.getOrElse(() => () => Promise.resolve(getPlaceholder()))
-  )()
+  if (!/[0-9]+/.test(videoId)) return getPlaceholder()
+
+  const apiResponse = await fetch(
+    'https://vimeo.com/api/oembed.json?url=' +
+      encodeURIComponent(`https://vimeo.com/${videoId}`)
+  )
+
+  if (apiResponse.status !== 200) return getPlaceholder()
+
+  try {
+    const data = VimeoApiResponse.decode(await apiResponse.json())
+
+    if (E.isLeft(data)) return getPlaceholder()
+
+    const url = data.right.thumbnail_url.replace(/_[0-9|x]+/, '')
+
+    const imageResponse = await fetch(url)
+
+    if (!isImageResponse(imageResponse)) return getPlaceholder()
+
+    return imageResponse
+  } catch (e) {
+    // error in parsing the api response or in parsing the thumbnail url
+    return getPlaceholder()
+  }
 }
 
 const GeogebraApiResponse = t.type({
@@ -161,12 +147,10 @@ async function getGeogebraThumbnail(url: URL) {
 
     if (O.isNone(data)) return getPlaceholder()
 
-    const thumbnailUrl = new Url(data.value.responses.response.item.previewUrl)
+    const thumbnailUrl = data.value.responses.response.item.previewUrl
 
-    if (thumbnailUrl.hostname !== 'cdn.geogebra.org') return getPlaceholder()
-
-    const imgRes = await fetch(thumbnailUrl.href)
-    if (imgRes.status === 200) return imgRes
+    const imgRes = await fetch(thumbnailUrl)
+    if (isImageResponse(imgRes)) return imgRes
   } catch (e) {
     // JSON cannot be parsed or preview url cannot be parsed
   }
@@ -182,7 +166,26 @@ async function getWikimediaThumbnail(url: URL) {
   const previewImageUrl = `https://upload.wikimedia.org/wikipedia/commons/thumb/${filenameWithPath}/800px--${filename}.jpg`
 
   const imgRes = await fetch(previewImageUrl)
-  if (imgRes.status === 200) return imgRes
+  if (isImageResponse(imgRes)) return imgRes
 
   return getPlaceholder()
+}
+
+function getPlaceholder() {
+  const placeholderB64 =
+    'iVBORw0KGgoAAAANSUhEUgAAAwAAAAGwAQMAAAAkGpCRAAAAA1BMVEXv9/t0VvapAAAAP0lEQVR42u3BMQEAAADCIPuntsUuYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQOqOwAAHrgHqAAAAAAElFTkSuQmCC'
+  const buffer = Buffer.from(placeholderB64, 'base64')
+  return new Response(buffer, {
+    status: 200,
+    statusText: 'OK',
+    headers: {
+      'Content-Type': 'image/png',
+      'Content-Length': Buffer.byteLength(buffer).toString(),
+    },
+  })
+}
+
+function isImageResponse(res: Response): boolean {
+  const contentType = res.headers.get('content-type') ?? ''
+  return res.status === 200 && contentType.startsWith('image/')
 }

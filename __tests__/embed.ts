@@ -53,41 +53,29 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     }
 
     beforeEach(() => {
-      global.server.use(
-        rest.get<never, any, { videoId: string; format: string }>(
-          'https://i.ytimg.com/vi/:videoId/:format',
-          (req, res, ctx) => {
-            const { videoId, format } = req.params
-
-            for (const spec of Object.values(videos)) {
-              if (videoId === spec.id && format === spec.format) {
-                return res(
-                  ctx.set('content-type', 'image/jpeg'),
-                  ctx.set('content-length', spec.contentLength.toString())
-                )
-              }
-            }
-
-            return res(ctx.status(404))
-          }
-        )
-      )
+      givenYoutube(defaultYoutubeServer())
     })
 
     test('returns sddefault.jpg thumbnail when it exists', async () => {
       const response = await requestThumbnail(
         `https://www.youtube-nocookie.com/embed/${videos.highQuality.id}?autoplay=1&html5=1`
       )
-      expectContentLength(response, videos.highQuality.contentLength)
-      expect(response.headers.get('content-type')).toBe('image/jpeg')
+      expectImageResponse({
+        response,
+        expectedContentLength: videos.highQuality.contentLength,
+        expectedImageType: 'image/jpeg',
+      })
     })
 
     test('returns hqdefault.jpg thumbnail when sddefault.jpg does not exist', async () => {
       const response = await requestThumbnail(
         `https://www.youtube-nocookie.com/embed/${videos.lowQuality.id}?autoplay=1&html5=1`
       )
-      expectContentLength(response, videos.lowQuality.contentLength)
-      expect(response.headers.get('content-type')).toBe('image/jpeg')
+      expectImageResponse({
+        response,
+        expectedContentLength: videos.lowQuality.contentLength,
+        expectedImageType: 'image/jpeg',
+      })
     })
 
     describe('returns placeholder', () => {
@@ -95,16 +83,49 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         const response = await requestThumbnail(
           `https://www.youtube-nocookie.com/embed/AaaAaaAaaAa?autoplay=1&html5=1`
         )
-        expect(isPlaceholderResponse(response))
+        expectIsPlaceholderResponse(response)
       })
 
       test('when video id is malformed', async () => {
         const response = await requestThumbnail(
           `https://www.youtube-nocookie.com/embed/foo:pass@malware.com`
         )
-        expect(isPlaceholderResponse(response))
+        expectIsPlaceholderResponse(response)
+      })
+
+      test('when youtube does not return an image', async () => {
+        givenYoutube(returnsText('Hello'))
+
+        const response = await requestThumbnail(
+          `https://www.youtube-nocookie.com/embed/${videos.highQuality.id}?autoplay=1&html5=1`,
+          TestEnvironment.Local
+        )
+        expectIsPlaceholderResponse(response)
       })
     })
+
+    function givenYoutube(resolver: RestResolver) {
+      global.server.use(
+        rest.get('https://i.ytimg.com/vi/:videoId/:format', resolver)
+      )
+    }
+
+    function defaultYoutubeServer(): RestResolver {
+      return (req, res, ctx) => {
+        const { videoId, format } = req.params
+
+        for (const spec of Object.values(videos)) {
+          if (videoId === spec.id && format === spec.format) {
+            return res(
+              ctx.set('content-type', 'image/jpeg'),
+              ctx.set('content-length', spec.contentLength.toString())
+            )
+          }
+        }
+
+        return res(ctx.status(404))
+      }
+    }
   })
 
   describe('Vimeo', () => {
@@ -118,12 +139,15 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       givenVimeoCdn(defaultVimeoCdn())
     })
 
-    test('returns thumbnail as webp', async () => {
+    test('returns thumbnail of vimeo video', async () => {
       const response = await requestThumbnail(
         `https://player.vimeo.com/video/${video.id}?autoplay=1`
       )
-      expectContentLength(response, video.contentLength)
-      expect(response.headers.get('content-type')).toBe('image/jpeg')
+      expectImageResponse({
+        response,
+        expectedImageType: 'image/jpeg',
+        expectedContentLength: video.contentLength,
+      })
     })
 
     describe('returns placeholder', () => {
@@ -131,14 +155,14 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         const response = await requestThumbnail(
           `https://player.vimeo.com/video/999999999?autoplay=1`
         )
-        expect(isPlaceholderResponse(response))
+        expectIsPlaceholderResponse(response)
       })
 
       test('when video id is malformed', async () => {
         const response = await requestThumbnail(
           `https://player.vimeo.com/video/foo:password@malware.com`
         )
-        expect(isPlaceholderResponse(response))
+        expectIsPlaceholderResponse(response)
       })
 
       test('when request to vimeo api fails', async () => {
@@ -149,7 +173,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
           TestEnvironment.Local
         )
-        expect(isPlaceholderResponse(response))
+        expectIsPlaceholderResponse(response)
       })
 
       test('when vimeo api returns malformed json', async () => {
@@ -159,7 +183,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           `https://player.vimeo.com/video/${video.id}?autoplay=1`,
           TestEnvironment.Local
         )
-        expect(isPlaceholderResponse(response))
+        expectIsPlaceholderResponse(response)
       })
 
       describe('when vimeo api returns a malformed response', () => {
@@ -174,7 +198,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
             `https://player.vimeo.com/video/${video.id}?autoplay=1`,
             TestEnvironment.Local
           )
-          expect(isPlaceholderResponse(response))
+          expectIsPlaceholderResponse(response)
         })
       })
 
@@ -185,22 +209,17 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           `https://player.vimeo.com/video/${video.id}?autoplay=1`,
           TestEnvironment.Local
         )
-        expect(isPlaceholderResponse(response))
+        expectIsPlaceholderResponse(response)
       })
 
-      test('when vimeo api returns a thumbnail_url not pointing to vimeocdn.com', async () => {
-        givenVimeoApi(
-          returnsJson({
-            type: 'video',
-            thumbnail_url: 'https://malware.com/',
-          })
-        )
+      test('when vimeo cdn doesn not return an image', async () => {
+        givenVimeoCdn(returnsText('Hello'))
 
         const response = await requestThumbnail(
           `https://player.vimeo.com/video/${video.id}?autoplay=1`,
           TestEnvironment.Local
         )
-        expect(isPlaceholderResponse(response))
+        expectIsPlaceholderResponse(response)
       })
 
       test('when vimeo cdn does not responed with 200', async () => {
@@ -210,7 +229,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           `https://player.vimeo.com/video/${video.id}?autoplay=1`,
           TestEnvironment.Local
         )
-        expect(isPlaceholderResponse(response))
+        expect(expectIsPlaceholderResponse(response))
       })
     })
 
@@ -247,10 +266,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         if (videoId === video.id) {
           return res(
-            ctx.json({
-              type: 'video',
-              thumbnail_url: video.thumbnailUrl,
-            })
+            ctx.json({ type: 'video', thumbnail_url: video.thumbnailUrl })
           )
         }
         return res(ctx.status(403))
@@ -268,35 +284,54 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     }
 
     beforeEach(() => {
-      global.server.use(
-        rest.get(
-          'https://upload.wikimedia.org/wikipedia/commons/thumb/*',
-          (req, res, ctx) => {
-            if (req.url.toString() === video.thumbnailUrl) {
-              return res(
-                ctx.set('content-type', 'image/jpeg'),
-                ctx.set('content-length', video.contentLength.toString())
-              )
-            }
-            return res(ctx.status(404))
-          }
-        )
-      )
+      givenWikimedia(defaultWikimediaServer())
     })
 
     test('returns thumbnail', async () => {
       const response = await requestThumbnail(video.embedUrl)
-
-      expectContentLength(response, video.contentLength)
-      expect(response.headers.get('content-type')).toBe('image/jpeg')
+      expectImageResponse({
+        response,
+        expectedImageType: 'image/jpeg',
+        expectedContentLength: video.contentLength,
+      })
     })
 
     test('returns placeholder when video/thumbnail does not exist', async () => {
       const response = await requestThumbnail(
         'https://upload.wikimedia.org/wikipedia/commons/2/55/must_see.webm'
       )
-      expect(isPlaceholderResponse(response))
+      expectIsPlaceholderResponse(response)
     })
+
+    test('returns placeholder when wikimedia does not return an image', async () => {
+      givenWikimedia(returnsText('Hello'))
+
+      const response = await requestThumbnail(
+        video.embedUrl,
+        TestEnvironment.Local
+      )
+      expectIsPlaceholderResponse(response)
+    })
+
+    function givenWikimedia(resolver: RestResolver) {
+      global.server.use(
+        rest.get(
+          'https://upload.wikimedia.org/wikipedia/commons/thumb/*',
+          resolver
+        )
+      )
+    }
+
+    function defaultWikimediaServer(): RestResolver {
+      return (req, res, ctx) => {
+        return req.url.toString() === video.thumbnailUrl
+          ? res(
+              ctx.set('content-type', 'image/jpeg'),
+              ctx.set('content-length', video.contentLength.toString())
+            )
+          : res(ctx.status(404))
+      }
+    }
   })
 
   describe('Geogebra', () => {
@@ -311,12 +346,15 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       givenGeogebraFile(defaultGeogebraFile())
     })
 
-    test('returns thumbnail', async () => {
+    test('returns thumbnail of geogebra applet', async () => {
       const response = await requestThumbnail(
         `https://www.geogebra.org/material/iframe/id/${applet.id}`
       )
-      expectContentLength(response, applet.contentLength)
-      expect(response.headers.get('content-type')).toBe('image/png')
+      expectImageResponse({
+        response,
+        expectedContentLength: applet.contentLength,
+        expectedImageType: 'image/png',
+      })
     })
 
     describe('returns placeholder', () => {
@@ -324,15 +362,14 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         const response = await requestThumbnail(
           `https://www.geogebra.org/material/iframe/id/abc%@`
         )
-
-        expect(isPlaceholderResponse(response))
+        expectIsPlaceholderResponse(response)
       })
 
       test('when geogebra file does not exist', async () => {
         const response = await requestThumbnail(
           `https://www.geogebra.org/material/iframe/id/001`
         )
-        expect(isPlaceholderResponse(response))
+        expectIsPlaceholderResponse(response)
       })
 
       test('when geogebra api returns with a non 200 respond', async () => {
@@ -342,8 +379,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           `https://www.geogebra.org/material/iframe/id/${applet.id}`,
           TestEnvironment.Local
         )
-
-        expect(isPlaceholderResponse(response))
+        expectIsPlaceholderResponse(response)
       })
 
       test('when geogebra api returns malformed json', async () => {
@@ -353,8 +389,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           `https://www.geogebra.org/material/iframe/id/${applet.id}`,
           TestEnvironment.Local
         )
-
-        expect(isPlaceholderResponse(response))
+        expectIsPlaceholderResponse(response)
       })
 
       test('when geogebra api returns unknwon json response', async () => {
@@ -364,8 +399,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           `https://www.geogebra.org/material/iframe/id/${applet.id}`,
           TestEnvironment.Local
         )
-
-        expect(isPlaceholderResponse(response))
+        expectIsPlaceholderResponse(response)
       })
 
       test('when geogebra api returns malformed preview url', async () => {
@@ -375,19 +409,17 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           `https://www.geogebra.org/material/iframe/id/${applet.id}`,
           TestEnvironment.Local
         )
-
-        expect(isPlaceholderResponse(response))
+        expectIsPlaceholderResponse(response)
       })
 
-      test('when host of geogebra preview url is not cdn.geogebra.org', async () => {
-        givenGeogebraApi(returnsPreviewUrl('http://malware.com/'))
+      test('when geogebra cdn does not respond with an image', async () => {
+        givenGeogebraFile(returnsText('Some text'))
 
         const response = await requestThumbnail(
           `https://www.geogebra.org/material/iframe/id/${applet.id}`,
           TestEnvironment.Local
         )
-
-        expect(isPlaceholderResponse(response))
+        expectIsPlaceholderResponse(response)
       })
 
       test('when geogebra file does not exists', async () => {
@@ -397,8 +429,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           `https://www.geogebra.org/material/iframe/id/${applet.id}`,
           TestEnvironment.Local
         )
-
-        expect(isPlaceholderResponse(response))
+        expectIsPlaceholderResponse(response)
       })
     })
 
@@ -419,11 +450,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           return res(
             ctx.json({
               responses: {
-                response: {
-                  item: {
-                    previewUrl: applet.thumbnailUrl,
-                  },
-                },
+                response: { item: { previewUrl: applet.thumbnailUrl } },
               },
             })
           )
@@ -453,19 +480,19 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
   describe('returns placeholder', () => {
     test('when url parameter is empty', async () => {
       const response = await requestThumbnail('')
-      expect(isPlaceholderResponse(response))
+      expect(expectIsPlaceholderResponse(response))
     })
 
     test('when url is invalid', async () => {
       const response = await requestThumbnail('42')
-      expect(isPlaceholderResponse(response))
+      expect(expectIsPlaceholderResponse(response))
     })
 
     test('when url is unsupported', async () => {
       const response = await requestThumbnail(
         'https://www.twitch.tv/videos/824398155'
       )
-      expect(isPlaceholderResponse(response))
+      expect(expectIsPlaceholderResponse(response))
     })
 
     test('when path is not thumbnail', async () => {
@@ -473,7 +500,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         subdomain: 'embed',
         pathname: '/foo',
       })
-      expect(isPlaceholderResponse(response))
+      expect(expectIsPlaceholderResponse(response))
     })
 
     test('when url parameter is missing', async () => {
@@ -481,16 +508,24 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         subdomain: 'embed',
         pathname: '/thumbnail',
       })
-      expect(isPlaceholderResponse(response))
+      expect(expectIsPlaceholderResponse(response))
     })
   })
 })
 
-function expectContentLength(
-  response: Response,
-  expectedContentLength: number,
-  maxError = 0.1
-) {
+function expectImageResponse({
+  expectedContentLength,
+  expectedImageType,
+  response,
+  maxError = 0.1,
+}: {
+  expectedImageType: string
+  expectedContentLength: number
+  response: Response
+  maxError?: number
+}) {
+  expect(response.status).toBe(200)
+  expect(response.headers.get('content-type')).toBe(expectedImageType)
   const contentLength = parseInt(response.headers.get('content-length') ?? '')
 
   expect(
@@ -498,7 +533,7 @@ function expectContentLength(
   ).toBeLessThanOrEqual(maxError)
 }
 
-function isPlaceholderResponse(response: Response) {
+function expectIsPlaceholderResponse(response: Response) {
   expect(response.status).toBe(200)
   expect(response.headers.get('content-type')).toBe('image/png')
   expect(response.headers.get('content-length')).toBe('135')
