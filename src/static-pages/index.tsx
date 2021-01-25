@@ -48,28 +48,6 @@ import {
 
 const defaultLanguage = Instance.En
 
-export {
-  RevisedType,
-  UnrevisedType,
-  Spec,
-  RevisedSpec,
-  UnrevisedConfig,
-  RevisedConfig,
-} from './config'
-
-export interface Page extends Spec {
-  title: string
-  lang: Instance
-}
-
-export interface RevisedPage extends Page, RevisedSpec {
-  isCurrentRevision: boolean
-  revisionDate: Date
-  revisedType: string
-}
-
-export type WithContent<A extends Spec> = A & { content: string }
-
 export async function staticPages(
   request: Request,
   unrevisedConfig = defaultUnrevisedConfig,
@@ -163,7 +141,7 @@ export function RevisedPage({ page }: { page: WithContent<RevisedPage> }) {
   return (
     <Template title={page.title} lang={page.lang}>
       {page.isCurrentRevision ? null : (
-        <div className="alert alert-info" style="margin-top: 20px;">
+        <div className="alert alert-info" style="margin-top: 30px;">
           {getAlert()}
         </div>
       )}
@@ -171,9 +149,44 @@ export function RevisedPage({ page }: { page: WithContent<RevisedPage> }) {
         {page.title} <small>{getSubHeader()}</small>
       </h1>
       {page.isCurrentRevision ? <p>{getArchiveDescription()}</p> : null}
+      <div className="alert alert-info" style="margin: 30px 0;">
+        {getConsentPageLink()}
+      </div>
       <div dangerouslySetInnerHTML={{ __html: page.content }} />
     </Template>
   )
+
+  function getConsentPageLink() {
+    switch (page.lang) {
+      case Instance.De:
+        return (
+          <Fragment>
+            <b>Einwilligungen für externe Inhalte</b>
+            <p>
+              Deine Einwilligungen kannst Du{' '}
+              <a href="/consent" style="text-decoration: underline;">
+                hier überprüfen und zurückrufen
+              </a>
+              .
+            </p>
+          </Fragment>
+        )
+      case Instance.En:
+      default:
+        return (
+          <Fragment>
+            <b>Consent for external content</b>
+            <p>
+              You can check and revoke your given consent{' '}
+              <a href="/consent" style="text-decoration: underline;">
+                here
+              </a>
+              .
+            </p>
+          </Fragment>
+        )
+    }
+  }
 
   function getAlert() {
     switch (page.lang) {
@@ -244,18 +257,18 @@ export function RevisionsOverview({ revisions }: { revisions: RevisedPage[] }) {
     <Template title={title} lang={current.lang}>
       <h1>{title}</h1>
       <p>{getDescription()}</p>
-      <ul>
-        {revisions.map((rev) => {
-          const link = `/${rev.revisedType}/archive/${rev.revision}`
-          return (
-            <li key={rev.revisionDate}>
-              <a href={link}>{renderRevision(rev)}</a>
-            </li>
-          )
-        })}
-      </ul>
+      <ul>{revisions.map(toLink)}</ul>
     </Template>
   )
+
+  function toLink(rev: RevisedPage) {
+    const link = `/${rev.revisedType}/archive/${rev.revision}`
+    return (
+      <li key={rev.revisionDate}>
+        <a href={link}>{renderRevision(rev)}</a>
+      </li>
+    )
+  }
 
   function getTitle() {
     switch (current.lang) {
@@ -302,7 +315,7 @@ export function RevisionsOverview({ revisions }: { revisions: RevisedPage[] }) {
   }
 }
 
-export async function fetchContent<A extends Page>(
+async function fetchContent<A extends Page>(
   page: A
 ): Promise<WithContent<A> | null> {
   const response = await fetchWithCache(page.url)
@@ -322,14 +335,14 @@ export async function fetchContent<A extends Page>(
   }
 }
 
-export function findRevisionById<A extends RevisedSpec>(
+function findRevisionById<A extends RevisedSpec>(
   revisions: A[],
   id: string
 ): A | null {
   return revisions.find((x) => x.revision === id) ?? null
 }
 
-export function getRevisions(
+function getRevisions(
   config: RevisedConfig,
   lang: Instance,
   revisedType: RevisedType,
@@ -356,7 +369,7 @@ export function getRevisions(
   }
 }
 
-export function getPage(
+function getPage(
   config: UnrevisedConfig,
   lang: Instance,
   unrevisedType: UnrevisedType,
@@ -386,3 +399,16 @@ function getSpecAndLanguage<A extends string, B>(
     return null
   }
 }
+
+interface Page extends Spec {
+  title: string
+  lang: Instance
+}
+
+interface RevisedPage extends Page, RevisedSpec {
+  isCurrentRevision: boolean
+  revisionDate: Date
+  revisedType: string
+}
+
+type WithContent<A extends Spec> = A & { content: string }

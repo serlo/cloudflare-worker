@@ -350,6 +350,13 @@ describe('handleRequest()', () => {
       })
     })
 
+    test('requests to /consent always resolve to frontend', async () => {
+      await expectResponseFrom({
+        backend: 'https://frontend.serlo.org/en/consent',
+        request: 'https://en.serlo.org/consent',
+      })
+    })
+
     describe('special paths where the cookie determines the backend', () => {
       describe.each([
         'https://de.serlo.org/',
