@@ -209,8 +209,24 @@ export function createNotFoundResponse() {
   return createPreactResponse(<NotFound />, { status: 404 })
 }
 
-async function toCacheKey(key: string): Promise<string> {
-  return key.length > 512 ? await digestMessage(key) : key
+interface CacheKeyBrand {
+  readonly CacheKey: unique symbol
+}
+
+const CacheKey = t.brand(
+  t.string,
+  (text): text is t.Branded<string, CacheKeyBrand> => text.length <= 512,
+  'CacheKey'
+)
+
+export type CacheKey = t.TypeOf<typeof CacheKey>
+
+export async function toCacheKey(key: string): Promise<CacheKey> {
+  const shortenKey = key.length > 512 ? await digestMessage(key) : key
+
+  return E.getOrElse<unknown, CacheKey>(() => {
+    throw new Error('Illegal State')
+  })(CacheKey.decode(shortenKey))
 }
 
 async function digestMessage(message: string): Promise<string> {
