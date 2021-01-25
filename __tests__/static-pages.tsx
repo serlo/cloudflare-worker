@@ -98,6 +98,19 @@ describe('privacy policies', () => {
       )
     })
 
+    test('contains a link to revoke consent', async () => {
+      givenLegalPageWith('en/privacy/current.md', '')
+
+      const response = await fetchSerlo({
+        subdomain: 'en',
+        pathname: '/privacy',
+      })
+
+      expect(await response.text()).toEqual(
+        expect.stringContaining('You can check and revoke your given consent')
+      )
+    })
+
     test('links to the archive of privacy policies', async () => {
       givenLegalPageWith('de/privacy/current.md', '')
 
@@ -246,6 +259,16 @@ describe('trailing slashes are allowed in accessing the legal pages', () => {
       expect.stringContaining('Privacy Policy')
     )
   })
+})
+
+test('legal pages have a link to revoke consent', async () => {
+  givenLegalPageWith('en/imprint.md', 'Imprint')
+
+  const response = await fetchSerlo({ subdomain: 'en', pathname: '/imprint' })
+
+  expect(await response.text()).toEqual(
+    expect.stringContaining('<a href="/consent">Revoke consent</a>')
+  )
 })
 
 test('returns 404 response when current version of legal page cannot be requested', async () => {
