@@ -137,6 +137,7 @@ describe('handleRequest()', () => {
       'https://de.serlo.org/_assets/image.png',
       'https://de.serlo.org/api/frontend/privacy',
       'https://de.serlo.org/api/auth/login',
+      'https://de.serlo.org/___graphql',
     ])('URL = %p', async (url) => {
       const backendUrl = new Url(url)
       backendUrl.hostname = 'frontend.serlo.org'
@@ -354,6 +355,13 @@ describe('handleRequest()', () => {
       await expectResponseFrom({
         backend: 'https://frontend.serlo.org/en/consent',
         request: 'https://en.serlo.org/consent',
+      })
+    })
+
+    test('requests to /___graphql always resolve to frontend', async () => {
+      await expectResponseFrom({
+        backend: 'https://frontend.serlo.org/___graphql',
+        request: 'https://en.serlo.org/___graphql',
       })
     })
 

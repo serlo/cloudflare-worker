@@ -39,7 +39,8 @@ export async function frontendSpecialPaths(
     url.pathname.startsWith('/_next/') ||
     url.pathname.startsWith('/_assets/') ||
     url.pathname.startsWith('/api/auth/') ||
-    url.pathname.startsWith('/api/frontend/')
+    url.pathname.startsWith('/api/frontend/') ||
+    url.pathname === '/___graphql'
   )
     return await fetchBackend({ ...config, useFrontend: true, request })
 
