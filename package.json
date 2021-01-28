@@ -21,7 +21,6 @@
     "license": "ts-node scripts/license-headers",
     "start": "start-storybook -p 6006",
     "test": "jest",
-    "test:dev": "cross-env TEST_ENVIRONMENT=dev jest",
     "test:staging": "cross-env TEST_ENVIRONMENT=staging jest",
     "test:production": "cross-env TEST_ENVIRONMENT=production jest",
     "wrangler:maintenance:kv:get": "wrangler kv:key get --binding=MAINTENANCE_KV",

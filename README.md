@@ -10,7 +10,6 @@ You can run tests with `yarn test`. We use [jest](https://jestjs.io/) and thus a
 
 It is also possible to run tests against other environments (the default environment is testing against the local source code):
 
-- `yarn test:dev` – Test against `serlo-development.dev`
 - `yarn test:staging` – Test against `serlo-staging.dev`
 - `yarn test:production` – Test against `serlo.org`
 
