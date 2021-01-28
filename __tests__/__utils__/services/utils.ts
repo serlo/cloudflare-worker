@@ -19,20 +19,13 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import {
-  rest,
-  ResponseResolver,
-  restContext,
-  MockedRequest,
-  RequestParams,
-} from 'msw'
-import { DefaultRequestBodyType } from 'msw/lib/types/utils/handlers/requestHandler'
+import { rest, ResponseResolver, restContext, MockedRequest } from 'msw'
 
 import { domains } from '../test-environment'
 
 export type RestResolver<
-  RequestBodyType = DefaultRequestBodyType,
-  RequestParamsType = RequestParams
+  RequestBodyType = MockedRequest['body'],
+  RequestParamsType = MockedRequest['params']
 > = ResponseResolver<
   MockedRequest<RequestBodyType, RequestParamsType>,
   typeof restContext
