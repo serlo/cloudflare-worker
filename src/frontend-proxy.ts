@@ -33,7 +33,7 @@ export async function frontendSpecialPaths(
     return createConfigurationResponse('Enabled: Use of new frontend', 0)
 
   if (url.pathname === '/disable-frontend')
-    return createConfigurationResponse('Disabled: Use of new frontend', 1)
+    return createConfigurationResponse('Disabled: Use of new frontend', 1.1)
 
   if (
     url.pathname.startsWith('/_next/') ||
