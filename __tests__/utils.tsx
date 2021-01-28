@@ -34,6 +34,7 @@ import {
   createNotFoundResponse,
   getPathInfo,
   Instance,
+  toCacheKey,
 } from '../src/utils'
 import {
   expectContainsText,
@@ -117,7 +118,10 @@ describe('getPathInfo()', () => {
   describe('uses PATH_INFO_KV as a cache', () => {
     test('use value in cache', async () => {
       const cacheValue = { typename: 'Article', currentPath: '/current-path' }
-      await global.PATH_INFO_KV.put('/en/path', JSON.stringify(cacheValue))
+      await global.PATH_INFO_KV.put(
+        await toCacheKey('/en/path'),
+        JSON.stringify(cacheValue)
+      )
 
       const pathInfo = await getPathInfo(Instance.En, '/path')
 
@@ -136,7 +140,7 @@ describe('getPathInfo()', () => {
 
       await getPathInfo(Instance.En, '/42')
 
-      expect(await global.PATH_INFO_KV.get('/en/42')).toEqual(
+      expect(await global.PATH_INFO_KV.get(await toCacheKey('/en/42'))).toEqual(
         JSON.stringify({ typename: 'Article', currentPath: '/current-path' })
       )
     })
@@ -179,26 +183,32 @@ describe('getPathInfo()', () => {
       })
 
       test('when cached value is malformed JSON', async () => {
-        await global.PATH_INFO_KV.put('/en/42', 'malformed json')
+        await global.PATH_INFO_KV.put(
+          await toCacheKey('/en/42'),
+          'malformed json'
+        )
 
         const pathInfo = await getPathInfo(Instance.En, '/42')
 
         expect(pathInfo).toEqual(target)
-        expect(await global.PATH_INFO_KV.get('/en/42')).toEqual(
-          JSON.stringify(target)
-        )
+        expect(
+          await global.PATH_INFO_KV.get(await toCacheKey('/en/42'))
+        ).toEqual(JSON.stringify(target))
       })
 
       test('when cached value is no PathInfo', async () => {
         const malformedPathInfo = JSON.stringify({ typename: 'Course' })
-        await global.PATH_INFO_KV.put('/en/42', malformedPathInfo)
+        await global.PATH_INFO_KV.put(
+          await toCacheKey('/en/42'),
+          malformedPathInfo
+        )
 
-        const pathInfo = await getPathInfo(Instance.En, '/42')
+        const pathInfo = await getPathInfo(Instance.En, await toCacheKey('/42'))
 
         expect(pathInfo).toEqual(target)
-        expect(await global.PATH_INFO_KV.get('/en/42')).toEqual(
-          JSON.stringify(target)
-        )
+        expect(
+          await global.PATH_INFO_KV.get(await toCacheKey('/en/42'))
+        ).toEqual(JSON.stringify(target))
       })
     })
   })
