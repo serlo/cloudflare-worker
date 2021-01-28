@@ -21,14 +21,12 @@
  */
 export enum TestEnvironment {
   Local = 'local',
-  Dev = 'dev',
   Staging = 'staging',
   Production = 'production',
 }
 
 export const domains: Record<TestEnvironment, string> = {
   [TestEnvironment.Local]: 'serlo.local',
-  [TestEnvironment.Dev]: 'serlo-development.dev',
   [TestEnvironment.Staging]: 'serlo-staging.dev',
   [TestEnvironment.Production]: 'serlo.org',
 }
