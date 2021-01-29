@@ -576,7 +576,7 @@ describe('handleRequest()', () => {
 
     test('sets cookie to that legacy backend will be used', () => {
       expect(res.headers.get('Set-Cookie')).toEqual(
-        expect.stringContaining('useFrontend=1;')
+        expect.stringContaining('useFrontend=1.1;')
       )
     })
 
