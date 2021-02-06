@@ -21,6 +21,7 @@
  */
 
 import { handleRequest } from '../../src'
+import { isInstance } from '../../src/utils'
 import {
   TestEnvironment,
   domains,
@@ -28,13 +29,18 @@ import {
 } from './test-environment'
 
 export function fetchSerlo(spec: UrlSpec, init?: RequestInit) {
+  const enviornment = spec.environment ?? getTestEnvironment()
   const request = new Request(createUrl(spec), init)
 
-  if ((spec.environment ?? getTestEnvironment()) === TestEnvironment.Local) {
+  if (enviornment === TestEnvironment.Local) {
     return handleRequest(request)
   } else {
     // See https://github.com/mswjs/msw/blob/master/src/context/fetch.ts
     request.headers.set('x-msw-bypass', 'true')
+
+    if (enviornment === TestEnvironment.Staging && isInstance(spec.subdomain)) {
+      request.headers.set('Authorization', 'Basic c2VybG90ZWFtOnNlcmxvdGVhbQ==')
+    }
 
     return fetch(request, { redirect: 'manual' })
   }
