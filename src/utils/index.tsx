@@ -40,7 +40,7 @@ export enum Instance {
   Ta = 'ta',
 }
 
-export function isInstance(code: string): code is Instance {
+export function isInstance(code: unknown): code is Instance {
   return Object.values(Instance).some((x) => x === code)
 }
 
