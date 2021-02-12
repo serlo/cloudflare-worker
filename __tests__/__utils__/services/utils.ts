@@ -23,7 +23,13 @@ import { rest, ResponseResolver, restContext, MockedRequest } from 'msw'
 
 import { domains } from '../test-environment'
 
-export type RestResolver = ResponseResolver<MockedRequest, typeof restContext>
+export type RestResolver<
+  RequestBodyType = MockedRequest['body'],
+  RequestParamsType = MockedRequest['params']
+> = ResponseResolver<
+  MockedRequest<RequestBodyType, RequestParamsType>,
+  typeof restContext
+>
 
 export function mockHttpGet(url: string, resolver: RestResolver) {
   global.server.use(

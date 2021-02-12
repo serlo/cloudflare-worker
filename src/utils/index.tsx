@@ -40,7 +40,7 @@ export enum Instance {
   Ta = 'ta',
 }
 
-export function isInstance(code: string): code is Instance {
+export function isInstance(code: unknown): code is Instance {
   return Object.values(Instance).some((x) => x === code)
 }
 
@@ -71,6 +71,7 @@ const ApiResult = t.type({
         alias: t.string,
         instance: t.string,
         pages: t.array(t.type({ alias: t.string })),
+        exercise: t.type({ alias: t.string }),
       }),
     ]),
   }),
@@ -111,6 +112,11 @@ export async function getPathInfo(
             alias
           }
         }
+        ... on Solution {
+          exercise {
+            alias
+          }
+        }
       }
     }`
   const variables = { alias: { instance: lang, path } }
@@ -136,7 +142,9 @@ export async function getPathInfo(
 
   const uuid = apiResult.right.data.uuid
   const currentPath =
-    uuid.pages !== undefined && uuid.pages.length > 0
+    uuid.exercise !== undefined
+      ? uuid.exercise.alias
+      : uuid.pages !== undefined && uuid.pages.length > 0
       ? uuid.pages[0].alias
       : uuid.alias ?? path
 
@@ -201,8 +209,24 @@ export function createNotFoundResponse() {
   return createPreactResponse(<NotFound />, { status: 404 })
 }
 
-async function toCacheKey(key: string): Promise<string> {
-  return key.length > 512 ? await digestMessage(key) : key
+interface CacheKeyBrand {
+  readonly CacheKey: unique symbol
+}
+
+const CacheKey = t.brand(
+  t.string,
+  (text): text is t.Branded<string, CacheKeyBrand> => text.length <= 512,
+  'CacheKey'
+)
+
+export type CacheKey = t.TypeOf<typeof CacheKey>
+
+export async function toCacheKey(key: string): Promise<CacheKey> {
+  const shortenKey = key.length > 512 ? await digestMessage(key) : key
+
+  return E.getOrElse<unknown, CacheKey>(() => {
+    throw new Error('Illegal State')
+  })(CacheKey.decode(shortenKey))
 }
 
 async function digestMessage(message: string): Promise<string> {

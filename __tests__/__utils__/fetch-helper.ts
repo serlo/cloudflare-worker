@@ -19,45 +19,38 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-
 import { handleRequest } from '../../src'
+import { isInstance } from '../../src/utils'
 import {
   TestEnvironment,
   domains,
   getTestEnvironment,
 } from './test-environment'
 
-export function fetchTestEnvironment(spec: UrlSpec, init?: RequestInit) {
-  return fetchAt({ ...spec, environment: getTestEnvironment() }, init)
-}
-
-export function fetchLocally(spec: UrlSpec, init?: RequestInit) {
-  return fetchAt({ ...spec, environment: TestEnvironment.Local }, init)
-}
-
-function fetchAt(
-  spec: UrlSpec & Required<TestEnvironmentSpec>,
-  init?: RequestInit
-) {
+export function fetchSerlo(spec: UrlSpec, init?: RequestInit) {
   const request = new Request(createUrl(spec), init)
+  const { environment, subdomain } = withDefaults(spec)
 
-  if (spec.environment === TestEnvironment.Local) {
+  if (environment === TestEnvironment.Local) {
     return handleRequest(request)
   } else {
     // See https://github.com/mswjs/msw/blob/master/src/context/fetch.ts
     request.headers.set('x-msw-bypass', 'true')
 
+    if (environment === TestEnvironment.Staging && isInstance(subdomain)) {
+      request.headers.set('Authorization', 'Basic c2VybG90ZWFtOnNlcmxvdGVhbQ==')
+    }
+
     return fetch(request, { redirect: 'manual' })
   }
 }
 
-export function createUrl({
-  subdomain = '',
-  pathname = '/',
-  environment = getTestEnvironment(),
-}: UrlSpec & TestEnvironmentSpec) {
+export function createUrl(spec: UrlSpec) {
+  const { protocol, subdomain, environment, pathname } = withDefaults(spec)
+
   return (
-    'https://' +
+    protocol +
+    '://' +
     subdomain +
     (subdomain.length > 0 ? '.' : '') +
     domains[environment] +
@@ -65,11 +58,18 @@ export function createUrl({
   )
 }
 
+function withDefaults(spec: UrlSpec): Required<UrlSpec> {
+  return {
+    subdomain: spec.subdomain ?? '',
+    pathname: spec.pathname ?? '/',
+    environment: spec.environment ?? getTestEnvironment(),
+    protocol: spec.protocol ?? 'https',
+  }
+}
+
 interface UrlSpec {
   subdomain?: string
   pathname?: string
-}
-
-interface TestEnvironmentSpec {
   environment?: TestEnvironment
+  protocol?: 'http' | 'https'
 }
