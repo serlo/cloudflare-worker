@@ -223,27 +223,46 @@ describe('redirects to current path of an resource', () => {
     await expectContainsText(response, ['Applets vertauscht'])
   })
 
-  test('redirects to first course page when requested entity is a course', async () => {
-    givenUuid({
-      id: 61682,
-      __typename: 'Course',
-      alias: 'course-alias',
-      pages: [
-        { alias: '/mathe/61911/%C3%BCbersicht' },
-        { alias: '/mathe/61686/negative-zahlen-im-alltag' },
-      ],
+  describe('redirects to first course page when requested entity is a course', () => {
+    test('when no course page is trashed', async () => {
+      givenUuid({
+        id: 61682,
+        __typename: 'Course',
+        alias: 'course-alias',
+        pages: [
+          { alias: '/mathe/61911/%C3%BCbersicht' },
+          { alias: '/mathe/61686/negative-zahlen-im-alltag' },
+        ],
+      })
+
+      const response = await fetchSerlo({
+        subdomain: 'de',
+        pathname: '/61682',
+      })
+
+      const target = createUrl({
+        subdomain: 'de',
+        pathname: '/mathe/61911/%C3%BCbersicht',
+      })
+      expectToBeRedirectTo(response, target, 301)
     })
 
-    const response = await fetchSerlo({
-      subdomain: 'de',
-      pathname: '/61682',
-    })
+    test('when first course pages are trashed or have no current revision', async () => {
+      givenUuid({
+        id: 19479,
+        __typename: 'Course',
+        alias: 'course-alias',
+        pages: [{ alias: '/mathe/20368/%C3%BCberblick' }],
+      })
 
-    const target = createUrl({
-      subdomain: 'de',
-      pathname: '/mathe/61911/%C3%BCbersicht',
+      const response = await fetchSerlo({ subdomain: 'de', pathname: '/19479' })
+
+      const target = createUrl({
+        subdomain: 'de',
+        pathname: '/mathe/20368/%C3%BCberblick',
+      })
+      expectToBeRedirectTo(response, target, 301)
     })
-    expectToBeRedirectTo(response, target, 301)
   })
 
   test('redirects to exercise when requested entity is a solution', async () => {
