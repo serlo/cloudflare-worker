@@ -53,6 +53,20 @@ export function Template({
     function gaOptout(){document.cookie=disableStr+'=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';window[disableStr]=true;}
   `
 
+  const css = `
+    #header-nav {
+      height: auto;
+    }
+
+    .content {
+      padding: 60px;
+    }
+
+    .call {
+      text-align: center;
+      font-size: 18px;
+  }`
+
   return (
     <html lang={lang}>
       <head>
@@ -64,18 +78,7 @@ export function Template({
           href="https://packages.serlo.org/serlo-org-client@8/main.css"
           rel="stylesheet"
         />
-        <style>{`
-            #header-nav {
-            height: auto;
-        }
-            .content {
-            padding: 60px;
-        }
-            .call {
-            text-align: center;
-            font-size: 18px;
-        }
-        `}</style>
+        <style>{css}</style>
       </head>
       <body>
         <div className="wrap" style="margin-bottom: -200px;">
@@ -139,6 +142,9 @@ export function Template({
                   <a href="/privacy">Datenschutz</a>
                 </li>
                 <li>
+                  <a href="/consent">Einwilligungen widerrufen</a>
+                </li>
+                <li>
                   <a href="/imprint">Impressum</a>
                 </li>
               </ul>
@@ -164,6 +170,9 @@ export function Template({
                 </li>
                 <li>
                   <a href="/privacy">Privacy Policy</a>
+                </li>
+                <li>
+                  <a href="/consent">Revoke consent</a>
                 </li>
                 <li>
                   <a href="/imprint">Imprint</a>

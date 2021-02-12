@@ -19,35 +19,159 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
+import { either as E, option as O } from 'fp-ts'
+import * as t from 'io-ts'
+
 import { Url } from './utils'
 
 export async function embed(request: Request): Promise<Response | null> {
+  // example url: embed.serlo.org/thumbnail?url=...
   const url = Url.fromRequest(request)
 
   if (url.subdomain !== 'embed') return null
 
-  // embed.serlo.org/thumbnail?url=...
-
   const urlParam = url.searchParams.get('url')
 
-  // TODO
-  if (urlParam === null || urlParam === '') return returnPlaceholder()
+  if (!urlParam) return getPlaceholder()
 
-  const videoUrl = new Url(urlParam)
+  try {
+    const videoUrl = new Url(urlParam)
 
-  if (videoUrl.domain === 'youtube.com') {
-    const vParam = videoUrl.searchParams.get('v')
-
-    // TODO
-    if (vParam === null) return null
-
-    return await fetch(`https://i.ytimg.com/vi/${vParam}/hqdefault.jpg`)
+    switch (videoUrl.domain) {
+      case 'youtube-nocookie.com':
+        return await getYoutubeThumbnail(videoUrl)
+      case 'vimeo.com':
+        return await getVimeoThumbnail(videoUrl)
+      case 'geogebra.org':
+        return await getGeogebraThumbnail(videoUrl)
+      case 'wikimedia.org':
+        return await getWikimediaThumbnail(videoUrl)
+    }
+  } catch (e) {
+    //Invalid URL
   }
 
-  return returnPlaceholder()
+  return getPlaceholder()
 }
 
-function returnPlaceholder() {
+async function getYoutubeThumbnail(url: URL) {
+  // example url: https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&html5
+
+  const videoId = url.pathname.replace('/embed/', '')
+
+  if (!/[a-zA-Z0-9_-]{11}/.test(videoId)) {
+    return getPlaceholder()
+  }
+
+  const baseUrl = `https://i.ytimg.com/vi/${videoId}`
+
+  const bigImgRes = await fetch(`${baseUrl}/sddefault.jpg`)
+  if (isImageResponse(bigImgRes)) return bigImgRes
+
+  const fallbackImgRes = await fetch(`${baseUrl}/hqdefault.jpg`)
+  if (isImageResponse(fallbackImgRes)) return fallbackImgRes
+
+  return getPlaceholder()
+}
+
+const VimeoApiResponse = t.type({
+  type: t.literal('video'),
+  thumbnail_url: t.string,
+})
+
+async function getVimeoThumbnail(url: URL) {
+  const videoId = url.pathname.replace('/video/', '')
+
+  if (!/[0-9]+/.test(videoId)) return getPlaceholder()
+
+  const apiResponse = await fetch(
+    'https://vimeo.com/api/oembed.json?url=' +
+      encodeURIComponent(`https://vimeo.com/${videoId}`)
+  )
+
+  if (apiResponse.status !== 200) return getPlaceholder()
+
+  try {
+    const data = VimeoApiResponse.decode(await apiResponse.json())
+
+    if (E.isLeft(data)) return getPlaceholder()
+
+    const url = data.right.thumbnail_url.replace(/_[0-9|x]+/, '')
+
+    const imageResponse = await fetch(url)
+
+    if (!isImageResponse(imageResponse)) return getPlaceholder()
+
+    return imageResponse
+  } catch (e) {
+    // error in parsing the api response or in parsing the thumbnail url
+    return getPlaceholder()
+  }
+}
+
+const GeogebraApiResponse = t.type({
+  responses: t.type({
+    response: t.type({ item: t.type({ previewUrl: t.string }) }),
+  }),
+})
+
+async function getGeogebraThumbnail(url: URL) {
+  //example url https://www.geogebra.org/material/iframe/id/100
+
+  const appletId = url.pathname.replace('/material/iframe/id/', '')
+
+  if (!/[0-9]+/.test(appletId)) return getPlaceholder()
+
+  const apiResponse = await fetch('https://www.geogebra.org/api/json.php', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      request: {
+        '-api': '1.0.0',
+        task: {
+          '-type': 'fetch',
+          fields: { field: [{ '-name': 'preview_url' }] },
+          filters: { field: [{ '-name': 'id', '#text': appletId }] },
+          limit: { '-num': '1' },
+        },
+      },
+    }),
+  })
+
+  if (apiResponse.status !== 200) return getPlaceholder()
+
+  try {
+    const data = O.fromEither(
+      GeogebraApiResponse.decode(await apiResponse.json())
+    )
+
+    if (O.isNone(data)) return getPlaceholder()
+
+    const thumbnailUrl = data.value.responses.response.item.previewUrl
+
+    const imgRes = await fetch(thumbnailUrl)
+    if (isImageResponse(imgRes)) return imgRes
+  } catch (e) {
+    // JSON cannot be parsed or preview url cannot be parsed
+  }
+
+  return getPlaceholder()
+}
+
+async function getWikimediaThumbnail(url: URL) {
+  const filenameWithPath = url.pathname.replace('/wikipedia/commons/', '') // e.g. '1/15/filename.webm'
+  const filename = filenameWithPath.substring(
+    filenameWithPath.lastIndexOf('/') + 1
+  )
+  const previewImageUrl = `https://upload.wikimedia.org/wikipedia/commons/thumb/${filenameWithPath}/800px--${filename}.jpg`
+
+  const imgRes = await fetch(previewImageUrl)
+  if (isImageResponse(imgRes)) return imgRes
+
+  return getPlaceholder()
+}
+
+function getPlaceholder() {
   const placeholderB64 =
     'iVBORw0KGgoAAAANSUhEUgAAAwAAAAGwAQMAAAAkGpCRAAAAA1BMVEXv9/t0VvapAAAAP0lEQVR42u3BMQEAAADCIPuntsUuYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQOqOwAAHrgHqAAAAAAElFTkSuQmCC'
   const buffer = Buffer.from(placeholderB64, 'base64')
@@ -59,4 +183,9 @@ function returnPlaceholder() {
       'Content-Length': Buffer.byteLength(buffer).toString(),
     },
   })
+}
+
+function isImageResponse(res: Response): boolean {
+  const contentType = res.headers.get('content-type') ?? ''
+  return res.status === 200 && contentType.startsWith('image/')
 }
