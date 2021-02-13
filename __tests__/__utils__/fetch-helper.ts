@@ -24,7 +24,7 @@ import { isInstance } from '../../src/utils'
 import {
   TestEnvironment,
   domains,
-  getTestEnvironment,
+  getCurrentTestEnvironment,
 } from './test-environment'
 
 export function fetchSerlo(spec: UrlSpec, init?: RequestInit) {
@@ -62,7 +62,7 @@ function withDefaults(spec: UrlSpec): Required<UrlSpec> {
   return {
     subdomain: spec.subdomain ?? '',
     pathname: spec.pathname ?? '/',
-    environment: spec.environment ?? getTestEnvironment(),
+    environment: spec.environment ?? getCurrentTestEnvironment(),
     protocol: spec.protocol ?? 'https',
   }
 }
