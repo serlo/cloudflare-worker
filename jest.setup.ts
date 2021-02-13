@@ -36,13 +36,13 @@ import {
   Uuid,
   givenSerlo,
   defaultSerloServer,
-  getTestEnvironment,
+  getCurrentTestEnvironment,
   TestEnvironment,
 } from './__tests__/__utils__'
 
 const randomCopy = Math.random
 
-if (getTestEnvironment() !== TestEnvironment.Local) {
+if (getCurrentTestEnvironment() !== TestEnvironment.Local) {
   jest.setTimeout(20000)
 }
 
