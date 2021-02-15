@@ -19,15 +19,38 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-declare namespace NodeJS {
-  interface Global {
-    MAINTENANCE_KV: KV<'enabled'>
-    PACKAGES_KV: KV<string>
-    PATH_INFO_KV: KV<import('./utils').CacheKey>
+declare global {
+  declare namespace NodeJS {
+    interface Global extends KVs, Variables, Secrets {
+      fetch: typeof fetch
+    }
   }
 }
 
-declare interface KV<Key extends string> {
+export interface Secrets {
+  API_SECRET: string
+}
+
+export interface Variables {
+  ALLOW_AUTH_FROM_LOCALHOST: 'true' | 'false'
+  API_ENDPOINT: string
+  DOMAIN: string
+  ENABLE_BASIC_AUTH: 'true' | 'false'
+  FRONTEND_ALLOWED_TYPES: string
+  FRONTEND_DOMAIN: string
+  FRONTEND_PROBABILITY_DESKTOP: string
+  FRONTEND_PROBABILITY_MOBILE: string
+  FRONTEND_PROBABILITY_AUTHENTICATED: string
+  REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND: 'true' | 'false'
+}
+
+export interface KVs {
+  MAINTENANCE_KV: KV<'enabled'>
+  PACKAGES_KV: KV<string>
+  PATH_INFO_KV: KV<import('./utils').CacheKey>
+}
+
+export interface KV<Key extends string> {
   get: (key: Key) => Promise<string | null>
   put: (
     key: Key,

@@ -19,24 +19,64 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
+import TOML from '@iarna/toml'
+import fs from 'fs'
+import path from 'path'
+
+import { Variables } from '../../src/bindings'
+
+let config: Config | undefined
+
 export enum TestEnvironment {
   Local = 'local',
   Staging = 'staging',
   Production = 'production',
 }
 
-export const domains: Record<TestEnvironment, string> = {
-  [TestEnvironment.Local]: 'serlo.local',
-  [TestEnvironment.Staging]: 'serlo-staging.dev',
-  [TestEnvironment.Production]: 'serlo.org',
-}
-
-export function getTestEnvironment(): TestEnvironment {
+export function currentTestEnvironment(): TestEnvironment {
   const environment = (process.env.TEST_ENVIRONMENT ?? '').toLowerCase()
 
   return isTestEnvironment(environment) ? environment : TestEnvironment.Local
 }
 
+export function currentTestEnvironmentWhen(
+  requirement: (config: Variables) => boolean
+): TestEnvironment {
+  return requirement(getConfig(currentTestEnvironment()))
+    ? currentTestEnvironment()
+    : TestEnvironment.Local
+}
+
+export function getDomain(environment: TestEnvironment): string {
+  return environment === TestEnvironment.Local
+    ? 'serlo.local'
+    : getConfig(environment).DOMAIN
+}
+
+export function getConfig(environment: TestEnvironment): Variables {
+  if (environment === TestEnvironment.Local) return global
+
+  config = config ?? loadConfig()
+
+  return config.env[environment].vars
+}
+
 function isTestEnvironment(env: string): env is TestEnvironment {
   return Object.values(TestEnvironment).includes(env as TestEnvironment)
+}
+
+function loadConfig() {
+  const rootDir = path.dirname(path.dirname(__dirname))
+  const configFile = path.join(rootDir, 'wrangler.toml')
+  const configContent = fs.readFileSync(configFile, 'utf8')
+
+  return (TOML.parse(configContent) as unknown) as Config
+}
+
+interface Config {
+  env: {
+    [Environment in 'staging' | 'production']: {
+      vars: Variables
+    }
+  }
 }
