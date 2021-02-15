@@ -39,7 +39,7 @@ export const domains: Record<TestEnvironment, string> = {
   [TestEnvironment.Production]: 'serlo.org',
 }
 
-export function getCurrentTestEnvironment(): TestEnvironment {
+export function currentTestEnvironment(): TestEnvironment {
   const environment = (process.env.TEST_ENVIRONMENT ?? '').toLowerCase()
 
   return isTestEnvironment(environment) ? environment : TestEnvironment.Local
@@ -49,12 +49,12 @@ export function currentTestEnvironmentWhen(
   requirement: (config: Variables) => boolean
 ): TestEnvironment {
   return requirement(currentTestEnvironmentConfig())
-    ? getCurrentTestEnvironment()
+    ? currentTestEnvironment()
     : TestEnvironment.Local
 }
 
 export function currentTestEnvironmentConfig(): Variables {
-  const environment = getCurrentTestEnvironment()
+  const environment = currentTestEnvironment()
 
   if (environment === TestEnvironment.Local) return global
 
