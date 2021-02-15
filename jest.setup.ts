@@ -36,13 +36,14 @@ import {
   Uuid,
   givenSerlo,
   defaultSerloServer,
-  getTestEnvironment,
+  currentTestEnvironment,
   TestEnvironment,
+  getDomain,
 } from './__tests__/__utils__'
 
 const randomCopy = Math.random
 
-if (getTestEnvironment() !== TestEnvironment.Local) {
+if (currentTestEnvironment() !== TestEnvironment.Local) {
   jest.setTimeout(20000)
 }
 
@@ -54,6 +55,8 @@ beforeAll(() => {
 
 beforeEach(() => {
   global.API_SECRET = 'secret'
+
+  global.DOMAIN = getDomain(currentTestEnvironment())
   global.FRONTEND_DOMAIN = 'frontend.serlo.org'
   global.FRONTEND_PROBABILITY_DESKTOP = '1'
   global.FRONTEND_PROBABILITY_MOBILE = '1'
