@@ -20,6 +20,8 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
+import type { KV } from '../../src/bindings'
+
 export function createKV<Key extends string>(): KV<Key> {
   const values = {} as Record<Key, string | undefined>
   return {
