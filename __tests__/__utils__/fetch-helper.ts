@@ -23,8 +23,8 @@ import { handleRequest } from '../../src'
 import { isInstance } from '../../src/utils'
 import {
   TestEnvironment,
-  domains,
   currentTestEnvironment,
+  getDomain,
 } from './test-environment'
 
 export function fetchSerlo(spec: UrlSpec, init?: RequestInit) {
@@ -53,7 +53,7 @@ export function createUrl(spec: UrlSpec) {
     '://' +
     subdomain +
     (subdomain.length > 0 ? '.' : '') +
-    domains[environment] +
+    getDomain(environment) +
     pathname
   )
 }

@@ -21,7 +21,7 @@
  */
 import { rest, ResponseResolver, restContext, MockedRequest } from 'msw'
 
-import { domains } from '../test-environment'
+import { getDomain, TestEnvironment } from '../test-environment'
 
 export type RestResolver<
   RequestBodyType = MockedRequest['body'],
@@ -65,6 +65,8 @@ export function createUrlRegex({
   subdomains: string[]
   pathname?: RegExp | string
 }): RegExp {
+  const domains = Object.values(TestEnvironment).map(getDomain)
+
   return new RegExp(
     'https:\\/\\/' +
       matchStrings(subdomains) +
