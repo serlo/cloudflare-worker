@@ -45,11 +45,13 @@
   "devDependencies": {
     "@babel/core": "^7.0.0",
     "@cloudflare/wrangler": "^1.0.0",
+    "@iarna/toml": "^2.0.0",
     "@splish-me/copyright-headers": "^0.0.2",
     "@storybook/preact": "^6.0.0",
     "@testing-library/jest-dom": "^5.0.0",
     "@testing-library/preact": "^2.0.0",
     "@types/core-js": "^2.0.0",
+    "@types/iarna__toml": "^2.0.0",
     "@types/jest": "^26.0.0",
     "@types/jsonwebtoken": "^8.0.0",
     "@types/luxon": "^1.0.0",

@@ -38,6 +38,7 @@ import {
   defaultSerloServer,
   getCurrentTestEnvironment,
   TestEnvironment,
+  currentTestEnvironmentConfig,
 } from './__tests__/__utils__'
 
 const randomCopy = Math.random
@@ -54,6 +55,9 @@ beforeAll(() => {
 
 beforeEach(() => {
   global.API_SECRET = 'secret'
+
+  global.DOMAIN = currentTestEnvironmentConfig().DOMAIN ?? 'serlo.local'
+
   global.FRONTEND_DOMAIN = 'frontend.serlo.org'
   global.FRONTEND_PROBABILITY_DESKTOP = '1'
   global.FRONTEND_PROBABILITY_MOBILE = '1'
