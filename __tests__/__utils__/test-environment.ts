@@ -33,12 +33,6 @@ export enum TestEnvironment {
   Production = 'production',
 }
 
-export const domains: Record<TestEnvironment, string> = {
-  [TestEnvironment.Local]: 'serlo.local',
-  [TestEnvironment.Staging]: 'serlo-staging.dev',
-  [TestEnvironment.Production]: 'serlo.org',
-}
-
 export function currentTestEnvironment(): TestEnvironment {
   const environment = (process.env.TEST_ENVIRONMENT ?? '').toLowerCase()
 
@@ -48,14 +42,18 @@ export function currentTestEnvironment(): TestEnvironment {
 export function currentTestEnvironmentWhen(
   requirement: (config: Variables) => boolean
 ): TestEnvironment {
-  return requirement(currentTestEnvironmentConfig())
+  return requirement(getConfig(currentTestEnvironment()))
     ? currentTestEnvironment()
     : TestEnvironment.Local
 }
 
-export function currentTestEnvironmentConfig(): Variables {
-  const environment = currentTestEnvironment()
+export function getDomain(environment: TestEnvironment): string {
+  return environment === TestEnvironment.Local
+    ? 'serlo.local'
+    : getConfig(environment).DOMAIN
+}
 
+export function getConfig(environment: TestEnvironment): Variables {
   if (environment === TestEnvironment.Local) return global
 
   config = config ?? loadConfig()
