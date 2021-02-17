@@ -1099,7 +1099,7 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@iarna/toml@^2.2.5":
+"@iarna/toml@^2.0.0":
   version "2.2.5"
   resolved "https://registry.yarnpkg.com/@iarna/toml/-/toml-2.2.5.tgz#b32366c89b43c6f8cefbdefac778b9c828e3ba8c"
   integrity sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==
@@ -1864,7 +1864,7 @@
   resolved "https://registry.yarnpkg.com/@types/html-minifier-terser/-/html-minifier-terser-5.1.1.tgz#3c9ee980f1a10d6021ae6632ca3e79ca2ec4fb50"
   integrity sha512-giAlZwstKbmvMk1OO7WXSj4OZ0keXAcl2TQq4LWHiiPH2ByaH7WeUzng+Qej8UPxxv+8lRTuouo0iaNDBuzIBA==
 
-"@types/iarna__toml@^2.0.1":
+"@types/iarna__toml@^2.0.0":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@types/iarna__toml/-/iarna__toml-2.0.1.tgz#80c9353ad8edf7aefa6a82d39d08c3b5baf397ed"
   integrity sha512-Gd4W2KbK3Tq5X/7I1vK7EyZ5VJVzS8mRcGPwq/Y8s1/gLtOPWZXw91+ykPl3xQlaRAuHzKg+R6zFdnT1MWR8IQ==
