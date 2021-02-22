@@ -27,7 +27,11 @@ import {
   getDomain,
 } from './test-environment'
 
-export function fetchSerlo(spec: UrlSpec, init?: RequestInit) {
+export function fetchSerlo(
+  spec: UrlSpec,
+  init?: RequestInit,
+  retry = 0
+): Promise<Response> {
   const request = new Request(createUrl(spec), init)
   const { environment, subdomain } = withDefaults(spec)
 
@@ -41,7 +45,19 @@ export function fetchSerlo(spec: UrlSpec, init?: RequestInit) {
       request.headers.set('Authorization', 'Basic c2VybG90ZWFtOnNlcmxvdGVhbQ==')
     }
 
-    return fetch(request, { redirect: 'manual' })
+    try {
+      return fetch(request, { redirect: 'manual' })
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        /ECONNRESET/.test(error.message) &&
+        retry < 1
+      ) {
+        return fetchSerlo(spec, init, retry + 1)
+      }
+
+      throw error
+    }
   }
 }
 
