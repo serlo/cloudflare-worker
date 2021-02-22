@@ -28,13 +28,13 @@ export function createKV<Key extends string>(): KV<Key> {
     async get(key: Key): Promise<string | null> {
       return Promise.resolve(values[key] ?? null)
     },
-
-    // eslint-disable-next-line @typescript-eslint/require-await
     async put(key: Key, value: string, _?: { expirationTtl: number }) {
       if (key.length > 512) {
         throw new Error('Error: key longer than 512 characters.')
       }
       values[key] = value
+
+      return Promise.resolve(undefined)
     },
   }
 }

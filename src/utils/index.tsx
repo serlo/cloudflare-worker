@@ -108,7 +108,7 @@ export async function getPathInfo(
           instance
         }
         ... on Course {
-          pages {
+          pages(trashed: false, hasCurrentRevision: true) {
             alias
           }
         }
