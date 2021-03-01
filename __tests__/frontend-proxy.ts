@@ -277,6 +277,18 @@ describe('handleRequest()', () => {
     })
   })
 
+  test('uses frontend when cookie "useFrontend" is "true"', async () => {
+    setupProbabilityFor(Backend.Legacy)
+
+    const request = new Request('https://en.serlo.org/math')
+    request.headers.set('Cookie', 'useFrontend=true')
+
+    await expectResponseFrom({
+      backend: 'https://frontend.serlo.org/en/math',
+      request,
+    })
+  })
+
   test('ignore wrongly formatted cookie values', async () => {
     setupProbabilityFor(Backend.Frontend)
 

@@ -94,6 +94,14 @@ export async function frontendProxy(
       return null
   }
 
+  if (getCookieValue('useFrontend', cookies) === 'true')
+    return await fetchBackend({
+      ...config,
+      useFrontend: true,
+      pathPrefix: config.instance,
+      request,
+    })
+
   const cookieValue = Number(getCookieValue('useFrontend', cookies) ?? 'NaN')
   const useFrontendNumber = Number.isNaN(cookieValue)
     ? Math.random()
