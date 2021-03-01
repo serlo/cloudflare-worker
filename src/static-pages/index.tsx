@@ -326,8 +326,6 @@ async function fetchContent<A extends Page>(
     const sanitizedContent = sanitizeHtml(rawContent)
     const content = sanitizedContent
       .replace('JS-GOOGLE-ANALYTICS-DEACTIVATE', 'javascript:gaOptout();')
-      // TODO: disabled until Matomo is live
-      .replace('MATOMO-OPT-OUT-FORM', '')
 
     return { ...page, content }
   } else {
