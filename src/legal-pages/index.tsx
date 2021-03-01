@@ -321,8 +321,7 @@ async function fetchContent<A extends Page>(
   const response = await fetchWithCache(page.url)
 
   if (response.ok) {
-    const text = await response.text()
-    const rawContent = page.url.endsWith('.md') ? markdownToHtml(text) : text
+    const rawContent = markdownToHtml(await response.text())
     const sanitizedContent = sanitizeHtml(rawContent)
     const content = sanitizedContent.replace(
       'JS-GOOGLE-ANALYTICS-DEACTIVATE',
