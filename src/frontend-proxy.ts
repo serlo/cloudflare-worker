@@ -79,13 +79,6 @@ export async function frontendProxy(
 
   if (!config.relevantRequest) return null
 
-  if (
-    url.hasContentApiParameters() ||
-    (global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND === 'true' &&
-      isAuthenticated)
-  )
-    return await fetchBackend({ ...config, useFrontend: false, request })
-
   if (url.isFrontendSupportedAndProbablyUuid()) {
     const pathInfo = await getPathInfo(config.instance, url.pathname)
     const typename = pathInfo?.typename ?? null
@@ -94,13 +87,20 @@ export async function frontendProxy(
       return null
   }
 
-  if (getCookieValue('useFrontend', cookies) === 'true')
+  if (getCookieValue('useFrontend', cookies) === 'always')
     return await fetchBackend({
       ...config,
       useFrontend: true,
       pathPrefix: config.instance,
       request,
     })
+
+  if (
+    url.hasContentApiParameters() ||
+    (global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND === 'true' &&
+      isAuthenticated)
+  )
+    return await fetchBackend({ ...config, useFrontend: false, request })
 
   const cookieValue = Number(getCookieValue('useFrontend', cookies) ?? 'NaN')
   const useFrontendNumber = Number.isNaN(cookieValue)
