@@ -277,11 +277,11 @@ describe('handleRequest()', () => {
     })
   })
 
-  test('uses frontend when cookie "useFrontend" is "true"', async () => {
+  test('uses frontend when cookie "useFrontend" is "always"', async () => {
     setupProbabilityFor(Backend.Legacy)
 
     const request = new Request('https://en.serlo.org/math')
-    request.headers.set('Cookie', 'useFrontend=true')
+    request.headers.set('Cookie', 'useFrontend=always;authenticated=1')
 
     await expectResponseFrom({
       backend: 'https://frontend.serlo.org/en/math',
