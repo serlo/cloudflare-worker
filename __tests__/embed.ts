@@ -22,14 +22,14 @@
 import { rest } from 'msw'
 
 import {
-  fetchSerlo,
   hasInternalServerError,
   RestResolver,
   returnsMalformedJson,
-  TestEnvironment,
   returnsJson,
   mockHttpGet,
   returnsText,
+  currentTestEnvironment,
+  localTestEnvironment,
 } from './__utils__'
 
 describe('embed.serlo.org/thumbnail?url=...', () => {
@@ -98,7 +98,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           `https://www.youtube-nocookie.com/embed/${videos.highQuality.id}?autoplay=1&html5=1`,
-          TestEnvironment.Local
+          localTestEnvironment()
         )
         expectIsPlaceholderResponse(response)
       })
@@ -170,8 +170,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           `https://player.vimeo.com/video/${video.id}?autoplay=1`,
-
-          TestEnvironment.Local
+          localTestEnvironment()
         )
         expectIsPlaceholderResponse(response)
       })
@@ -181,7 +180,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           `https://player.vimeo.com/video/${video.id}?autoplay=1`,
-          TestEnvironment.Local
+          localTestEnvironment()
         )
         expectIsPlaceholderResponse(response)
       })
@@ -196,7 +195,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
           const response = await requestThumbnail(
             `https://player.vimeo.com/video/${video.id}?autoplay=1`,
-            TestEnvironment.Local
+            localTestEnvironment()
           )
           expectIsPlaceholderResponse(response)
         })
@@ -207,7 +206,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           `https://player.vimeo.com/video/${video.id}?autoplay=1`,
-          TestEnvironment.Local
+          localTestEnvironment()
         )
         expectIsPlaceholderResponse(response)
       })
@@ -217,7 +216,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           `https://player.vimeo.com/video/${video.id}?autoplay=1`,
-          TestEnvironment.Local
+          localTestEnvironment()
         )
         expectIsPlaceholderResponse(response)
       })
@@ -227,7 +226,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           `https://player.vimeo.com/video/${video.id}?autoplay=1`,
-          TestEnvironment.Local
+          localTestEnvironment()
         )
         expect(expectIsPlaceholderResponse(response))
       })
@@ -308,7 +307,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
       const response = await requestThumbnail(
         video.embedUrl,
-        TestEnvironment.Local
+        localTestEnvironment()
       )
       expectIsPlaceholderResponse(response)
     })
@@ -377,7 +376,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           `https://www.geogebra.org/material/iframe/id/${applet.id}`,
-          TestEnvironment.Local
+          localTestEnvironment()
         )
         expectIsPlaceholderResponse(response)
       })
@@ -387,7 +386,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           `https://www.geogebra.org/material/iframe/id/${applet.id}`,
-          TestEnvironment.Local
+          localTestEnvironment()
         )
         expectIsPlaceholderResponse(response)
       })
@@ -397,7 +396,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           `https://www.geogebra.org/material/iframe/id/${applet.id}`,
-          TestEnvironment.Local
+          localTestEnvironment()
         )
         expectIsPlaceholderResponse(response)
       })
@@ -407,7 +406,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           `https://www.geogebra.org/material/iframe/id/${applet.id}`,
-          TestEnvironment.Local
+          localTestEnvironment()
         )
         expectIsPlaceholderResponse(response)
       })
@@ -417,7 +416,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           `https://www.geogebra.org/material/iframe/id/${applet.id}`,
-          TestEnvironment.Local
+          localTestEnvironment()
         )
         expectIsPlaceholderResponse(response)
       })
@@ -427,7 +426,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           `https://www.geogebra.org/material/iframe/id/${applet.id}`,
-          TestEnvironment.Local
+          localTestEnvironment()
         )
         expectIsPlaceholderResponse(response)
       })
@@ -496,7 +495,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     })
 
     test('when path is not thumbnail', async () => {
-      const response = await fetchSerlo({
+      const response = await currentTestEnvironment().fetch({
         subdomain: 'embed',
         pathname: '/foo',
       })
@@ -504,7 +503,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     })
 
     test('when url parameter is missing', async () => {
-      const response = await fetchSerlo({
+      const response = await currentTestEnvironment().fetch({
         subdomain: 'embed',
         pathname: '/thumbnail',
       })
@@ -541,11 +540,10 @@ function expectIsPlaceholderResponse(response: Response) {
 
 async function requestThumbnail(
   url: string,
-  environment?: TestEnvironment
+  env = currentTestEnvironment()
 ): Promise<Response> {
-  return await fetchSerlo({
+  return await env.fetch({
     subdomain: 'embed',
     pathname: '/thumbnail?url=' + encodeURIComponent(url),
-    environment,
   })
 }

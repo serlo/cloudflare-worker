@@ -27,21 +27,22 @@ import {
   returnsText,
   givenStats,
   defaultStatsServer,
-  fetchSerlo,
   setupProbabilityFor,
   Backend,
   givenUuid,
-  createUrl,
+  currentTestEnvironment,
 } from './__utils__'
 
 describe('Enforce HTTPS', () => {
+  const env = currentTestEnvironment()
+
   test('HTTP URL', async () => {
-    const response = await fetchSerlo({
+    const response = await env.fetch({
       subdomain: 'en',
       protocol: 'http',
     })
 
-    const target = createUrl({ subdomain: 'en' })
+    const target = env.createUrl({ subdomain: 'en' })
     expectToBeRedirectTo(response, target, 302)
   })
 
@@ -53,7 +54,7 @@ describe('Enforce HTTPS', () => {
       instance: Instance.De,
       content: 'Startseite',
     })
-    const response = await fetchSerlo({
+    const response = await env.fetch({
       subdomain: 'de',
       protocol: 'https',
     })

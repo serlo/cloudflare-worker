@@ -37,14 +37,13 @@ import {
   givenSerlo,
   defaultSerloServer,
   currentTestEnvironment,
-  TestEnvironment,
-  getDomain,
 } from './__tests__/__utils__'
 
 const randomCopy = Math.random
+const timeout = currentTestEnvironment().getNeededTimeout()
 
-if (currentTestEnvironment() !== TestEnvironment.Local) {
-  jest.setTimeout(20000)
+if (timeout) {
+  jest.setTimeout(timeout)
 }
 
 beforeAll(() => {
@@ -56,7 +55,7 @@ beforeAll(() => {
 beforeEach(() => {
   global.API_SECRET = 'secret'
 
-  global.DOMAIN = getDomain(currentTestEnvironment())
+  global.DOMAIN = 'serlo.local'
   global.FRONTEND_DOMAIN = 'frontend.serlo.org'
   global.FRONTEND_PROBABILITY_DESKTOP = '1'
   global.FRONTEND_PROBABILITY_MOBILE = '1'
