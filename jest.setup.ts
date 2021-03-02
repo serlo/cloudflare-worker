@@ -37,6 +37,8 @@ import {
   givenSerlo,
   defaultSerloServer,
   currentTestEnvironment,
+  givenFrontend,
+  defaultFrontendServer,
 } from './__tests__/__utils__'
 
 const randomCopy = Math.random
@@ -56,7 +58,7 @@ beforeEach(() => {
   global.API_SECRET = 'secret'
 
   global.DOMAIN = 'serlo.local'
-  global.FRONTEND_DOMAIN = 'frontend.serlo.org'
+  global.FRONTEND_DOMAIN = 'frontend.serlo.local'
   global.FRONTEND_PROBABILITY_DESKTOP = '1'
   global.FRONTEND_PROBABILITY_MOBILE = '1'
   global.FRONTEND_PROBABILITY_AUTHENTICATED = '1'
@@ -71,6 +73,7 @@ beforeEach(() => {
   global.uuids = new Array<Uuid>()
 
   givenApi(defaultApiServer())
+  givenFrontend(defaultFrontendServer())
   givenSerlo(defaultSerloServer())
 })
 

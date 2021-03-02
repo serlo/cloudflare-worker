@@ -21,6 +21,7 @@
  */
 import TOML from '@iarna/toml'
 import fs from 'fs'
+import { FetchError } from 'node-fetch'
 import path from 'path'
 
 import { handleRequest } from '../../src'
@@ -59,6 +60,12 @@ abstract class TestEnvironment {
     return this.fetchRequest(this.createRequest(spec, init))
   }
 
+  public abstract fetchRequest(request: Request): Promise<Response>
+
+  public createRequest(spec: UrlSpec, init?: RequestInit) {
+    return new Request(this.createUrl(spec), init)
+  }
+
   public createUrl({
     protocol = 'https',
     subdomain = '',
@@ -79,12 +86,6 @@ abstract class TestEnvironment {
   public getNeededTimeout(): number | null {
     return null
   }
-
-  protected createRequest(spec: UrlSpec, init?: RequestInit) {
-    return new Request(this.createUrl(spec), init)
-  }
-
-  protected abstract fetchRequest(request: Request): Promise<Response>
 }
 
 export class LocalEnvironment extends TestEnvironment {
@@ -92,7 +93,7 @@ export class LocalEnvironment extends TestEnvironment {
     return global.DOMAIN
   }
 
-  protected fetchRequest(request: Request): Promise<Response> {
+  public fetchRequest(request: Request): Promise<Response> {
     return handleRequest(request)
   }
 }
@@ -127,7 +128,7 @@ class RemoteEnvironment extends TestEnvironment {
     return 20000
   }
 
-  protected createRequest(spec: UrlSpec, init?: RequestInit) {
+  public createRequest(spec: UrlSpec, init?: RequestInit) {
     const request = super.createRequest(spec, init)
 
     // See https://github.com/mswjs/msw/blob/master/src/context/fetch.ts
@@ -140,15 +141,17 @@ class RemoteEnvironment extends TestEnvironment {
     return request
   }
 
-  protected fetchRequest(request: Request, retry = 0): Promise<Response> {
+  public async fetchRequest(request: Request, retry = 0): Promise<Response> {
     try {
       return fetch(request, { redirect: 'manual' })
     } catch (error) {
       if (
-        error instanceof Error &&
+        error instanceof FetchError &&
         /ECONNRESET/.test(error.message) &&
-        retry < 1
+        retry < 0
       ) {
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+
         return this.fetchRequest(request, retry + 1)
       }
 
