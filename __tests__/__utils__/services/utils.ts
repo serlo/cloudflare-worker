@@ -21,8 +21,6 @@
  */
 import { rest, ResponseResolver, restContext, MockedRequest } from 'msw'
 
-import { getDomain, TestEnvironment } from '../test-environment'
-
 export type RestResolver<
   RequestBodyType = MockedRequest['body'],
   RequestParamsType = MockedRequest['params']
@@ -65,13 +63,12 @@ export function createUrlRegex({
   subdomains: string[]
   pathname?: RegExp | string
 }): RegExp {
-  const domains = Object.values(TestEnvironment).map(getDomain)
-
   return new RegExp(
     'https:\\/\\/' +
       matchStrings(subdomains) +
       '\\.' +
-      matchStrings(Object.values(domains)) +
+      // TODO: Remove "serlo.org"
+      matchStrings([global.DOMAIN, 'serlo.org']) +
       (typeof pathname === 'string' ? escapeRegex(pathname) : pathname.source)
   )
 }
