@@ -56,19 +56,38 @@ export function defaultFrontendServer(): RestResolver {
       )
     }
 
+    if (req.url.pathname === '/___graphql') return res(ctx.body('graphiql'))
+
     const instance = req.url.pathname.substr(1, 2)
     const pathname = req.url.pathname.substr(3)
 
-    const uuid = getUuid(instance, pathname.length > 0 ? pathname : '/')
+    let content
 
-    return uuid == null
-      ? res(ctx.status(404))
-      : res(
-          ctx.body(
-            '<script id="__NEXT_DATA__"\n' +
-              '<script src="/_next/static/chunks/main-717520089966e528.js"\n' +
-              (uuid.content ?? '')
-          )
-        )
+    if (pathname === '/user/notifications' && instance === 'en') {
+      content = 'Notifications'
+    } else if (pathname === '/spenden' && instance === 'de') {
+      content = 'Spenden'
+    } else if (pathname === '') {
+      content = instance === 'de' ? 'Startseite' : 'The Open Learning Platform'
+    } else if (req.url.pathname === '/en/consent') {
+      content = 'Consent'
+    } else if (['/search', '/license/detail/1'].includes(pathname)) {
+      content = ''
+    } else {
+      const uuid = getUuid(instance, pathname.length > 0 ? pathname : '/')
+
+      if (uuid == null) return res(ctx.status(404))
+
+      content = uuid.content ?? ''
+    }
+
+    return res(
+      ctx.set('x-vercel-cache', 'HIT'),
+      ctx.body(
+        '<script id="__NEXT_DATA__"\n' +
+          '<script src="/_next/static/chunks/main-717520089966e528.js"\n' +
+          content
+      )
+    )
   }
 }
