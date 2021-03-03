@@ -34,10 +34,32 @@ export function givenSerlo(resolver: RestResolver) {
 export function defaultSerloServer(): RestResolver {
   return (req, res, ctx) => {
     const url = new Url(req.url.href)
-    const uuid = getUuid(url.subdomain, url.pathname)
 
-    return uuid == null
-      ? res(ctx.status(404))
-      : res(ctx.body('<html class="fuelux"\n' + (uuid.content ?? '')))
+    if (url.pathname.startsWith('/auth/') || url.pathname === '/user/register')
+      return res(ctx.body(''))
+
+    let content
+
+    if (url.pathname === '/spenden' && url.subdomain === 'de') {
+      content = 'Spenden'
+    } else if (url.pathname === '/') {
+      content =
+        url.subdomain === 'de' ? 'Startseite' : 'The Open Learning Platform'
+    } else if (url.pathname === '/search') {
+      content = url.searchParams.get('q') ?? ''
+    } else if (url.pathname === '/license/detail/1') {
+      content = ''
+    } else {
+      const uuid = getUuid(url.subdomain, url.pathname)
+
+      if (uuid == null) return res(ctx.status(404))
+
+      content = uuid.content ?? ''
+    }
+
+    return res(
+      ctx.set('x-powered-by', 'PHP'),
+      ctx.body('<html class="fuelux"\n' + content)
+    )
   }
 }
