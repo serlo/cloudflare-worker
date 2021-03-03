@@ -21,62 +21,161 @@
  */
 import TOML from '@iarna/toml'
 import fs from 'fs'
+import { FetchError } from 'node-fetch'
 import path from 'path'
 
+import { handleRequest } from '../../src'
 import { Variables } from '../../src/bindings'
-
-let config: Config | undefined
-
-export enum TestEnvironment {
-  Local = 'local',
-  Staging = 'staging',
-  Production = 'production',
-}
+import { isInstance } from '../../src/utils'
 
 export function currentTestEnvironment(): TestEnvironment {
   const environment = (process.env.TEST_ENVIRONMENT ?? '').toLowerCase()
 
-  return isTestEnvironment(environment) ? environment : TestEnvironment.Local
+  return isRemoteEnvironmentName(environment)
+    ? new RemoteEnvironment(environment)
+    : new LocalEnvironment()
 }
 
 export function currentTestEnvironmentWhen(
   requirement: (config: Variables) => boolean
 ): TestEnvironment {
-  return requirement(getConfig(currentTestEnvironment()))
-    ? currentTestEnvironment()
-    : TestEnvironment.Local
+  const current = currentTestEnvironment()
+
+  if (
+    current instanceof RemoteEnvironment &&
+    requirement(current.getConfig())
+  ) {
+    return current
+  }
+
+  return new LocalEnvironment()
 }
 
-export function getDomain(environment: TestEnvironment): string {
-  return environment === TestEnvironment.Local
-    ? 'serlo.local'
-    : getConfig(environment).DOMAIN
+export function localTestEnvironment() {
+  return new LocalEnvironment()
 }
 
-export function getConfig(environment: TestEnvironment): Variables {
-  if (environment === TestEnvironment.Local) return global
+abstract class TestEnvironment {
+  public fetch(spec: UrlSpec, init?: RequestInit) {
+    return this.fetchRequest(this.createRequest(spec, init))
+  }
 
-  config = config ?? loadConfig()
+  public abstract fetchRequest(request: Request): Promise<Response>
 
-  return config.env[environment].vars
+  public createRequest(spec: UrlSpec, init?: RequestInit) {
+    return new Request(this.createUrl(spec), init)
+  }
+
+  public createUrl({
+    protocol = 'https',
+    subdomain = '',
+    pathname = '/',
+  }: UrlSpec): string {
+    return (
+      protocol +
+      '://' +
+      subdomain +
+      (subdomain.length > 0 ? '.' : '') +
+      this.getDomain() +
+      pathname
+    )
+  }
+
+  public abstract getDomain(): string
+
+  public getNeededTimeout(): number | null {
+    return null
+  }
 }
 
-function isTestEnvironment(env: string): env is TestEnvironment {
-  return Object.values(TestEnvironment).includes(env as TestEnvironment)
+export class LocalEnvironment extends TestEnvironment {
+  public getDomain() {
+    return global.DOMAIN
+  }
+
+  public fetchRequest(request: Request): Promise<Response> {
+    return handleRequest(request)
+  }
 }
 
-function loadConfig() {
-  const rootDir = path.dirname(path.dirname(__dirname))
-  const configFile = path.join(rootDir, 'wrangler.toml')
-  const configContent = fs.readFileSync(configFile, 'utf8')
+class RemoteEnvironment extends TestEnvironment {
+  protected static config: Config
 
-  return (TOML.parse(configContent) as unknown) as Config
+  public constructor(private name: RemoteEnvironmentName) {
+    super()
+  }
+
+  public getDomain(): string {
+    return this.getConfig().DOMAIN
+  }
+
+  public getConfig(): Variables {
+    RemoteEnvironment.config =
+      RemoteEnvironment.config ?? RemoteEnvironment.loadConfig()
+
+    return RemoteEnvironment.config.env[this.name].vars
+  }
+
+  protected static loadConfig() {
+    const rootDir = path.dirname(path.dirname(__dirname))
+    const configFile = path.join(rootDir, 'wrangler.toml')
+    const configContent = fs.readFileSync(configFile, 'utf8')
+
+    return (TOML.parse(configContent) as unknown) as Config
+  }
+
+  public getNeededTimeout() {
+    return 20000
+  }
+
+  public createRequest(spec: UrlSpec, init?: RequestInit) {
+    const request = super.createRequest(spec, init)
+
+    // See https://github.com/mswjs/msw/blob/master/src/context/fetch.ts
+    request.headers.set('x-msw-bypass', 'true')
+
+    if (this.name === 'staging' && isInstance(spec.subdomain)) {
+      request.headers.set('Authorization', 'Basic c2VybG90ZWFtOnNlcmxvdGVhbQ==')
+    }
+
+    return request
+  }
+
+  public async fetchRequest(request: Request, retry = 0): Promise<Response> {
+    try {
+      return fetch(request, { redirect: 'manual' })
+    } catch (error) {
+      if (
+        error instanceof FetchError &&
+        /ECONNRESET/.test(error.message) &&
+        retry < 3
+      ) {
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+
+        return this.fetchRequest(request, retry + 1)
+      }
+
+      throw error
+    }
+  }
 }
 
 interface Config {
   env: {
-    [Environment in 'staging' | 'production']: {
+    [Environment in RemoteEnvironmentName]: {
       vars: Variables
     }
   }
+}
+
+type RemoteEnvironmentName = 'staging' | 'production'
+
+function isRemoteEnvironmentName(env: string): env is RemoteEnvironmentName {
+  return env === 'staging' || env === 'production'
+}
+
+interface UrlSpec {
+  subdomain?: string
+  pathname?: string
+  protocol?: 'http' | 'https'
 }

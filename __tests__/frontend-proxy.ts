@@ -19,371 +19,397 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { handleRequest } from '../src'
-import { Url, Instance } from '../src/utils'
+import { Instance } from '../src/utils'
 import {
   expectHasOkStatus,
   mockHttpGet,
   returnsText,
   givenUuid,
   givenApi,
-  returnsMalformedJson,
   returnsJson,
   Backend,
   setupProbabilityFor,
+  localTestEnvironment,
+  currentTestEnvironment,
+  currentTestEnvironmentWhen,
 } from './__utils__'
 
-describe('handleRequest()', () => {
-  beforeEach(() => {
-    global.FRONTEND_DOMAIN = 'frontend.serlo.org'
-    global.FRONTEND_ALLOWED_TYPES = '["Page"]'
-    global.FRONTEND_PROBABILITY_DESKTOP = '0.5'
-    Math.random = jest.fn().mockReturnValue(0.5)
+beforeEach(() => {
+  global.FRONTEND_ALLOWED_TYPES = '["Page"]'
+  global.FRONTEND_PROBABILITY_DESKTOP = '0.5'
+  Math.random = jest.fn().mockReturnValue(0.5)
 
-    givenUuid({
-      id: 23591,
-      __typename: 'Page',
-      alias: '/math',
-      instance: Instance.En,
+  givenUuid({
+    id: 23591,
+    __typename: 'Page',
+    alias: '/math',
+    instance: Instance.En,
+  })
+})
+
+describe('chooses backend based on random number', () => {
+  const env = localTestEnvironment()
+
+  describe('for desktop', () => {
+    test('chooses frontend when random number <= probability', async () => {
+      global.FRONTEND_PROBABILITY_DESKTOP = '0.5'
+      Math.random = jest.fn().mockReturnValue(0.5)
+
+      const response = await env.fetch({ subdomain: 'en', pathname: '/math' })
+
+      await expectFrontend(response)
+    })
+
+    test('chooses legacy backend for random number > probability', async () => {
+      global.FRONTEND_PROBABILITY_DESKTOP = '0.5'
+      Math.random = jest.fn().mockReturnValue(0.75)
+
+      const response = await env.fetch({ subdomain: 'en', pathname: '/math' })
+
+      await expectLegacy(response)
     })
   })
 
-  describe('chooses backend based on random number', () => {
-    describe('for desktop', () => {
-      test('chooses frontend when random number <= probability', async () => {
-        global.FRONTEND_PROBABILITY_DESKTOP = '0.5'
-        Math.random = jest.fn().mockReturnValue(0.5)
+  describe('for mobile', () => {
+    test('chooses frontend when random number <= probability', async () => {
+      setupProbabilityFor(Backend.Legacy)
+      global.FRONTEND_PROBABILITY_MOBILE = '0.5'
+      Math.random = jest.fn().mockReturnValue(0.5)
 
-        await expectResponseFrom({
-          backend: 'https://frontend.serlo.org/en/math',
-          request: 'https://en.serlo.org/math',
-        })
-      })
-
-      test('chooses legacy backend for random number > probability', async () => {
-        global.FRONTEND_PROBABILITY_DESKTOP = '0.5'
-        Math.random = jest.fn().mockReturnValue(0.75)
-
-        await expectResponseFrom({
-          backend: 'https://en.serlo.org/math',
-          request: 'https://en.serlo.org/math',
-        })
-      })
+      await expectFrontend(await doMobileRequest())
     })
 
-    describe('for mobile', () => {
-      test('chooses frontend when random number <= probability', async () => {
-        setupProbabilityFor(Backend.Legacy)
-        global.FRONTEND_PROBABILITY_MOBILE = '0.5'
-        Math.random = jest.fn().mockReturnValue(0.5)
+    test('chooses legacy backend for random number > probability', async () => {
+      setupProbabilityFor(Backend.Frontend)
+      global.FRONTEND_PROBABILITY_MOBILE = '0.5'
+      Math.random = jest.fn().mockReturnValue(0.75)
 
-        await expectResponseFrom({
-          backend: 'https://frontend.serlo.org/en/math',
-          request: getMobileRequest(),
-        })
-      })
-
-      test('chooses legacy backend for random number > probability', async () => {
-        setupProbabilityFor(Backend.Frontend)
-        global.FRONTEND_PROBABILITY_MOBILE = '0.5'
-        Math.random = jest.fn().mockReturnValue(0.75)
-
-        await expectResponseFrom({
-          backend: 'https://en.serlo.org/math',
-          request: getMobileRequest(),
-        })
-      })
-
-      function getMobileRequest() {
-        const userAgent =
-          'Mozilla/5.0 (Android 4.0.3; de-ch) Version/4.0 Mobile Safari/534.30'
-        const request = new Request('https://en.serlo.org/math')
-
-        request.headers.set('user-agent', userAgent)
-
-        return request
-      }
-    })
-  })
-
-  describe('returned response set cookie with calculated random number', () => {
-    test.each([Backend.Frontend, Backend.Legacy])('%p', async (backend) => {
-      global.DOMAIN = 'serlo.org'
-      const backendUrl = getUrlFor(backend, 'https://en.serlo.org/math')
-
-      setupProbabilityFor(backend)
-      mockHttpGet(backendUrl, returnsText(''))
-      Math.random = jest.fn().mockReturnValue(0.25)
-
-      const response = await handleUrl('https://en.serlo.org/math')
-
-      const cookieHeader = response.headers.get('Set-Cookie')
-      expect(cookieHeader).toBe('useFrontend=0.25; path=/; domain=.serlo.org')
-    })
-  })
-
-  test('removes trailing slashes and prepends language code when the backend is frontend', async () => {
-    setupProbabilityFor(Backend.Frontend)
-
-    await expectResponseFrom({
-      backend: 'https://frontend.serlo.org/de',
-      request: 'https://de.serlo.org/',
-    })
-  })
-
-  describe('special paths do not get a language prefix', () => {
-    test.each([
-      'https://de.serlo.org/_next/script.js',
-      'https://de.serlo.org/_assets/image.png',
-      'https://de.serlo.org/api/frontend/privacy',
-      'https://de.serlo.org/api/auth/login',
-      'https://de.serlo.org/___graphql',
-    ])('URL = %p', async (url) => {
-      const backendUrl = new Url(url)
-      backendUrl.hostname = 'frontend.serlo.org'
-
-      await expectResponseFrom({
-        backend: backendUrl.href,
-        request: url,
-      })
-    })
-  })
-
-  describe('when user is authenticated', () => {
-    describe('when REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = true', () => {
-      beforeEach(() => {
-        global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = 'true'
-        setupProbabilityFor(Backend.Frontend)
-      })
-
-      test('chooses legacy backend', async () => {
-        await expectResponseFrom({
-          backend: 'https://en.serlo.org/math',
-          request: getAuthedRequest(),
-        })
-      })
-
-      test('does not set cookie with random number', async () => {
-        mockHttpGet(Backend.Legacy, returnsText(''))
-        const response = await handleRequest(getAuthedRequest())
-        expect(response.headers.get('Set-Cookie')).toBeNull()
-      })
+      await expectLegacy(await doMobileRequest())
     })
 
-    describe('when REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = false', () => {
-      beforeEach(() => {
-        global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = 'false'
-        setupProbabilityFor(Backend.Frontend)
-      })
+    function doMobileRequest() {
+      const request = env.createRequest({ subdomain: 'en' })
+      const userAgent =
+        'Mozilla/5.0 (Android 4.0.3; de-ch) Version/4.0 Mobile Safari/534.30'
+      request.headers.set('user-agent', userAgent)
 
-      test('chooses frontend when random number <= probability', async () => {
-        setupProbabilityFor(Backend.Legacy)
-        global.FRONTEND_PROBABILITY_AUTHENTICATED = '0.5'
-        Math.random = jest.fn().mockReturnValue(0.5)
-
-        await expectResponseFrom({
-          backend: 'https://frontend.serlo.org/en/math',
-          request: getAuthedRequest(),
-        })
-      })
-
-      test('chooses legacy backend for random number > probability', async () => {
-        setupProbabilityFor(Backend.Frontend)
-        global.FRONTEND_PROBABILITY_AUTHENTICATED = '0.5'
-        Math.random = jest.fn().mockReturnValue(0.75)
-
-        await expectResponseFrom({
-          backend: 'https://en.serlo.org/math',
-          request: getAuthedRequest(),
-        })
-      })
-    })
-
-    function getAuthedRequest() {
-      const request = new Request('https://en.serlo.org/math')
-      request.headers.set('Cookie', 'authenticated=1')
-      return request
+      return env.fetchRequest(request)
     }
   })
+})
 
-  describe('when request contains content api parameter', () => {
-    const url = 'https://de.serlo.org/math?contentOnly'
+describe('returned response set cookie with calculated random number', () => {
+  test.each([Backend.Frontend, Backend.Legacy])('%p', async (backend) => {
+    const env = localTestEnvironment()
+
+    setupProbabilityFor(backend)
+    Math.random = jest.fn().mockReturnValue(0.25)
+
+    const response = await env.fetch({ subdomain: 'en', pathname: '/math' })
+
+    const cookieHeader = response.headers.get('Set-Cookie')
+    expect(cookieHeader).toBe('useFrontend=0.25; path=/; domain=.serlo.local')
+  })
+})
+
+test('removes trailing slashes and prepends language code when the backend is frontend', async () => {
+  const env = currentTestEnvironment()
+  setupProbabilityFor(Backend.Frontend)
+
+  await expectFrontend(await env.fetch({ subdomain: 'en' }))
+})
+
+describe('when user is authenticated', () => {
+  describe('when REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = true', () => {
     let response: Response
 
     beforeEach(async () => {
-      givenApi(returnsMalformedJson())
+      global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = 'true'
       setupProbabilityFor(Backend.Frontend)
-      mockHttpGet(url, returnsText('content'))
-
-      response = await handleUrl(url)
+      const env = currentTestEnvironmentWhen(
+        (config) =>
+          config.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND === 'true'
+      )
+      response = await doAuthedRequest(env)
     })
 
     test('chooses legacy backend', async () => {
-      expect(await response.text()).toBe('content')
+      await expectLegacy(response)
     })
 
-    test('does not set cookie with random number', () => {
-      expect(response.headers.get('Set-Cookie')).toBeNull()
-    })
-  })
-
-  describe('uses cookie "useFrontend" to determine backend', () => {
-    describe.each([
-      {
-        cookieValue: 'useFrontend=0.25',
-        backend: Backend.Frontend,
-      },
-      {
-        cookieValue: 'useFrontend=0.5; otherCookie=42;',
-        backend: Backend.Frontend,
-      },
-      {
-        cookieValue: 'useFrontend=0.75;',
-        backend: Backend.Legacy,
-      },
-    ])('Parameters: %p', ({ cookieValue, backend }) => {
-      let response: Response
-
-      beforeEach(async () => {
-        const url = 'https://en.serlo.org/math'
-        const backendUrl = getUrlFor(backend, url)
-
-        mockHttpGet(backendUrl, returnsText('content'))
-        global.FRONTEND_PROBABILITY_DESKTOP = '0.5'
-
-        const request = new Request(url, { headers: { Cookie: cookieValue } })
-        response = await handleRequest(request)
-      })
-
-      test('new random number was not calculated', () => {
-        expect(Math.random).not.toHaveBeenCalled()
-      })
-
-      test('cookie for storing random number is not set in response', () => {
-        expect(response.headers.get('Set-Cookie')).toBeNull()
-      })
+    test('does not set cookie "useFrontend"', () => {
+      expect(response.headers.get('Set-Cookie')).not.toEqual(
+        expect.stringContaining('useFrontend')
+      )
     })
   })
 
-  test('uses cookie "frontendUrl" to determine the url of the frontend', async () => {
+  describe('when REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = false', () => {
+    beforeEach(() => {
+      global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = 'false'
+    })
+
+    test('chooses frontend when random number <= probability', async () => {
+      setupProbabilityFor(Backend.Legacy)
+      global.FRONTEND_PROBABILITY_AUTHENTICATED = '0.5'
+      Math.random = jest.fn().mockReturnValue(0.5)
+
+      await expectFrontend(await doAuthedRequest(localTestEnvironment()))
+    })
+
+    test('chooses legacy backend for random number > probability', async () => {
+      setupProbabilityFor(Backend.Frontend)
+      global.FRONTEND_PROBABILITY_AUTHENTICATED = '0.5'
+      Math.random = jest.fn().mockReturnValue(0.75)
+
+      await expectLegacy(await doAuthedRequest(localTestEnvironment()))
+    })
+  })
+
+  function doAuthedRequest(env: ReturnType<typeof currentTestEnvironment>) {
+    const request = env.createRequest({ subdomain: 'en' })
+    request.headers.set('Cookie', 'authenticated=1')
+    return env.fetchRequest(request)
+  }
+})
+
+describe('when request contains content api parameter', () => {
+  let response: Response
+
+  beforeEach(async () => {
     setupProbabilityFor(Backend.Frontend)
 
-    const request = new Request('https://en.serlo.org/math')
-    request.headers.set('Cookie', 'frontendDomain=myfrontend.org')
-
-    await expectResponseFrom({
-      backend: 'https://myfrontend.org/en/math',
-      request,
+    response = await currentTestEnvironment().fetch({
+      subdomain: 'en',
+      pathname: '/?contentOnly',
     })
   })
 
-  test('uses frontend when cookie "useFrontend" is "always"', async () => {
-    setupProbabilityFor(Backend.Legacy)
-
-    const request = new Request('https://en.serlo.org/math')
-    request.headers.set('Cookie', 'useFrontend=always;authenticated=1')
-
-    await expectResponseFrom({
-      backend: 'https://frontend.serlo.org/en/math',
-      request,
-    })
+  test('chooses legacy backend', async () => {
+    await expectLegacy(response)
   })
 
-  test('ignore wrongly formatted cookie values', async () => {
-    setupProbabilityFor(Backend.Frontend)
+  test('does not set cookie with random number', () => {
+    expect(response.headers.get('Set-Cookie')).not.toEqual(
+      expect.stringContaining('useFrontend')
+    )
+  })
+})
 
-    const request = new Request('https://en.serlo.org/math')
-    request.headers.set('Cookie', 'useFrontend=foo')
+describe('uses cookie "useFrontend" to determine backend', () => {
+  test.each([
+    {
+      cookieValue: 'useFrontend=0.25',
+      backend: Backend.Frontend,
+    },
+    {
+      cookieValue: 'useFrontend=0.5; otherCookie=42;',
+      backend: Backend.Frontend,
+    },
+    {
+      cookieValue: 'useFrontend=0.75;',
+      backend: Backend.Legacy,
+    },
+  ])('Parameters: %p', async ({ cookieValue, backend }) => {
+    global.FRONTEND_PROBABILITY_DESKTOP = '0.5'
 
-    await expectResponseFrom({
-      backend: 'https://frontend.serlo.org/en/math',
-      request,
-    })
-    expect(Math.random).toHaveBeenCalled()
+    const env = localTestEnvironment()
+
+    const request = env.createRequest({ subdomain: 'en' })
+    request.headers.set('Cookie', cookieValue)
+    const response = await env.fetchRequest(request)
+
+    await expectBackend(response, backend)
+    expect(response.headers.get('Set-Cookie')).toBeNull()
+  })
+})
+
+test('uses cookie "frontendUrl" to determine the url of the frontend', async () => {
+  setupProbabilityFor(Backend.Frontend)
+  mockHttpGet('https://myfrontend.org/en/math', returnsText('content'))
+
+  const env = localTestEnvironment()
+
+  const request = env.createRequest({ subdomain: 'en', pathname: '/math' })
+  request.headers.set('Cookie', 'frontendDomain=myfrontend.org')
+  const response = await env.fetchRequest(request)
+
+  expect(await response.text()).toBe('content')
+})
+
+test('uses frontend when cookie "useFrontend" is "always"', async () => {
+  setupProbabilityFor(Backend.Legacy)
+  const env = currentTestEnvironment()
+
+  const request = env.createRequest({ subdomain: 'en' })
+  request.headers.set('Cookie', 'useFrontend=always;authenticated=1')
+  const response = await env.fetchRequest(request)
+
+  await expectFrontend(response)
+})
+
+test('ignore wrongly formatted cookie values', async () => {
+  setupProbabilityFor(Backend.Frontend)
+  const env = currentTestEnvironment()
+
+  const request = env.createRequest({ subdomain: 'en' })
+  request.headers.set('Cookie', 'useFrontend=foo')
+  const response = await env.fetchRequest(request)
+
+  expect(response.status).toBe(200)
+  expect(response.headers.get('Set-Cookie')).toEqual(
+    expect.stringContaining('useFrontend')
+  )
+})
+
+test('chooses legacy backend when type of ressource is not in FRONTEND_ALLOWED_TYPES', async () => {
+  global.FRONTEND_ALLOWED_TYPES = '["Page", "Article"]'
+  givenUuid({ id: 42, __typename: 'TaxonomyTerm' })
+
+  const response = await localTestEnvironment().fetch({
+    subdomain: 'en',
+    pathname: '/42',
   })
 
-  test('chooses legacy backend when type of ressource is not in FRONTEND_ALLOWED_TYPES', async () => {
-    global.FRONTEND_ALLOWED_TYPES = '["Page", "Article"]'
-    givenUuid({ id: 42, __typename: 'TaxonomyTerm' })
+  await expectLegacy(response)
+})
 
-    await expectResponseFrom({
-      backend: 'https://de.serlo.org/42',
-      request: 'https://de.serlo.org/42',
-    })
+test('chooses legacy backend when type of ressource is unknown', async () => {
+  givenApi(returnsJson({}))
+  givenUuid({
+    __typename: 'Article',
+    alias: '/unknown',
+    instance: Instance.En,
   })
 
-  test('chooses legacy backend when type of ressource is unknown', async () => {
-    givenApi(returnsJson({}))
-
-    await expectResponseFrom({
-      backend: 'https://de.serlo.org/unknown',
-      request: 'https://de.serlo.org/unknown',
-    })
+  const response = await localTestEnvironment().fetch({
+    subdomain: 'en',
+    pathname: '/unknown',
   })
 
-  describe('special paths', () => {
-    test('requests to /api/auth/... always resolve to frontend', async () => {
-      await expectResponseFrom({
-        backend: 'https://frontend.serlo.org/api/auth/callback',
-        request: 'https://de.serlo.org/api/auth/callback',
-      })
+  await expectLegacy(response)
+})
+
+describe('special paths', () => {
+  const env = currentTestEnvironment()
+
+  test('/_assets/* always resolves to frontend', async () => {
+    const response = await env.fetch({
+      subdomain: 'en',
+      pathname: '/_assets/favicon.ico',
     })
 
-    test('requests to /api/frontend/... always resolve to frontend', async () => {
-      await expectResponseFrom({
-        backend: 'https://frontend.serlo.org/api/frontend/privacy/json',
-        request: 'https://de.serlo.org/api/frontend/privacy/json',
-      })
-    })
+    expect(response.status).toBe(200)
+    expect(response.headers.get('content-type')).toBe(
+      'image/vnd.microsoft.icon'
+    )
+    expect(response.headers.get('Set-Cookie')).not.toEqual(
+      expect.stringContaining('useFrontend')
+    )
+  })
 
-    test('requests to /_next/... always resolve to frontend', async () => {
+  describe('/next/*', () => {
+    test('always resolve to frontend', async () => {
       // Make sure that special paths of the frontend are resolved before the
       // redirects
       //
       // See also https://github.com/serlo/serlo.org-cloudflare-worker/issues/71
       givenUuid({ id: 5, __typename: 'TaxonomyTerm', alias: '/mathe/-5' })
 
-      await expectResponseFrom({
-        backend: 'https://frontend.serlo.org/_next/static/Xi-nU5/script.js',
-        request: 'https://de.serlo.org/_next/static/Xi-nU5/script.js',
+      const response = await env.fetch({
+        subdomain: 'en',
+        pathname: await getJavascriptPathname(),
       })
+
+      expect(response.status).toBe(200)
+      expect(response.headers.get('content-type')).toEqual(
+        expect.stringContaining('application/javascript')
+      )
+      expect(response.headers.get('Set-Cookie')).not.toEqual(
+        expect.stringContaining('useFrontend')
+      )
     })
 
-    test('requests to /_assets/... always resolve to frontend', async () => {
-      await expectResponseFrom({
-        backend: 'https://frontend.serlo.org/_assets/img/picture.svg',
-        request: 'https://de.serlo.org/_assets/img/picture.svg',
-      })
+    async function getJavascriptPathname() {
+      const regex = /\/_next\/static\/chunks\/main-[0-9a-f]+.js/
+      const response = await env.fetch({ subdomain: 'en', pathname: '/' })
+      const match = regex.exec(await response.text())
+
+      if (match === null) throw new Error('javascript pathname not found')
+
+      return match[0]
+    }
+  })
+
+  test('/api/frontend/* always resolves to frontend', async () => {
+    const response = await env.fetch({
+      subdomain: 'en',
+      pathname: '/api/frontend/privacy',
     })
 
-    test('requests to /user/notifications always resolve to frontend', async () => {
-      await expectResponseFrom({
-        backend: 'https://frontend.serlo.org/de/user/notifications',
-        request: 'https://de.serlo.org/user/notifications',
-      })
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual(
+      expect.arrayContaining(['2020-02-10'])
+    )
+    expect(response.headers.get('Set-Cookie')).not.toEqual(
+      expect.stringContaining('useFrontend')
+    )
+  })
+
+  test('/api/auth/* always resolves to frontend (and transfers request header to backend)', async () => {
+    const request = env.createRequest({
+      subdomain: 'en',
+      pathname: '/api/auth/login',
+    })
+    request.headers.set('referer', env.createUrl({ subdomain: 'en' }))
+
+    const response = await env.fetchRequest(request)
+
+    expect(response.status).toBe(302)
+    expect(response.headers.get('location')).toEqual(
+      expect.stringContaining(env.createUrl({ subdomain: 'hydra' }))
+    )
+    expect(response.headers.get('Set-Cookie')).not.toEqual(
+      expect.stringContaining('useFrontend')
+    )
+  })
+
+  test('/user/notifications always resolve to frontend', async () => {
+    const response = await env.fetch({
+      subdomain: 'en',
+      pathname: '/user/notifications',
     })
 
-    test('requests to /consent always resolve to frontend', async () => {
-      await expectResponseFrom({
-        backend: 'https://frontend.serlo.org/en/consent',
-        request: 'https://en.serlo.org/consent',
-      })
+    expect(response.status).toBe(200)
+    expect(await response.text()).toEqual(
+      expect.stringContaining('Notifications')
+    )
+  })
+
+  test('/consent always resolve to frontend', async () => {
+    const response = await env.fetch({
+      subdomain: 'en',
+      pathname: '/consent',
     })
 
-    test('requests to /___graphql always resolve to frontend', async () => {
-      await expectResponseFrom({
-        backend: 'https://frontend.serlo.org/___graphql',
-        request: 'https://en.serlo.org/___graphql',
-      })
+    expect(response.status).toBe(200)
+    expect(await response.text()).toEqual(expect.stringContaining('Consent'))
+  })
+
+  test('/___graphql always resolve to frontend', async () => {
+    const response = await env.fetch({
+      subdomain: 'en',
+      pathname: '/___graphql',
     })
 
-    describe('special paths where the cookie determines the backend', () => {
-      describe.each([
-        'https://de.serlo.org/',
-        'https://de.serlo.org/search',
-        'https://de.serlo.org/spenden',
-        'https://de.serlo.org/license/detail/1',
-      ])('URL = %p', (url) => {
+    expect(response.status).toBe(200)
+    expect(await response.text()).toEqual(expect.stringContaining('graphiql'))
+  })
+
+  describe('special paths where the cookie determines the backend', () => {
+    describe.each(['/', '/search', '/spenden', '/license/detail/1'])(
+      'URL = %p',
+      (pathname) => {
         test.each([Backend.Frontend, Backend.Legacy])(
           'backend = %p',
           async (backend) => {
@@ -403,15 +429,17 @@ describe('handleRequest()', () => {
             setupProbabilityFor(backend)
             Math.random = jest.fn().mockReturnValue(0.5)
 
-            await expectResponseFrom({
-              backend: getUrlFor(backend, url),
-              request: url,
-            })
+            const env = localTestEnvironment()
+            const response = await env.fetch({ subdomain: 'de', pathname })
+
+            await expectBackend(response, backend)
           }
         )
-      })
-    })
+      }
+    )
+  })
 
+  /* TODO: The following test case is obsolete.
     describe('special paths where the cookie determines the backend when USER is in FRONTEND_ALLOWED_TYPES', () => {
       describe.each([
         'https://de.serlo.org/user/public',
@@ -431,200 +459,141 @@ describe('handleRequest()', () => {
           }
         )
       })
-    })
+    })*/
 
-    describe('forwards authentication requests to legacy backend', () => {
-      test.each([
-        'https://de.serlo.org/auth/login',
-        'https://de.serlo.org/auth/logout',
-        'https://de.serlo.org/auth/activate/:token',
-        'https://de.serlo.org/auth/password/change',
-        'https://de.serlo.org/auth/password/restore/:token',
-        'https://de.serlo.org/auth/hydra/login',
-        'https://de.serlo.org/auth/hydra/consent',
-        'https://de.serlo.org/user/register',
-      ])('URL = %p', async (url) => {
-        await expectResponseFrom({ backend: url, request: url })
-      })
-    })
+  describe('forwards authentication requests to legacy backend', () => {
+    test.each([
+      '/auth/login',
+      '/auth/logout',
+      '/auth/activate/12345678',
+      '/auth/password/change',
+      '/auth/password/restore/:token',
+      '/auth/hydra/login',
+      '/auth/hydra/consent',
+      '/user/register',
+    ])('URL = %p', async (pathname) => {
+      const env = currentTestEnvironment()
+      const response = await env.fetch({ subdomain: 'en', pathname })
 
-    describe('special paths need to have a trailing slash in their prefix', () => {
-      test.each([
-        'https://de.serlo.org/api/frontend-alternative',
-        'https://de.serlo.org/_next-alias',
-        'https://de.serlo.org/_assets-alias',
-      ])('URL = %p', async (url) => {
-        givenUuid({
-          __typename: 'Page',
-          alias: new URL(url).pathname,
-        })
-        setupProbabilityFor(Backend.Legacy)
-
-        await expectResponseFrom({ backend: url, request: url })
-      })
-    })
-
-    describe('Predetermined special paths do not set a cookie', () => {
-      test.each([
-        'https://de.serlo.org/_next/script.js',
-        'https://de.serlo.org/_assets/image.png',
-        'https://de.serlo.org/api/frontend/privacy',
-        'https://de.serlo.org/auth/login',
-        'https://de.serlo.org/auth/logout',
-        'https://de.serlo.org/auth/activate/:token',
-        'https://de.serlo.org/auth/password/change',
-        'https://de.serlo.org/auth/password/restore/:token',
-        'https://de.serlo.org/auth/hydra/login',
-        'https://de.serlo.org/auth/hydra/consent',
-        'https://de.serlo.org/user/register',
-      ])('URL = %p', async (url) => {
-        const backendUrl = new Url(url)
-        backendUrl.hostname = 'frontend.serlo.org'
-
-        mockHttpGet(backendUrl.href, returnsText(url))
-        mockHttpGet(getUrlFor(Backend.Legacy, url), returnsText(url))
-
-        const response = await handleUrl(url)
-
-        expect(response.headers.get('Set-Cookie')).toBeNull()
-      })
-    })
-  })
-
-  test('creates a copy of backend responses (otherwise there is an error in cloudflare)', async () => {
-    const backendResponse = new Response('')
-    global.fetch = jest.fn().mockResolvedValue(backendResponse)
-
-    // There is not type checking for the main page and thus we do not need
-    // to mock the api request here
-    const response = await handleUrl('https://de.serlo.org/')
-
-    expect(response).not.toBe(backendResponse)
-  })
-
-  describe('passes query string to backend', () => {
-    test.each([Backend.Frontend, Backend.Legacy])('%p', async (backend) => {
-      setupProbabilityFor(backend)
-
-      await expectResponseFrom({
-        backend: getUrlFor(backend, 'https://de.serlo.org/?foo=bar'),
-        request: 'https://de.serlo.org/?foo=bar',
-      })
-    })
-  })
-
-  describe('transfers request headers to backend', () => {
-    test.each([Backend.Frontend, Backend.Legacy])('%p', async (backend) => {
-      setupProbabilityFor(backend)
-      mockHttpGet(
-        getUrlFor(backend, 'https://de.serlo.org/'),
-        (req, res, ctx) =>
-          res(ctx.status(req.headers.get('Cookie') === 'token=123' ? 200 : 400))
+      expect(response.headers.get('Set-Cookie')).not.toEqual(
+        expect.stringContaining('useFrontend')
       )
-
-      const request = new Request('https://de.serlo.org/')
-      request.headers.set('Cookie', 'token=123')
-      const response = await handleRequest(request)
-
-      expectHasOkStatus(response)
-    })
-  })
-
-  describe('transfers response headers from backend', () => {
-    test.each([Backend.Frontend, Backend.Legacy])('%p', async (backend) => {
-      const headers = {
-        'X-Header': 'bar',
-        'Set-Cookie': 'token=123456; path=/',
-      }
-      mockHttpGet(
-        getUrlFor(backend, 'https://de.serlo.org/'),
-        (_req, res, ctx) => res(ctx.set(headers))
-      )
-
-      setupProbabilityFor(backend)
-      const response = await handleUrl('https://de.serlo.org/')
-
-      expect(response.headers.get('X-Header')).toBe('bar')
-      expect(response.headers.get('Set-Cookie')).toEqual(
-        expect.stringContaining(`token=123456; path=/`)
-      )
-    })
-  })
-
-  describe('requests to /enable-frontend enable use of frontend', () => {
-    let res: Response
-
-    beforeEach(async () => {
-      res = await handleUrl('https://de.serlo.org/enable-frontend')
-    })
-
-    test('shows message that frontend was enabled', async () => {
-      expectHasOkStatus(res)
-      expect(await res.text()).toBe('Enabled: Use of new frontend')
-    })
-
-    test('sets cookie so that new frontend will be used', () => {
-      expect(res.headers.get('Set-Cookie')).toEqual(
-        expect.stringContaining('useFrontend=0;')
-      )
-    })
-
-    test('main page will be loaded after 1 second', () => {
-      expect(res.headers.get('Refresh')).toBe('1; url=/')
-    })
-  })
-
-  describe('requests to /disable-frontend disable use of frontend', () => {
-    let res: Response
-
-    beforeEach(async () => {
-      res = await handleUrl('https://de.serlo.org/disable-frontend')
-    })
-
-    test('shows message that frontend use is disabled', async () => {
-      expectHasOkStatus(res)
-      expect(await res.text()).toBe('Disabled: Use of new frontend')
-    })
-
-    test('sets cookie to that legacy backend will be used', () => {
-      expect(res.headers.get('Set-Cookie')).toEqual(
-        expect.stringContaining('useFrontend=1.1;')
-      )
-    })
-
-    test('main page will be loaded after 1 second', () => {
-      expect(res.headers.get('Refresh')).toBe('1; url=/')
     })
   })
 })
 
-async function expectResponseFrom({
+test('creates a copy of backend responses (otherwise there is an error in cloudflare)', async () => {
+  const backendResponse = new Response('')
+  global.fetch = jest.fn().mockResolvedValue(backendResponse)
+
+  // There is not type checking for the main page and thus we do not need
+  // to mock the api request here
+  const response = await localTestEnvironment().fetch({ subdomain: 'en' })
+
+  expect(response).not.toBe(backendResponse)
+})
+
+test('passes query string to backend', async () => {
+  const response = await fetchBackend({
+    backend: Backend.Legacy,
+    pathname: '/search?q=Pythagoras',
+  })
+
+  expect(await response.text()).toEqual(expect.stringContaining('Pythagoras'))
+})
+
+describe('requests to /enable-frontend enable use of frontend', () => {
+  let ressponse: Response
+
+  beforeEach(async () => {
+    ressponse = await currentTestEnvironment().fetch({
+      subdomain: 'en',
+      pathname: '/enable-frontend',
+    })
+  })
+
+  test('shows message that frontend was enabled', async () => {
+    expectHasOkStatus(ressponse)
+    expect(await ressponse.text()).toBe('Enabled: Use of new frontend')
+  })
+
+  test('sets cookie so that new frontend will be used', () => {
+    expect(ressponse.headers.get('Set-Cookie')).toEqual(
+      expect.stringContaining('useFrontend=0;')
+    )
+  })
+
+  test('main page will be loaded after 1 second', () => {
+    expect(ressponse.headers.get('Refresh')).toBe('1; url=/')
+  })
+})
+
+describe('requests to /disable-frontend disable use of frontend', () => {
+  let response: Response
+
+  beforeEach(async () => {
+    response = await currentTestEnvironment().fetch({
+      subdomain: 'en',
+      pathname: '/disable-frontend',
+    })
+  })
+
+  test('shows message that frontend use is disabled', async () => {
+    expectHasOkStatus(response)
+    expect(await response.text()).toBe('Disabled: Use of new frontend')
+  })
+
+  test('sets cookie to that legacy backend will be used', () => {
+    expect(response.headers.get('Set-Cookie')).toEqual(
+      expect.stringContaining('useFrontend=1.1;')
+    )
+  })
+
+  test('main page will be loaded after 1 second', () => {
+    expect(response.headers.get('Refresh')).toBe('1; url=/')
+  })
+})
+
+function fetchBackend({
+  env = currentTestEnvironment(),
+  pathname,
+  subdomain = 'en',
   backend,
-  request,
 }: {
-  backend: string
-  request: Request | string
+  env?: ReturnType<typeof currentTestEnvironment>
+  pathname: string
+  subdomain?: string
+  backend: Backend
 }) {
-  mockHttpGet(backend, returnsText('content'))
+  const request = env.createRequest({ subdomain, pathname })
+  const cookieValue = backend === Backend.Frontend ? '0' : '1.1'
+  request.headers.set('Cookie', `useFrontend=${cookieValue}`)
 
-  request = typeof request === 'string' ? new Request(request) : request
-  const response = await handleRequest(request)
-
-  expect(await response.text()).toBe('content')
+  return env.fetchRequest(request)
 }
 
-async function handleUrl(url: string): Promise<Response> {
-  return await handleRequest(new Request(url))
-}
-
-function getUrlFor(backend: Backend, url: string) {
-  const backendUrl = new Url(url)
-
+async function expectBackend(response: Response, backend: Backend) {
   if (backend === Backend.Frontend) {
-    backendUrl.pathname = '/' + backendUrl.subdomain + backendUrl.pathname
-    backendUrl.hostname = 'frontend.serlo.org'
-    backendUrl.pathname = backendUrl.pathnameWithoutTrailingSlash
+    await expectFrontend(response)
+  } else {
+    await expectLegacy(response)
   }
+}
 
-  return backendUrl.href
+async function expectLegacy(response: Response) {
+  expect(await response.text()).toEqual(
+    expect.stringContaining('<html class="fuelux"')
+  )
+  // Tests that backend headers are transfered to client
+  expect(response.headers.get('x-powered-by')).toEqual(
+    expect.stringContaining('PHP')
+  )
+}
+
+async function expectFrontend(response: Response) {
+  expect(await response.text()).toEqual(
+    expect.stringContaining('<script id="__NEXT_DATA__"')
+  )
+  // Tests that backend headers are transfered to client
+  expect(response.headers.get('x-vercel-cache')).toEqual('HIT')
 }

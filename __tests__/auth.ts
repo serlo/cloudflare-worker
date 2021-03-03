@@ -20,50 +20,45 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-import {
-  createUrl,
-  currentTestEnvironmentWhen,
-  expectIsJsonResponse,
-  fetchSerlo,
-} from './__utils__'
+import { currentTestEnvironmentWhen, expectIsJsonResponse } from './__utils__'
 
 test('Frontend Sector Identifier URI Validation (block localhost)', async () => {
   global.ALLOW_AUTH_FROM_LOCALHOST = 'false'
+  const env = currentTestEnvironmentWhen(
+    (config) => config.ALLOW_AUTH_FROM_LOCALHOST === 'false'
+  )
 
-  const response = await fetchSerlo({
+  const response = await env.fetch({
     pathname: '/auth/frontend-redirect-uris.json',
-    environment: currentTestEnvironmentWhen(
-      (config) => config.ALLOW_AUTH_FROM_LOCALHOST === 'false'
-    ),
   })
 
   await expectIsJsonResponse(response, [
-    createUrl({ subdomain: 'de', pathname: '/api/auth/callback' }),
-    createUrl({ subdomain: 'en', pathname: '/api/auth/callback' }),
-    createUrl({ subdomain: 'es', pathname: '/api/auth/callback' }),
-    createUrl({ subdomain: 'fr', pathname: '/api/auth/callback' }),
-    createUrl({ subdomain: 'hi', pathname: '/api/auth/callback' }),
-    createUrl({ subdomain: 'ta', pathname: '/api/auth/callback' }),
+    env.createUrl({ subdomain: 'de', pathname: '/api/auth/callback' }),
+    env.createUrl({ subdomain: 'en', pathname: '/api/auth/callback' }),
+    env.createUrl({ subdomain: 'es', pathname: '/api/auth/callback' }),
+    env.createUrl({ subdomain: 'fr', pathname: '/api/auth/callback' }),
+    env.createUrl({ subdomain: 'hi', pathname: '/api/auth/callback' }),
+    env.createUrl({ subdomain: 'ta', pathname: '/api/auth/callback' }),
   ])
 })
 
 test('Frontend Sector Identifier URI Validation (allow localhost)', async () => {
   global.ALLOW_AUTH_FROM_LOCALHOST = 'true'
+  const env = currentTestEnvironmentWhen(
+    (config) => config.ALLOW_AUTH_FROM_LOCALHOST === 'true'
+  )
 
-  const response = await fetchSerlo({
+  const response = await env.fetch({
     pathname: '/auth/frontend-redirect-uris.json',
-    environment: currentTestEnvironmentWhen(
-      (config) => config.ALLOW_AUTH_FROM_LOCALHOST === 'true'
-    ),
   })
 
   await expectIsJsonResponse(response, [
-    createUrl({ subdomain: 'de', pathname: '/api/auth/callback' }),
-    createUrl({ subdomain: 'en', pathname: '/api/auth/callback' }),
-    createUrl({ subdomain: 'es', pathname: '/api/auth/callback' }),
-    createUrl({ subdomain: 'fr', pathname: '/api/auth/callback' }),
-    createUrl({ subdomain: 'hi', pathname: '/api/auth/callback' }),
-    createUrl({ subdomain: 'ta', pathname: '/api/auth/callback' }),
+    env.createUrl({ subdomain: 'de', pathname: '/api/auth/callback' }),
+    env.createUrl({ subdomain: 'en', pathname: '/api/auth/callback' }),
+    env.createUrl({ subdomain: 'es', pathname: '/api/auth/callback' }),
+    env.createUrl({ subdomain: 'fr', pathname: '/api/auth/callback' }),
+    env.createUrl({ subdomain: 'hi', pathname: '/api/auth/callback' }),
+    env.createUrl({ subdomain: 'ta', pathname: '/api/auth/callback' }),
     'http://localhost:3000/api/auth/callback',
   ])
 })

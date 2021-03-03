@@ -24,18 +24,24 @@ import {
   expectIsJsonResponse,
   mockHttpGet,
   returnsText,
-  fetchSerlo,
-  TestEnvironment,
   RestResolver,
   hasInternalServerError,
   expectIsNotFoundResponse,
+  currentTestEnvironment,
+  localTestEnvironment,
 } from './__utils__'
+
+let env: ReturnType<typeof currentTestEnvironment>
+
+beforeEach(() => {
+  env = currentTestEnvironment()
+})
 
 describe('serlo.org/terms', () => {
   test('is in German at de.serlo.org/terms', async () => {
     givenLegalPageWith('de/terms.md', 'Informationen für Weiternutzer')
 
-    const response = await fetchSerlo({ subdomain: 'de', pathname: '/terms' })
+    const response = await env.fetch({ subdomain: 'de', pathname: '/terms' })
 
     expect(await response.text()).toEqual(
       expect.stringContaining('Informationen für Weiternutzer')
@@ -44,7 +50,7 @@ describe('serlo.org/terms', () => {
   test('is in English at en.serlo.org/terms', async () => {
     givenLegalPageWith('en/terms.md', 'Terms of Use')
 
-    const response = await fetchSerlo({ subdomain: 'en', pathname: '/terms' })
+    const response = await env.fetch({ subdomain: 'en', pathname: '/terms' })
 
     expect(await response.text()).toEqual(
       expect.stringContaining('Terms of Use')
@@ -56,7 +62,7 @@ describe('serlo.org/imprint', () => {
   test('is in German at de.serlo.org/imprint', async () => {
     givenLegalPageWith('de/imprint.md', 'Impressum')
 
-    const response = await fetchSerlo({ subdomain: 'de', pathname: '/imprint' })
+    const response = await env.fetch({ subdomain: 'de', pathname: '/imprint' })
 
     expect(await response.text()).toEqual(expect.stringContaining('Impressum'))
   })
@@ -64,7 +70,7 @@ describe('serlo.org/imprint', () => {
   test('is in English at en.serlo.org/imprint', async () => {
     givenLegalPageWith('en/imprint.md', 'Imprint')
 
-    const response = await fetchSerlo({ subdomain: 'en', pathname: '/imprint' })
+    const response = await env.fetch({ subdomain: 'en', pathname: '/imprint' })
 
     expect(await response.text()).toEqual(expect.stringContaining('Imprint'))
   })
@@ -75,7 +81,7 @@ describe('privacy policies', () => {
     test('is in German at de.serlo.org/privacy', async () => {
       givenLegalPageWith('de/privacy/current.md', 'Datenschutzerklärung')
 
-      const response = await fetchSerlo({
+      const response = await env.fetch({
         subdomain: 'de',
         pathname: '/privacy',
       })
@@ -88,7 +94,7 @@ describe('privacy policies', () => {
     test('is in English at en.serlo.org/privacy', async () => {
       givenLegalPageWith('en/privacy/current.md', 'Privacy Policy')
 
-      const response = await fetchSerlo({
+      const response = await env.fetch({
         subdomain: 'en',
         pathname: '/privacy',
       })
@@ -101,7 +107,7 @@ describe('privacy policies', () => {
     test('contains a link to revoke consent', async () => {
       givenLegalPageWith('en/privacy/current.md', '')
 
-      const response = await fetchSerlo({
+      const response = await env.fetch({
         subdomain: 'en',
         pathname: '/privacy',
       })
@@ -114,7 +120,7 @@ describe('privacy policies', () => {
     test('links to the archive of privacy policies', async () => {
       givenLegalPageWith('de/privacy/current.md', '')
 
-      const response = await fetchSerlo({
+      const response = await env.fetch({
         subdomain: 'de',
         pathname: '/privacy',
       })
@@ -129,7 +135,7 @@ describe('privacy policies', () => {
     test('is in German at de.serlo.org/privacy/2020-02-10', async () => {
       givenLegalPageWith('de/privacy/2020-02-10.md', 'Datenschutzerklärung')
 
-      const response = await fetchSerlo({
+      const response = await env.fetch({
         subdomain: 'de',
         pathname: '/privacy/archive/2020-02-10',
       })
@@ -142,7 +148,7 @@ describe('privacy policies', () => {
     test('links to the archive and the current version', async () => {
       givenLegalPageWith('de/privacy/2020-02-10.md', '')
 
-      const response = await fetchSerlo({
+      const response = await env.fetch({
         subdomain: 'de',
         pathname: '/privacy/archive/2020-02-10',
       })
@@ -159,7 +165,7 @@ describe('privacy policies', () => {
     test('is not the same website as serlo.org/privacy', async () => {
       givenLegalPageWith('de/privacy/2020-02-10.md', '')
 
-      const response = await fetchSerlo({
+      const response = await env.fetch({
         subdomain: 'de',
         pathname: '/privacy/archive/2020-02-10',
       })
@@ -176,7 +182,7 @@ describe('privacy policies', () => {
       '[Google Analytics deaktivieren](JS-GOOGLE-ANALYTICS-DEACTIVATE)'
     )
 
-    const response = await fetchSerlo({
+    const response = await env.fetch({
       subdomain: 'de',
       pathname: '/privacy/archive/2020-02-10',
     })
@@ -189,7 +195,7 @@ describe('privacy policies', () => {
   })
 
   test('serlo.org/privacy/json returns list of privacy versions', async () => {
-    const response = await fetchSerlo({
+    const response = await env.fetch({
       subdomain: 'de',
       pathname: '/privacy/json',
     })
@@ -202,7 +208,7 @@ describe('English version is the default version', () => {
   test('for fr.serlo.org/terms', async () => {
     givenLegalPageWith('en/terms.md', 'Terms of Use')
 
-    const response = await fetchSerlo({ subdomain: 'fr', pathname: '/terms' })
+    const response = await env.fetch({ subdomain: 'fr', pathname: '/terms' })
 
     expect(await response.text()).toEqual(
       expect.stringContaining('Terms of Use')
@@ -212,7 +218,7 @@ describe('English version is the default version', () => {
   test('for fr.serlo.org/imprint', async () => {
     givenLegalPageWith('en/imprint.md', 'Imprint')
 
-    const response = await fetchSerlo({ subdomain: 'fr', pathname: '/imprint' })
+    const response = await env.fetch({ subdomain: 'fr', pathname: '/imprint' })
 
     expect(await response.text()).toEqual(expect.stringContaining('Imprint'))
   })
@@ -220,7 +226,7 @@ describe('English version is the default version', () => {
   test('for fr.serlo.org/privacy', async () => {
     givenLegalPageWith('en/privacy/current.md', 'Privacy Policy')
 
-    const response = await fetchSerlo({ subdomain: 'fr', pathname: '/privacy' })
+    const response = await env.fetch({ subdomain: 'fr', pathname: '/privacy' })
 
     expect(await response.text()).toEqual(
       expect.stringContaining('Privacy Policy')
@@ -232,7 +238,7 @@ describe('trailing slashes are allowed in accessing the legal pages', () => {
   test('for serlo.org/terms/', async () => {
     givenLegalPageWith('en/terms.md', 'Terms of Use')
 
-    const response = await fetchSerlo({ subdomain: 'en', pathname: '/terms/' })
+    const response = await env.fetch({ subdomain: 'en', pathname: '/terms/' })
 
     expect(await response.text()).toEqual(
       expect.stringContaining('Terms of Use')
@@ -242,7 +248,7 @@ describe('trailing slashes are allowed in accessing the legal pages', () => {
   test('for serlo.org/imprint/', async () => {
     givenLegalPageWith('en/imprint.md', 'Imprint')
 
-    const response = await fetchSerlo({ subdomain: 'en', pathname: '/imprint' })
+    const response = await env.fetch({ subdomain: 'en', pathname: '/imprint' })
 
     expect(await response.text()).toEqual(expect.stringContaining('Imprint'))
   })
@@ -250,7 +256,7 @@ describe('trailing slashes are allowed in accessing the legal pages', () => {
   test('for serlo.org/privacy/', async () => {
     givenLegalPageWith('en/privacy/current.md', 'Privacy Policy')
 
-    const response = await fetchSerlo({
+    const response = await env.fetch({
       subdomain: 'en',
       pathname: '/privacy/',
     })
@@ -264,7 +270,7 @@ describe('trailing slashes are allowed in accessing the legal pages', () => {
 test('legal pages have a link to revoke consent', async () => {
   givenLegalPageWith('en/imprint.md', 'Imprint')
 
-  const response = await fetchSerlo({ subdomain: 'en', pathname: '/imprint' })
+  const response = await env.fetch({ subdomain: 'en', pathname: '/imprint' })
 
   expect(await response.text()).toEqual(
     expect.stringContaining('<a href="/consent">Revoke consent</a>')
@@ -272,12 +278,13 @@ test('legal pages have a link to revoke consent', async () => {
 })
 
 test('returns 404 response when current version of legal page cannot be requested', async () => {
+  const env = localTestEnvironment()
+
   givenLegalPage('en/terms.md', hasInternalServerError())
 
-  const response = await fetchSerlo({
+  const response = await env.fetch({
     subdomain: 'en',
     pathname: '/terms/',
-    environment: TestEnvironment.Local,
   })
 
   await expectIsNotFoundResponse(response)
@@ -288,12 +295,13 @@ describe('html of legal pages is sanitized', () => {
     '<iframe src="malware.com"></iframe>',
     '<script>alert(42)</script>',
   ])('tag type: %s', async (exampleCode) => {
+    const env = localTestEnvironment()
+
     givenLegalPageWith('en/imprint.md', exampleCode)
 
-    const response = await fetchSerlo({
+    const response = await env.fetch({
       subdomain: 'en',
       pathname: '/imprint',
-      environment: TestEnvironment.Local,
     })
 
     expect(await response.text()).not.toEqual(

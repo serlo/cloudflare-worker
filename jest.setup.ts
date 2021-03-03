@@ -37,14 +37,15 @@ import {
   givenSerlo,
   defaultSerloServer,
   currentTestEnvironment,
-  TestEnvironment,
-  getDomain,
+  givenFrontend,
+  defaultFrontendServer,
 } from './__tests__/__utils__'
 
 const randomCopy = Math.random
+const timeout = currentTestEnvironment().getNeededTimeout()
 
-if (currentTestEnvironment() !== TestEnvironment.Local) {
-  jest.setTimeout(20000)
+if (timeout) {
+  jest.setTimeout(timeout)
 }
 
 beforeAll(() => {
@@ -56,8 +57,8 @@ beforeAll(() => {
 beforeEach(() => {
   global.API_SECRET = 'secret'
 
-  global.DOMAIN = getDomain(currentTestEnvironment())
-  global.FRONTEND_DOMAIN = 'frontend.serlo.org'
+  global.DOMAIN = 'serlo.local'
+  global.FRONTEND_DOMAIN = 'frontend.serlo.local'
   global.FRONTEND_PROBABILITY_DESKTOP = '1'
   global.FRONTEND_PROBABILITY_MOBILE = '1'
   global.FRONTEND_PROBABILITY_AUTHENTICATED = '1'
@@ -72,6 +73,7 @@ beforeEach(() => {
   global.uuids = new Array<Uuid>()
 
   givenApi(defaultApiServer())
+  givenFrontend(defaultFrontendServer())
   givenSerlo(defaultSerloServer())
 })
 
