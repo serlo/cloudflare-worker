@@ -148,7 +148,7 @@ class RemoteEnvironment extends TestEnvironment {
       if (
         error instanceof FetchError &&
         /ECONNRESET/.test(error.message) &&
-        retry < 2
+        retry < 3
       ) {
         await new Promise((resolve) => setTimeout(resolve, 1000))
 
