@@ -24,9 +24,9 @@ import { edtrIoStats } from './are-we-edtr-io-yet'
 import { authFrontendSectorIdentifierUriValidation } from './auth'
 import { embed } from './embed'
 import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
+import { legalPages } from './legal-pages'
 import { maintenanceMode } from './maintenance'
 import { redirects } from './redirects'
-import { staticPages } from './static-pages'
 import { Url } from './utils'
 
 addEventListener('fetch', (event: Event) => {
@@ -40,7 +40,7 @@ export async function handleRequest(request: Request) {
     (await edtrIoStats(request)) ||
     (await maintenanceMode(request)) ||
     (await enforceHttps(request)) ||
-    (await staticPages(request)) ||
+    (await legalPages(request)) ||
     (await frontendSpecialPaths(request)) ||
     (await redirects(request)) ||
     (await embed(request)) ||

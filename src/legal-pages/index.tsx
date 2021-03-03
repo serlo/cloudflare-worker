@@ -48,7 +48,7 @@ import {
 
 const defaultLanguage = Instance.En
 
-export async function staticPages(
+export async function legalPages(
   request: Request,
   unrevisedConfig = defaultUnrevisedConfig,
   revisedConfig = defaultRevisedConfig
@@ -321,13 +321,12 @@ async function fetchContent<A extends Page>(
   const response = await fetchWithCache(page.url)
 
   if (response.ok) {
-    const text = await response.text()
-    const rawContent = page.url.endsWith('.md') ? markdownToHtml(text) : text
+    const rawContent = markdownToHtml(await response.text())
     const sanitizedContent = sanitizeHtml(rawContent)
-    const content = sanitizedContent
-      .replace('JS-GOOGLE-ANALYTICS-DEACTIVATE', 'javascript:gaOptout();')
-      // TODO: disabled until Matomo is live
-      .replace('MATOMO-OPT-OUT-FORM', '')
+    const content = sanitizedContent.replace(
+      'JS-GOOGLE-ANALYTICS-DEACTIVATE',
+      'javascript:gaOptout();'
+    )
 
     return { ...page, content }
   } else {

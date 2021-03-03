@@ -25,7 +25,7 @@ import {
   UnrevisedPage as UnrevisedPageOriginal,
   RevisedPage as RevisedPageOriginal,
   RevisionsOverview as RevisionsOverviewOriginal,
-} from '../src/static-pages'
+} from '../src/legal-pages'
 import { Instance } from '../src/utils'
 import { createStaticComponent } from './utils'
 
