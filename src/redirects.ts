@@ -112,6 +112,19 @@ export async function redirects(request: Request) {
     return url.toRedirect()
   }
 
+  if (isInstance(url.subdomain)) {
+    // See https://github.com/serlo/serlo.org-cloudflare-worker/issues/184
+    // Can be deleted after a while after the /entity/view/<id>/toc route
+    // got deleted
+    const match = /^\/entity\/view\/(\d+)\/toc$/.exec(url.pathname)
+
+    if (match) {
+      url.pathname = `/${match[1]}`
+
+      return url.toRedirect(308)
+    }
+  }
+
   if (
     isInstance(url.subdomain) &&
     url.isProbablyUuid() &&

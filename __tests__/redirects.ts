@@ -103,6 +103,19 @@ test('start.serlo.org', async () => {
   expectToBeRedirectTo(response, target, 301)
 })
 
+test('/entity/view/<id>/toc gets redirected to /<id>', async () => {
+  const response = await env.fetch({
+    subdomain: 'de',
+    pathname: '/entity/view/58362/toc',
+  })
+
+  expectToBeRedirectTo(
+    response,
+    env.createUrl({ subdomain: 'de', pathname: '/58362' }),
+    308
+  )
+})
+
 test.each(['/labschool', '/labschool/'])(
   'de.serlo.org%s redirects to labschool homepage',
   async (pathname) => {
