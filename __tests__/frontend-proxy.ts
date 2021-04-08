@@ -196,6 +196,32 @@ describe('when request contains content api parameter', () => {
   })
 })
 
+describe('when request contains header X-From: legacy-serlo.org', () => {
+  let response: Response
+
+  beforeEach(async () => {
+    setupProbabilityFor(Backend.Frontend)
+
+    response = await currentTestEnvironment().fetch(
+      {
+        subdomain: 'en',
+        pathname: '/',
+      },
+      { headers: { 'X-From': 'legacy-serlo.org' } }
+    )
+  })
+
+  test('chooses legacy backend', async () => {
+    await expectLegacy(response)
+  })
+
+  test('does not set cookie with random number', () => {
+    expect(response.headers.get('Set-Cookie')).not.toEqual(
+      expect.stringContaining('useFrontend')
+    )
+  })
+})
+
 describe('uses cookie "useFrontend" to determine backend', () => {
   test.each([
     {
