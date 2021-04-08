@@ -98,7 +98,8 @@ export async function frontendProxy(
   if (
     url.hasContentApiParameters() ||
     (global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND === 'true' &&
-      isAuthenticated)
+      isAuthenticated) ||
+    request.headers.get('X-From') === 'legacy-serlo.org'
   )
     return await fetchBackend({ ...config, useFrontend: false, request })
 
