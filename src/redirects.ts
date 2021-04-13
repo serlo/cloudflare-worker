@@ -63,6 +63,8 @@ export async function redirects(request: Request) {
         return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
       case '/labschool':
         return Response.redirect('https://meet.google.com/cvd-pame-zod')
+      case '/maxsimon':
+        return Response.redirect('https://meet.google.com/jbx-bjba-qjh')
       case '/1':
         return Response.redirect('https://meet.google.com/fxn-iprp-ezx')
       case '/2':
@@ -70,7 +72,7 @@ export async function redirects(request: Request) {
       case '/3':
         return Response.redirect('https://meet.google.com/qma-zouf-vcz')
       case '/4':
-        return Response.redirect('https://meet.google.com/iskddmh-wrh')
+        return Response.redirect('https://meet.google.com/ynr-brkr-vds')
       case '/5':
         return Response.redirect('https://meet.google.com/xqt-cdpm-nco')
       case '/6':
