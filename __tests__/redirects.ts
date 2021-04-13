@@ -46,7 +46,7 @@ describe('meet.serlo.org', () => {
     ['/1', '/fxn-iprp-ezx'],
     ['/2', '/yku-aksd-fkk'],
     ['/3', '/qma-zouf-vcz'],
-    ['/4', '/iskddmh-wrh'],
+    ['/4', '/ynr-brkr-vds'],
     ['/5', '/xqt-cdpm-nco'],
     ['/6', '/sui-yuwv-suh'],
   ])('meet.serlo.org%s', async (pathname, googleMeetRoom) => {

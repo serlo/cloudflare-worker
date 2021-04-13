@@ -72,7 +72,7 @@ export async function redirects(request: Request) {
       case '/3':
         return Response.redirect('https://meet.google.com/qma-zouf-vcz')
       case '/4':
-        return Response.redirect('https://meet.google.com/iskddmh-wrh')
+        return Response.redirect('https://meet.google.com/ynr-brkr-vds')
       case '/5':
         return Response.redirect('https://meet.google.com/xqt-cdpm-nco')
       case '/6':
