@@ -353,4 +353,26 @@ describe('redirects to current path of an resource', () => {
 
     await expectContainsText(response, ['Zahlen und Größen'])
   })
+
+  test('redirects to article when single comment is requested', async () => {
+    givenUuid({
+      id: 65395,
+      __typename: 'Comment',
+      alias: '/mathe/1573/vektor#comment-65395',
+      legacyObject: { alias: '/mathe/1573/'}
+    })
+
+    const response = await env.fetch({
+      subdomain: 'de',
+      pathname: '/65395',
+    })
+
+    const target = env.createUrl({
+      subdomain: 'de',
+      pathname: '/mathe/1573/',
+    })
+    expectToBeRedirectTo(response, target, 301)
+  })
 })
+
+

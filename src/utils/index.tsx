@@ -72,6 +72,7 @@ const ApiResult = t.type({
         instance: t.string,
         pages: t.array(t.type({ alias: t.string })),
         exercise: t.type({ alias: t.string }),
+        legacyObject: t.type({ alias: t.string}),
       }),
     ]),
   }),
@@ -117,6 +118,11 @@ export async function getPathInfo(
             alias
           }
         }
+        ... on Comment {
+          legacyObject {
+            alias
+          }
+        }
       }
     }`
   const variables = { alias: { instance: lang, path } }
@@ -142,12 +148,13 @@ export async function getPathInfo(
 
   const uuid = apiResult.right.data.uuid
   const currentPath =
-    uuid.exercise !== undefined
+    uuid.legacyObject !== undefined 
+      ? uuid.legacyObject.alias 
+      : uuid.exercise !== undefined
       ? uuid.exercise.alias
       : uuid.pages !== undefined && uuid.pages.length > 0
       ? uuid.pages[0].alias
-      : uuid.alias ?? path
-
+      : uuid.alias ?? path 
   const result = {
     typename: uuid.__typename,
     currentPath,
