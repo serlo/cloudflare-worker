@@ -359,7 +359,7 @@ describe('redirects to current path of an resource', () => {
       id: 65395,
       __typename: 'Comment',
       alias: '/mathe/1573/vektor#comment-65395',
-      legacyObject: { alias: '/mathe/1573/'}
+      legacyObject: { alias: '/mathe/1573/' },
     })
 
     const response = await env.fetch({
@@ -374,5 +374,3 @@ describe('redirects to current path of an resource', () => {
     expectToBeRedirectTo(response, target, 301)
   })
 })
-
-
