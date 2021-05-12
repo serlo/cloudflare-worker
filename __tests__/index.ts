@@ -31,6 +31,7 @@ import {
   Backend,
   givenUuid,
   currentTestEnvironment,
+  currentTestEnvironmentWhen,
 } from './__utils__'
 
 describe('Enforce HTTPS', () => {
@@ -101,6 +102,18 @@ describe('Semantic file names', () => {
 
     expect(await response.text()).toBe('image')
   })
+})
+
+test('Disallow robots in staging', async () => {
+  global.DOMAIN = 'serlo-staging.org'
+  const env = currentTestEnvironmentWhen(
+    (config) => config.DOMAIN === 'serlo-staging.org'
+  )
+
+  const request = new Request('https://de.serlo-staging.dev/robots.txt')
+  const response = await env.fetchRequest(request)
+
+  expect(await response.text()).toBe('User-agent: *\nDisallow: /\n')
 })
 
 describe('Packages', () => {
