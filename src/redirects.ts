@@ -136,10 +136,11 @@ export async function redirects(request: Request) {
 
     if (pathInfo !== null) {
       const newUrl = new Url(url.href)
-      const { currentPath, instance } = pathInfo
+      const { currentPath, instance, hash } = pathInfo
 
       if (instance && url.subdomain !== instance) newUrl.subdomain = instance
       if (url.pathname !== currentPath) newUrl.pathname = currentPath
+      if (hash !== undefined) newUrl.hash = hash
 
       if (newUrl.href !== url.href) return newUrl.toRedirect(301)
     }
