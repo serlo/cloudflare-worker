@@ -59,7 +59,7 @@ export function getCookieValue(
 
 const PathInfo = t.intersection([
   t.type({ typename: t.string, currentPath: t.string }),
-  t.partial({ instance: t.string }),
+  t.partial({ instance: t.string, hash: t.string }),
 ])
 type PathInfo = t.TypeOf<typeof PathInfo>
 
@@ -73,6 +73,7 @@ const ApiResult = t.type({
         pages: t.array(t.type({ alias: t.string })),
         exercise: t.type({ alias: t.string }),
         legacyObject: t.type({ alias: t.string }),
+        id: t.number,
       }),
     ]),
   }),
@@ -119,6 +120,7 @@ export async function getPathInfo(
           }
         }
         ... on Comment {
+          id
           legacyObject {
             alias
           }
@@ -159,6 +161,9 @@ export async function getPathInfo(
     typename: uuid.__typename,
     currentPath,
     instance: uuid.instance,
+    ...(uuid.legacyObject !== undefined
+      ? { hash: `#comment-${uuid.id ?? 0}` }
+      : {}),
   }
 
   await global.PATH_INFO_KV.put(cacheKey, JSON.stringify(result), {
