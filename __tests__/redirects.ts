@@ -366,7 +366,7 @@ describe('redirects to current path of an resource', () => {
 
     const target = env.createUrl({
       subdomain: 'de',
-      pathname: '/mathe/1573/vektor',
+      pathname: '/mathe/1573/vektor#comment-65395',
     })
     expectToBeRedirectTo(response, target, 301)
   })

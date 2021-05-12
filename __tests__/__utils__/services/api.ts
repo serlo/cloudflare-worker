@@ -64,7 +64,7 @@ export function defaultApiServer(): RestResolver {
       return res(ctx.status(404, statusText))
     }
 
-    const result = R.omit(['id', 'oldAlias'], uuid)
+    const result = R.omit(['oldAlias'], uuid)
 
     if (result.alias !== undefined)
       result.alias = encodeURIComponent(result.alias).replace(/%2F/g, '/')

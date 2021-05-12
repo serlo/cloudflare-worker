@@ -35,6 +35,7 @@ describe('api calls', () => {
       query($alias: AliasInput) {
         uuid(alias: $alias) {
           __typename
+          id
           ... on Page {
             alias
           }
@@ -55,7 +56,7 @@ describe('api calls', () => {
 
     expect(response.status).toBe(200)
     expect(await response.json()).toEqual({
-      data: { uuid: { __typename: 'Page', alias: '/23591/math' } },
+      data: { uuid: { __typename: 'Page', alias: '/23591/math', id: 23591 } },
     })
   })
 })
