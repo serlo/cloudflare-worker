@@ -358,18 +358,15 @@ describe('redirects to current path of an resource', () => {
     givenUuid({
       id: 65395,
       __typename: 'Comment',
-      alias: '/mathe/1573/vektor#comment-65395',
-      legacyObject: { alias: '/mathe/1573/' },
+      alias: '/mathe/65395/65395',
+      legacyObject: { alias: '/mathe/1573/vektor' },
     })
 
-    const response = await env.fetch({
-      subdomain: 'de',
-      pathname: '/65395',
-    })
+    const response = await env.fetch({ subdomain: 'de', pathname: '/65395' })
 
     const target = env.createUrl({
       subdomain: 'de',
-      pathname: '/mathe/1573/',
+      pathname: '/mathe/1573/vektor',
     })
     expectToBeRedirectTo(response, target, 301)
   })
