@@ -41,6 +41,7 @@ export async function handleRequest(request: Request) {
     (await maintenanceMode(request)) ||
     (await enforceHttps(request)) ||
     (await legalPages(request)) ||
+    stagingRobots(request) ||
     (await frontendSpecialPaths(request)) ||
     (await redirects(request)) ||
     (await embed(request)) ||
@@ -58,6 +59,16 @@ async function enforceHttps(request: Request) {
   if (url.protocol !== 'http:') return null
   url.protocol = 'https:'
   return Promise.resolve(url.toRedirect())
+}
+
+function stagingRobots(request: Request) {
+  const url = Url.fromRequest(request)
+
+  if (url.domain === 'serlo-staging.dev' && url.pathname === '/robots.txt') {
+    return new Response('User-agent: *\nDisallow: /\n')
+  } else {
+    return null
+  }
 }
 
 async function semanticFileNames(request: Request) {
