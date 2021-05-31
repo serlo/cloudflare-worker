@@ -121,7 +121,7 @@ class RemoteEnvironment extends TestEnvironment {
     const configFile = path.join(rootDir, 'wrangler.toml')
     const configContent = fs.readFileSync(configFile, 'utf8')
 
-    return (TOML.parse(configContent) as unknown) as Config
+    return TOML.parse(configContent) as unknown as Config
   }
 
   public getNeededTimeout() {
