@@ -86,9 +86,9 @@ afterAll(() => {
   global.server.close()
 })
 
-global.Response = (NodeResponse as unknown) as typeof Response
-global.Request = (NodeRequest as unknown) as typeof Request
-global.crypto = ({
+global.Response = NodeResponse as unknown as typeof Response
+global.Request = NodeRequest as unknown as typeof Request
+global.crypto = {
   subtle: {
     digest(encoding: string, message: Uint8Array) {
       return Promise.resolve(
@@ -99,7 +99,7 @@ global.crypto = ({
       )
     },
   },
-} as unknown) as typeof crypto
+} as unknown as typeof crypto
 global.TextEncoder = util.TextEncoder
 
 export {}

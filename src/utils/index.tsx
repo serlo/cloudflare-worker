@@ -189,10 +189,10 @@ export async function fetchWithCache(
   url: string | Request,
   init?: RequestInit
 ): Promise<Response> {
-  return await fetch(url, ({
+  return await fetch(url, {
     cf: { cacheTtl: 60 * 60 },
     ...init,
-  } as unknown) as RequestInit)
+  } as unknown as RequestInit)
 }
 
 export function getBasicAuthHeaders(): Record<string, string> {
