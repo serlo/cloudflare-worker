@@ -51,20 +51,20 @@ export async function redirects(request: Request) {
 
   if (url.subdomain === 'meet') {
     const meetRedirects = {
-      '/': '/vtk-ncrc-rdp',
-      '/dev': '/rci-pize-jow',
-      '/einbindung': '/qzv-ojgk-xqw',
-      '/begleitung': '/kon-wdmt-yhb',
-      '/reviewing': '/kon-wdmt-yhb',
-      '/labschool': '/cvd-pame-zod',
-      '/fundraising': '/uus-vjgu-ttr',
-      '/maxsimon': '/jbx-bjba-qjh',
-      '/1': '/fxn-iprp-ezx',
-      '/2': '/yku-aksd-fkk',
-      '/3': '/qma-zouf-vcz',
-      '/4': '/ynr-brkr-vds',
-      '/5': '/xqt-cdpm-nco',
-      '/6': '/sui-yuwv-suh',
+      '/': 'vtk-ncrc-rdp',
+      '/dev': 'rci-pize-jow',
+      '/einbindung': 'qzv-ojgk-xqw',
+      '/begleitung': 'kon-wdmt-yhb',
+      '/reviewing': 'kon-wdmt-yhb',
+      '/labschool': 'cvd-pame-zod',
+      '/fundraising': 'uus-vjgu-ttr',
+      '/maxsimon': 'jbx-bjba-qjh',
+      '/1': 'fxn-iprp-ezx',
+      '/2': 'yku-aksd-fkk',
+      '/3': 'qma-zouf-vcz',
+      '/4': 'ynr-brkr-vds',
+      '/5': 'xqt-cdpm-nco',
+      '/6': 'sui-yuwv-suh',
     }
     if (url.pathname in meetRedirects) {
       return Response.redirect(
