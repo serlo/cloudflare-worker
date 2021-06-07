@@ -50,38 +50,29 @@ export async function redirects(request: Request) {
   }
 
   if (url.subdomain === 'meet') {
-    switch (url.pathname) {
-      case '/':
-        return Response.redirect('https://meet.google.com/vtk-ncrc-rdp')
-      case '/dev':
-        return Response.redirect('https://meet.google.com/rci-pize-jow')
-      case '/einbindung':
-        return Response.redirect('https://meet.google.com/qzv-ojgk-xqw')
-      case '/begleitung':
-        return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
-      case '/reviewing':
-        return Response.redirect('https://meet.google.com/kon-wdmt-yhb')
-      case '/labschool':
-        return Response.redirect('https://meet.google.com/cvd-pame-zod')
-      case '/fundraising':
-        return Response.redirect('https://meet.google.com/uus-vjgu-ttr')
-      case '/maxsimon':
-        return Response.redirect('https://meet.google.com/jbx-bjba-qjh')
-      case '/1':
-        return Response.redirect('https://meet.google.com/fxn-iprp-ezx')
-      case '/2':
-        return Response.redirect('https://meet.google.com/yku-aksd-fkk')
-      case '/3':
-        return Response.redirect('https://meet.google.com/qma-zouf-vcz')
-      case '/4':
-        return Response.redirect('https://meet.google.com/ynr-brkr-vds')
-      case '/5':
-        return Response.redirect('https://meet.google.com/xqt-cdpm-nco')
-      case '/6':
-        return Response.redirect('https://meet.google.com/sui-yuwv-suh')
-      default:
-        return createNotFoundResponse()
+    const meetRedirects = {
+      '/': '/vtk-ncrc-rdp',
+      '/dev': '/rci-pize-jow',
+      '/einbindung': '/qzv-ojgk-xqw',
+      '/begleitung': '/kon-wdmt-yhb',
+      '/reviewing': '/kon-wdmt-yhb',
+      '/labschool': '/cvd-pame-zod',
+      '/fundraising': '/uus-vjgu-ttr',
+      '/maxsimon': '/jbx-bjba-qjh',
+      '/1': '/fxn-iprp-ezx',
+      '/2': '/yku-aksd-fkk',
+      '/3': '/qma-zouf-vcz',
+      '/4': '/ynr-brkr-vds',
+      '/5': '/xqt-cdpm-nco',
+      '/6': '/sui-yuwv-suh',
     }
+    if (url.pathname in meetRedirects) {
+      return Response.redirect(
+        `https://meet.google.com/${
+          meetRedirects[url.pathname as keyof typeof meetRedirects]
+        }`
+      )
+    } else return createNotFoundResponse()
   }
 
   if (
