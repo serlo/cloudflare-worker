@@ -19,6 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
+import R from 'ramda'
 
 import {
   Url,
@@ -27,6 +28,23 @@ import {
   isInstance,
   getPathInfo,
 } from './utils'
+
+const meetRedirects: Record<string, string | undefined> = {
+  '/': 'vtk-ncrc-rdp',
+  '/dev': 'rci-pize-jow',
+  '/einbindung': 'qzv-ojgk-xqw',
+  '/begleitung': 'kon-wdmt-yhb',
+  '/reviewing': 'kon-wdmt-yhb',
+  '/labschool': 'cvd-pame-zod',
+  '/fundraising': 'uus-vjgu-ttr',
+  '/maxsimon': 'jbx-bjba-qjh',
+  '/1': 'fxn-iprp-ezx',
+  '/2': 'yku-aksd-fkk',
+  '/3': 'qma-zouf-vcz',
+  '/4': 'ynr-brkr-vds',
+  '/5': 'xqt-cdpm-nco',
+  '/6': 'sui-yuwv-suh',
+}
 
 export async function redirects(request: Request) {
   const url = Url.fromRequest(request)
@@ -50,29 +68,10 @@ export async function redirects(request: Request) {
   }
 
   if (url.subdomain === 'meet') {
-    const meetRedirects = {
-      '/': 'vtk-ncrc-rdp',
-      '/dev': 'rci-pize-jow',
-      '/einbindung': 'qzv-ojgk-xqw',
-      '/begleitung': 'kon-wdmt-yhb',
-      '/reviewing': 'kon-wdmt-yhb',
-      '/labschool': 'cvd-pame-zod',
-      '/fundraising': 'uus-vjgu-ttr',
-      '/maxsimon': 'jbx-bjba-qjh',
-      '/1': 'fxn-iprp-ezx',
-      '/2': 'yku-aksd-fkk',
-      '/3': 'qma-zouf-vcz',
-      '/4': 'ynr-brkr-vds',
-      '/5': 'xqt-cdpm-nco',
-      '/6': 'sui-yuwv-suh',
-    }
-    if (url.pathname in meetRedirects) {
-      return Response.redirect(
-        `https://meet.google.com/${
-          meetRedirects[url.pathname as keyof typeof meetRedirects]
-        }`
-      )
-    } else return createNotFoundResponse()
+    const meetRedirect = meetRedirects[url.pathname]
+    return R.isNil(meetRedirect)
+      ? createNotFoundResponse()
+      : Response.redirect(`https://meet.google.com/${meetRedirect}`)
   }
 
   if (
