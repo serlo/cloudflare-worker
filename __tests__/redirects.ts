@@ -42,6 +42,7 @@ describe('meet.serlo.org', () => {
     ['/begleitung', '/kon-wdmt-yhb'],
     ['/reviewing', '/kon-wdmt-yhb'],
     ['/labschool', '/cvd-pame-zod'],
+    ['/fundraising', '/uus-vjgu-ttr'],
     ['/maxsimon', '/jbx-bjba-qjh'],
     ['/1', '/fxn-iprp-ezx'],
     ['/2', '/yku-aksd-fkk'],
