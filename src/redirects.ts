@@ -56,7 +56,7 @@ export async function redirects(request: Request) {
     )
   }
 
-  if (url.subdomain === 'de') {
+  if (url.subdomain === Instance.De) {
     switch (url.pathname) {
       case '/datenschutz':
         return Response.redirect('https://de.serlo.org/privacy', 301)
@@ -102,7 +102,12 @@ export async function redirects(request: Request) {
   }
 
   if (url.subdomain === 'www' || url.subdomain === '') {
-    url.subdomain = 'de'
+    if (url.pathname === '/global') {
+      url.subdomain = Instance.En
+      return url.toRedirect(301)
+    }
+
+    url.subdomain = Instance.De
     return url.toRedirect()
   }
 
