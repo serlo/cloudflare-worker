@@ -19,7 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import R from 'ramda'
+import { isNil } from 'ramda'
 
 import {
   Url,
@@ -69,7 +69,7 @@ export async function redirects(request: Request) {
 
   if (url.subdomain === 'meet') {
     const meetRedirect = meetRedirects[url.pathname]
-    return R.isNil(meetRedirect)
+    return isNil(meetRedirect)
       ? createNotFoundResponse()
       : Response.redirect(`https://meet.google.com/${meetRedirect}`)
   }
