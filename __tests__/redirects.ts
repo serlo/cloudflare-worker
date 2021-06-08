@@ -97,6 +97,13 @@ test('de.serlo.org/nutzungsbedingungen ', async () => {
   expectToBeRedirectTo(response, target, 301)
 })
 
+test('serlo.org/global -> en.serlo.org/global', async () => {
+  const response = await env.fetch({ pathname: '/global' })
+
+  const target = env.createUrl({ subdomain: 'en', pathname: '/global' })
+  expectToBeRedirectTo(response, target, 301)
+})
+
 test('start.serlo.org', async () => {
   const response = await env.fetch({ subdomain: 'start' })
 
