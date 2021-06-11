@@ -101,6 +101,11 @@ export async function redirects(request: Request) {
     )
   }
 
+  if (isInstance(url.subdomain) && url.pathname === '/user/public') {
+    url.pathname = '/user/me'
+    return url.toRedirect()
+  }
+
   if (url.subdomain === 'www' || url.subdomain === '') {
     if (url.pathname === '/global') {
       url.subdomain = Instance.En
