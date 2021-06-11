@@ -104,6 +104,16 @@ test('serlo.org/global -> en.serlo.org/global', async () => {
   expectToBeRedirectTo(response, target, 301)
 })
 
+test('*.serlo.org/user/public -> *serlo.org/user/me', async () => {
+  const response = await env.fetch({
+    subdomain: 'hi',
+    pathname: '/user/public',
+  })
+
+  const target = env.createUrl({ subdomain: 'hi', pathname: '/user/me' })
+  expectToBeRedirectTo(response, target, 302)
+})
+
 test('start.serlo.org', async () => {
   const response = await env.fetch({ subdomain: 'start' })
 
