@@ -23,6 +23,7 @@ import { DateTime } from 'luxon'
 
 exec()
 
+/* eslint-disable no-console */
 function exec() {
   if (process.argv.length <= 2) {
     console.error('Expecting date')
@@ -49,3 +50,4 @@ function exec() {
     })
   }
 }
+/* eslint-enable no-console */
