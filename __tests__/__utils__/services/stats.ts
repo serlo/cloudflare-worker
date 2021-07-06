@@ -21,20 +21,18 @@
  */
 import { rest } from 'msw'
 
-import { RestResolver } from './utils'
+import { createUrlRegex, RestResolver } from './utils'
 
 export function givenStats(resolver: RestResolver) {
-  global.server.use(rest.get('https://stats.serlo.org/*', resolver))
+  global.server.use(
+    rest.get(createUrlRegex({ subdomains: ['stats'] }), resolver)
+  )
 }
 
 export function defaultStatsServer(): RestResolver {
   return (req, res, ctx) => {
-    const path = req.url.pathname
-
-    if (path !== '/login') {
-      return res(ctx.status(302), ctx.set('location', '/login'))
-    }
-
-    return res(ctx.body('<title>Grafana</title>'))
+    return req.url.pathname !== '/login'
+      ? res(ctx.status(302), ctx.set('location', '/login'))
+      : res(ctx.body('<title>Grafana</title>'))
   }
 }

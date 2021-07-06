@@ -34,6 +34,7 @@ import {
   defaultAssetsServer,
   expectImageReponse,
   givenCssOnPackages,
+  expectToBeRedirectTo,
 } from './__utils__'
 
 describe('Enforce HTTPS', () => {
@@ -183,18 +184,21 @@ describe('HTTPS requests to stats.serlo.org are not altered', () => {
   })
 
   test('when url is https://stats.serlo.org/', async () => {
-    const response = await handleUrl('https://stats.serlo.org/')
+    const env = currentTestEnvironment()
+    const response = await env.fetch({ subdomain: 'stats' })
 
-    // TODO: msw seems to make automatically a redirect here which we
-    // won't have in the cloudflare worker. Look for a way to change the next
-    // line to:
-    //
-    // expectToBeRedirectTo(response, '/login', 302)
-    expect(response.url).toBe('https://stats.serlo.org/login')
+    expectToBeRedirectTo(
+      response,
+      env.createUrl({ subdomain: 'stats', pathname: '/login' }),
+      302
+    )
   })
 
   test('when url is https://stats.serlo.org/login', async () => {
-    const response = await handleUrl('https://stats.serlo.org/login')
+    const response = await currentTestEnvironment().fetch({
+      subdomain: 'stats',
+      pathname: '/login',
+    })
 
     expect(await response.text()).toEqual(
       expect.stringContaining('<title>Grafana</title>')
@@ -204,9 +208,4 @@ describe('HTTPS requests to stats.serlo.org are not altered', () => {
 
 async function handleUrl(url: string): Promise<Response> {
   return await handleRequest(new Request(url))
-}
-
-function expectToBeRedirectTo(response: Response, url: string, status: number) {
-  expect(response.headers.get('Location')).toBe(url)
-  expect(response.status).toBe(status)
 }
