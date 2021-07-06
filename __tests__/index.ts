@@ -32,6 +32,7 @@ import {
   currentTestEnvironmentWhen,
   givenAssets,
   defaultAssetsServer,
+  expectImageReponse,
 } from './__utils__'
 
 describe('Enforce HTTPS', () => {
@@ -88,8 +89,11 @@ describe('Semantic file names', () => {
       pathname: '/meta/serlo.jpg',
     })
 
-    expect(response.headers.get('content-type')).toBe('image/jpeg')
-    expect(response.headers.get('content-length')).toBe('139735')
+    expectImageReponse({
+      response,
+      expectedImageType: 'image/jpeg',
+      expectedContentLength: 139735,
+    })
   })
 
   test('assets.serlo.org/<hash>/<fileName>.<ext>', async () => {
