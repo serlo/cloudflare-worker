@@ -42,7 +42,7 @@ beforeEach(() => {
 test('Disabled (no maintenance planned)', async () => {
   global.MAINTENANCE_KV = createKV()
 
-  await expectNoMaintenanceMode()
+  await expectNoMaintenanceModeForDe()
 })
 
 test('Disabled (before scheduled maintenance)', async () => {
@@ -53,7 +53,7 @@ test('Disabled (before scheduled maintenance)', async () => {
   }
   await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
 
-  await expectNoMaintenanceMode()
+  await expectNoMaintenanceModeForDe()
 })
 
 test('Disabled (after scheduled maintenance)', async () => {
@@ -64,7 +64,7 @@ test('Disabled (after scheduled maintenance)', async () => {
   }
   await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
 
-  await expectNoMaintenanceMode()
+  await expectNoMaintenanceModeForDe()
 })
 
 test('Enabled (de, w/ end)', async () => {
@@ -151,7 +151,7 @@ test('Enabled (different subdomain, w/ end)', async () => {
   }
   await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
 
-  await expectNoMaintenanceMode()
+  await expectNoMaintenanceModeForDe()
 })
 
 test('Enabled (different subdomain, w/o end)', async () => {
@@ -161,10 +161,10 @@ test('Enabled (different subdomain, w/o end)', async () => {
   }
   await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
 
-  await expectNoMaintenanceMode()
+  await expectNoMaintenanceModeForDe()
 })
 
-async function expectNoMaintenanceMode() {
+async function expectNoMaintenanceModeForDe() {
   const response = await fetchMainPage('de')
 
   expect(await response.text()).toEqual(expect.stringContaining('Startseite'))
