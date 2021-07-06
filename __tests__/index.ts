@@ -20,7 +20,6 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-import { handleRequest } from '../src'
 import { Instance } from '../src/utils'
 import {
   mockHttpGet,
@@ -35,6 +34,7 @@ import {
   expectImageReponse,
   givenCssOnPackages,
   expectToBeRedirectTo,
+  localTestEnvironment,
 } from './__utils__'
 
 describe('Enforce HTTPS', () => {
@@ -66,9 +66,13 @@ describe('Enforce HTTPS', () => {
   })
 
   test('Pact Broker', async () => {
-    mockHttpGet('http://pacts.serlo.local/bar', returnsText('content'))
+    const local = localTestEnvironment()
+    mockHttpGet(
+      local.createUrl({ subdomain: 'pacts', pathname: '/bar' }),
+      returnsText('content')
+    )
 
-    const response = await handleUrl('http://pacts.serlo.local/bar')
+    const response = await local.fetch({ subdomain: 'pacts', pathname: '/bar' })
 
     expect(await response.text()).toBe('content')
   })
@@ -205,7 +209,3 @@ describe('HTTPS requests to stats.serlo.org are not altered', () => {
     )
   })
 })
-
-async function handleUrl(url: string): Promise<Response> {
-  return await handleRequest(new Request(url))
-}
