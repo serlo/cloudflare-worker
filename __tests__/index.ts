@@ -35,13 +35,9 @@ describe('Enforce HTTPS', () => {
   const env = currentTestEnvironment()
 
   test('HTTP URL', async () => {
-    const response = await env.fetch({
-      subdomain: 'en',
-      protocol: 'http',
-    })
+    const response = await env.fetch({ subdomain: 'en', protocol: 'http' })
 
-    const target = env.createUrl({ subdomain: 'en' })
-    expectToBeRedirectTo(response, target, 302)
+    expectToBeRedirectTo(response, env.createUrl({ subdomain: 'en' }), 302)
   })
 
   test('HTTPS URL', async () => {
@@ -52,10 +48,8 @@ describe('Enforce HTTPS', () => {
       content: 'Startseite',
     })
 
-    const response = await env.fetch({
-      subdomain: 'de',
-      protocol: 'https',
-    })
+    const response = await env.fetch({ subdomain: 'de', protocol: 'https' })
+
     expect(await response.text()).toEqual(expect.stringContaining('Startseite'))
   })
 
