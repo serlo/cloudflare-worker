@@ -7,6 +7,9 @@ function init {
 	NORMAL=$(tput sgr0)
 
 	read_arguments "$@"
+
+	print_header "Make sure yarn packages are up to date"
+	yarn install --frozen-lock
 }
 
 function read_arguments {
@@ -21,14 +24,14 @@ function read_arguments {
 
 function main {
 	if [ -n "$NO_UNCOMMITTED_CHANGES" ]; then
-		print_test_header "Check that there are no uncommitted changes when pushing"
+		print_header "Check that there are no uncommitted changes when pushing"
 		test_no_uncommitted_changes_when_pushing
 	fi
 
-	print_test_header "Run linter"
+	print_header "Run linter"
 	yarn lint
 
-	print_test_header "Run all tests"
+	print_header "Run all tests"
 	yarn test
 }
 
@@ -43,7 +46,7 @@ function error {
 	exit 1
 }
 
-function print_test_header {
+function print_header {
 	echo
 	log "=== $@ ==="
 }
