@@ -24,8 +24,6 @@ import { Instance } from '../src/utils'
 import {
   mockHttpGet,
   returnsText,
-  givenStats,
-  defaultStatsServer,
   givenUuid,
   currentTestEnvironment,
   currentTestEnvironmentWhen,
@@ -179,33 +177,5 @@ describe('packages.serlo.org', () => {
 
     expect(response.status).toBe(200)
     expect(response.headers.get('content-type')).toBe('text/css')
-  })
-})
-
-describe('HTTPS requests to stats.serlo.org are not altered', () => {
-  beforeEach(() => {
-    givenStats(defaultStatsServer())
-  })
-
-  test('when url is https://stats.serlo.org/', async () => {
-    const env = currentTestEnvironment()
-    const response = await env.fetch({ subdomain: 'stats' })
-
-    expectToBeRedirectTo(
-      response,
-      env.createUrl({ subdomain: 'stats', pathname: '/login' }),
-      302
-    )
-  })
-
-  test('when url is https://stats.serlo.org/login', async () => {
-    const response = await currentTestEnvironment().fetch({
-      subdomain: 'stats',
-      pathname: '/login',
-    })
-
-    expect(await response.text()).toEqual(
-      expect.stringContaining('<title>Grafana</title>')
-    )
   })
 })

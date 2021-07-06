@@ -55,7 +55,7 @@ export function localTestEnvironment() {
   return new LocalEnvironment()
 }
 
-abstract class TestEnvironment {
+export abstract class TestEnvironment {
   public fetch(spec: UrlSpec, init?: RequestInit) {
     return this.fetchRequest(this.createRequest(spec, init))
   }
