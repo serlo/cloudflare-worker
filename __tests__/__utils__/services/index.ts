@@ -20,7 +20,6 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 export * from './api'
-export * from './assets'
 export * from './database'
 export * from './frontend'
 export * from './serlo'
