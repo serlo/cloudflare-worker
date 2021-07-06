@@ -21,9 +21,38 @@
  */
 import { rest } from 'msw'
 
-import { createUrlRegex } from './utils'
+import { createUrlRegex, currentTestEnvironment } from './__utils__'
 
-export function givenCssOnPackages(pathname: string) {
+beforeEach(async () => {
+  givenCssOnPackages('/serlo-org-client@10.0.0/main.css')
+
+  await global.PACKAGES_KV.put('serlo-org-client@10', 'serlo-org-client@10.0.0')
+})
+
+test('resolves to specific package version when package name is in PACKAGES_KV', async () => {
+  const response = await currentTestEnvironment().fetch({
+    subdomain: 'packages',
+    pathname: '/serlo-org-client@10/main.css',
+  })
+
+  expectCssResponse(response)
+})
+
+test('forwards request when package name is not in PACKAGES_KV', async () => {
+  const response = await currentTestEnvironment().fetch({
+    subdomain: 'packages',
+    pathname: '/serlo-org-client@10.0.0/main.css',
+  })
+
+  expectCssResponse(response)
+})
+
+function expectCssResponse(response: Response) {
+  expect(response.status).toBe(200)
+  expect(response.headers.get('content-type')).toBe('text/css')
+}
+
+function givenCssOnPackages(pathname: string) {
   global.server.use(
     rest.get(createUrlRegex({ subdomains: ['packages'] }), (req, res, ctx) => {
       return req.url.pathname === pathname
