@@ -27,8 +27,6 @@ import {
   returnsText,
   givenStats,
   defaultStatsServer,
-  setupProbabilityFor,
-  Backend,
   givenUuid,
   currentTestEnvironment,
   currentTestEnvironmentWhen,
@@ -48,13 +46,13 @@ describe('Enforce HTTPS', () => {
   })
 
   test('HTTPS URL', async () => {
-    setupProbabilityFor(Backend.Legacy)
     givenUuid({
       __typename: 'Page',
       alias: '/',
       instance: Instance.De,
       content: 'Startseite',
     })
+
     const response = await env.fetch({
       subdomain: 'de',
       protocol: 'https',
