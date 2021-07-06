@@ -19,10 +19,27 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-export * from './api'
-export * from './assets'
-export * from './database'
-export * from './frontend'
-export * from './serlo'
-export * from './stats'
-export * from './utils'
+import { rest } from 'msw'
+
+import { createUrlRegex, RestResolver } from './utils'
+
+export function givenAssets(resolver: RestResolver) {
+  global.server.use(
+    rest.get(createUrlRegex({ subdomains: ['assets'] }), resolver)
+  )
+}
+
+export function defaultAssetsServer(
+  assets: { [P in string]?: { contentType: string; contentLength: number } }
+): RestResolver {
+  return (req, res, ctx) => {
+    const asset = assets[req.url.pathname]
+
+    return asset !== undefined
+      ? res(
+          ctx.set('content-length', asset.contentLength.toString()),
+          ctx.set('content-type', asset.contentType)
+        )
+      : res(ctx.status(404))
+  }
+}

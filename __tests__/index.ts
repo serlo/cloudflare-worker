@@ -30,6 +30,8 @@ import {
   givenUuid,
   currentTestEnvironment,
   currentTestEnvironmentWhen,
+  givenAssets,
+  defaultAssetsServer,
 } from './__utils__'
 
 describe('Enforce HTTPS', () => {
@@ -70,12 +72,24 @@ describe('Enforce HTTPS', () => {
 })
 
 describe('Semantic file names', () => {
+  beforeEach(() => {
+    givenAssets(
+      defaultAssetsServer({
+        '/meta/serlo.jpg': { contentType: 'image/jpeg', contentLength: 139735 },
+      })
+    )
+  })
+
   test('assets.serlo.org/meta/*', async () => {
-    mockHttpGet('https://assets.serlo.org/meta/foo', returnsText('content'))
+    const env = currentTestEnvironment()
 
-    const response = await handleUrl('https://assets.serlo.local/meta/foo')
+    const response = await env.fetch({
+      subdomain: 'assets',
+      pathname: '/meta/serlo.jpg',
+    })
 
-    expect(await response.text()).toBe('content')
+    expect(response.headers.get('content-type')).toBe('image/jpeg')
+    expect(response.headers.get('content-length')).toBe('139735')
   })
 
   test('assets.serlo.org/<hash>/<fileName>.<ext>', async () => {
