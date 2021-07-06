@@ -27,9 +27,6 @@ import {
   givenUuid,
   currentTestEnvironment,
   currentTestEnvironmentWhen,
-  givenAssets,
-  defaultAssetsServer,
-  expectImageReponse,
   expectToBeRedirectTo,
   localTestEnvironment,
 } from './__utils__'
@@ -72,67 +69,6 @@ describe('Enforce HTTPS', () => {
     const response = await local.fetch({ subdomain: 'pacts', pathname: '/bar' })
 
     expect(await response.text()).toBe('content')
-  })
-})
-
-describe('Semantic file names', () => {
-  beforeEach(() => {
-    givenAssets(
-      defaultAssetsServer({
-        '/meta/serlo.jpg': { contentType: 'image/jpeg', contentLength: 139735 },
-        '/5c766c2380ea6_13576fb9538fbbab5bbe8fad96bd16d80f7f5119.png': {
-          contentType: 'image/png',
-          contentLength: 3624,
-        },
-        '/legacy/58f090745b909_16a4cba82bd1cb09434b7f582e555b9ac7531922.png': {
-          contentType: 'image/png',
-          contentLength: 898192,
-        },
-      })
-    )
-  })
-
-  test('assets.serlo.org/meta/*', async () => {
-    const env = currentTestEnvironment()
-
-    const response = await env.fetch({
-      subdomain: 'assets',
-      pathname: '/meta/serlo.jpg',
-    })
-
-    expectImageReponse({
-      response,
-      expectedImageType: 'image/jpeg',
-      expectedContentLength: 139735,
-    })
-  })
-
-  test('assets.serlo.org/<hash>/<fileName>.<ext>', async () => {
-    const response = await currentTestEnvironment().fetch({
-      subdomain: 'assets',
-      pathname:
-        '/5c766c2380ea6_13576fb9538fbbab5bbe8fad96bd16d80f7f5119/ashoka.png',
-    })
-
-    expectImageReponse({
-      response,
-      expectedContentLength: 3624,
-      expectedImageType: 'image/png',
-    })
-  })
-
-  test('assets.serlo.org/legacy/<hash>/<fileName>.<ext>', async () => {
-    const response = await currentTestEnvironment().fetch({
-      subdomain: 'assets',
-      pathname:
-        '/legacy/58f090745b909_16a4cba82bd1cb09434b7f582e555b9ac7531922/garden.png',
-    })
-
-    expectImageReponse({
-      response,
-      expectedContentLength: 898192,
-      expectedImageType: 'image/png',
-    })
   })
 })
 
