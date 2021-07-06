@@ -65,3 +65,39 @@ export function expectToBeRedirectTo(
   expect(response.headers.get('Location')).toBe(url)
   expect(response.status).toBe(status)
 }
+
+export function expectImageReponse({
+  expectedContentLength,
+  expectedImageType,
+  response,
+}: {
+  expectedImageType: string
+  expectedContentLength: number
+  response: Response
+}) {
+  expectHasOkStatus(response)
+  expect(response.headers.get('content-type')).toBe(expectedImageType)
+  expect(response.headers.get('content-length')).toBe(
+    expectedContentLength.toString()
+  )
+}
+
+export function expectImageResponseWithError({
+  expectedContentLength,
+  expectedImageType,
+  response,
+  maxRelativeError = 0.1,
+}: {
+  expectedImageType: string
+  expectedContentLength: number
+  response: Response
+  maxRelativeError?: number
+}) {
+  expectHasOkStatus(response)
+  expect(response.headers.get('content-type')).toBe(expectedImageType)
+  const contentLength = parseInt(response.headers.get('content-length') ?? '')
+
+  expect(
+    Math.abs(contentLength - expectedContentLength) / expectedContentLength
+  ).toBeLessThanOrEqual(maxRelativeError)
+}
