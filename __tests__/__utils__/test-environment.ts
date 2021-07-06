@@ -94,7 +94,8 @@ export class LocalEnvironment extends TestEnvironment {
   }
 
   public fetchRequest(request: Request): Promise<Response> {
-    return handleRequest(request)
+    // CF worker has redirect set to "manual" as default value
+    return handleRequest(new Request(request, { redirect: 'manual' }))
   }
 }
 
