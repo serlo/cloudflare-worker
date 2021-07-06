@@ -2,7 +2,13 @@
 
 This repository contains the source code for the cloudflare worker of Serlo ([https://serlo.org/](https://serlo.org)).
 
-## Testing
+## Development
+
+### Helpful commands
+
+- `yarn test` – run all tests
+- `yarn lint` – run linter against the codebase
+- `yarn check:all` – run all checks (tests and lints)
 
 ### Running tests
 
@@ -20,6 +26,17 @@ At [`__test__/__utils__`](./__tests__/__utils__) there are utility functions for
 - [`fetch-helper.ts`](./__tests__/__utils__/fetch-helper.ts):
   - `fetchSerlo()` - does an request at the current testing environment. For example when `TEST_ENVIRONMENT=staging` it makes a request at `*.serlo-staging.dev`. Use this function whenever possible. By setting `{ environment: TestEnvironment.Locally }` you can always test against the local environment.
 - [`epxect-helper.ts`](./__tests__/__utils__/expect-helper.ts): Various assertation helper you can use.
+
+### Run automatically all checks before pushing
+
+You can use [git hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) to automatically check your codebase before you push. In order to archieve this run the following commands in the root directory:
+
+```sh
+echo 'yarn check:all --no-uncommitted-changes' > .git/hooks/pre-push
+chmod +x .git/hooks/pre-push
+```
+
+You can use the flag `--no-verify` like in `git push --no-verify` to bypass the checks while pushing.
 
 ## Static pages
 
