@@ -77,6 +77,14 @@ describe('Semantic file names', () => {
     givenAssets(
       defaultAssetsServer({
         '/meta/serlo.jpg': { contentType: 'image/jpeg', contentLength: 139735 },
+        '/5c766c2380ea6_13576fb9538fbbab5bbe8fad96bd16d80f7f5119.png': {
+          contentType: 'image/png',
+          contentLength: 3624,
+        },
+        '/legacy/58f090745b909_16a4cba82bd1cb09434b7f582e555b9ac7531922.png': {
+          contentType: 'image/png',
+          contentLength: 898192,
+        },
       })
     )
   })
@@ -97,26 +105,31 @@ describe('Semantic file names', () => {
   })
 
   test('assets.serlo.org/<hash>/<fileName>.<ext>', async () => {
-    mockHttpGet('https://assets.serlo.org/hash.ext', returnsText('image'))
+    const response = await currentTestEnvironment().fetch({
+      subdomain: 'assets',
+      pathname:
+        '/5c766c2380ea6_13576fb9538fbbab5bbe8fad96bd16d80f7f5119/ashoka.png',
+    })
 
-    const response = await handleUrl(
-      'https://assets.serlo.local/hash/fileName.ext'
-    )
-
-    expect(await response.text()).toBe('image')
+    expectImageReponse({
+      response,
+      expectedContentLength: 3624,
+      expectedImageType: 'image/png',
+    })
   })
 
   test('assets.serlo.org/legacy/<hash>/<fileName>.<ext>', async () => {
-    mockHttpGet(
-      'https://assets.serlo.org/legacy/hash.ext',
-      returnsText('image')
-    )
+    const response = await currentTestEnvironment().fetch({
+      subdomain: 'assets',
+      pathname:
+        '/legacy/58f090745b909_16a4cba82bd1cb09434b7f582e555b9ac7531922/garden.png',
+    })
 
-    const response = await handleUrl(
-      'https://assets.serlo.local/legacy/hash/fileName.ext'
-    )
-
-    expect(await response.text()).toBe('image')
+    expectImageReponse({
+      response,
+      expectedContentLength: 898192,
+      expectedImageType: 'image/png',
+    })
   })
 })
 
