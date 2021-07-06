@@ -78,13 +78,14 @@ test('Enabled (de, w/ end)', async () => {
 
   const response = await fetchMainPage('de')
 
-  expect(response.status).toEqual(503)
-  expectContentTypeIsHtml(response)
   expect(response.headers.get('Retry-After')).toEqual(end.toHTTP())
-  await expectContainsText(response, [
-    'Wartungsmodus',
-    `gegen ${end.setLocale('de').toFormat('HH:mm (ZZZZ)')} wieder online`,
-  ])
+  await expectMaintenanceResponse({
+    response,
+    expectTexts: [
+      'Wartungsmodus',
+      `gegen ${end.setLocale('de').toFormat('HH:mm (ZZZZ)')} wieder online`,
+    ],
+  })
 })
 
 test('Enabled (en, w/ end)', async () => {
@@ -98,13 +99,14 @@ test('Enabled (en, w/ end)', async () => {
 
   const response = await fetchMainPage('en')
 
-  expect(response.status).toEqual(503)
-  expectContentTypeIsHtml(response)
   expect(response.headers.get('Retry-After')).toEqual(end.toHTTP())
-  await expectContainsText(response, [
-    'Maintenance mode',
-    `We expect to be back by ${end.setLocale('en').toFormat('HH:mm (ZZZZ)')}`,
-  ])
+  await expectMaintenanceResponse({
+    response,
+    expectTexts: [
+      'Maintenance mode',
+      `We expect to be back by ${end.setLocale('en').toFormat('HH:mm (ZZZZ)')}`,
+    ],
+  })
 })
 
 test('Enabled (de, w/o end)', async () => {
@@ -116,12 +118,10 @@ test('Enabled (de, w/o end)', async () => {
 
   const response = await fetchMainPage('de')
 
-  expect(response.status).toEqual(503)
-  expectContentTypeIsHtml(response)
-  await expectContainsText(response, [
-    'Wartungsmodus',
-    'in ein paar Stunden wieder online',
-  ])
+  await expectMaintenanceResponse({
+    response,
+    expectTexts: ['Wartungsmodus', 'in ein paar Stunden wieder online'],
+  })
 })
 
 test('Enabled (en, w/o end)', async () => {
@@ -133,12 +133,13 @@ test('Enabled (en, w/o end)', async () => {
 
   const response = await fetchMainPage('en')
 
-  expect(response.status).toEqual(503)
-  expectContentTypeIsHtml(response)
-  await expectContainsText(response, [
-    'Maintenance mode',
-    'We expect to be back in a couple of hours.',
-  ])
+  await expectMaintenanceResponse({
+    response,
+    expectTexts: [
+      'Maintenance mode',
+      'We expect to be back in a couple of hours.',
+    ],
+  })
 })
 
 test('Enabled (different subdomain, w/ end)', async () => {
@@ -167,6 +168,18 @@ async function expectNoMaintenanceMode() {
   const response = await fetchMainPage('de')
 
   expect(await response.text()).toEqual(expect.stringContaining('Startseite'))
+}
+
+async function expectMaintenanceResponse({
+  response,
+  expectTexts,
+}: {
+  response: Response
+  expectTexts: string[]
+}) {
+  expect(response.status).toEqual(503)
+  expectContentTypeIsHtml(response)
+  await expectContainsText(response, expectTexts)
 }
 
 async function fetchMainPage(subdomain: string) {
