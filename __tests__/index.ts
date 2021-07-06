@@ -30,7 +30,6 @@ import {
   givenAssets,
   defaultAssetsServer,
   expectImageReponse,
-  givenCssOnPackages,
   expectToBeRedirectTo,
   localTestEnvironment,
 } from './__utils__'
@@ -147,35 +146,4 @@ test('Disallow robots in staging', async () => {
   const response = await env.fetchRequest(request)
 
   expect(await response.text()).toBe('User-agent: *\nDisallow: /\n')
-})
-
-describe('packages.serlo.org', () => {
-  beforeEach(async () => {
-    givenCssOnPackages('/serlo-org-client@10.0.0/main.css')
-
-    await global.PACKAGES_KV.put(
-      'serlo-org-client@10',
-      'serlo-org-client@10.0.0'
-    )
-  })
-
-  test('resolves to specific package version when package name is in PACKAGES_KV', async () => {
-    const response = await currentTestEnvironment().fetch({
-      subdomain: 'packages',
-      pathname: '/serlo-org-client@10/main.css',
-    })
-
-    expect(response.status).toBe(200)
-    expect(response.headers.get('content-type')).toBe('text/css')
-  })
-
-  test('forwards request when package name is not in PACKAGES_KV', async () => {
-    const response = await currentTestEnvironment().fetch({
-      subdomain: 'packages',
-      pathname: '/serlo-org-client@10.0.0/main.css',
-    })
-
-    expect(response.status).toBe(200)
-    expect(response.headers.get('content-type')).toBe('text/css')
-  })
 })
