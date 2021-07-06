@@ -19,11 +19,16 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-export * from './api'
-export * from './assets'
-export * from './database'
-export * from './frontend'
-export * from './packages'
-export * from './serlo'
-export * from './stats'
-export * from './utils'
+import { rest } from 'msw'
+
+import { createUrlRegex } from './utils'
+
+export function givenCssOnPackages(pathname: string) {
+  global.server.use(
+    rest.get(createUrlRegex({ subdomains: ['packages'] }), (req, res, ctx) => {
+      return req.url.pathname === pathname
+        ? res(ctx.set('content-type', 'text/css'))
+        : res(ctx.status(404))
+    })
+  )
+}
