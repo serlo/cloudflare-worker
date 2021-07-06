@@ -33,6 +33,7 @@ import {
   givenAssets,
   defaultAssetsServer,
   expectImageReponse,
+  givenCssOnPackages,
 } from './__utils__'
 
 describe('Enforce HTTPS', () => {
@@ -145,26 +146,34 @@ test('Disallow robots in staging', async () => {
   expect(await response.text()).toBe('User-agent: *\nDisallow: /\n')
 })
 
-describe('Packages', () => {
-  test('packages.serlo.org/<package>/<filePath>', async () => {
-    await global.PACKAGES_KV.put('foo', 'foo@1.0.0')
-    mockHttpGet(
-      'https://packages.serlo.org/foo@1.0.0/bar',
-      returnsText('content')
+describe('packages.serlo.org', () => {
+  beforeEach(async () => {
+    givenCssOnPackages('/serlo-org-client@10.0.0/main.css')
+
+    await global.PACKAGES_KV.put(
+      'serlo-org-client@10',
+      'serlo-org-client@10.0.0'
     )
-
-    const response = await handleUrl('https://packages.serlo.local/foo/bar')
-
-    expect(await response.text()).toBe('content')
   })
 
-  test('packages.serlo.org/<package>/<filePath> (invalid)', async () => {
-    await global.PACKAGES_KV.put('foo', 'foo@1.0.0')
-    mockHttpGet('https://packages.serlo.org/foobar/bar', returnsText('content'))
+  test('resolves to specific package version when package name is in PACKAGES_KV', async () => {
+    const response = await currentTestEnvironment().fetch({
+      subdomain: 'packages',
+      pathname: '/serlo-org-client@10/main.css',
+    })
 
-    const response = await handleUrl('https://packages.serlo.local/foobar/bar')
+    expect(response.status).toBe(200)
+    expect(response.headers.get('content-type')).toBe('text/css')
+  })
 
-    expect(await response.text()).toBe('content')
+  test('forwards request when package name is not in PACKAGES_KV', async () => {
+    const response = await currentTestEnvironment().fetch({
+      subdomain: 'packages',
+      pathname: '/serlo-org-client@10.0.0/main.css',
+    })
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get('content-type')).toBe('text/css')
   })
 })
 
