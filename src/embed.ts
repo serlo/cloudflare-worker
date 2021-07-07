@@ -149,7 +149,9 @@ async function getGeogebraThumbnail(url: URL) {
 
     const thumbnailUrl = data.value.responses.response.item.previewUrl
 
-    const imgRes = await fetch(thumbnailUrl)
+    const imgRes = await fetch(thumbnailUrl, {
+      cf: { cacheTtl: 24 * 60 * 60, cacheEveything: true },
+    } as unknown as RequestInit)
     if (isImageResponse(imgRes)) return imgRes
   } catch (e) {
     // JSON cannot be parsed or preview url cannot be parsed
