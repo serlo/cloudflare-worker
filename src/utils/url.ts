@@ -38,6 +38,7 @@ const pathsFrontendSupportsWithoutUuids = [
   /^\/$/,
   /^\/search$/,
   /^\/spenden$/,
+  /^\/subscriptions\/manage$/,
   /^\/license\/detail\/\d+$/,
   /^\/entity\/repository\/history\/\d+$/,
 ]
