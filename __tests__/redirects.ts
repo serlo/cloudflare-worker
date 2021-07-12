@@ -252,7 +252,7 @@ describe('redirects to current path of an resource', () => {
       content: 'Applets vertauscht?',
     })
 
-    const response = await env.fetch({
+    const response = await localTestEnvironment().fetch({
       subdomain: 'de',
       pathname: '/27778',
     })
