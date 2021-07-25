@@ -114,6 +114,17 @@ test('*.serlo.org/user/public -> *serlo.org/user/me', async () => {
   expectToBeRedirectTo(response, target, 302)
 })
 
+test('de.serlo.org/neuerechtsform', async () => {
+  const response = await env.fetch({
+    subdomain: 'de',
+    pathname: '/neuerechtsform',
+  })
+
+  const target =
+    'https://docs.google.com/document/d/1uoWhJ9icFXCIAWe_UFZxraus6R8oOkTsk5ni4vwL2Rc/edit'
+  expectToBeRedirectTo(response, target, 302)
+})
+
 test('start.serlo.org', async () => {
   const response = await env.fetch({ subdomain: 'start' })
 
