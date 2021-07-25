@@ -93,6 +93,16 @@ export async function redirects(request: Request) {
 
   if (
     url.subdomain === Instance.De &&
+    url.pathnameWithoutTrailingSlash === '/neuerechtsform'
+  ) {
+    return Response.redirect(
+      'https://docs.google.com/document/d/1uoWhJ9icFXCIAWe_UFZxraus6R8oOkTsk5ni4vwL2Rc/edit',
+      302
+    )
+  }
+
+  if (
+    url.subdomain === Instance.De &&
     url.pathnameWithoutTrailingSlash === '/beitreten'
   ) {
     return Response.redirect(
