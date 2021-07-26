@@ -96,7 +96,7 @@ export async function redirects(request: Request) {
     url.pathnameWithoutTrailingSlash === '/neuerechtsform'
   ) {
     return Response.redirect(
-      'https://docs.google.com/document/d/1uoWhJ9icFXCIAWe_UFZxraus6R8oOkTsk5ni4vwL2Rc/edit',
+      'https://drive.google.com/file/d/1G3w2EIXlqvwuZ8LMzsYUjoMf9NbXoDIX/view',
       302
     )
   }
