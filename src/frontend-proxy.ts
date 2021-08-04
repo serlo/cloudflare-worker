@@ -44,7 +44,11 @@ export async function frontendSpecialPaths(
   )
     return await fetchBackend({ ...config, useFrontend: true, request })
 
-  if (url.pathname == '/user/notifications' || url.pathname == '/consent')
+  if (
+    url.pathname == '/user/notifications' ||
+    url.pathname == '/consent' ||
+    url.pathname.startsWith('/event/history')
+  )
     return await fetchBackend({
       ...config,
       useFrontend: true,
@@ -148,7 +152,6 @@ async function fetchBackend({
 
     backendUrl.pathname = backendUrl.pathnameWithoutTrailingSlash
   }
-
   const response = await fetch(new Request(backendUrl.toString(), request), {
     redirect: 'manual',
   })
