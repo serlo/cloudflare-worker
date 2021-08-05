@@ -44,11 +44,7 @@ export async function frontendSpecialPaths(
   )
     return await fetchBackend({ ...config, useFrontend: true, request })
 
-  if (
-    url.pathname == '/user/notifications' ||
-    url.pathname == '/consent' ||
-    url.pathname.startsWith('/event/history')
-  )
+  if (url.pathname == '/user/notifications' || url.pathname == '/consent')
     return await fetchBackend({
       ...config,
       useFrontend: true,

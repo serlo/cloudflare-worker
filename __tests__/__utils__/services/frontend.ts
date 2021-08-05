@@ -71,9 +71,10 @@ export function defaultFrontendServer(): RestResolver {
       content = instance === 'de' ? 'Startseite' : 'The Open Learning Platform'
     } else if (req.url.pathname === '/en/consent') {
       content = 'Consent'
-    } else if (req.url.pathname === '/en/event/history') {
-      content = 'Event Log'
-    } else if (req.url.pathname === '/de/event/history/1555') {
+    } else if (
+      req.url.pathname === '/en/event/history' ||
+      req.url.pathname === '/en/event/history/201375'
+    ) {
       content = 'Event Log'
     } else if (['/search', '/license/detail/1'].includes(pathname)) {
       content = ''
