@@ -434,8 +434,8 @@ describe('special paths', () => {
 
   test('/event/history/[id] always resolve to frontend', async () => {
     const response = await env.fetch({
-      subdomain: 'de',
-      pathname: '/event/history/1555',
+      subdomain: 'en',
+      pathname: '/event/history/201375',
     })
 
     expect(response.status).toBe(200)
