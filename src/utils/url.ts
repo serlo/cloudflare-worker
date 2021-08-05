@@ -41,6 +41,7 @@ const pathsFrontendSupportsWithoutUuids = [
   /^\/subscriptions\/manage$/,
   /^\/license\/detail\/\d+$/,
   /^\/entity\/repository\/history\/\d+$/,
+  /^\/event\/history(\/\d+)?$/,
 ]
 
 export class Url extends URL {
