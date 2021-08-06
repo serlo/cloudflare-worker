@@ -422,6 +422,26 @@ describe('special paths', () => {
     expect(await response.text()).toEqual(expect.stringContaining('Consent'))
   })
 
+  test('/event/history always resolve to frontend', async () => {
+    const response = await env.fetch({
+      subdomain: 'en',
+      pathname: '/event/history',
+    })
+
+    expect(response.status).toBe(200)
+    expect(await response.text()).toEqual(expect.stringContaining('Event Log'))
+  })
+
+  test('/event/history/[id] always resolve to frontend', async () => {
+    const response = await env.fetch({
+      subdomain: 'en',
+      pathname: '/event/history/201375',
+    })
+
+    expect(response.status).toBe(200)
+    expect(await response.text()).toEqual(expect.stringContaining('Event Log'))
+  })
+
   test('/___graphql always resolve to frontend', async () => {
     const response = await env.fetch({
       subdomain: 'en',
