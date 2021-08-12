@@ -148,7 +148,6 @@ async function fetchBackend({
 
     backendUrl.pathname = backendUrl.pathnameWithoutTrailingSlash
   }
-
   const response = await fetch(new Request(backendUrl.toString(), request), {
     redirect: 'manual',
   })

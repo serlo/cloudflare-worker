@@ -55,7 +55,7 @@ export function localTestEnvironment() {
   return new LocalEnvironment()
 }
 
-abstract class TestEnvironment {
+export abstract class TestEnvironment {
   public fetch(spec: UrlSpec, init?: RequestInit) {
     return this.fetchRequest(this.createRequest(spec, init))
   }
@@ -94,7 +94,8 @@ export class LocalEnvironment extends TestEnvironment {
   }
 
   public fetchRequest(request: Request): Promise<Response> {
-    return handleRequest(request)
+    // CF worker has redirect set to "manual" as default value
+    return handleRequest(new Request(request, { redirect: 'manual' }))
   }
 }
 

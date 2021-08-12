@@ -38,6 +38,7 @@ const meetRedirects: Record<string, string | undefined> = {
   '/labschool': 'cvd-pame-zod',
   '/fundraising': 'uus-vjgu-ttr',
   '/maxsimon': 'jbx-bjba-qjh',
+  '/hochschulmathe': 'oud-dpuy-swx',
   '/1': 'fxn-iprp-ezx',
   '/2': 'yku-aksd-fkk',
   '/3': 'qma-zouf-vcz',
@@ -89,6 +90,16 @@ export async function redirects(request: Request) {
   ) {
     url.pathname = '/mathe/universitaet/44323'
     return url.toRedirect(301)
+  }
+
+  if (
+    url.subdomain === Instance.De &&
+    url.pathnameWithoutTrailingSlash === '/neuerechtsform'
+  ) {
+    return Response.redirect(
+      'https://drive.google.com/file/d/1G3w2EIXlqvwuZ8LMzsYUjoMf9NbXoDIX/view',
+      302
+    )
   }
 
   if (
