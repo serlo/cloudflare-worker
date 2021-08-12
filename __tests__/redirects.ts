@@ -44,6 +44,7 @@ describe('meet.serlo.org', () => {
     ['/labschool', '/cvd-pame-zod'],
     ['/fundraising', '/uus-vjgu-ttr'],
     ['/maxsimon', '/jbx-bjba-qjh'],
+    ['/hochschulmathe', '/oud-dpuy-swx'],
     ['/1', '/fxn-iprp-ezx'],
     ['/2', '/yku-aksd-fkk'],
     ['/3', '/qma-zouf-vcz'],
@@ -113,6 +114,20 @@ test('*.serlo.org/user/public -> *serlo.org/user/me', async () => {
   const target = env.createUrl({ subdomain: 'hi', pathname: '/user/me' })
   expectToBeRedirectTo(response, target, 302)
 })
+
+test.each(['/neuerechtsform', '/neuerechtsform/'])(
+  'de.serlo.org%s',
+  async () => {
+    const response = await env.fetch({
+      subdomain: 'de',
+      pathname: '/neuerechtsform',
+    })
+
+    const target =
+      'https://drive.google.com/file/d/1G3w2EIXlqvwuZ8LMzsYUjoMf9NbXoDIX/view'
+    expectToBeRedirectTo(response, target, 302)
+  }
+)
 
 test('start.serlo.org', async () => {
   const response = await env.fetch({ subdomain: 'start' })
@@ -252,7 +267,7 @@ describe('redirects to current path of an resource', () => {
       content: 'Applets vertauscht?',
     })
 
-    const response = await env.fetch({
+    const response = await localTestEnvironment().fetch({
       subdomain: 'de',
       pathname: '/27778',
     })

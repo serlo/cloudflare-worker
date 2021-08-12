@@ -30,6 +30,8 @@ import {
   returnsText,
   currentTestEnvironment,
   localTestEnvironment,
+  expectImageResponseWithError,
+  expectImageReponse,
 } from './__utils__'
 
 describe('embed.serlo.org/thumbnail?url=...', () => {
@@ -60,7 +62,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       const response = await requestThumbnail(
         `https://www.youtube-nocookie.com/embed/${videos.highQuality.id}?autoplay=1&html5=1`
       )
-      expectImageResponse({
+      expectImageResponseWithError({
         response,
         expectedContentLength: videos.highQuality.contentLength,
         expectedImageType: 'image/jpeg',
@@ -71,7 +73,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       const response = await requestThumbnail(
         `https://www.youtube-nocookie.com/embed/${videos.lowQuality.id}?autoplay=1&html5=1`
       )
-      expectImageResponse({
+      expectImageResponseWithError({
         response,
         expectedContentLength: videos.lowQuality.contentLength,
         expectedImageType: 'image/jpeg',
@@ -143,7 +145,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       const response = await requestThumbnail(
         `https://player.vimeo.com/video/${video.id}?autoplay=1`
       )
-      expectImageResponse({
+      expectImageResponseWithError({
         response,
         expectedImageType: 'image/jpeg',
         expectedContentLength: video.contentLength,
@@ -288,7 +290,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
     test('returns thumbnail', async () => {
       const response = await requestThumbnail(video.embedUrl)
-      expectImageResponse({
+      expectImageResponseWithError({
         response,
         expectedImageType: 'image/jpeg',
         expectedContentLength: video.contentLength,
@@ -349,7 +351,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       const response = await requestThumbnail(
         `https://www.geogebra.org/material/iframe/id/${applet.id}`
       )
-      expectImageResponse({
+      expectImageResponseWithError({
         response,
         expectedContentLength: applet.contentLength,
         expectedImageType: 'image/png',
@@ -512,30 +514,12 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
   })
 })
 
-function expectImageResponse({
-  expectedContentLength,
-  expectedImageType,
-  response,
-  maxError = 0.1,
-}: {
-  expectedImageType: string
-  expectedContentLength: number
-  response: Response
-  maxError?: number
-}) {
-  expect(response.status).toBe(200)
-  expect(response.headers.get('content-type')).toBe(expectedImageType)
-  const contentLength = parseInt(response.headers.get('content-length') ?? '')
-
-  expect(
-    Math.abs(contentLength - expectedContentLength) / expectedContentLength
-  ).toBeLessThanOrEqual(maxError)
-}
-
 function expectIsPlaceholderResponse(response: Response) {
-  expect(response.status).toBe(200)
-  expect(response.headers.get('content-type')).toBe('image/png')
-  expect(response.headers.get('content-length')).toBe('135')
+  expectImageReponse({
+    response,
+    expectedImageType: 'image/png',
+    expectedContentLength: 135,
+  })
 }
 
 async function requestThumbnail(
