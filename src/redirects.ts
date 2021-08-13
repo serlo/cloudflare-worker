@@ -131,7 +131,15 @@ export async function redirects(request: Request) {
     // See https://github.com/serlo/serlo.org-cloudflare-worker/issues/184
     // Can be deleted after a while after the /entity/view/<id>/toc route
     // got deleted
-    const match = /^\/entity\/view\/(\d+)\/toc$/.exec(url.pathname)
+    let match = /^\/entity\/view\/(\d+)\/toc$/.exec(url.pathname)
+
+    if (match) {
+      url.pathname = `/${match[1]}`
+
+      return url.toRedirect(308)
+    }
+
+    match = /^\/page\/view\/(\d+)$/.exec(url.pathname)
 
     if (match) {
       url.pathname = `/${match[1]}`
