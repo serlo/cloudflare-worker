@@ -136,7 +136,7 @@ export async function redirects(request: Request) {
     if (match) {
       url.pathname = `/${match[1]}`
 
-      return url.toRedirect(308)
+      return url.toRedirect(301)
     }
 
     match = /^\/page\/view\/(\d+)$/.exec(url.pathname)
@@ -144,7 +144,7 @@ export async function redirects(request: Request) {
     if (match) {
       url.pathname = `/${match[1]}`
 
-      return url.toRedirect(308)
+      return url.toRedirect(301)
     }
   }
 
