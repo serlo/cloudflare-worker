@@ -146,7 +146,7 @@ test('/entity/view/<id>/toc gets redirected to /<id>', async () => {
   expectToBeRedirectTo(
     response,
     env.createUrl({ subdomain: 'de', pathname: '/58362' }),
-    308
+    301
   )
 })
 
@@ -202,6 +202,16 @@ test('www.serlo.org/* redirects to de.serlo.org/*', async () => {
 
   const target = env.createUrl({ subdomain: 'de', pathname: '/foo' })
   expectToBeRedirectTo(response, target, 302)
+})
+
+test('/page/view/:id redirects to /:id', async () => {
+  const response = await env.fetch({
+    subdomain: 'de',
+    pathname: '/page/view/1',
+  })
+
+  const target = env.createUrl({ subdomain: 'de', pathname: '/1' })
+  expectToBeRedirectTo(response, target, 301)
 })
 
 describe('redirects to current path of an resource', () => {
