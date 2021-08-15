@@ -146,7 +146,7 @@ test('/entity/view/<id>/toc gets redirected to /<id>', async () => {
   expectToBeRedirectTo(
     response,
     env.createUrl({ subdomain: 'de', pathname: '/58362' }),
-    308
+    301
   )
 })
 
@@ -211,7 +211,7 @@ test('/page/view/:id redirects to /:id', async () => {
   })
 
   const target = env.createUrl({ subdomain: 'de', pathname: '/1' })
-  expectToBeRedirectTo(response, target, 308)
+  expectToBeRedirectTo(response, target, 301)
 })
 
 describe('redirects to current path of an resource', () => {
