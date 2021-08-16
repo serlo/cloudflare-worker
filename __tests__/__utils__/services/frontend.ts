@@ -76,6 +76,8 @@ export function defaultFrontendServer(): RestResolver {
       req.url.pathname === '/en/event/history/201375'
     ) {
       content = 'Event Log'
+    } else if (req.url.pathname === '/en/entity/unrevised') {
+      content = 'Unrevised Revisions'
     } else if (['/search', '/license/detail/1'].includes(pathname)) {
       content = ''
     } else {
