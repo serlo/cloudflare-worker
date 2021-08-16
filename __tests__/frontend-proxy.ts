@@ -442,6 +442,18 @@ describe('special paths', () => {
     expect(await response.text()).toEqual(expect.stringContaining('Event Log'))
   })
 
+  test('/entity/unrevised always resolve to frontend', async () => {
+    const response = await env.fetch({
+      subdomain: 'en',
+      pathname: '/entity/unrevised',
+    })
+
+    expect(response.status).toBe(200)
+    expect(await response.text()).toEqual(
+      expect.stringContaining('Unrevised Revisions')
+    )
+  })
+
   test('/___graphql always resolve to frontend', async () => {
     const response = await env.fetch({
       subdomain: 'en',
