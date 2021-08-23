@@ -30,8 +30,7 @@ export enum RevisedType {
   Privacy = 'privacy',
 }
 
-const legalRepo =
-  'https://raw.githubusercontent.com/serlo/serlo.org-legal/master'
+const legalRepo = 'https://raw.githubusercontent.com/serlo/serlo.org-legal/main'
 
 // TODO: i18n
 export const titles: {
