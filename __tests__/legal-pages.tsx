@@ -316,7 +316,7 @@ function givenLegalPageWith(path: string, text: string) {
 
 function givenLegalPage(path: string, resolver: RestResolver) {
   mockHttpGet(
-    `https://raw.githubusercontent.com/serlo/serlo.org-legal/master/${path}`,
+    `https://raw.githubusercontent.com/serlo/serlo.org-legal/main/${path}`,
     resolver
   )
 }
