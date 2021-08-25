@@ -128,23 +128,23 @@ export async function redirects(request: Request) {
   }
 
   if (isInstance(url.subdomain)) {
-    // See https://github.com/serlo/serlo.org-cloudflare-worker/issues/184
-    // Can be deleted after a while after the /entity/view/<id>/toc route
-    // got deleted
-    let match = /^\/entity\/view\/(\d+)\/toc$/.exec(url.pathname)
+    const regexes = [
+      // See https://github.com/serlo/serlo.org-cloudflare-worker/issues/184
+      // Can be deleted after a while after the /entity/view/<id>/toc route
+      // got deleted
+      /^\/entity\/view\/(\d+)\/toc$/,
+      /^\/page\/view\/(\d+)$/,
+      /^\/ref\/(\d+)$/,
+    ]
 
-    if (match) {
-      url.pathname = `/${match[1]}`
+    for (const regex of regexes) {
+      const match = regex.exec(url.pathname)
 
-      return url.toRedirect(301)
-    }
+      if (match) {
+        url.pathname = `/${match[1]}`
 
-    match = /^\/page\/view\/(\d+)$/.exec(url.pathname)
-
-    if (match) {
-      url.pathname = `/${match[1]}`
-
-      return url.toRedirect(301)
+        return url.toRedirect(301)
+      }
     }
   }
 
