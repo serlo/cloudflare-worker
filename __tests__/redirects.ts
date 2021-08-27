@@ -214,6 +214,16 @@ test('/page/view/:id redirects to /:id', async () => {
   expectToBeRedirectTo(response, target, 301)
 })
 
+test('/ref/:id redirects to /:id', async () => {
+  const response = await env.fetch({
+    subdomain: 'de',
+    pathname: '/ref/1',
+  })
+
+  const target = env.createUrl({ subdomain: 'de', pathname: '/1' })
+  expectToBeRedirectTo(response, target, 301)
+})
+
 describe('redirects to current path of an resource', () => {
   beforeEach(() => {
     givenUuid({
