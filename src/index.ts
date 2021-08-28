@@ -98,19 +98,21 @@ async function packages(request: Request) {
 
   url.host = 'packages.serlo.org'
 
-  const re = /([^/]+)\//
-  const match = re.exec(url.pathname)
+  const paths = url.pathname.split('/')
+  const resolvedPackage =
+    paths.length >= 2 ? await global.PACKAGES_KV.get(paths[1]) : null
 
-  if (!match) return fetch(url.href, request)
+  if (resolvedPackage) {
+    paths[1] = resolvedPackage
+    url.pathname = paths.join('/')
+  }
 
-  const pkg = match[1]
+  let response = await fetch(url.href, request)
 
-  const resolvedPackage = await global.PACKAGES_KV.get(pkg)
-  if (!resolvedPackage) return fetch(url.href, request)
+  if (resolvedPackage) {
+    response = new Response(response.body, response)
+    response.headers.set('x-package', resolvedPackage)
+  }
 
-  url.pathname = url.pathname.replace(`/${pkg}/`, `/${resolvedPackage}/`)
-  let response = await fetch(new Request(url.href, request))
-  response = new Response(response.body, response)
-  response.headers.set('x-package', resolvedPackage)
   return response
 }
