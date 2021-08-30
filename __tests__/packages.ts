@@ -24,7 +24,7 @@ import { rest } from 'msw'
 import { createUrlRegex, currentTestEnvironment } from './__utils__'
 
 beforeEach(async () => {
-  givenCssOnPackages('/serlo-org-client@10.0.0/main.css')
+  givenCssOnPackagesServer('/serlo-org-client@10.0.0/main.css')
 
   await global.PACKAGES_KV.put('serlo-org-client@10', 'serlo-org-client@10.0.0')
 })
@@ -52,7 +52,7 @@ function expectCssResponse(response: Response) {
   expect(response.headers.get('content-type')).toBe('text/css')
 }
 
-function givenCssOnPackages(pathname: string) {
+function givenCssOnPackagesServer(pathname: string) {
   global.server.use(
     rest.get(createUrlRegex({ subdomains: ['packages'] }), (req, res, ctx) => {
       return req.url.pathname === pathname
