@@ -27,7 +27,7 @@ declare global {
   }
 }
 
-export interface Secrets {
+interface Secrets {
   API_SECRET: string
 }
 
@@ -44,7 +44,7 @@ export interface Variables {
   REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND: 'true' | 'false'
 }
 
-export interface KVs {
+interface KVs {
   MAINTENANCE_KV: KV<'enabled'>
   PACKAGES_KV: KV<string>
   PATH_INFO_KV: KV<import('./utils').CacheKey>

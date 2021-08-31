@@ -230,8 +230,7 @@ const CacheKey = t.brand(
   (text): text is t.Branded<string, CacheKeyBrand> => text.length <= 512,
   'CacheKey'
 )
-
-export type CacheKey = t.TypeOf<typeof CacheKey>
+type CacheKey = t.TypeOf<typeof CacheKey>
 
 export async function toCacheKey(key: string): Promise<CacheKey> {
   const shortenKey = key.length > 512 ? await digestMessage(key) : key
