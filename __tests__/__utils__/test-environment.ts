@@ -88,7 +88,7 @@ export abstract class TestEnvironment {
   }
 }
 
-export class LocalEnvironment extends TestEnvironment {
+class LocalEnvironment extends TestEnvironment {
   public getDomain() {
     return global.DOMAIN
   }
