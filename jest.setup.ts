@@ -78,7 +78,7 @@ beforeEach(() => {
   givenFrontend(defaultFrontendServer())
   givenSerlo(defaultSerloServer())
 
-  global.SENTRY_DNS = 'https://public@127.0.0.1/0'
+  global.SENTRY_DSN = 'https://public@127.0.0.1/0'
   global.sentryEvents = []
   mockSentryServer()
 })
@@ -109,7 +109,7 @@ global.crypto = {
 global.TextEncoder = util.TextEncoder
 
 function mockSentryServer() {
-  const { hostname, pathname } = new URL(global.SENTRY_DNS)
+  const { hostname, pathname } = new URL(global.SENTRY_DSN)
   const sentryUrl = `https://${hostname}/api${pathname}/store/`
 
   global.server.use(
