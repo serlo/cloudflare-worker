@@ -21,21 +21,16 @@
  */
 import { either as E, option as O } from 'fp-ts'
 import * as t from 'io-ts'
-import Toucan from 'toucan-js'
 
-import { Url } from './utils'
+import { SentryReporter, Url } from './utils'
 
-export async function embed(
-  request: Request,
-  sentry: Toucan
-): Promise<Response | null> {
+export async function embed(event: FetchEvent): Promise<Response | null> {
   // example url: embed.serlo.org/thumbnail?url=...
-  const url = Url.fromRequest(request)
+  const url = Url.fromRequest(event.request)
 
   if (url.subdomain !== 'embed') return null
 
-  sentry.setTag('service', 'embed')
-
+  const sentry = new SentryReporter({ event, service: 'embed' })
   const urlParam = url.searchParams.get('url')
 
   // TODO: sentry.setTag('thumbnailUrl', urlParam)
@@ -87,7 +82,7 @@ const VimeoApiResponse = t.type({
   thumbnail_url: t.string,
 })
 
-async function getVimeoThumbnail(url: URL, sentry: Toucan) {
+async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
   const videoId = url.pathname.replace('/video/', '')
 
   if (!/[0-9]+/.test(videoId)) return getPlaceholder()
