@@ -33,7 +33,7 @@ export async function embed(event: FetchEvent): Promise<Response | null> {
   const sentry = new SentryReporter({ event, service: 'embed' })
   const urlParam = url.searchParams.get('url')
 
-  // TODO: sentry.setTag('thumbnailUrl', urlParam)
+  sentry.setContext('thumbnailUrl', urlParam)
 
   if (!urlParam) return getPlaceholder()
 
