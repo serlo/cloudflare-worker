@@ -21,16 +21,22 @@
  */
 import { either as E, option as O } from 'fp-ts'
 import * as t from 'io-ts'
+import Toucan from 'toucan-js'
 
 import { Url } from './utils'
 
-export async function embed(request: Request): Promise<Response | null> {
+export async function embed(
+  request: Request,
+  sentry: Toucan
+): Promise<Response | null> {
   // example url: embed.serlo.org/thumbnail?url=...
   const url = Url.fromRequest(request)
 
   if (url.subdomain !== 'embed') return null
 
   const urlParam = url.searchParams.get('url')
+
+  sentry.setTag('thumbnailUrl', urlParam)
 
   if (!urlParam) return getPlaceholder()
 
@@ -41,7 +47,7 @@ export async function embed(request: Request): Promise<Response | null> {
       case 'youtube-nocookie.com':
         return await getYoutubeThumbnail(videoUrl)
       case 'vimeo.com':
-        return await getVimeoThumbnail(videoUrl)
+        return await getVimeoThumbnail(videoUrl, sentry)
       case 'geogebra.org':
         return await getGeogebraThumbnail(videoUrl)
       case 'wikimedia.org':
@@ -79,7 +85,7 @@ const VimeoApiResponse = t.type({
   thumbnail_url: t.string,
 })
 
-async function getVimeoThumbnail(url: URL) {
+async function getVimeoThumbnail(url: URL, sentry: Toucan) {
   const videoId = url.pathname.replace('/video/', '')
 
   if (!/[0-9]+/.test(videoId)) return getPlaceholder()
@@ -94,7 +100,10 @@ async function getVimeoThumbnail(url: URL) {
   try {
     const data = VimeoApiResponse.decode(await apiResponse.json())
 
-    if (E.isLeft(data)) return getPlaceholder()
+    if (E.isLeft(data)) {
+      sentry.captureMessage('Vimeo API returns malformed JSON', 'warning')
+      return getPlaceholder()
+    }
 
     const url = data.right.thumbnail_url.replace(/_[0-9|x]+/, '')
 

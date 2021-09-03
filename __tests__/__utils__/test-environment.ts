@@ -24,7 +24,7 @@ import fs from 'fs'
 import { FetchError } from 'node-fetch'
 import path from 'path'
 
-import { handleRequest } from '../../src'
+import { handleFetchEvent } from '../../src'
 import { Variables } from '../../src/bindings'
 import { isInstance } from '../../src/utils'
 
@@ -93,9 +93,21 @@ class LocalEnvironment extends TestEnvironment {
     return global.DOMAIN
   }
 
-  public fetchRequest(request: Request): Promise<Response> {
+  public async fetchRequest(originalRequest: Request): Promise<Response> {
     // CF worker has redirect set to "manual" as default value
-    return handleRequest(new Request(request, { redirect: 'manual' }))
+    const request = new Request(originalRequest, { redirect: 'manual' })
+    const waitForPromises: Promise<unknown>[] = []
+
+    const response = await handleFetchEvent({
+      request,
+      waitUntil(promise: Promise<unknown>) {
+        waitForPromises.push(promise)
+      },
+    } as unknown as FetchEvent)
+
+    await Promise.all(waitForPromises)
+
+    return response
   }
 }
 

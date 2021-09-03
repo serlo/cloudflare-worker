@@ -19,6 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
+import { Level } from 'toucan-js/dist/types'
 
 export async function expectContainsText(response: Response, texts: string[]) {
   expect(response).not.toBeNull()
@@ -100,4 +101,30 @@ export function expectImageResponseWithError({
   expect(
     Math.abs(contentLength - expectedContentLength) / expectedContentLength
   ).toBeLessThanOrEqual(maxRelativeError)
+}
+
+export function expectSentryEvent({
+  message,
+  level,
+  error,
+}: {
+  message?: string
+  level?: Level
+  error?: string
+}) {
+  expect(global.sentryEvents).toContainEqual(
+    expect.objectContaining({
+      ...(level ? { level } : error ? { level: 'error' } : {}),
+      ...(message ? { message } : {}),
+      ...(error
+        ? {
+            exception: {
+              values: expect.arrayContaining([
+                expect.objectContaining({ value: error }) as unknown,
+              ]) as unknown,
+            },
+          }
+        : {}),
+    })
+  )
 }
