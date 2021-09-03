@@ -128,3 +128,7 @@ export function expectSentryEvent({
     })
   )
 }
+
+export function expectNoSentryError() {
+  expect(global.sentryEvents).toHaveLength(0)
+}

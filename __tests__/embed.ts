@@ -33,6 +33,7 @@ import {
   expectImageResponseWithError,
   expectImageReponse,
   expectSentryEvent,
+  expectNoSentryError,
 } from './__utils__'
 
 describe('embed.serlo.org/thumbnail?url=...', () => {
@@ -57,6 +58,10 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
     beforeEach(() => {
       givenYoutube(defaultYoutubeServer())
+    })
+
+    afterEach(() => {
+      expectNoSentryError()
     })
 
     test('returns sddefault.jpg thumbnail when it exists', async () => {
