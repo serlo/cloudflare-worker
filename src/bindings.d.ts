@@ -29,6 +29,7 @@ declare global {
 
 interface Secrets {
   API_SECRET: string
+  SENTRY_DNS: string
 }
 
 export interface Variables {

@@ -32,6 +32,7 @@ import {
   localTestEnvironment,
   expectImageResponseWithError,
   expectImageReponse,
+  expectSentryEvent,
 } from './__utils__'
 
 describe('embed.serlo.org/thumbnail?url=...', () => {
@@ -200,6 +201,10 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
             localTestEnvironment()
           )
           expectIsPlaceholderResponse(response)
+          expectSentryEvent({
+            message: 'Vimeo API returns malformed JSON',
+            level: 'warning',
+          })
         })
       })
 
