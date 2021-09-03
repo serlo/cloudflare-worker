@@ -214,7 +214,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           expectSentryEvent({
             message: 'Vimeo API returns malformed JSON',
             level: 'warning',
-            tags: { service: 'embed' },
+            service: 'embed',
             context: { thumbnailUrl },
           })
         })
