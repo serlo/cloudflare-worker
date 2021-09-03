@@ -160,6 +160,8 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     })
 
     describe('returns placeholder', () => {
+      const validThumbnail = `https://player.vimeo.com/video/${video.id}?autoplay=1`
+
       test('when video does not exist', async () => {
         const response = await requestThumbnail(
           `https://player.vimeo.com/video/999999999?autoplay=1`
@@ -205,13 +207,14 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           givenVimeoApi(returnsJson(data))
 
           const response = await requestThumbnail(
-            `https://player.vimeo.com/video/${video.id}?autoplay=1`,
+            validThumbnail,
             localTestEnvironment()
           )
           expectIsPlaceholderResponse(response)
           expectSentryEvent({
             message: 'Vimeo API returns malformed JSON',
             level: 'warning',
+            tags: { service: 'embed' },
           })
         })
       })

@@ -34,9 +34,11 @@ export async function embed(
 
   if (url.subdomain !== 'embed') return null
 
+  sentry.setTag('service', 'embed')
+
   const urlParam = url.searchParams.get('url')
 
-  sentry.setTag('thumbnailUrl', urlParam)
+  // TODO: sentry.setTag('thumbnailUrl', urlParam)
 
   if (!urlParam) return getPlaceholder()
 
