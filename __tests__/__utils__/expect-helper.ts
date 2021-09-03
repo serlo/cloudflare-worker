@@ -107,10 +107,12 @@ export function expectSentryEvent({
   message,
   level,
   error,
+  tags,
 }: {
   message?: string
   level?: Level
   error?: string
+  tags?: Record<string, string>
 }) {
   expect(global.sentryEvents).toContainEqual(
     expect.objectContaining({
@@ -125,6 +127,7 @@ export function expectSentryEvent({
             },
           }
         : {}),
+      ...(tags ? { tags: expect.objectContaining(tags) as unknown } : {}),
     })
   )
 }
