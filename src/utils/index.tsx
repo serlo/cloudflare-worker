@@ -29,6 +29,7 @@ import sanitize from 'sanitize-html'
 import { fetchApi } from '../api'
 import { NotFound } from '../ui'
 
+export { SentryReporter } from './sentry'
 export * from './url'
 
 export enum Instance {

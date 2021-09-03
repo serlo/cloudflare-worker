@@ -19,8 +19,6 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import Toucan from 'toucan-js'
-
 import { api } from './api'
 import { edtrIoStats } from './are-we-edtr-io-yet'
 import { authFrontendSectorIdentifierUriValidation } from './auth'
@@ -39,7 +37,6 @@ addEventListener('fetch', (event: Event) => {
 
 export async function handleFetchEvent(event: FetchEvent) {
   const { request } = event
-  const sentry = new Toucan({ dsn: global.SENTRY_DNS, context: event })
 
   return (
     authFrontendSectorIdentifierUriValidation(request) ||
@@ -50,7 +47,7 @@ export async function handleFetchEvent(event: FetchEvent) {
     stagingRobots(request) ||
     (await frontendSpecialPaths(request)) ||
     (await redirects(request)) ||
-    (await embed(request, sentry)) ||
+    (await embed(event)) ||
     (await semanticFileNames(request)) ||
     (await packages(request)) ||
     (await api(request)) ||
