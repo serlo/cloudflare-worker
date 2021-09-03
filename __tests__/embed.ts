@@ -156,6 +156,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         expectedImageType: 'image/jpeg',
         expectedContentLength: video.contentLength,
       })
+      expectNoSentryError()
     })
 
     describe('returns placeholder', () => {
@@ -164,6 +165,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           `https://player.vimeo.com/video/999999999?autoplay=1`
         )
         expectIsPlaceholderResponse(response)
+        expectNoSentryError()
       })
 
       test('when video id is malformed', async () => {
@@ -171,6 +173,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           `https://player.vimeo.com/video/foo:password@malware.com`
         )
         expectIsPlaceholderResponse(response)
+        expectNoSentryError()
       })
 
       test('when request to vimeo api fails', async () => {
