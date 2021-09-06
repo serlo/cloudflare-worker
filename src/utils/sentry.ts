@@ -43,7 +43,12 @@ export class SentryReporter {
 
   private getToucan() {
     const toucan =
-      this.toucan ?? new Toucan({ dsn: global.SENTRY_DSN, context: this.event })
+      this.toucan ??
+      new Toucan({
+        dsn: global.SENTRY_DSN,
+        context: this.event,
+        environment: global.ENVIRONMENT,
+      })
 
     toucan.setTag('service', this.service)
     toucan.setExtra('context', this.context)
