@@ -21,15 +21,19 @@
  */
 import Toucan from 'toucan-js'
 
+export class SentryFactory {
+  constructor(private event: FetchEvent) {}
+
+  createReporter(service: string) {
+    return new SentryReporter(this.event, service)
+  }
+}
+
 export class SentryReporter {
   private context: Record<string, unknown>
-  private event: FetchEvent
-  private service: string
   private toucan?: Toucan
 
-  constructor({ event, service }: { event: FetchEvent; service: string }) {
-    this.service = service
-    this.event = event
+  constructor(private event: FetchEvent, private service: string) {
     this.context = {}
   }
 

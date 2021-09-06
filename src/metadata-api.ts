@@ -19,19 +19,22 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { isInstance, SentryReporter, Url } from './utils'
+import { isInstance, SentryFactory, Url } from './utils'
 
-export async function metadataApi(event: FetchEvent) {
-  const url = Url.fromRequest(event.request)
+export async function metadataApi(
+  request: Request,
+  sentryFactory: SentryFactory
+) {
+  const url = Url.fromRequest(request)
 
   if (!isInstance(url.subdomain)) return null
   if (!url.pathname.startsWith('/entity/api')) return null
 
-  const sentry = new SentryReporter({ event, service: 'metadata-api' })
+  const sentry = sentryFactory.createReporter('metadata-api')
 
   sentry.setContext('url', url.href)
-  sentry.setContext('userAgent', event.request.headers.get('User-Agent'))
+  sentry.setContext('userAgent', request.headers.get('User-Agent'))
   sentry.captureMessage('Legacy metadata API is used', 'info')
 
-  return fetch(event.request)
+  return fetch(request)
 }

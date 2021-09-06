@@ -22,15 +22,18 @@
 import { option as O } from 'fp-ts'
 import * as t from 'io-ts'
 
-import { SentryReporter, Url } from './utils'
+import { SentryFactory, SentryReporter, Url } from './utils'
 
-export async function embed(event: FetchEvent): Promise<Response | null> {
+export async function embed(
+  request: Request,
+  sentryFactory: SentryFactory
+): Promise<Response | null> {
   // example url: embed.serlo.org/thumbnail?url=...
-  const url = Url.fromRequest(event.request)
+  const url = Url.fromRequest(request)
 
   if (url.subdomain !== 'embed') return null
 
-  const sentry = new SentryReporter({ event, service: 'embed' })
+  const sentry = sentryFactory.createReporter('embed')
   const urlParam = url.searchParams.get('url')
 
   sentry.setContext('thumbnailUrl', urlParam)
