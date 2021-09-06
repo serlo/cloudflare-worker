@@ -27,7 +27,7 @@ import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
 import { legalPages } from './legal-pages'
 import { maintenanceMode } from './maintenance'
 import { redirects } from './redirects'
-import { Url } from './utils'
+import { SentryReporter, Url } from './utils'
 
 addEventListener('fetch', (event: Event) => {
   const e = event as FetchEvent
@@ -46,6 +46,7 @@ export async function handleFetchEvent(event: FetchEvent) {
     (await legalPages(request)) ||
     stagingRobots(request) ||
     (await frontendSpecialPaths(request)) ||
+    sentryHelloWorld(event) ||
     (await redirects(request)) ||
     (await embed(event)) ||
     (await semanticFileNames(request)) ||
@@ -54,6 +55,18 @@ export async function handleFetchEvent(event: FetchEvent) {
     (await frontendProxy(request)) ||
     (await fetch(request))
   )
+}
+
+function sentryHelloWorld(event: FetchEvent) {
+  const url = Url.fromRequest(event.request)
+
+  if (url.subdomain !== '') return null
+  if (url.pathname !== '/sentry-report-hello-world') return null
+
+  const sentry = new SentryReporter({ event, service: 'sentry-hello-world' })
+  sentry.captureMessage('Hello World!', 'info')
+
+  return new Response('Hello-World message send to sentry')
 }
 
 async function enforceHttps(request: Request) {
