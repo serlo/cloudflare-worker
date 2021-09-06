@@ -56,6 +56,10 @@ export function hasInternalServerError(): RestResolver {
   return (_req, res, ctx) => res(ctx.status(500))
 }
 
+export function redirectsTo(location: string): RestResolver {
+  return (_req, res, ctx) => res(ctx.set('location', location), ctx.status(302))
+}
+
 export function createUrlRegex({
   subdomains,
   pathname = /\/.*/,
