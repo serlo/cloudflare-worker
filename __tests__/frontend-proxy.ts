@@ -497,28 +497,6 @@ describe('special paths', () => {
     )
   })
 
-  /* TODO: The following test case is obsolete.
-    describe('special paths where the cookie determines the backend when USER is in FRONTEND_ALLOWED_TYPES', () => {
-      describe.each([
-        'https://de.serlo.org/user/public',
-        'https://de.serlo.org/user/me',
-      ])('URL = %p', (url) => {
-        test.each([Backend.Frontend, Backend.Legacy])(
-          'backend = %p',
-          async (backend) => {
-            global.FRONTEND_ALLOWED_TYPES = '["User"]'
-            setupProbabilityFor(backend)
-            Math.random = jest.fn().mockReturnValue(0.5)
-
-            await expectResponseFrom({
-              backend: getUrlFor(backend, url),
-              request: url,
-            })
-          }
-        )
-      })
-    })*/
-
   describe('forwards authentication requests to legacy backend', () => {
     test.each([
       '/auth/login',
