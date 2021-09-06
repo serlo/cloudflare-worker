@@ -49,7 +49,10 @@ export class SentryReporter {
     })
 
     this.toucan.setTag('service', this.service)
-    this.toucan.setExtra('context', this.context)
+
+    if (Object.keys(this.context).length > 0) {
+      this.toucan.setExtra('context', this.context)
+    }
 
     return this.toucan
   }
