@@ -32,6 +32,9 @@ import {
   localTestEnvironment,
   currentTestEnvironment,
   currentTestEnvironmentWhen,
+  redirectsTo,
+  givenFrontend,
+  expectSentryEvent,
 } from './__utils__'
 
 beforeEach(() => {
@@ -515,6 +518,28 @@ describe('special paths', () => {
         expect.stringContaining('useFrontend')
       )
     })
+  })
+})
+
+test('Resports to sentry when frontend responded with redirect', async () => {
+  setupProbabilityFor(Backend.Frontend)
+  givenFrontend(redirectsTo('https://frontend.serlo.org/'))
+  mockHttpGet('https://frontend.serlo.org/', returnsText('Hello World'))
+
+  const env = localTestEnvironment()
+  const response = await env.fetch({ subdomain: 'en', pathname: '/math' })
+
+  expect(await response.text()).toBe('Hello World')
+  expectSentryEvent({
+    message: 'Frontend responded with a redirect',
+    level: 'error',
+    context: {
+      backendUrl: env.createUrl({
+        subdomain: 'frontend',
+        pathname: '/en/math',
+      }),
+      responseUrl: 'https://frontend.serlo.org/',
+    },
   })
 })
 

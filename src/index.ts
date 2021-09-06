@@ -45,14 +45,14 @@ export async function handleFetchEvent(event: FetchEvent) {
     (await enforceHttps(request)) ||
     (await legalPages(request)) ||
     stagingRobots(request) ||
-    (await frontendSpecialPaths(request)) ||
+    (await frontendSpecialPaths(event)) ||
     sentryHelloWorld(event) ||
     (await redirects(request)) ||
     (await embed(event)) ||
     (await semanticFileNames(request)) ||
     (await packages(request)) ||
     (await api(request)) ||
-    (await frontendProxy(request)) ||
+    (await frontendProxy(event)) ||
     (await fetch(request))
   )
 }
