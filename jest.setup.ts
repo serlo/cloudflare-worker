@@ -60,6 +60,7 @@ beforeEach(() => {
   global.API_SECRET = 'secret'
 
   global.DOMAIN = 'serlo.local'
+  global.ENVIRONMENT = 'local'
   global.FRONTEND_DOMAIN = 'frontend.serlo.local'
   global.FRONTEND_PROBABILITY_DESKTOP = '1'
   global.FRONTEND_PROBABILITY_MOBILE = '1'

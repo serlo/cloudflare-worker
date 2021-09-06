@@ -36,6 +36,7 @@ export interface Variables {
   ALLOW_AUTH_FROM_LOCALHOST: 'true' | 'false'
   API_ENDPOINT: string
   DOMAIN: string
+  ENVIRONMENT: string
   ENABLE_BASIC_AUTH: 'true' | 'false'
   FRONTEND_ALLOWED_TYPES: string
   FRONTEND_DOMAIN: string
