@@ -26,6 +26,7 @@ import { embed } from './embed'
 import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
 import { legalPages } from './legal-pages'
 import { maintenanceMode } from './maintenance'
+import { metadataApi } from './metadata-api'
 import { redirects } from './redirects'
 import { SentryReporter, Url } from './utils'
 
@@ -53,6 +54,7 @@ export async function handleFetchEvent(event: FetchEvent) {
     (await packages(request)) ||
     (await api(request)) ||
     (await frontendProxy(request)) ||
+    (await metadataApi(event)) ||
     (await fetch(request))
   )
 }
