@@ -19,7 +19,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { either as E, option as O } from 'fp-ts'
+import { option as O } from 'fp-ts'
 import * as t from 'io-ts'
 
 import { SentryReporter, Url } from './utils'
@@ -95,14 +95,15 @@ async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
   if (apiResponse.status !== 200) return getPlaceholder()
 
   try {
-    const data = VimeoApiResponse.decode(await apiResponse.json())
+    const returnedJson = (await apiResponse.json()) as unknown
 
-    if (E.isLeft(data)) {
+    if (!VimeoApiResponse.is(returnedJson)) {
+      sentry.setContext('returnedJson', returnedJson)
       sentry.captureMessage('Vimeo API returns malformed JSON', 'warning')
       return getPlaceholder()
     }
 
-    const url = data.right.thumbnail_url.replace(/_[0-9|x]+/, '')
+    const url = returnedJson.thumbnail_url.replace(/_[0-9|x]+/, '')
 
     const imageResponse = await fetch(url)
 

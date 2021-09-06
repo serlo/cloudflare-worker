@@ -203,8 +203,8 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           42,
           { type: 'video' },
           { thumbnail_url: video.thumbnailUrl },
-        ])('%p', async (data) => {
-          givenVimeoApi(returnsJson(data))
+        ])('%p', async (returnedJson) => {
+          givenVimeoApi(returnsJson(returnedJson))
 
           const response = await requestThumbnail(
             thumbnailUrl,
@@ -215,7 +215,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
             message: 'Vimeo API returns malformed JSON',
             level: 'warning',
             service: 'embed',
-            context: { thumbnailUrl },
+            context: { thumbnailUrl, returnedJson },
           })
         })
       })
