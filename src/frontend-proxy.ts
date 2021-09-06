@@ -26,19 +26,17 @@ import {
   Instance,
   getPathInfo,
   SentryReporter,
+  SentryFactory,
 } from './utils'
 
 export async function frontendSpecialPaths(
-  event: FetchEvent
+  request: Request,
+  sentryFactory: SentryFactory
 ): Promise<Response | null> {
-  const { request } = event
   const config = getConfig(request)
   const url = Url.fromRequest(request)
 
-  const sentry = new SentryReporter({
-    event,
-    service: 'frontend-special-paths',
-  })
+  const sentry = sentryFactory.createReporter('frontend-special-paths')
 
   if (!config.relevantRequest) return null
 
@@ -98,14 +96,14 @@ export async function frontendSpecialPaths(
 }
 
 export async function frontendProxy(
-  event: FetchEvent
+  request: Request,
+  sentryFactory: SentryFactory
 ): Promise<Response | null> {
-  const { request } = event
   const config = getConfig(request)
   const url = Url.fromRequest(request)
   const cookies = request.headers.get('Cookie')
   const isAuthenticated = getCookieValue('authenticated', cookies) === '1'
-  const sentry = new SentryReporter({ event, service: 'frontend' })
+  const sentry = sentryFactory.createReporter('frontend')
 
   if (!config.relevantRequest) return null
 

@@ -28,7 +28,7 @@ import { legalPages } from './legal-pages'
 import { maintenanceMode } from './maintenance'
 import { metadataApi } from './metadata-api'
 import { redirects } from './redirects'
-import { SentryReporter, Url } from './utils'
+import { SentryFactory, Url } from './utils'
 
 addEventListener('fetch', (event: Event) => {
   const e = event as FetchEvent
@@ -38,6 +38,7 @@ addEventListener('fetch', (event: Event) => {
 
 export async function handleFetchEvent(event: FetchEvent) {
   const { request } = event
+  const sentryFactory = new SentryFactory(event)
 
   return (
     authFrontendSectorIdentifierUriValidation(request) ||
@@ -46,26 +47,26 @@ export async function handleFetchEvent(event: FetchEvent) {
     (await enforceHttps(request)) ||
     (await legalPages(request)) ||
     stagingRobots(request) ||
-    (await frontendSpecialPaths(event)) ||
-    sentryHelloWorld(event) ||
+    (await frontendSpecialPaths(request, sentryFactory)) ||
+    sentryHelloWorld(request, sentryFactory) ||
     (await redirects(request)) ||
-    (await embed(event)) ||
+    (await embed(request, sentryFactory)) ||
     (await semanticFileNames(request)) ||
     (await packages(request)) ||
     (await api(request)) ||
-    (await frontendProxy(event)) ||
-    (await metadataApi(event)) ||
+    (await frontendProxy(request, sentryFactory)) ||
+    (await metadataApi(request, sentryFactory)) ||
     (await fetch(request))
   )
 }
 
-function sentryHelloWorld(event: FetchEvent) {
-  const url = Url.fromRequest(event.request)
+function sentryHelloWorld(request: Request, sentryFactory: SentryFactory) {
+  const url = Url.fromRequest(request)
 
   if (url.subdomain !== '') return null
   if (url.pathname !== '/sentry-report-hello-world') return null
 
-  const sentry = new SentryReporter({ event, service: 'sentry-hello-world' })
+  const sentry = sentryFactory.createReporter('sentry-hello-world')
   sentry.captureMessage('Hello World!', 'info')
 
   return new Response('Hello-World message send to sentry')
