@@ -63,8 +63,8 @@ export function expectToBeRedirectTo(
   url: string,
   status: number
 ) {
-  expect(response.headers.get('Location')).toBe(url)
   expect(response.status).toBe(status)
+  expect(response.headers.get('Location')).toBe(url)
 }
 
 export function expectImageReponse({

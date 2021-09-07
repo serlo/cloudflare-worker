@@ -57,7 +57,7 @@ export function hasInternalServerError(): RestResolver {
 }
 
 export function redirectsTo(location: string): RestResolver {
-  return (_req, res, ctx) => res(ctx.set('location', location), ctx.status(302))
+  return (_req, res, ctx) => res(ctx.set('Location', location), ctx.status(302))
 }
 
 export function createUrlRegex({

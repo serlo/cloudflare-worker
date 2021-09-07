@@ -167,7 +167,7 @@ async function fetchBackend({
   pathPrefix,
   request,
   useFrontend,
-  redirect = 'follow',
+  redirect,
   sentry,
 }: {
   pathPrefix?: Instance
@@ -187,7 +187,7 @@ async function fetchBackend({
     backendUrl.pathname = backendUrl.pathnameWithoutTrailingSlash
   }
   const response = await fetch(new Request(backendUrl.toString(), request), {
-    redirect,
+    redirect: redirect ?? (useFrontend ? 'follow' : 'manual'),
   })
 
   if (useFrontend && response.redirected) {
