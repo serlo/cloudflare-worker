@@ -22,11 +22,13 @@
 // eslint-disable-next-line import/no-unassigned-import
 import '@testing-library/jest-dom'
 import * as cryptoNode from 'crypto'
+import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import fetchNode, {
   Response as NodeResponse,
   Request as NodeRequest,
 } from 'node-fetch'
+import { Event as SentryEvent } from 'toucan-js/dist/types'
 import * as util from 'util'
 
 import {
@@ -58,6 +60,7 @@ beforeEach(() => {
   global.API_SECRET = 'secret'
 
   global.DOMAIN = 'serlo.local'
+  global.ENVIRONMENT = 'local'
   global.FRONTEND_DOMAIN = 'frontend.serlo.local'
   global.FRONTEND_PROBABILITY_DESKTOP = '1'
   global.FRONTEND_PROBABILITY_MOBILE = '1'
@@ -75,6 +78,10 @@ beforeEach(() => {
   givenApi(defaultApiServer())
   givenFrontend(defaultFrontendServer())
   givenSerlo(defaultSerloServer())
+
+  global.SENTRY_DSN = 'https://public@127.0.0.1/0'
+  global.sentryEvents = []
+  mockSentryServer()
 })
 
 afterEach(() => {
@@ -102,6 +109,19 @@ global.crypto = {
 } as unknown as typeof crypto
 global.TextEncoder = util.TextEncoder
 
+function mockSentryServer() {
+  const { hostname, pathname } = new URL(global.SENTRY_DSN)
+  const sentryUrl = `https://${hostname}/api${pathname}/store/`
+
+  global.server.use(
+    rest.post<SentryEvent>(sentryUrl, (req, res, ctx) => {
+      global.sentryEvents.push(req.body)
+
+      return res(ctx.status(200))
+    })
+  )
+}
+
 export {}
 
 declare global {
@@ -109,6 +129,7 @@ declare global {
     interface Global {
       server: ReturnType<typeof import('msw/node').setupServer>
       uuids: Uuid[]
+      sentryEvents: SentryEvent[]
     }
   }
 }

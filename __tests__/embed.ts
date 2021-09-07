@@ -32,6 +32,8 @@ import {
   localTestEnvironment,
   expectImageResponseWithError,
   expectImageReponse,
+  expectSentryEvent,
+  expectNoSentryError,
 } from './__utils__'
 
 describe('embed.serlo.org/thumbnail?url=...', () => {
@@ -56,6 +58,10 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
     beforeEach(() => {
       givenYoutube(defaultYoutubeServer())
+    })
+
+    afterEach(() => {
+      expectNoSentryError()
     })
 
     test('returns sddefault.jpg thumbnail when it exists', async () => {
@@ -150,14 +156,18 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         expectedImageType: 'image/jpeg',
         expectedContentLength: video.contentLength,
       })
+      expectNoSentryError()
     })
 
     describe('returns placeholder', () => {
+      const thumbnailUrl = `https://player.vimeo.com/video/${video.id}?autoplay=1`
+
       test('when video does not exist', async () => {
         const response = await requestThumbnail(
           `https://player.vimeo.com/video/999999999?autoplay=1`
         )
         expectIsPlaceholderResponse(response)
+        expectNoSentryError()
       })
 
       test('when video id is malformed', async () => {
@@ -165,6 +175,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           `https://player.vimeo.com/video/foo:password@malware.com`
         )
         expectIsPlaceholderResponse(response)
+        expectNoSentryError()
       })
 
       test('when request to vimeo api fails', async () => {
@@ -192,14 +203,20 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           42,
           { type: 'video' },
           { thumbnail_url: video.thumbnailUrl },
-        ])('%p', async (data) => {
-          givenVimeoApi(returnsJson(data))
+        ])('%p', async (returnedJson) => {
+          givenVimeoApi(returnsJson(returnedJson))
 
           const response = await requestThumbnail(
-            `https://player.vimeo.com/video/${video.id}?autoplay=1`,
+            thumbnailUrl,
             localTestEnvironment()
           )
           expectIsPlaceholderResponse(response)
+          expectSentryEvent({
+            message: 'Vimeo API returns malformed JSON',
+            level: 'warning',
+            service: 'embed',
+            context: { thumbnailUrl, returnedJson },
+          })
         })
       })
 

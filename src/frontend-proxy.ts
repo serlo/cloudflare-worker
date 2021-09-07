@@ -19,13 +19,24 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { Url, getCookieValue, isInstance, Instance, getPathInfo } from './utils'
+import {
+  Url,
+  getCookieValue,
+  isInstance,
+  Instance,
+  getPathInfo,
+  SentryReporter,
+  SentryFactory,
+} from './utils'
 
 export async function frontendSpecialPaths(
-  request: Request
+  request: Request,
+  sentryFactory: SentryFactory
 ): Promise<Response | null> {
   const config = getConfig(request)
   const url = Url.fromRequest(request)
+
+  const sentry = sentryFactory.createReporter('frontend-special-paths')
 
   if (!config.relevantRequest) return null
 
@@ -35,6 +46,15 @@ export async function frontendSpecialPaths(
   if (url.pathname === '/disable-frontend')
     return createConfigurationResponse('Disabled: Use of new frontend', 1.1)
 
+  if (url.pathname.startsWith('/api/auth/'))
+    return await fetchBackend({
+      ...config,
+      useFrontend: true,
+      request,
+      redirect: 'manual',
+      sentry,
+    })
+
   if (
     url.pathname.startsWith('/_next/') ||
     url.pathname.startsWith('/_assets/') ||
@@ -42,7 +62,7 @@ export async function frontendSpecialPaths(
     url.pathname.startsWith('/api/frontend/') ||
     url.pathname === '/___graphql'
   )
-    return await fetchBackend({ ...config, useFrontend: true, request })
+    return await fetchBackend({ ...config, useFrontend: true, request, sentry })
 
   if (url.pathname == '/user/notifications' || url.pathname == '/consent')
     return await fetchBackend({
@@ -50,6 +70,7 @@ export async function frontendSpecialPaths(
       useFrontend: true,
       request,
       pathPrefix: config.instance,
+      sentry,
     })
 
   if (
@@ -64,18 +85,25 @@ export async function frontendSpecialPaths(
       '/user/register',
     ].includes(url.pathname)
   )
-    return await fetchBackend({ ...config, useFrontend: false, request })
+    return await fetchBackend({
+      ...config,
+      useFrontend: false,
+      request,
+      sentry,
+    })
 
   return null
 }
 
 export async function frontendProxy(
-  request: Request
+  request: Request,
+  sentryFactory: SentryFactory
 ): Promise<Response | null> {
   const config = getConfig(request)
   const url = Url.fromRequest(request)
   const cookies = request.headers.get('Cookie')
   const isAuthenticated = getCookieValue('authenticated', cookies) === '1'
+  const sentry = sentryFactory.createReporter('frontend')
 
   if (!config.relevantRequest) return null
 
@@ -93,6 +121,7 @@ export async function frontendProxy(
       useFrontend: true,
       pathPrefix: config.instance,
       request,
+      sentry,
     })
 
   if (
@@ -101,7 +130,12 @@ export async function frontendProxy(
       isAuthenticated) ||
     request.headers.get('X-From') === 'legacy-serlo.org'
   )
-    return await fetchBackend({ ...config, useFrontend: false, request })
+    return await fetchBackend({
+      ...config,
+      useFrontend: false,
+      request,
+      sentry,
+    })
 
   const cookieValue = Number(getCookieValue('useFrontend', cookies) ?? 'NaN')
   const useFrontendNumber = Number.isNaN(cookieValue)
@@ -121,6 +155,7 @@ export async function frontendProxy(
     useFrontend: useFrontendNumber <= probability,
     pathPrefix: config.instance,
     request,
+    sentry,
   })
   if (Number.isNaN(cookieValue))
     setCookieUseFrontend(response, useFrontendNumber)
@@ -133,10 +168,14 @@ async function fetchBackend({
   pathPrefix,
   request,
   useFrontend,
+  redirect = 'follow',
+  sentry,
 }: {
   pathPrefix?: Instance
   request: Request
   useFrontend: boolean
+  redirect?: Request['redirect']
+  sentry: SentryReporter
 } & RelevantRequestConfig) {
   const backendUrl = Url.fromRequest(request)
 
@@ -149,8 +188,14 @@ async function fetchBackend({
     backendUrl.pathname = backendUrl.pathnameWithoutTrailingSlash
   }
   const response = await fetch(new Request(backendUrl.toString(), request), {
-    redirect: 'manual',
+    redirect,
   })
+
+  if (useFrontend && response.redirected) {
+    sentry.setContext('backendUrl', backendUrl)
+    sentry.setContext('responseUrl', response.url)
+    sentry.captureMessage('Frontend responded with a redirect', 'error')
+  }
 
   return new Response(response.body, response)
 }
