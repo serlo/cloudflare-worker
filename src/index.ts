@@ -26,15 +26,20 @@ import { embed } from './embed'
 import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
 import { legalPages } from './legal-pages'
 import { maintenanceMode } from './maintenance'
+import { metadataApi } from './metadata-api'
 import { redirects } from './redirects'
-import { Url } from './utils'
+import { SentryFactory, Url } from './utils'
 
 addEventListener('fetch', (event: Event) => {
   const e = event as FetchEvent
-  e.respondWith(handleRequest(e.request))
+
+  e.respondWith(handleFetchEvent(e))
 })
 
-export async function handleRequest(request: Request) {
+export async function handleFetchEvent(event: FetchEvent) {
+  const { request } = event
+  const sentryFactory = new SentryFactory(event)
+
   return (
     authFrontendSectorIdentifierUriValidation(request) ||
     (await edtrIoStats(request)) ||
@@ -42,15 +47,29 @@ export async function handleRequest(request: Request) {
     (await enforceHttps(request)) ||
     (await legalPages(request)) ||
     stagingRobots(request) ||
-    (await frontendSpecialPaths(request)) ||
+    (await frontendSpecialPaths(request, sentryFactory)) ||
+    sentryHelloWorld(request, sentryFactory) ||
     (await redirects(request)) ||
-    (await embed(request)) ||
+    (await embed(request, sentryFactory)) ||
     (await semanticFileNames(request)) ||
     (await packages(request)) ||
     (await api(request)) ||
-    (await frontendProxy(request)) ||
+    (await frontendProxy(request, sentryFactory)) ||
+    (await metadataApi(request, sentryFactory)) ||
     (await fetch(request))
   )
+}
+
+function sentryHelloWorld(request: Request, sentryFactory: SentryFactory) {
+  const url = Url.fromRequest(request)
+
+  if (url.subdomain !== '') return null
+  if (url.pathname !== '/sentry-report-hello-world') return null
+
+  const sentry = sentryFactory.createReporter('sentry-hello-world')
+  sentry.captureMessage('Hello World!', 'info')
+
+  return new Response('Hello-World message send to sentry')
 }
 
 async function enforceHttps(request: Request) {

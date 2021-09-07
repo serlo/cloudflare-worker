@@ -1,7 +1,7 @@
 /**
  * This file is part of Serlo.org Cloudflare Worker.
  *
- * Copyright (c) 2020 Serlo Education e.V.
+ * Copyright (c) 2021 Serlo Education e.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @copyright Copyright (c) 2020 Serlo Education e.V.
+ * @copyright Copyright (c) 2021 Serlo Education e.V.
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
@@ -24,7 +24,7 @@ import fs from 'fs'
 import { FetchError } from 'node-fetch'
 import path from 'path'
 
-import { handleRequest } from '../../src'
+import { handleFetchEvent } from '../../src'
 import { Variables } from '../../src/bindings'
 import { isInstance } from '../../src/utils'
 
@@ -93,9 +93,21 @@ class LocalEnvironment extends TestEnvironment {
     return global.DOMAIN
   }
 
-  public fetchRequest(request: Request): Promise<Response> {
+  public async fetchRequest(originalRequest: Request): Promise<Response> {
     // CF worker has redirect set to "manual" as default value
-    return handleRequest(new Request(request, { redirect: 'manual' }))
+    const request = new Request(originalRequest, { redirect: 'manual' })
+    const waitForPromises: Promise<unknown>[] = []
+
+    const response = await handleFetchEvent({
+      request,
+      waitUntil(promise: Promise<unknown>) {
+        waitForPromises.push(promise)
+      },
+    } as unknown as FetchEvent)
+
+    await Promise.all(waitForPromises)
+
+    return response
   }
 }
 

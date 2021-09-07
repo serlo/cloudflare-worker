@@ -19,18 +19,24 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { either as E, option as O } from 'fp-ts'
+import { option as O } from 'fp-ts'
 import * as t from 'io-ts'
 
-import { Url } from './utils'
+import { SentryFactory, SentryReporter, Url } from './utils'
 
-export async function embed(request: Request): Promise<Response | null> {
+export async function embed(
+  request: Request,
+  sentryFactory: SentryFactory
+): Promise<Response | null> {
   // example url: embed.serlo.org/thumbnail?url=...
   const url = Url.fromRequest(request)
 
   if (url.subdomain !== 'embed') return null
 
+  const sentry = sentryFactory.createReporter('embed')
   const urlParam = url.searchParams.get('url')
+
+  sentry.setContext('thumbnailUrl', urlParam)
 
   if (!urlParam) return getPlaceholder()
 
@@ -41,7 +47,7 @@ export async function embed(request: Request): Promise<Response | null> {
       case 'youtube-nocookie.com':
         return await getYoutubeThumbnail(videoUrl)
       case 'vimeo.com':
-        return await getVimeoThumbnail(videoUrl)
+        return await getVimeoThumbnail(videoUrl, sentry)
       case 'geogebra.org':
         return await getGeogebraThumbnail(videoUrl)
       case 'wikimedia.org':
@@ -79,7 +85,7 @@ const VimeoApiResponse = t.type({
   thumbnail_url: t.string,
 })
 
-async function getVimeoThumbnail(url: URL) {
+async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
   const videoId = url.pathname.replace('/video/', '')
 
   if (!/[0-9]+/.test(videoId)) return getPlaceholder()
@@ -92,11 +98,15 @@ async function getVimeoThumbnail(url: URL) {
   if (apiResponse.status !== 200) return getPlaceholder()
 
   try {
-    const data = VimeoApiResponse.decode(await apiResponse.json())
+    const returnedJson = (await apiResponse.json()) as unknown
 
-    if (E.isLeft(data)) return getPlaceholder()
+    if (!VimeoApiResponse.is(returnedJson)) {
+      sentry.setContext('returnedJson', returnedJson)
+      sentry.captureMessage('Vimeo API returns malformed JSON', 'warning')
+      return getPlaceholder()
+    }
 
-    const url = data.right.thumbnail_url.replace(/_[0-9|x]+/, '')
+    const url = returnedJson.thumbnail_url.replace(/_[0-9|x]+/, '')
 
     const imageResponse = await fetch(url)
 
