@@ -58,7 +58,6 @@ export async function frontendSpecialPaths(
   if (
     url.pathname.startsWith('/_next/') ||
     url.pathname.startsWith('/_assets/') ||
-    url.pathname.startsWith('/api/auth/') ||
     url.pathname.startsWith('/api/frontend/') ||
     url.pathname === '/___graphql'
   )
@@ -168,7 +167,7 @@ async function fetchBackend({
   pathPrefix,
   request,
   useFrontend,
-  redirect = 'follow',
+  redirect,
   sentry,
 }: {
   pathPrefix?: Instance
@@ -188,7 +187,7 @@ async function fetchBackend({
     backendUrl.pathname = backendUrl.pathnameWithoutTrailingSlash
   }
   const response = await fetch(new Request(backendUrl.toString(), request), {
-    redirect,
+    redirect: redirect ?? (useFrontend ? 'follow' : 'manual'),
   })
 
   if (useFrontend && response.redirected) {
