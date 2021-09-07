@@ -38,7 +38,6 @@ import {
 } from '../src/utils'
 import {
   expectContainsText,
-  expectHasOkStatus,
   expectContentTypeIsHtml,
   expectIsJsonResponse,
   expectIsNotFoundResponse,
@@ -249,7 +248,7 @@ describe('markdownToHtml()', () => {
 test('PreactResponse', async () => {
   const hello = createPreactResponse(<h1>Hello</h1>)
 
-  expectHasOkStatus(hello)
+  expect(hello.status).toBe(200)
   expectContentTypeIsHtml(hello)
   await expectContainsText(hello, ['<h1>Hello</h1>'])
 
