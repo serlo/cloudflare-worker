@@ -21,7 +21,6 @@
  */
 import { Instance } from '../src/utils'
 import {
-  expectHasOkStatus,
   mockHttpGet,
   returnsText,
   givenUuid,
@@ -574,7 +573,7 @@ describe('requests to /enable-frontend enable use of frontend', () => {
   })
 
   test('shows message that frontend was enabled', async () => {
-    expectHasOkStatus(ressponse)
+    expect(ressponse.status).toBe(200)
     expect(await ressponse.text()).toBe('Enabled: Use of new frontend')
   })
 
@@ -600,7 +599,7 @@ describe('requests to /disable-frontend disable use of frontend', () => {
   })
 
   test('shows message that frontend use is disabled', async () => {
-    expectHasOkStatus(response)
+    expect(response.status).toBe(200)
     expect(await response.text()).toBe('Disabled: Use of new frontend')
   })
 
