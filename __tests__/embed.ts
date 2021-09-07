@@ -30,8 +30,6 @@ import {
   returnsText,
   currentTestEnvironment,
   localTestEnvironment,
-  expectImageResponseWithError,
-  expectImageReponse,
   expectSentryEvent,
   expectNoSentryError,
 } from './__utils__'
@@ -532,11 +530,9 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 })
 
 function expectIsPlaceholderResponse(response: Response) {
-  expectImageReponse({
-    response,
-    expectedImageType: 'image/png',
-    expectedContentLength: 135,
-  })
+  expect(response.status).toBe(200)
+  expect(response.headers.get('content-type')).toBe('image/png')
+  expect(response.headers.get('content-length')).toBe('135')
 }
 
 async function requestThumbnail(
@@ -547,4 +543,24 @@ async function requestThumbnail(
     subdomain: 'embed',
     pathname: '/thumbnail?url=' + encodeURIComponent(url),
   })
+}
+
+function expectImageResponseWithError({
+  expectedContentLength,
+  expectedImageType,
+  response,
+  maxRelativeError = 0.1,
+}: {
+  expectedImageType: string
+  expectedContentLength: number
+  response: Response
+  maxRelativeError?: number
+}) {
+  expect(response.status).toBe(200)
+  expect(response.headers.get('content-type')).toBe(expectedImageType)
+  const contentLength = parseInt(response.headers.get('content-length') ?? '')
+
+  expect(
+    Math.abs(contentLength - expectedContentLength) / expectedContentLength
+  ).toBeLessThanOrEqual(maxRelativeError)
 }

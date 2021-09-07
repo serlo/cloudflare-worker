@@ -24,7 +24,6 @@ import { rest } from 'msw'
 import {
   createUrlRegex,
   currentTestEnvironment,
-  expectImageReponse,
   TestEnvironment,
 } from './__utils__'
 
@@ -33,14 +32,12 @@ let env: TestEnvironment
 beforeEach(() => {
   env = currentTestEnvironment()
   givenAssets({
-    '/meta/serlo.jpg': { contentType: 'image/jpeg', contentLength: 139735 },
+    '/meta/serlo.jpg': { contentLength: 371895 },
     '/5c766c2380ea6_13576fb9538fbbab5bbe8fad96bd16d80f7f5119.png': {
-      contentType: 'image/png',
-      contentLength: 3624,
+      contentLength: 4774,
     },
     '/legacy/58f090745b909_16a4cba82bd1cb09434b7f582e555b9ac7531922.png': {
-      contentType: 'image/png',
-      contentLength: 898192,
+      contentLength: 899629,
     },
   })
 })
@@ -51,11 +48,7 @@ test('assets.serlo.org/meta/*', async () => {
     pathname: '/meta/serlo.jpg',
   })
 
-  expectImageReponse({
-    response,
-    expectedImageType: 'image/jpeg',
-    expectedContentLength: 139735,
-  })
+  expectAsset({ response, expectedStoredContentLength: 371895 })
 })
 
 test('assets.serlo.org/<hash>/<fileName>.<ext>', async () => {
@@ -65,11 +58,7 @@ test('assets.serlo.org/<hash>/<fileName>.<ext>', async () => {
       '/5c766c2380ea6_13576fb9538fbbab5bbe8fad96bd16d80f7f5119/ashoka.png',
   })
 
-  expectImageReponse({
-    response,
-    expectedContentLength: 3624,
-    expectedImageType: 'image/png',
-  })
+  expectAsset({ response, expectedStoredContentLength: 4774 })
 })
 
 test('assets.serlo.org/legacy/<hash>/<fileName>.<ext>', async () => {
@@ -79,26 +68,35 @@ test('assets.serlo.org/legacy/<hash>/<fileName>.<ext>', async () => {
       '/legacy/58f090745b909_16a4cba82bd1cb09434b7f582e555b9ac7531922/garden.png',
   })
 
-  expectImageReponse({
-    response,
-    expectedContentLength: 898192,
-    expectedImageType: 'image/png',
-  })
+  expectAsset({ response, expectedStoredContentLength: 899629 })
 })
 
-function givenAssets(
-  assets: { [P in string]?: { contentType: string; contentLength: number } }
-) {
+function givenAssets(assets: { [P in string]?: { contentLength: number } }) {
   global.server.use(
     rest.get(createUrlRegex({ subdomains: ['assets'] }), (req, res, ctx) => {
       const asset = assets[req.url.pathname]
 
       return asset !== undefined
         ? res(
-            ctx.set('content-length', asset.contentLength.toString()),
-            ctx.set('content-type', asset.contentType)
+            ctx.set(
+              'x-goog-stored-content-length',
+              asset.contentLength.toString()
+            )
           )
         : res(ctx.status(404))
     })
+  )
+}
+
+function expectAsset({
+  response,
+  expectedStoredContentLength,
+}: {
+  response: Response
+  expectedStoredContentLength: number
+}) {
+  expect(response.status).toBe(200)
+  expect(response.headers.get('x-goog-stored-content-length')).toBe(
+    expectedStoredContentLength.toString()
   )
 }
