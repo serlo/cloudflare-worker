@@ -370,6 +370,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         expectedImageType: 'image/jpeg',
         expectedContentLength: video.contentLength,
       })
+      expectNoSentryError()
     })
 
     test('returns placeholder when video/thumbnail does not exist', async () => {
@@ -378,6 +379,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       )
 
       expectIsPlaceholderResponse(response)
+      expectNoSentryError()
     })
 
     test('returns placeholder when wikimedia does not return an image', async () => {
