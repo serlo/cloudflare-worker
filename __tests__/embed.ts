@@ -251,10 +251,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           message: 'Returned thumbnail url of Vimeo API is malformed',
           level: 'warning',
           service: 'embed',
-          context: {
-            thumbnailUrl,
-            vimeoThumbnailUrl: '42',
-          },
+          context: { thumbnailUrl, vimeoThumbnailUrl: '42' },
         })
       })
 
@@ -266,6 +263,12 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           localTestEnvironment()
         )
         expectIsPlaceholderResponse(response)
+        expectSentryEvent({
+          message: 'Vimeo CDN did not return an image',
+          level: 'warning',
+          service: 'embed',
+          context: { thumbnailUrl, vimeoThumbnailUrl: video.thumbnailUrl },
+        })
       })
 
       test('when vimeo cdn does not responed with 200', async () => {
@@ -276,6 +279,12 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           localTestEnvironment()
         )
         expect(expectIsPlaceholderResponse(response))
+        expectSentryEvent({
+          message: 'Vimeo CDN did not return an image',
+          level: 'warning',
+          service: 'embed',
+          context: { thumbnailUrl, vimeoThumbnailUrl: video.thumbnailUrl },
+        })
       })
     })
 

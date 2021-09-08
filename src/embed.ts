@@ -137,14 +137,14 @@ async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
     /_[0-9|x]+/,
     ''
   )
+  sentry.setContext('vimeoThumbnailUrl', vimeoThumbnailUrl)
 
   try {
     imgUrl = new Url(vimeoThumbnailUrl)
   } catch (e) {
-    sentry.setContext('vimeoThumbnailUrl', vimeoThumbnailUrl)
     sentry.setContext(
       'apiResponse',
-      responseToContext({ response: apiResponse, text: apiResponseText })
+      responseToContext({ response: apiResponse, json: apiResponseJson })
     )
     sentry.captureMessage(
       'Returned thumbnail url of Vimeo API is malformed',
@@ -155,7 +155,14 @@ async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
 
   const imageResponse = await fetch(imgUrl.href)
 
-  if (!isImageResponse(imageResponse)) return getPlaceholder()
+  if (!isImageResponse(imageResponse)) {
+    sentry.setContext(
+      'vimdeoCdnResponse',
+      responseToContext({ response: imageResponse })
+    )
+    sentry.captureMessage('Vimeo CDN did not return an image', 'warning')
+    return getPlaceholder()
+  }
 
   return imageResponse
 }
