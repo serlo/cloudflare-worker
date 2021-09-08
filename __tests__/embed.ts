@@ -184,6 +184,15 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           localTestEnvironment()
         )
         expectIsPlaceholderResponse(response)
+        expectSentryEvent({
+          message: 'Request to Vimeo API was not successful',
+          level: 'warning',
+          service: 'embed',
+          context: {
+            thumbnailUrl,
+            apiResponse: expect.objectContaining({ status: 500 }),
+          },
+        })
       })
 
       test('when vimeo api returns malformed json', async () => {
@@ -194,9 +203,18 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           localTestEnvironment()
         )
         expectIsPlaceholderResponse(response)
+        expectSentryEvent({
+          message: 'Vimeo API returns malformed JSON',
+          level: 'warning',
+          service: 'embed',
+          context: {
+            thumbnailUrl,
+            apiResponse: expect.objectContaining({ text: 'malformed json' }),
+          },
+        })
       })
 
-      describe('when vimeo api returns a malformed response', () => {
+      describe('when vimeo api returns unsupported json', () => {
         test.each([
           42,
           { type: 'video' },
@@ -210,10 +228,13 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           )
           expectIsPlaceholderResponse(response)
           expectSentryEvent({
-            message: 'Vimeo API returns malformed JSON',
+            message: 'Vimeo API returns unsupported JSON',
             level: 'warning',
             service: 'embed',
-            context: { thumbnailUrl, returnedJson },
+            context: {
+              thumbnailUrl,
+              apiResponse: expect.objectContaining({ json: returnedJson }),
+            },
           })
         })
       })
@@ -285,7 +306,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
             ctx.json({ type: 'video', thumbnail_url: video.thumbnailUrl })
           )
         }
-        return res(ctx.status(403))
+        return res(ctx.status(404))
       }
     }
   })
