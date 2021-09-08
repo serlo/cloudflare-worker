@@ -134,8 +134,27 @@ async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
     return getPlaceholder()
   }
 
-  const imgUrl = apiResponseJson.thumbnail_url.replace(/_[0-9|x]+/, '')
-  const imageResponse = await fetch(imgUrl)
+  let imgUrl: Url
+  const vimeoThumbnailUrl = apiResponseJson.thumbnail_url.replace(
+    /_[0-9|x]+/,
+    ''
+  )
+
+  try {
+    imgUrl = new Url(vimeoThumbnailUrl)
+  } catch (e) {
+    sentry.setContext('vimeoThumbnailUrl', vimeoThumbnailUrl)
+    reportIllegalApiResponse({
+      message: 'Returned thumbnail url of Vimeo API is malformed',
+      sentry,
+      apiResponse,
+      apiResponseText,
+      apiResponseJson,
+    })
+    return getPlaceholder()
+  }
+
+  const imageResponse = await fetch(imgUrl.href)
 
   if (!isImageResponse(imageResponse)) return getPlaceholder()
 

@@ -247,6 +247,15 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           localTestEnvironment()
         )
         expectIsPlaceholderResponse(response)
+        expectSentryEvent({
+          message: 'Returned thumbnail url of Vimeo API is malformed',
+          level: 'warning',
+          service: 'embed',
+          context: {
+            thumbnailUrl,
+            vimeoThumbnailUrl: '42',
+          },
+        })
       })
 
       test('when vimeo cdn doesn not return an image', async () => {
