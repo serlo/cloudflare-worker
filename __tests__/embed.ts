@@ -559,6 +559,10 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
   })
 
   describe('returns placeholder', () => {
+    afterEach(() => {
+      expectNoSentryError()
+    })
+
     test('when url parameter is empty', async () => {
       const response = await requestThumbnail('')
 
