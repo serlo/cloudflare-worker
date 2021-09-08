@@ -19,7 +19,6 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { option as O } from 'fp-ts'
 import * as t from 'io-ts'
 
 import { SentryFactory, SentryReporter, responseToContext, Url } from './utils'
@@ -49,7 +48,7 @@ export async function embed(
       case 'vimeo.com':
         return await getVimeoThumbnail(videoUrl, sentry)
       case 'geogebra.org':
-        return await getGeogebraThumbnail(videoUrl)
+        return await getGeogebraThumbnail(videoUrl, sentry)
       case 'wikimedia.org':
         return await getWikimediaThumbnail(videoUrl)
     }
@@ -171,13 +170,17 @@ async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
 
 const GeogebraApiResponse = t.type({
   responses: t.type({
-    response: t.type({ item: t.type({ previewUrl: t.string }) }),
+    response: t.intersection([
+      t.type({ '-type': t.literal('listing') }),
+      t.partial({ item: t.type({ previewUrl: t.string }) }),
+    ]),
   }),
 })
 
-async function getGeogebraThumbnail(url: URL) {
-  //example url https://www.geogebra.org/material/iframe/id/100
+async function getGeogebraThumbnail(url: URL, sentry: SentryReporter) {
+  sentry.setTag('imageRepository', 'geogebra')
 
+  //example url https://www.geogebra.org/material/iframe/id/100
   const appletId = url.pathname.replace('/material/iframe/id/', '')
 
   if (!/[0-9]+/.test(appletId)) return getPlaceholder()
@@ -197,25 +200,79 @@ async function getGeogebraThumbnail(url: URL) {
       },
     }),
   })
+  const apiResponseText = await apiResponse.text()
 
-  if (apiResponse.status !== 200) return getPlaceholder()
-
-  try {
-    const data = O.fromEither(
-      GeogebraApiResponse.decode(await apiResponse.json())
+  if (apiResponse.status !== 200) {
+    sentry.setContext(
+      'apiResponse',
+      responseToContext({ response: apiResponse, text: apiResponseText })
     )
-
-    if (O.isNone(data)) return getPlaceholder()
-
-    const thumbnailUrl = data.value.responses.response.item.previewUrl
-
-    const imgRes = await fetch(thumbnailUrl)
-    if (isImageResponse(imgRes)) return imgRes
-  } catch (e) {
-    // JSON cannot be parsed or preview url cannot be parsed
+    sentry.captureMessage(
+      'Request to Geogebra API was not successful',
+      'warning'
+    )
+    return getPlaceholder()
   }
 
-  return getPlaceholder()
+  let apiResponseJson: unknown
+
+  try {
+    apiResponseJson = JSON.parse(apiResponseText)
+  } catch (e) {
+    sentry.setContext(
+      'apiResponse',
+      responseToContext({ response: apiResponse, text: apiResponseText })
+    )
+    sentry.captureMessage('Geogebra API returned malformed JSON', 'warning')
+    return getPlaceholder()
+  }
+
+  if (!GeogebraApiResponse.is(apiResponseJson)) {
+    sentry.setContext(
+      'apiResponse',
+      responseToContext({ response: apiResponse, json: apiResponseJson })
+    )
+    sentry.captureMessage('Geogebra API returned unsupported JSON', 'warning')
+    return getPlaceholder()
+  }
+
+  const { item } = apiResponseJson.responses.response
+  if (item === undefined) {
+    // Geogebra material does not exist
+    return getPlaceholder()
+  }
+
+  let previewUrl: Url
+  sentry.setContext('geogebraPreviewUrl', item.previewUrl)
+
+  try {
+    previewUrl = new Url(item.previewUrl)
+  } catch (e) {
+    sentry.setContext(
+      'apiResponse',
+      responseToContext({ response: apiResponse, json: apiResponseJson })
+    )
+    sentry.captureMessage(
+      'Geogebra API returned malformed preview url',
+      'warning'
+    )
+    return getPlaceholder()
+  }
+
+  const imageResponse = await fetch(previewUrl.href)
+  if (!isImageResponse(imageResponse)) {
+    sentry.setContext(
+      'geogebraImageResponse',
+      responseToContext({ response: imageResponse })
+    )
+    sentry.captureMessage(
+      'Geogebra CDN does not respond with an image',
+      'warning'
+    )
+    return getPlaceholder()
+  }
+
+  return imageResponse
 }
 
 async function getWikimediaThumbnail(url: URL) {
