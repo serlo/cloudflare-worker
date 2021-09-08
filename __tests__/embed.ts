@@ -436,15 +436,19 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         expectedContentLength: applet.contentLength,
         expectedImageType: 'image/png',
       })
+      expectNoSentryError()
     })
 
     describe('returns placeholder', () => {
+      const thumbnailUrl = `https://www.geogebra.org/material/iframe/id/${applet.id}`
+
       test('when geogebra id contains non digit characters', async () => {
         const response = await requestThumbnail(
           `https://www.geogebra.org/material/iframe/id/abc%@`
         )
 
         expectIsPlaceholderResponse(response)
+        expectNoSentryError()
       })
 
       test('when geogebra file does not exist', async () => {
@@ -453,17 +457,28 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         )
 
         expectIsPlaceholderResponse(response)
+        expectNoSentryError()
       })
 
       test('when geogebra api returns with a non 200 respond', async () => {
         givenGeogebraApi(hasInternalServerError())
 
         const response = await requestThumbnail(
-          `https://www.geogebra.org/material/iframe/id/${applet.id}`,
+          thumbnailUrl,
           localTestEnvironment()
         )
 
         expectIsPlaceholderResponse(response)
+        expectSentryEvent({
+          message: 'Request to Geogebra API was not successful',
+          level: 'warning',
+          service: 'embed',
+          tags: { imageRepository: 'geogebra' },
+          context: {
+            thumbnailUrl,
+            apiResponse: expect.objectContaining({ status: 500 }),
+          },
+        })
       })
 
       test('when geogebra api returns malformed json', async () => {
@@ -475,28 +490,55 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         )
 
         expectIsPlaceholderResponse(response)
+        expectSentryEvent({
+          message: 'Geogebra API returned malformed JSON',
+          level: 'warning',
+          service: 'embed',
+          tags: { imageRepository: 'geogebra' },
+          context: {
+            thumbnailUrl,
+            apiResponse: expect.objectContaining({ text: 'malformed json' }),
+          },
+        })
       })
 
       test('when geogebra api returns unknwon json response', async () => {
         givenGeogebraApi(returnsJson({ type: 'video' }))
 
         const response = await requestThumbnail(
-          `https://www.geogebra.org/material/iframe/id/${applet.id}`,
+          thumbnailUrl,
           localTestEnvironment()
         )
 
         expectIsPlaceholderResponse(response)
+        expectSentryEvent({
+          message: 'Geogebra API returned unsupported JSON',
+          level: 'warning',
+          service: 'embed',
+          tags: { imageRepository: 'geogebra' },
+          context: {
+            thumbnailUrl,
+            apiResponse: expect.objectContaining({ json: { type: 'video' } }),
+          },
+        })
       })
 
       test('when geogebra api returns malformed preview url', async () => {
         givenGeogebraApi(returnsPreviewUrl('bad'))
 
         const response = await requestThumbnail(
-          `https://www.geogebra.org/material/iframe/id/${applet.id}`,
+          thumbnailUrl,
           localTestEnvironment()
         )
 
         expectIsPlaceholderResponse(response)
+        expectSentryEvent({
+          message: 'Geogebra API returned malformed preview url',
+          level: 'warning',
+          service: 'embed',
+          tags: { imageRepository: 'geogebra' },
+          context: { thumbnailUrl, geogebraPreviewUrl: 'bad' },
+        })
       })
 
       test('when geogebra cdn does not respond with an image', async () => {
@@ -508,6 +550,13 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         )
 
         expectIsPlaceholderResponse(response)
+        expectSentryEvent({
+          message: 'Geogebra CDN does not respond with an image',
+          level: 'warning',
+          service: 'embed',
+          tags: { imageRepository: 'geogebra' },
+          context: { thumbnailUrl, geogebraPreviewUrl: applet.thumbnailUrl },
+        })
       })
 
       test('when geogebra file does not exists', async () => {
@@ -519,6 +568,13 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         )
 
         expectIsPlaceholderResponse(response)
+        expectSentryEvent({
+          message: 'Geogebra CDN does not respond with an image',
+          level: 'warning',
+          service: 'embed',
+          tags: { imageRepository: 'geogebra' },
+          context: { thumbnailUrl, geogebraPreviewUrl: applet.thumbnailUrl },
+        })
       })
     })
 
@@ -535,21 +591,21 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           '#text'
         ] as string
 
-        if (appletId == applet.id)
-          return res(
-            ctx.json({
-              responses: {
-                response: { item: { previewUrl: applet.thumbnailUrl } },
-              },
-            })
-          )
-
-        return res(ctx.status(404))
+        return returnsPreviewUrl(
+          appletId === applet.id ? applet.thumbnailUrl : undefined
+        )(req, res, ctx)
       }
     }
 
-    function returnsPreviewUrl(previewUrl: string) {
-      return returnsJson({ responses: { response: { item: { previewUrl } } } })
+    function returnsPreviewUrl(previewUrl?: string) {
+      return returnsJson({
+        responses: {
+          response: {
+            '-type': 'listing',
+            ...(previewUrl ? { item: { previewUrl } } : {}),
+          },
+        },
+      })
     }
 
     function givenGeogebraFile(resolver: RestResolver) {
