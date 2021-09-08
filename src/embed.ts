@@ -86,6 +86,8 @@ const VimeoApiResponse = t.type({
 })
 
 async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
+  sentry.setTag('imageRepository', 'vimeo')
+
   const videoId = url.pathname.replace('/video/', '')
 
   if (!/[0-9]+/.test(videoId)) return getPlaceholder()

@@ -31,14 +31,20 @@ export class SentryFactory {
 
 export class SentryReporter {
   private context: Record<string, unknown>
+  private tags: Array<[string, string | number | boolean]>
   private toucan?: Toucan
 
   constructor(private event: FetchEvent, private service: string) {
     this.context = {}
+    this.tags = []
   }
 
   setContext(key: string, value: unknown) {
     this.context[key] = value
+  }
+
+  setTag(key: string, value: string | number | boolean) {
+    this.tags.push([key, value])
   }
 
   captureMessage(message: string, level: 'error' | 'warning' | 'info') {
@@ -56,6 +62,10 @@ export class SentryReporter {
 
     if (Object.keys(this.context).length > 0) {
       this.toucan.setExtra('context', this.context)
+    }
+
+    for (const [key, value] of this.tags) {
+      this.toucan.setTag(key, value)
     }
 
     return this.toucan
