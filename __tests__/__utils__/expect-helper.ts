@@ -66,14 +66,18 @@ export function expectSentryEvent({
   level,
   error,
   service,
+  tags = {},
   context,
 }: {
   message?: string
   level?: Level
   error?: string
   service?: string
+  tags?: Record<string, string | number | boolean>
   context?: Record<string, unknown>
 }) {
+  const finalTags = { ...tags, ...(service ? { service } : {}) }
+
   expect(global.sentryEvents).toContainEqual(
     expect.objectContaining({
       ...(level ? { level } : error ? { level: 'error' } : {}),
@@ -87,8 +91,8 @@ export function expectSentryEvent({
             },
           }
         : {}),
-      ...(service
-        ? { tags: expect.objectContaining({ service }) as unknown }
+      ...(Object.keys(finalTags).length > 0
+        ? { tags: expect.objectContaining(finalTags) as unknown }
         : {}),
       ...(context
         ? { extra: { context: expect.objectContaining(context) as unknown } }

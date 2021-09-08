@@ -197,6 +197,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           message: 'Request to Vimeo API was not successful',
           level: 'warning',
           service: 'embed',
+          tags: { imageRepository: 'vimeo' },
           context: {
             thumbnailUrl,
             apiResponse: expect.objectContaining({ status: 500 }),
@@ -217,6 +218,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           message: 'Vimeo API returns malformed JSON',
           level: 'warning',
           service: 'embed',
+          tags: { imageRepository: 'vimeo' },
           context: {
             thumbnailUrl,
             apiResponse: expect.objectContaining({ text: 'malformed json' }),
@@ -242,6 +244,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
             message: 'Vimeo API returns unsupported JSON',
             level: 'warning',
             service: 'embed',
+            tags: { imageRepository: 'vimeo' },
             context: {
               thumbnailUrl,
               apiResponse: expect.objectContaining({ json: returnedJson }),
@@ -263,6 +266,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           message: 'Returned thumbnail url of Vimeo API is malformed',
           level: 'warning',
           service: 'embed',
+          tags: { imageRepository: 'vimeo' },
           context: { thumbnailUrl, vimeoThumbnailUrl: '42' },
         })
       })
@@ -280,6 +284,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           message: 'Vimeo CDN did not return an image',
           level: 'warning',
           service: 'embed',
+          tags: { imageRepository: 'vimeo' },
           context: { thumbnailUrl, vimeoThumbnailUrl: video.thumbnailUrl },
         })
       })
@@ -297,6 +302,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           message: 'Vimeo CDN did not return an image',
           level: 'warning',
           service: 'embed',
+          tags: { imageRepository: 'vimeo' },
           context: { thumbnailUrl, vimeoThumbnailUrl: video.thumbnailUrl },
         })
       })
