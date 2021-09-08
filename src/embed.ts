@@ -22,7 +22,7 @@
 import { option as O } from 'fp-ts'
 import * as t from 'io-ts'
 
-import { SentryFactory, SentryReporter, Url } from './utils'
+import { SentryFactory, SentryReporter, responseToContext, Url } from './utils'
 
 export async function embed(
   request: Request,
@@ -98,12 +98,14 @@ async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
 
   if (apiResponse.status !== 200) {
     if (apiResponse.status !== 404) {
-      reportIllegalApiResponse({
-        message: 'Request to Vimeo API was not successful',
-        sentry,
-        apiResponse,
-        apiResponseText,
-      })
+      sentry.setContext(
+        'apiResponse',
+        responseToContext({ response: apiResponse, text: apiResponseText })
+      )
+      sentry.captureMessage(
+        'Request to Vimeo API was not successful',
+        'warning'
+      )
     }
     return getPlaceholder()
   }
@@ -113,24 +115,20 @@ async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
   try {
     apiResponseJson = JSON.parse(apiResponseText) as unknown
   } catch (e) {
-    reportIllegalApiResponse({
-      message: 'Vimeo API returns malformed JSON',
-      sentry,
-      apiResponse,
-      apiResponseText,
-      apiResponseJson,
-    })
+    sentry.setContext(
+      'apiResponse',
+      responseToContext({ response: apiResponse, text: apiResponseText })
+    )
+    sentry.captureMessage('Vimeo API returns malformed JSON', 'warning')
     return getPlaceholder()
   }
 
   if (!VimeoApiResponse.is(apiResponseJson)) {
-    reportIllegalApiResponse({
-      message: 'Vimeo API returns unsupported JSON',
-      sentry,
-      apiResponse,
-      apiResponseText,
-      apiResponseJson,
-    })
+    sentry.setContext(
+      'apiResponse',
+      responseToContext({ response: apiResponse, json: apiResponseJson })
+    )
+    sentry.captureMessage('Vimeo API returns unsupported JSON', 'warning')
     return getPlaceholder()
   }
 
@@ -144,13 +142,14 @@ async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
     imgUrl = new Url(vimeoThumbnailUrl)
   } catch (e) {
     sentry.setContext('vimeoThumbnailUrl', vimeoThumbnailUrl)
-    reportIllegalApiResponse({
-      message: 'Returned thumbnail url of Vimeo API is malformed',
-      sentry,
-      apiResponse,
-      apiResponseText,
-      apiResponseJson,
-    })
+    sentry.setContext(
+      'apiResponse',
+      responseToContext({ response: apiResponse, text: apiResponseText })
+    )
+    sentry.captureMessage(
+      'Returned thumbnail url of Vimeo API is malformed',
+      'warning'
+    )
     return getPlaceholder()
   }
 
@@ -244,26 +243,4 @@ function getPlaceholder() {
 function isImageResponse(res: Response): boolean {
   const contentType = res.headers.get('content-type') ?? ''
   return res.status === 200 && contentType.startsWith('image/')
-}
-
-function reportIllegalApiResponse({
-  sentry,
-  message,
-  apiResponse,
-  apiResponseText,
-  apiResponseJson,
-}: {
-  sentry: SentryReporter
-  message: string
-  apiResponse: Response
-  apiResponseText: string
-  apiResponseJson?: unknown
-}) {
-  sentry.setContext('apiResponse', {
-    status: apiResponse.status,
-    url: apiResponse.url,
-    text: apiResponseText,
-    ...(apiResponseJson ? { json: apiResponseJson } : {}),
-  })
-  sentry.captureMessage(message, 'warning')
 }
