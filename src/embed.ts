@@ -94,29 +94,52 @@ async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
     'https://vimeo.com/api/oembed.json?url=' +
       encodeURIComponent(`https://vimeo.com/${videoId}`)
   )
+  const apiResponseText = await apiResponse.text()
 
-  if (apiResponse.status !== 200) return getPlaceholder()
-
-  try {
-    const returnedJson = (await apiResponse.json()) as unknown
-
-    if (!VimeoApiResponse.is(returnedJson)) {
-      sentry.setContext('returnedJson', returnedJson)
-      sentry.captureMessage('Vimeo API returns malformed JSON', 'warning')
-      return getPlaceholder()
+  if (apiResponse.status !== 200) {
+    if (apiResponse.status !== 404) {
+      reportIllegalApiResponse({
+        message: 'Request to Vimeo API was not successful',
+        sentry,
+        apiResponse,
+        apiResponseText,
+      })
     }
-
-    const url = returnedJson.thumbnail_url.replace(/_[0-9|x]+/, '')
-
-    const imageResponse = await fetch(url)
-
-    if (!isImageResponse(imageResponse)) return getPlaceholder()
-
-    return imageResponse
-  } catch (e) {
-    // error in parsing the api response or in parsing the thumbnail url
     return getPlaceholder()
   }
+
+  let apiResponseJson: unknown = undefined
+
+  try {
+    apiResponseJson = JSON.parse(apiResponseText) as unknown
+  } catch (e) {
+    reportIllegalApiResponse({
+      message: 'Vimeo API returns malformed JSON',
+      sentry,
+      apiResponse,
+      apiResponseText,
+      apiResponseJson,
+    })
+    return getPlaceholder()
+  }
+
+  if (!VimeoApiResponse.is(apiResponseJson)) {
+    reportIllegalApiResponse({
+      message: 'Vimeo API returns unsupported JSON',
+      sentry,
+      apiResponse,
+      apiResponseText,
+      apiResponseJson,
+    })
+    return getPlaceholder()
+  }
+
+  const imgUrl = apiResponseJson.thumbnail_url.replace(/_[0-9|x]+/, '')
+  const imageResponse = await fetch(imgUrl)
+
+  if (!isImageResponse(imageResponse)) return getPlaceholder()
+
+  return imageResponse
 }
 
 const GeogebraApiResponse = t.type({
@@ -202,4 +225,26 @@ function getPlaceholder() {
 function isImageResponse(res: Response): boolean {
   const contentType = res.headers.get('content-type') ?? ''
   return res.status === 200 && contentType.startsWith('image/')
+}
+
+function reportIllegalApiResponse({
+  sentry,
+  message,
+  apiResponse,
+  apiResponseText,
+  apiResponseJson,
+}: {
+  sentry: SentryReporter
+  message: string
+  apiResponse: Response
+  apiResponseText: string
+  apiResponseJson?: unknown
+}) {
+  sentry.setContext('apiResponse', {
+    status: apiResponse.status,
+    url: apiResponse.url,
+    text: apiResponseText,
+    ...(apiResponseJson ? { json: apiResponseJson } : {}),
+  })
+  sentry.captureMessage(message, 'warning')
 }
