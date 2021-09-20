@@ -127,6 +127,12 @@ export async function redirects(request: Request) {
     return url.toRedirect()
   }
 
+  if (url.pathname.startsWith('/api/pdf/')) {
+    url.subdomain = 'pdf'
+    url.pathname = url.pathname.replace('/pdf', '')
+    return url.toRedirect(301)
+  }
+
   if (isInstance(url.subdomain)) {
     const regexes = [
       // See https://github.com/serlo/serlo.org-cloudflare-worker/issues/184
