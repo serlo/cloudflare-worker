@@ -128,6 +128,16 @@ export async function redirects(request: Request) {
   }
 
   if (isInstance(url.subdomain)) {
+    const pdfMatch = /^\/api\/pdf\/(\d+)/.exec(url.pathname)
+
+    if (pdfMatch) {
+      url.subdomain = 'pdf'
+      url.pathname = `/api/${pdfMatch[1]}`
+      return url.toRedirect(301)
+    }
+  }
+
+  if (isInstance(url.subdomain)) {
     const regexes = [
       // See https://github.com/serlo/serlo.org-cloudflare-worker/issues/184
       // Can be deleted after a while after the /entity/view/<id>/toc route
