@@ -137,6 +137,15 @@ test('start.serlo.org', async () => {
   expectToBeRedirectTo(response, target, 301)
 })
 
+test('de.serlo.org/api/pdf/* redirects to pdf.serlo.org/api/*', async () => {
+  const response = await env.fetch({
+    subdomain: 'de',
+    pathname: '/api/pdf/100',
+  })
+  const target = env.createUrl({ subdomain: 'pdf', pathname: '/api/100' })
+  expectToBeRedirectTo(response, target, 301)
+})
+
 test('/entity/view/<id>/toc gets redirected to /<id>', async () => {
   const response = await env.fetch({
     subdomain: 'de',
