@@ -21,46 +21,40 @@
  */
 import { rest } from 'msw'
 
-import { RestResolver, currentTestEnvironment } from './__utils__'
+import { currentTestEnvironment } from './__utils__'
 
 describe('de.serlo.org/api/stats/quickbar.json', () => {
   beforeEach(() => {
-    givenArrrg(arrrgServer())
+    setupArrrg()
   })
 
   test('returns json file', async () => {
-    const response = await requestJson('/api/stats/quickbar.json')
+    const env = currentTestEnvironment()
+    const response = await env.fetch({
+      subdomain: 'de',
+      pathname: '/api/stats/quickbar.json',
+    })
     expect(response.status).toBe(200)
     expect(response.headers.get('content-type')).toBe('application/json')
 
     expect(await response.text()).toEqual(
-      expect.stringContaining('"title":"Mathematik Startseite"')
+      expect.stringContaining('"title":"Math Landing"')
     )
   })
 
-  function givenArrrg(resolver: RestResolver) {
+  function setupArrrg() {
     global.server.use(
-      rest.get('https://arrrg.de/serlo-stats/quickbar.json', resolver)
-    )
-  }
-
-  function arrrgServer(): RestResolver {
-    return (req, res, ctx) => {
-      return res(
-        ctx.set('content-type', 'application/json'),
-        ctx.body(
-          '[{"id":"19767","title":"Mathematik Startseite","path":[],"isTax":false,"count":35416}]'
-        )
+      rest.get(
+        'https://arrrg.de/serlo-stats/quickbar.json',
+        (req, res, ctx) => {
+          return res(
+            ctx.set('content-type', 'application/json'),
+            ctx.body(
+              '[{"id":"100","title":"Math Landing","path":[],"isTax":false,"count":10000}]'
+            )
+          )
+        }
       )
-    }
+    )
   }
 })
-
-async function requestJson(
-  pathname: string,
-  env = currentTestEnvironment()
-): Promise<Response> {
-  return await env.fetch({
-    pathname,
-  })
-}

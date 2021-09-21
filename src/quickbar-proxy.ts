@@ -20,24 +20,28 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-import { Url } from './utils'
+import { isInstance, Url, SentryFactory } from './utils'
 
 export async function quickbarProxy(
-  request: Request
+  request: Request,
+  sentryFactory: SentryFactory
 ): Promise<Response | null> {
-  // https://de.serlo.org/api/stats/quickbar.json
   const url = Url.fromRequest(request)
 
+  if (!isInstance(url.subdomain)) return null
   if (url.pathname !== '/api/stats/quickbar.json') return null
+
+  const sentry = sentryFactory.createReporter('quickbar-proxy')
 
   try {
     const jsonUrl = 'https://arrrg.de/serlo-stats/quickbar.json'
     const jsonRes = await fetch(jsonUrl, {
       cf: { cacheTtl: 24 * 60 * 60 },
     } as unknown as RequestInit)
+
     if (jsonRes.ok) return jsonRes
   } catch (e) {
-    // this should be reported, right?
+    sentry.captureException(e)
   }
   return null
 }
