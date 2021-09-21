@@ -127,10 +127,14 @@ export async function redirects(request: Request) {
     return url.toRedirect()
   }
 
-  if (url.pathname.startsWith('/api/pdf/')) {
-    url.subdomain = 'pdf'
-    url.pathname = url.pathname.replace('/pdf', '')
-    return url.toRedirect(301)
+  if (isInstance(url.subdomain)) {
+    const pdfMatch = /^\/api\/pdf\/(\d+)/.exec(url.pathname)
+
+    if (pdfMatch) {
+      url.subdomain = 'pdf'
+      url.pathname = `/api/${pdfMatch[1]}`
+      return url.toRedirect(301)
+    }
   }
 
   if (isInstance(url.subdomain)) {
