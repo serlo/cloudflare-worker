@@ -142,8 +142,8 @@ test('de.serlo.org/api/pdf/* redirects to pdf.serlo.org/api/*', async () => {
     subdomain: 'de',
     pathname: '/api/pdf/100',
   })
-  const target = env.createUrl({ subdomain: 'pdf', pathname: '/api/100' })
-  expectToBeRedirectTo(response, target, 301)
+
+  expectToBeRedirectTo(response, 'https://pdf.serlo.org/api/100', 301)
 })
 
 test('/entity/view/<id>/toc gets redirected to /<id>', async () => {
