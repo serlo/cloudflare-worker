@@ -131,7 +131,7 @@ export async function redirects(request: Request) {
     const pdfMatch = /^\/api\/pdf\/(\d+)/.exec(url.pathname)
 
     if (pdfMatch) {
-      url.subdomain = 'pdf'
+      url.hostname = 'pdf.serlo.org'
       url.pathname = `/api/${pdfMatch[1]}`
       return url.toRedirect(301)
     }
