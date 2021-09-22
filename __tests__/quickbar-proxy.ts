@@ -38,7 +38,7 @@ describe('de.serlo.org/api/stats/quickbar.json', () => {
     expect(response.headers.get('content-type')).toBe('application/json')
 
     expect(await response.text()).toEqual(
-      expect.stringContaining('"title":"Math Landing"')
+      expect.stringContaining('"title":"Mathematik Startseite"')
     )
   })
 
@@ -46,11 +46,11 @@ describe('de.serlo.org/api/stats/quickbar.json', () => {
     global.server.use(
       rest.get(
         'https://arrrg.de/serlo-stats/quickbar.json',
-        (req, res, ctx) => {
+        (_req, res, ctx) => {
           return res(
             ctx.set('content-type', 'application/json'),
             ctx.body(
-              '[{"id":"100","title":"Math Landing","path":[],"isTax":false,"count":10000}]'
+              '[{"id":"100","title":"Mathematik Startseite","path":[],"isTax":false,"count":10000}]'
             )
           )
         }
