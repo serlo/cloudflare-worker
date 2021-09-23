@@ -34,17 +34,16 @@ export async function pdfProxy(
 
   const sentry = sentryFactory.createReporter('pdf-proxy')
 
-  try {
-    url.hostname = 'pdf.serlo.org'
-    url.pathname = `/api/${pdfMatch[1]}`
+  url.hostname = 'pdf.serlo.org'
+  url.pathname = `/api/${pdfMatch[1]}`
 
-    const pdfRes = await fetch(url.href, {
-      cf: { cacheTtl: 24 * 60 * 60 },
-    } as unknown as RequestInit)
+  const pdfRes = await fetch(url.href, {
+    cf: { cacheTtl: 24 * 60 * 60 },
+  } as unknown as RequestInit)
 
-    if (pdfRes.ok) return pdfRes
-  } catch (e) {
-    sentry.captureException(e)
-  }
+  if (pdfRes.ok) return pdfRes
+
+  sentry.captureMessage('PDF server problem', 'warning')
+
   return null
 }

@@ -33,15 +33,14 @@ export async function quickbarProxy(
 
   const sentry = sentryFactory.createReporter('quickbar-proxy')
 
-  try {
-    const jsonUrl = 'https://arrrg.de/serlo-stats/quickbar.json'
-    const jsonRes = await fetch(jsonUrl, {
-      cf: { cacheTtl: 24 * 60 * 60 },
-    } as unknown as RequestInit)
+  const jsonUrl = 'https://arrrg.de/serlo-stats/quickbar.json'
+  const jsonRes = await fetch(jsonUrl, {
+    cf: { cacheTtl: 24 * 60 * 60 },
+  } as unknown as RequestInit)
 
-    if (jsonRes.ok) return jsonRes
-  } catch (e) {
-    sentry.captureException(e)
-  }
+  if (jsonRes.ok) return jsonRes
+
+  sentry.captureMessage('Quickbar server problem, arrrg', 'warning')
+
   return null
 }
