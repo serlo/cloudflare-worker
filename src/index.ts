@@ -27,6 +27,8 @@ import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
 import { legalPages } from './legal-pages'
 import { maintenanceMode } from './maintenance'
 import { metadataApi } from './metadata-api'
+import { pdfProxy } from './pdf-proxy'
+import { quickbarProxy } from './quickbar-proxy'
 import { redirects } from './redirects'
 import { SentryFactory, Url } from './utils'
 
@@ -46,6 +48,8 @@ export async function handleFetchEvent(event: FetchEvent) {
     (await maintenanceMode(request)) ||
     (await enforceHttps(request)) ||
     (await legalPages(request)) ||
+    (await quickbarProxy(request, sentryFactory)) ||
+    (await pdfProxy(request, sentryFactory)) ||
     stagingRobots(request) ||
     (await frontendSpecialPaths(request, sentryFactory)) ||
     sentryHelloWorld(request, sentryFactory) ||
