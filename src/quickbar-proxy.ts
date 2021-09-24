@@ -20,7 +20,7 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-import { isInstance, Url, SentryFactory } from './utils'
+import { isInstance, Url, SentryFactory, responseToContext } from './utils'
 
 export async function quickbarProxy(
   request: Request,
@@ -31,16 +31,25 @@ export async function quickbarProxy(
   if (!isInstance(url.subdomain)) return null
   if (url.pathname !== '/api/stats/quickbar.json') return null
 
-  const sentry = sentryFactory.createReporter('quickbar-proxy')
-
-  const jsonUrl = 'https://arrrg.de/serlo-stats/quickbar.json'
-  const jsonRes = await fetch(jsonUrl, {
+  const quickbarUrl = 'https://arrrg.de/serlo-stats/quickbar.json'
+  const response = await fetch(quickbarUrl, {
     cf: { cacheTtl: 24 * 60 * 60 },
   } as unknown as RequestInit)
 
-  if (jsonRes.ok) return jsonRes
+  if (response.ok) {
+    return response
+  } else {
+    const sentry = sentryFactory.createReporter('quickbar-proxy')
 
-  sentry.captureMessage('Quickbar server problem, arrrg', 'warning')
+    sentry.setContext(
+      'response',
+      responseToContext({ response, text: await response.text() })
+    )
+    sentry.captureMessage(
+      'Illegal response of quickbar server, arrrg',
+      'warning'
+    )
 
-  return null
+    return null
+  }
 }
