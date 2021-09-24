@@ -22,25 +22,28 @@
 
 import { isInstance, Url, SentryFactory } from './utils'
 
-export async function quickbarProxy(
+export async function pdfProxy(
   request: Request,
   sentryFactory: SentryFactory
 ): Promise<Response | null> {
   const url = Url.fromRequest(request)
 
   if (!isInstance(url.subdomain)) return null
-  if (url.pathname !== '/api/stats/quickbar.json') return null
+  const pdfMatch = /^\/api\/pdf\/(\d+)/.exec(url.pathname)
+  if (!pdfMatch) return null
 
-  const sentry = sentryFactory.createReporter('quickbar-proxy')
+  const sentry = sentryFactory.createReporter('pdf-proxy')
 
-  const jsonUrl = 'https://arrrg.de/serlo-stats/quickbar.json'
-  const jsonRes = await fetch(jsonUrl, {
+  url.hostname = 'pdf.serlo.org'
+  url.pathname = `/api/${pdfMatch[1]}`
+
+  const pdfRes = await fetch(url.href, {
     cf: { cacheTtl: 24 * 60 * 60 },
   } as unknown as RequestInit)
 
-  if (jsonRes.ok) return jsonRes
+  if (pdfRes.ok) return pdfRes
 
-  sentry.captureMessage('Quickbar server problem, arrrg', 'warning')
+  sentry.captureMessage('PDF server problem', 'warning')
 
   return null
 }

@@ -19,28 +19,30 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
+import { rest } from 'msw'
 
-import { isInstance, Url, SentryFactory } from './utils'
+import { currentTestEnvironment } from './__utils__'
 
-export async function quickbarProxy(
-  request: Request,
-  sentryFactory: SentryFactory
-): Promise<Response | null> {
-  const url = Url.fromRequest(request)
+describe('proxy for pdf.serlo.org', () => {
+  beforeEach(() => {
+    setupPdfSerloOrg()
+  })
 
-  if (!isInstance(url.subdomain)) return null
-  if (url.pathname !== '/api/stats/quickbar.json') return null
+  test('request to de.serlo.org/api/pdf/* gets pdf from pdf.serlo.org', async () => {
+    const env = currentTestEnvironment()
+    const response = await env.fetch({
+      subdomain: 'de',
+      pathname: '/api/pdf/100',
+    })
+    expect(response.status).toBe(200)
+    expect(response.headers.get('content-type')).toBe('application/pdf')
+  })
 
-  const sentry = sentryFactory.createReporter('quickbar-proxy')
-
-  const jsonUrl = 'https://arrrg.de/serlo-stats/quickbar.json'
-  const jsonRes = await fetch(jsonUrl, {
-    cf: { cacheTtl: 24 * 60 * 60 },
-  } as unknown as RequestInit)
-
-  if (jsonRes.ok) return jsonRes
-
-  sentry.captureMessage('Quickbar server problem, arrrg', 'warning')
-
-  return null
-}
+  function setupPdfSerloOrg() {
+    global.server.use(
+      rest.get('https://pdf.serlo.org/api/100', (_req, res, ctx) => {
+        return res(ctx.set('content-type', 'application/pdf'))
+      })
+    )
+  }
+})
