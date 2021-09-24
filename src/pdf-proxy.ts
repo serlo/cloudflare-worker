@@ -20,7 +20,7 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-import { isInstance, Url, SentryFactory } from './utils'
+import { isInstance, Url, SentryFactory, responseToContext } from './utils'
 
 export async function pdfProxy(
   request: Request,
@@ -32,18 +32,23 @@ export async function pdfProxy(
   const pdfMatch = /^\/api\/pdf\/(\d+)/.exec(url.pathname)
   if (!pdfMatch) return null
 
-  const sentry = sentryFactory.createReporter('pdf-proxy')
-
   url.hostname = 'pdf.serlo.org'
   url.pathname = `/api/${pdfMatch[1]}`
 
-  const pdfRes = await fetch(url.href, {
+  const response = await fetch(url.href, {
     cf: { cacheTtl: 24 * 60 * 60 },
   } as unknown as RequestInit)
 
-  if (pdfRes.ok) return pdfRes
-
-  sentry.captureMessage('PDF server problem', 'warning')
+  if (response.ok) {
+    return response
+  } else {
+    const sentry = sentryFactory.createReporter('pdf-proxy')
+    sentry.setContext(
+      'response',
+      responseToContext({ response, text: await response.text() })
+    )
+    sentry.captureMessage('Illegal response of pdf.serlo.org', 'warning')
+  }
 
   return null
 }
