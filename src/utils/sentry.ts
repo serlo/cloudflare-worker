@@ -51,6 +51,10 @@ export class SentryReporter {
     this.getToucan().captureMessage(message, level)
   }
 
+  captureException(err: unknown) {
+    this.getToucan().captureException(err)
+  }
+
   private getToucan() {
     this.toucan ??= new Toucan({
       dsn: global.SENTRY_DSN,
