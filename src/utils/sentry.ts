@@ -65,3 +65,20 @@ export class SentryReporter {
     return this.toucan
   }
 }
+
+export function responseToContext({
+  response,
+  text,
+  json,
+}: {
+  response: Response
+  text?: string
+  json?: unknown
+}) {
+  return {
+    status: response.status,
+    url: response.url,
+    ...(text ? { text } : {}),
+    ...(json ? { json } : {}),
+  }
+}
