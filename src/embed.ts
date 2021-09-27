@@ -19,10 +19,9 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { option as O } from 'fp-ts'
 import * as t from 'io-ts'
 
-import { SentryFactory, SentryReporter, Url } from './utils'
+import { SentryFactory, SentryReporter, responseToContext, Url } from './utils'
 
 export async function embed(
   request: Request,
@@ -49,7 +48,7 @@ export async function embed(
       case 'vimeo.com':
         return await getVimeoThumbnail(videoUrl, sentry)
       case 'geogebra.org':
-        return await getGeogebraThumbnail(videoUrl)
+        return await getGeogebraThumbnail(videoUrl, sentry)
       case 'wikimedia.org':
         return await getWikimediaThumbnail(videoUrl)
     }
@@ -86,6 +85,8 @@ const VimeoApiResponse = t.type({
 })
 
 async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
+  sentry.setTag('imageRepository', 'vimeo')
+
   const videoId = url.pathname.replace('/video/', '')
 
   if (!/[0-9]+/.test(videoId)) return getPlaceholder()
@@ -94,40 +95,92 @@ async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
     'https://vimeo.com/api/oembed.json?url=' +
       encodeURIComponent(`https://vimeo.com/${videoId}`)
   )
+  const apiResponseText = await apiResponse.text()
 
-  if (apiResponse.status !== 200) return getPlaceholder()
-
-  try {
-    const returnedJson = (await apiResponse.json()) as unknown
-
-    if (!VimeoApiResponse.is(returnedJson)) {
-      sentry.setContext('returnedJson', returnedJson)
-      sentry.captureMessage('Vimeo API returns malformed JSON', 'warning')
-      return getPlaceholder()
+  if (apiResponse.status !== 200) {
+    if (apiResponse.status !== 404) {
+      sentry.setContext(
+        'apiResponse',
+        responseToContext({ response: apiResponse, text: apiResponseText })
+      )
+      sentry.captureMessage(
+        'Request to Vimeo API was not successful',
+        'warning'
+      )
     }
-
-    const url = returnedJson.thumbnail_url.replace(/_[0-9|x]+/, '')
-
-    const imageResponse = await fetch(url)
-
-    if (!isImageResponse(imageResponse)) return getPlaceholder()
-
-    return imageResponse
-  } catch (e) {
-    // error in parsing the api response or in parsing the thumbnail url
     return getPlaceholder()
   }
+
+  let apiResponseJson: unknown = undefined
+
+  try {
+    apiResponseJson = JSON.parse(apiResponseText) as unknown
+  } catch (e) {
+    sentry.setContext(
+      'apiResponse',
+      responseToContext({ response: apiResponse, text: apiResponseText })
+    )
+    sentry.captureMessage('Vimeo API returns malformed JSON', 'warning')
+    return getPlaceholder()
+  }
+
+  if (!VimeoApiResponse.is(apiResponseJson)) {
+    sentry.setContext(
+      'apiResponse',
+      responseToContext({ response: apiResponse, json: apiResponseJson })
+    )
+    sentry.captureMessage('Vimeo API returns unsupported JSON', 'warning')
+    return getPlaceholder()
+  }
+
+  let imgUrl: Url
+  const vimeoThumbnailUrl = apiResponseJson.thumbnail_url.replace(
+    /_[0-9|x]+/,
+    ''
+  )
+  sentry.setContext('vimeoThumbnailUrl', vimeoThumbnailUrl)
+
+  try {
+    imgUrl = new Url(vimeoThumbnailUrl)
+  } catch (e) {
+    sentry.setContext(
+      'apiResponse',
+      responseToContext({ response: apiResponse, json: apiResponseJson })
+    )
+    sentry.captureMessage(
+      'Returned thumbnail url of Vimeo API is malformed',
+      'warning'
+    )
+    return getPlaceholder()
+  }
+
+  const imageResponse = await fetch(imgUrl.href)
+
+  if (!isImageResponse(imageResponse)) {
+    sentry.setContext(
+      'vimdeoCdnResponse',
+      responseToContext({ response: imageResponse })
+    )
+    sentry.captureMessage('Vimeo CDN did not return an image', 'warning')
+    return getPlaceholder()
+  }
+
+  return imageResponse
 }
 
 const GeogebraApiResponse = t.type({
   responses: t.type({
-    response: t.type({ item: t.type({ previewUrl: t.string }) }),
+    response: t.intersection([
+      t.type({ '-type': t.literal('listing') }),
+      t.partial({ item: t.type({ previewUrl: t.string }) }),
+    ]),
   }),
 })
 
-async function getGeogebraThumbnail(url: URL) {
-  //example url https://www.geogebra.org/material/iframe/id/100
+async function getGeogebraThumbnail(url: URL, sentry: SentryReporter) {
+  sentry.setTag('imageRepository', 'geogebra')
 
+  //example url https://www.geogebra.org/material/iframe/id/100
   const appletId = url.pathname.replace('/material/iframe/id/', '')
 
   if (!/[0-9]+/.test(appletId)) return getPlaceholder()
@@ -147,25 +200,79 @@ async function getGeogebraThumbnail(url: URL) {
       },
     }),
   })
+  const apiResponseText = await apiResponse.text()
 
-  if (apiResponse.status !== 200) return getPlaceholder()
-
-  try {
-    const data = O.fromEither(
-      GeogebraApiResponse.decode(await apiResponse.json())
+  if (apiResponse.status !== 200) {
+    sentry.setContext(
+      'apiResponse',
+      responseToContext({ response: apiResponse, text: apiResponseText })
     )
-
-    if (O.isNone(data)) return getPlaceholder()
-
-    const thumbnailUrl = data.value.responses.response.item.previewUrl
-
-    const imgRes = await fetch(thumbnailUrl)
-    if (isImageResponse(imgRes)) return imgRes
-  } catch (e) {
-    // JSON cannot be parsed or preview url cannot be parsed
+    sentry.captureMessage(
+      'Request to Geogebra API was not successful',
+      'warning'
+    )
+    return getPlaceholder()
   }
 
-  return getPlaceholder()
+  let apiResponseJson: unknown
+
+  try {
+    apiResponseJson = JSON.parse(apiResponseText)
+  } catch (e) {
+    sentry.setContext(
+      'apiResponse',
+      responseToContext({ response: apiResponse, text: apiResponseText })
+    )
+    sentry.captureMessage('Geogebra API returned malformed JSON', 'warning')
+    return getPlaceholder()
+  }
+
+  if (!GeogebraApiResponse.is(apiResponseJson)) {
+    sentry.setContext(
+      'apiResponse',
+      responseToContext({ response: apiResponse, json: apiResponseJson })
+    )
+    sentry.captureMessage('Geogebra API returned unsupported JSON', 'warning')
+    return getPlaceholder()
+  }
+
+  const { item } = apiResponseJson.responses.response
+  if (item === undefined) {
+    // Geogebra material does not exist
+    return getPlaceholder()
+  }
+
+  let previewUrl: Url
+  sentry.setContext('geogebraPreviewUrl', item.previewUrl)
+
+  try {
+    previewUrl = new Url(item.previewUrl)
+  } catch (e) {
+    sentry.setContext(
+      'apiResponse',
+      responseToContext({ response: apiResponse, json: apiResponseJson })
+    )
+    sentry.captureMessage(
+      'Geogebra API returned malformed preview url',
+      'warning'
+    )
+    return getPlaceholder()
+  }
+
+  const imageResponse = await fetch(previewUrl.href)
+  if (!isImageResponse(imageResponse)) {
+    sentry.setContext(
+      'geogebraImageResponse',
+      responseToContext({ response: imageResponse })
+    )
+    sentry.captureMessage(
+      'Geogebra CDN does not respond with an image',
+      'warning'
+    )
+    return getPlaceholder()
+  }
+
+  return imageResponse
 }
 
 async function getWikimediaThumbnail(url: URL) {
