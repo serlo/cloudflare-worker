@@ -38,30 +38,35 @@ addEventListener('fetch', (event: Event) => {
   e.respondWith(handleFetchEvent(e))
 })
 
-export async function handleFetchEvent(event: FetchEvent) {
+export async function handleFetchEvent(event: FetchEvent): Promise<Response> {
   const { request } = event
   const sentryFactory = new SentryFactory(event)
 
-  return (
-    authFrontendSectorIdentifierUriValidation(request) ||
-    (await edtrIoStats(request)) ||
-    (await maintenanceMode(request)) ||
-    (await enforceHttps(request)) ||
-    (await legalPages(request)) ||
-    (await quickbarProxy(request, sentryFactory)) ||
-    (await pdfProxy(request, sentryFactory)) ||
-    stagingRobots(request) ||
-    (await frontendSpecialPaths(request, sentryFactory)) ||
-    sentryHelloWorld(request, sentryFactory) ||
-    (await redirects(request)) ||
-    (await embed(request, sentryFactory)) ||
-    (await semanticFileNames(request)) ||
-    (await packages(request)) ||
-    (await api(request)) ||
-    (await frontendProxy(request, sentryFactory)) ||
-    (await metadataApi(request, sentryFactory)) ||
-    (await fetch(request))
-  )
+  try {
+    return (
+      authFrontendSectorIdentifierUriValidation(request) ||
+      (await edtrIoStats(request)) ||
+      (await maintenanceMode(request)) ||
+      (await enforceHttps(request)) ||
+      (await legalPages(request)) ||
+      (await quickbarProxy(request, sentryFactory)) ||
+      (await pdfProxy(request, sentryFactory)) ||
+      stagingRobots(request) ||
+      (await frontendSpecialPaths(request, sentryFactory)) ||
+      sentryHelloWorld(request, sentryFactory) ||
+      (await redirects(request)) ||
+      (await embed(request, sentryFactory)) ||
+      (await semanticFileNames(request)) ||
+      (await packages(request)) ||
+      (await api(request)) ||
+      (await frontendProxy(request, sentryFactory)) ||
+      (await metadataApi(request, sentryFactory)) ||
+      (await fetch(request))
+    )
+  } catch (e) {
+    sentryFactory.createReporter('handle-fetch-event').captureException(e)
+    throw e
+  }
 }
 
 function sentryHelloWorld(request: Request, sentryFactory: SentryFactory) {
