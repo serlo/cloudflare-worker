@@ -35,9 +35,7 @@ export async function pdfProxy(
   url.hostname = 'pdf.serlo.org'
   url.pathname = `/api/${pdfMatch[1]}`
 
-  const response = await fetch(url.href, {
-    cf: { cacheTtl: 24 * 60 * 60 },
-  } as unknown as RequestInit)
+  const response = await fetch(url.href, { cf: { cacheTtl: 24 * 60 * 60 } })
 
   if (response.ok) {
     return response

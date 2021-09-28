@@ -284,9 +284,10 @@ async function getWikimediaThumbnail(url: URL) {
 
   // note: this adds manual caching settings,
   // since wikimedia does not return a max - age setting that cf can adopt
+  // TODO: disable `cacheEverything` when blocked image is working again
   const imgRes = await fetch(previewImageUrl, {
-    cf: { cacheTtl: 24 * 60 * 60, cacheEveything: true }, // TODO: disable `cacheEverything` when blocked image is working again
-  } as unknown as RequestInit)
+    cf: { cacheTtl: 24 * 60 * 60, cacheEverything: true },
+  })
   if (isImageResponse(imgRes)) return imgRes
 
   return getPlaceholder()
