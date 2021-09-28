@@ -21,12 +21,7 @@
  */
 import { h } from 'preact'
 
-import {
-  createPreactResponse,
-  fetchWithCache,
-  getBasicAuthHeaders,
-  Url,
-} from '../utils'
+import { createPreactResponse, getBasicAuthHeaders, Url } from '../utils'
 import { AreWeEdtrIoYet, AreWeEdtrIoYetProps } from './template'
 
 export async function edtrIoStats(request: Request) {
@@ -37,7 +32,8 @@ export async function edtrIoStats(request: Request) {
   url.subdomain = 'de'
   url.pathname = '/entities/are-we-edtr-io-yet'
 
-  const data = await fetchWithCache(url.href, {
+  const data = await fetch(url.href, {
+    cf: { cacheTtl: 60 * 60 },
     headers: getBasicAuthHeaders(),
   })
 
