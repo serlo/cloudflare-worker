@@ -32,9 +32,7 @@ export async function quickbarProxy(
   if (url.pathname !== '/api/stats/quickbar.json') return null
 
   const quickbarUrl = 'https://arrrg.de/serlo-stats/quickbar.json'
-  const response = await fetch(quickbarUrl, {
-    cf: { cacheTtl: 24 * 60 * 60 },
-  } as unknown as RequestInit)
+  const response = await fetch(quickbarUrl, { cf: { cacheTtl: 24 * 60 * 60 } })
 
   if (response.ok) {
     return response
