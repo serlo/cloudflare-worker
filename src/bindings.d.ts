@@ -21,9 +21,7 @@
  */
 declare global {
   declare namespace NodeJS {
-    interface Global extends KVs, Variables, Secrets {
-      fetch: typeof fetch
-    }
+    interface Global extends KVs, Variables, Secrets {}
   }
 }
 
