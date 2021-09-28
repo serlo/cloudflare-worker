@@ -26,7 +26,6 @@ import {
   createJsonResponse,
   createNotFoundResponse,
   createPreactResponse,
-  fetchWithCache,
   isInstance,
   Instance,
   markdownToHtml,
@@ -318,7 +317,7 @@ export function RevisionsOverview({ revisions }: { revisions: RevisedPage[] }) {
 async function fetchContent<A extends Page>(
   page: A
 ): Promise<WithContent<A> | null> {
-  const response = await fetchWithCache(page.url)
+  const response = await fetch(page.url, { cf: { cacheTtl: 60 * 60 * 24 } })
 
   if (response.ok) {
     const rawContent = markdownToHtml(await response.text())
