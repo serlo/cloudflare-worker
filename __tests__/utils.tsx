@@ -27,7 +27,6 @@ import {
   getCookieValue,
   sanitizeHtml,
   markdownToHtml,
-  fetchWithCache,
   isInstance,
   createPreactResponse,
   createJsonResponse,
@@ -41,8 +40,6 @@ import {
   expectContentTypeIsHtml,
   expectIsJsonResponse,
   expectIsNotFoundResponse,
-  mockHttpGet,
-  returnsText,
   givenApi,
   givenUuid,
   hasInternalServerError,
@@ -275,24 +272,4 @@ test('JsonResponse', async () => {
 
 test('NotFoundResponse', async () => {
   await expectIsNotFoundResponse(createNotFoundResponse())
-})
-
-describe('fetchWithCache()', () => {
-  test('returns the result of fetch()', async () => {
-    mockHttpGet('http://example.com/', returnsText('test'))
-
-    const response = await fetchWithCache('http://example.com/')
-
-    expect(await response.text()).toBe('test')
-  })
-
-  test('responses are cached for 1 hour', async () => {
-    mockHttpGet('http://example.com/', returnsText(''))
-
-    await fetchWithCache('http://example.com/')
-
-    expect(fetch).toHaveBeenCalledWith('http://example.com/', {
-      cf: { cacheTtl: 3600 },
-    })
-  })
 })

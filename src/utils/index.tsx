@@ -186,16 +186,6 @@ export function markdownToHtml(markdown: string): string {
   return marked(markdown, { headerIds: false }).trim()
 }
 
-export async function fetchWithCache(
-  url: string | Request,
-  init?: RequestInit
-): Promise<Response> {
-  return await fetch(url, {
-    cf: { cacheTtl: 60 * 60 },
-    ...init,
-  } as unknown as RequestInit)
-}
-
 export function getBasicAuthHeaders(): Record<string, string> {
   return global.ENABLE_BASIC_AUTH === 'true'
     ? { Authorization: 'Basic c2VybG90ZWFtOnNlcmxvdGVhbQ==' }

@@ -34,6 +34,7 @@ export async function metadataApi(
 
   sentry.setContext('url', url.href)
   sentry.setContext('userAgent', request.headers.get('User-Agent'))
+  sentry.setContext('headers', Object.fromEntries(request.headers.entries()))
   sentry.captureMessage('Legacy metadata API is used', 'info')
 
   return fetch(request)
