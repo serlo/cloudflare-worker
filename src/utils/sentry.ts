@@ -88,6 +88,7 @@ export function responseToContext({
   return {
     status: response.status,
     url: response.url,
+    headers: Object.fromEntries(response.headers.entries()),
     ...(text ? { text } : {}),
     ...(json ? { json } : {}),
   }
