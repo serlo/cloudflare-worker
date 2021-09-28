@@ -33,6 +33,9 @@ function main() {
 
   print_header "Run all tests"
   yarn test
+
+  print_header "Run build"
+  yarn build
 }
 
 function test_no_uncommitted_changes_when_pushing() {
