@@ -58,7 +58,6 @@ beforeAll(() => {
 
 beforeEach(() => {
   global.API_SECRET = 'secret'
-
   global.DOMAIN = 'serlo.local'
   global.ENVIRONMENT = 'local'
   global.FRONTEND_DOMAIN = 'frontend.serlo.local'
@@ -66,8 +65,6 @@ beforeEach(() => {
   global.FRONTEND_PROBABILITY_MOBILE = '1'
   global.FRONTEND_PROBABILITY_AUTHENTICATED = '1'
   global.FRONTEND_ALLOWED_TYPES = '[]'
-  // TODO: Remove this since this tests an implementation details
-  global.fetch = jest.fn().mockImplementation(fetchNode)
 
   global.MAINTENANCE_KV = createKV()
   global.PATH_INFO_KV = createKV()
@@ -82,6 +79,8 @@ beforeEach(() => {
   global.SENTRY_DSN = 'https://public@127.0.0.1/0'
   global.sentryEvents = []
   mockSentryServer()
+
+  addGlobalMocks()
 })
 
 afterEach(() => {
@@ -93,21 +92,24 @@ afterAll(() => {
   global.server.close()
 })
 
-global.Response = NodeResponse as unknown as typeof Response
-global.Request = NodeRequest as unknown as typeof Request
-global.crypto = {
-  subtle: {
-    digest(encoding: string, message: Uint8Array) {
-      return Promise.resolve(
-        cryptoNode
-          .createHash(encoding.toLowerCase().replace('-', ''))
-          .update(message)
-          .digest()
-      )
+function addGlobalMocks() {
+  global.fetch = fetchNode as unknown as typeof fetch
+  global.Response = NodeResponse as unknown as typeof Response
+  global.Request = NodeRequest as unknown as typeof Request
+  global.crypto = {
+    subtle: {
+      digest(encoding: string, message: Uint8Array) {
+        return Promise.resolve(
+          cryptoNode
+            .createHash(encoding.toLowerCase().replace('-', ''))
+            .update(message)
+            .digest()
+        )
+      },
     },
-  },
-} as unknown as typeof crypto
-global.TextEncoder = util.TextEncoder
+  } as unknown as typeof crypto
+  global.TextEncoder = util.TextEncoder
+}
 
 function mockSentryServer() {
   const { hostname, pathname } = new URL(global.SENTRY_DSN)
