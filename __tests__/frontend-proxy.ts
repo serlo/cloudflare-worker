@@ -446,6 +446,16 @@ describe('special paths', () => {
     expect(await response.text()).toEqual(expect.stringContaining('Event Log'))
   })
 
+  test('/event/history/user/[userId]/… always resolve to frontend', async () => {
+    const response = await env.fetch({
+      subdomain: 'en',
+      pathname: '/event/history/user/1/arekkas',
+    })
+
+    expect(response.status).toBe(200)
+    expect(await response.text()).toEqual(expect.stringContaining('arekkas'))
+  })
+
   test('/entity/unrevised always resolve to frontend', async () => {
     const response = await env.fetch({
       subdomain: 'en',

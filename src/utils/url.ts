@@ -42,6 +42,7 @@ const pathsFrontendSupportsWithoutUuids = [
   /^\/license\/detail\/\d+$/,
   /^\/entity\/repository\/history\/\d+$/,
   /^\/entity\/unrevised$/,
+  /^\/event\/history\/user\/\d+\/.+$/,
   /^\/event\/history(\/\d+)?$/,
 ]
 
