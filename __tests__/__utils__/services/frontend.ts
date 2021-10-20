@@ -58,6 +58,8 @@ export function defaultFrontendServer(): RestResolver {
 
     if (req.url.pathname === '/___graphql') return res(ctx.body('graphiql'))
 
+    if (req.url.pathname === '/___funfunfun') return res(ctx.body('funfunfun'))
+
     const instance = req.url.pathname.substr(1, 2)
     const pathname = req.url.pathname.substr(3)
 
