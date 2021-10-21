@@ -21,7 +21,7 @@
  */
 import { api } from './api'
 import { edtrIoStats } from './are-we-edtr-io-yet'
-import { authFrontendSectorIdentifierUriValidation } from './auth'
+import { auth } from './auth'
 import { embed } from './embed'
 import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
 import { legalPages } from './legal-pages'
@@ -44,7 +44,7 @@ export async function handleFetchEvent(event: FetchEvent): Promise<Response> {
 
   try {
     return (
-      authFrontendSectorIdentifierUriValidation(request) ||
+      auth(request) ||
       (await edtrIoStats(request)) ||
       (await maintenanceMode(request)) ||
       (await enforceHttps(request)) ||
