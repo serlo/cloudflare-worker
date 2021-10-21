@@ -20,7 +20,11 @@
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-import { currentTestEnvironmentWhen, expectIsJsonResponse } from './__utils__'
+import {
+  currentTestEnvironment,
+  currentTestEnvironmentWhen,
+  expectIsJsonResponse,
+} from './__utils__'
 
 test('Frontend Sector Identifier URI Validation (block localhost)', async () => {
   global.ALLOW_AUTH_FROM_LOCALHOST = 'false'
@@ -61,4 +65,13 @@ test('Frontend Sector Identifier URI Validation (allow localhost)', async () => 
     env.createUrl({ subdomain: 'ta', pathname: '/api/auth/callback' }),
     'http://localhost:3000/api/auth/callback',
   ])
+})
+
+test('Kratos Identity Schema', async () => {
+  const env = currentTestEnvironment()
+  const response = await env.fetch({
+    pathname: '/auth/kratos-identity.schema.json',
+  })
+
+  expect(response.status).toBe(200)
 })
