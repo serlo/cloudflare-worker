@@ -468,7 +468,7 @@ describe('special paths', () => {
     )
   })
 
-  test('/___graphql always resolve to frontend', async () => {
+  test('/___graphlql always resolve to frontend', async () => {
     const response = await env.fetch({
       subdomain: 'en',
       pathname: '/___graphql',
@@ -476,6 +476,16 @@ describe('special paths', () => {
 
     expect(response.status).toBe(200)
     expect(await response.text()).toEqual(expect.stringContaining('graphiql'))
+  })
+
+  test('links starting with /___ always resolve to frontend', async () => {
+    const response = await env.fetch({
+      subdomain: 'en',
+      pathname: '/___funfunfun',
+    })
+
+    expect(response.status).toBe(200)
+    expect(await response.text()).toEqual(expect.stringContaining('funfunfun'))
   })
 
   describe('special paths where the cookie determines the backend', () => {
