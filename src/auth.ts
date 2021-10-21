@@ -21,7 +21,14 @@
  */
 import { Instance, createJsonResponse, Url } from './utils'
 
-export function authFrontendSectorIdentifierUriValidation(
+export function auth(request: Request): Response | null {
+  return (
+    authFrontendSectorIdentifierUriValidation(request) ||
+    authKratosIdentitySchema(request)
+  )
+}
+
+function authFrontendSectorIdentifierUriValidation(
   request: Request
 ): Response | null {
   const url = Url.fromRequest(request)
@@ -41,4 +48,50 @@ export function authFrontendSectorIdentifierUriValidation(
   ]
 
   return createJsonResponse(redirectUris)
+}
+
+function authKratosIdentitySchema(request: Request): Response | null {
+  const url = Url.fromRequest(request)
+  if (
+    url.subdomain !== '' ||
+    url.pathname !== '/auth/kratos-identity.schema.json'
+  ) {
+    return null
+  }
+  const schema = {
+    $id: 'https://serlo.org/auth/kratos-identity.schema.json',
+    $schema: 'http://json-schema.org/draft-07/schema#',
+    title: 'User',
+    type: 'object',
+    properties: {
+      traits: {
+        type: 'object',
+        properties: {
+          email: {
+            type: 'string',
+            format: 'email',
+            'ory.sh/kratos': {
+              credentials: {
+                password: {
+                  identifier: true,
+                },
+              },
+            },
+          },
+          username: {
+            type: 'string',
+            'ory.sh/kratos': {
+              credentials: {
+                password: {
+                  identifier: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  }
+
+  return createJsonResponse(schema)
 }
