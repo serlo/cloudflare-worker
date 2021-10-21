@@ -468,16 +468,6 @@ describe('special paths', () => {
     )
   })
 
-  test('/___graphlql always resolve to frontend', async () => {
-    const response = await env.fetch({
-      subdomain: 'en',
-      pathname: '/___graphql',
-    })
-
-    expect(response.status).toBe(200)
-    expect(await response.text()).toEqual(expect.stringContaining('graphiql'))
-  })
-
   test('links starting with /___ always resolve to frontend', async () => {
     const response = await env.fetch({
       subdomain: 'en',
