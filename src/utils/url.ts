@@ -80,6 +80,15 @@ export class Url extends URL {
   }
 
   public isFrontendSupportedAndProbablyUuid(): boolean {
+    // TODO: We need a test for this when it is deployed in production
+    if (
+      global.ENVIRONMENT === 'staging' &&
+      (/\/entity\/repository\/add-revision\/\d+/.test(this.pathname) ||
+        /\/entity\/repository\/add-revision\/\d+\/\d+/.test(this.pathname))
+    ) {
+      return false
+    }
+
     return pathsFrontendSupportsWithoutUuids.every(
       (regex) => regex.exec(this.pathname) === null
     )
