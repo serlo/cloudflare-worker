@@ -76,6 +76,12 @@ function authKratosIdentitySchema(request: Request): Response | null {
                   identifier: true,
                 },
               },
+              verification: {
+                via: 'email',
+              },
+              recovery: {
+                via: 'email',
+              },
             },
           },
           username: {
@@ -89,6 +95,7 @@ function authKratosIdentitySchema(request: Request): Response | null {
             },
           },
         },
+        required: ['email', 'username'],
       },
     },
   }
