@@ -30,7 +30,6 @@ import {
   setupProbabilityFor,
   localTestEnvironment,
   currentTestEnvironment,
-  currentTestEnvironmentWhen,
   redirectsTo,
   givenFrontend,
   expectSentryEvent,
@@ -39,8 +38,7 @@ import {
 } from './__utils__'
 
 beforeEach(() => {
-  global.FRONTEND_ALLOWED_TYPES = '["Page"]'
-  global.FRONTEND_PROBABILITY_DESKTOP = '0.5'
+  global.FRONTEND_PROBABILITY = '0.5'
   Math.random = jest.fn().mockReturnValue(0.5)
 
   givenUuid({
@@ -56,7 +54,7 @@ describe('chooses backend based on random number', () => {
 
   describe('for desktop', () => {
     test('chooses frontend when random number <= probability', async () => {
-      global.FRONTEND_PROBABILITY_DESKTOP = '0.5'
+      global.FRONTEND_PROBABILITY = '0.5'
       Math.random = jest.fn().mockReturnValue(0.5)
 
       const response = await env.fetch({ subdomain: 'en', pathname: '/math' })
@@ -65,40 +63,13 @@ describe('chooses backend based on random number', () => {
     })
 
     test('chooses legacy backend for random number > probability', async () => {
-      global.FRONTEND_PROBABILITY_DESKTOP = '0.5'
+      global.FRONTEND_PROBABILITY = '0.5'
       Math.random = jest.fn().mockReturnValue(0.75)
 
       const response = await env.fetch({ subdomain: 'en', pathname: '/math' })
 
       await expectLegacy(response)
     })
-  })
-
-  describe('for mobile', () => {
-    test('chooses frontend when random number <= probability', async () => {
-      setupProbabilityFor(Backend.Legacy)
-      global.FRONTEND_PROBABILITY_MOBILE = '0.5'
-      Math.random = jest.fn().mockReturnValue(0.5)
-
-      await expectFrontend(await doMobileRequest())
-    })
-
-    test('chooses legacy backend for random number > probability', async () => {
-      setupProbabilityFor(Backend.Frontend)
-      global.FRONTEND_PROBABILITY_MOBILE = '0.5'
-      Math.random = jest.fn().mockReturnValue(0.75)
-
-      await expectLegacy(await doMobileRequest())
-    })
-
-    function doMobileRequest() {
-      const request = env.createRequest({ subdomain: 'en' })
-      const userAgent =
-        'Mozilla/5.0 (Android 4.0.3; de-ch) Version/4.0 Mobile Safari/534.30'
-      request.headers.set('user-agent', userAgent)
-
-      return env.fetchRequest(request)
-    }
   })
 })
 
@@ -121,60 +92,6 @@ test('removes trailing slashes and prepends language code when the backend is fr
   setupProbabilityFor(Backend.Frontend)
 
   await expectFrontend(await env.fetch({ subdomain: 'en' }))
-})
-
-describe('when user is authenticated', () => {
-  describe('when REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = true', () => {
-    let response: Response
-
-    beforeEach(async () => {
-      global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = 'true'
-      setupProbabilityFor(Backend.Frontend)
-      const env = currentTestEnvironmentWhen(
-        (config) =>
-          config.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND === 'true'
-      )
-      response = await doAuthedRequest(env)
-    })
-
-    test('chooses legacy backend', async () => {
-      await expectLegacy(response)
-    })
-
-    test('does not set cookie "useFrontend"', () => {
-      expect(response.headers.get('Set-Cookie')).not.toEqual(
-        expect.stringContaining('useFrontend')
-      )
-    })
-  })
-
-  describe('when REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = false', () => {
-    beforeEach(() => {
-      global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = 'false'
-    })
-
-    test('chooses frontend when random number <= probability', async () => {
-      setupProbabilityFor(Backend.Legacy)
-      global.FRONTEND_PROBABILITY_AUTHENTICATED = '0.5'
-      Math.random = jest.fn().mockReturnValue(0.5)
-
-      await expectFrontend(await doAuthedRequest(localTestEnvironment()))
-    })
-
-    test('chooses legacy backend for random number > probability', async () => {
-      setupProbabilityFor(Backend.Frontend)
-      global.FRONTEND_PROBABILITY_AUTHENTICATED = '0.5'
-      Math.random = jest.fn().mockReturnValue(0.75)
-
-      await expectLegacy(await doAuthedRequest(localTestEnvironment()))
-    })
-  })
-
-  function doAuthedRequest(env: ReturnType<typeof currentTestEnvironment>) {
-    const request = env.createRequest({ subdomain: 'en' })
-    request.headers.set('Cookie', 'authenticated=1')
-    return env.fetchRequest(request)
-  }
 })
 
 describe('when request contains content api parameter', () => {
@@ -241,7 +158,7 @@ describe('uses cookie "useFrontend" to determine backend', () => {
       backend: Backend.Legacy,
     },
   ])('Parameters: %p', async ({ cookieValue, backend }) => {
-    global.FRONTEND_PROBABILITY_DESKTOP = '0.5'
+    global.FRONTEND_PROBABILITY = '0.5'
 
     const env = localTestEnvironment()
 
@@ -290,18 +207,6 @@ test('ignore wrongly formatted cookie values', async () => {
   expect(response.headers.get('Set-Cookie')).toEqual(
     expect.stringContaining('useFrontend')
   )
-})
-
-test('chooses legacy backend when type of ressource is not in FRONTEND_ALLOWED_TYPES', async () => {
-  global.FRONTEND_ALLOWED_TYPES = '["Page", "Article"]'
-  givenUuid({ id: 42, __typename: 'TaxonomyTerm' })
-
-  const response = await localTestEnvironment().fetch({
-    subdomain: 'en',
-    pathname: '/42',
-  })
-
-  await expectLegacy(response)
 })
 
 test('chooses legacy backend when type of ressource is unknown', async () => {
