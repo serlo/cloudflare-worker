@@ -101,7 +101,6 @@ export async function frontendProxy(
   const config = getConfig(request)
   const url = Url.fromRequest(request)
   const cookies = request.headers.get('Cookie')
-  const isAuthenticated = getCookieValue('authenticated', cookies) === '1'
   const sentry = sentryFactory.createReporter('frontend')
 
   if (!config.relevantRequest) return null
@@ -125,8 +124,6 @@ export async function frontendProxy(
 
   if (
     url.hasContentApiParameters() ||
-    (global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND === 'true' &&
-      isAuthenticated) ||
     request.headers.get('X-From') === 'legacy-serlo.org'
   )
     return await fetchBackend({
@@ -145,8 +142,6 @@ export async function frontendProxy(
 
   const probability = isProbablyMobile
     ? config.probabilityMobile
-    : isAuthenticated
-    ? config.probabilityAuthenticated
     : config.probabilityDesktop
 
   const response = await fetchBackend({
@@ -229,7 +224,6 @@ function getConfig(request: Request): Config {
     instance: url.subdomain,
     probabilityDesktop: Number(global.FRONTEND_PROBABILITY_DESKTOP),
     probabilityMobile: Number(global.FRONTEND_PROBABILITY_MOBILE),
-    probabilityAuthenticated: Number(global.FRONTEND_PROBABILITY_AUTHENTICATED),
   }
 }
 
@@ -241,7 +235,6 @@ interface RelevantRequestConfig {
   allowedTypes: string[]
   probabilityDesktop: number
   probabilityMobile: number
-  probabilityAuthenticated: number
   frontendDomain: string
 }
 

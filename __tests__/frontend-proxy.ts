@@ -123,60 +123,6 @@ test('removes trailing slashes and prepends language code when the backend is fr
   await expectFrontend(await env.fetch({ subdomain: 'en' }))
 })
 
-describe('when user is authenticated', () => {
-  describe('when REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = true', () => {
-    let response: Response
-
-    beforeEach(async () => {
-      global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = 'true'
-      setupProbabilityFor(Backend.Frontend)
-      const env = currentTestEnvironmentWhen(
-        (config) =>
-          config.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND === 'true'
-      )
-      response = await doAuthedRequest(env)
-    })
-
-    test('chooses legacy backend', async () => {
-      await expectLegacy(response)
-    })
-
-    test('does not set cookie "useFrontend"', () => {
-      expect(response.headers.get('Set-Cookie')).not.toEqual(
-        expect.stringContaining('useFrontend')
-      )
-    })
-  })
-
-  describe('when REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = false', () => {
-    beforeEach(() => {
-      global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND = 'false'
-    })
-
-    test('chooses frontend when random number <= probability', async () => {
-      setupProbabilityFor(Backend.Legacy)
-      global.FRONTEND_PROBABILITY_AUTHENTICATED = '0.5'
-      Math.random = jest.fn().mockReturnValue(0.5)
-
-      await expectFrontend(await doAuthedRequest(localTestEnvironment()))
-    })
-
-    test('chooses legacy backend for random number > probability', async () => {
-      setupProbabilityFor(Backend.Frontend)
-      global.FRONTEND_PROBABILITY_AUTHENTICATED = '0.5'
-      Math.random = jest.fn().mockReturnValue(0.75)
-
-      await expectLegacy(await doAuthedRequest(localTestEnvironment()))
-    })
-  })
-
-  function doAuthedRequest(env: ReturnType<typeof currentTestEnvironment>) {
-    const request = env.createRequest({ subdomain: 'en' })
-    request.headers.set('Cookie', 'authenticated=1')
-    return env.fetchRequest(request)
-  }
-})
-
 describe('when request contains content api parameter', () => {
   let response: Response
 
