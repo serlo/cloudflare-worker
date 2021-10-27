@@ -36,7 +36,6 @@ export interface Variables {
   DOMAIN: string
   ENVIRONMENT: string
   ENABLE_BASIC_AUTH: 'true' | 'false'
-  FRONTEND_ALLOWED_TYPES: string
   FRONTEND_DOMAIN: string
   FRONTEND_PROBABILITY: string
 }
