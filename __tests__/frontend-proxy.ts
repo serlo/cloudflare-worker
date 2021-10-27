@@ -30,7 +30,6 @@ import {
   setupProbabilityFor,
   localTestEnvironment,
   currentTestEnvironment,
-  currentTestEnvironmentWhen,
   redirectsTo,
   givenFrontend,
   expectSentryEvent,
@@ -40,7 +39,7 @@ import {
 
 beforeEach(() => {
   global.FRONTEND_ALLOWED_TYPES = '["Page"]'
-  global.FRONTEND_PROBABILITY_DESKTOP = '0.5'
+  global.FRONTEND_PROBABILITY = '0.5'
   Math.random = jest.fn().mockReturnValue(0.5)
 
   givenUuid({
@@ -56,7 +55,7 @@ describe('chooses backend based on random number', () => {
 
   describe('for desktop', () => {
     test('chooses frontend when random number <= probability', async () => {
-      global.FRONTEND_PROBABILITY_DESKTOP = '0.5'
+      global.FRONTEND_PROBABILITY = '0.5'
       Math.random = jest.fn().mockReturnValue(0.5)
 
       const response = await env.fetch({ subdomain: 'en', pathname: '/math' })
@@ -65,40 +64,13 @@ describe('chooses backend based on random number', () => {
     })
 
     test('chooses legacy backend for random number > probability', async () => {
-      global.FRONTEND_PROBABILITY_DESKTOP = '0.5'
+      global.FRONTEND_PROBABILITY = '0.5'
       Math.random = jest.fn().mockReturnValue(0.75)
 
       const response = await env.fetch({ subdomain: 'en', pathname: '/math' })
 
       await expectLegacy(response)
     })
-  })
-
-  describe('for mobile', () => {
-    test('chooses frontend when random number <= probability', async () => {
-      setupProbabilityFor(Backend.Legacy)
-      global.FRONTEND_PROBABILITY_MOBILE = '0.5'
-      Math.random = jest.fn().mockReturnValue(0.5)
-
-      await expectFrontend(await doMobileRequest())
-    })
-
-    test('chooses legacy backend for random number > probability', async () => {
-      setupProbabilityFor(Backend.Frontend)
-      global.FRONTEND_PROBABILITY_MOBILE = '0.5'
-      Math.random = jest.fn().mockReturnValue(0.75)
-
-      await expectLegacy(await doMobileRequest())
-    })
-
-    function doMobileRequest() {
-      const request = env.createRequest({ subdomain: 'en' })
-      const userAgent =
-        'Mozilla/5.0 (Android 4.0.3; de-ch) Version/4.0 Mobile Safari/534.30'
-      request.headers.set('user-agent', userAgent)
-
-      return env.fetchRequest(request)
-    }
   })
 })
 
@@ -187,7 +159,7 @@ describe('uses cookie "useFrontend" to determine backend', () => {
       backend: Backend.Legacy,
     },
   ])('Parameters: %p', async ({ cookieValue, backend }) => {
-    global.FRONTEND_PROBABILITY_DESKTOP = '0.5'
+    global.FRONTEND_PROBABILITY = '0.5'
 
     const env = localTestEnvironment()
 

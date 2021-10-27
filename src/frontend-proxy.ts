@@ -137,16 +137,10 @@ export async function frontendProxy(
   const useFrontendNumber = Number.isNaN(cookieValue)
     ? Math.random()
     : cookieValue
-  const isProbablyMobile =
-    (request.headers.get('user-agent') ?? '').indexOf('Mobi') > -1
-
-  const probability = isProbablyMobile
-    ? config.probabilityMobile
-    : config.probabilityDesktop
 
   const response = await fetchBackend({
     ...config,
-    useFrontend: useFrontendNumber <= probability,
+    useFrontend: useFrontendNumber <= config.probability,
     pathPrefix: config.instance,
     request,
     sentry,
@@ -222,8 +216,7 @@ function getConfig(request: Request): Config {
     frontendDomain:
       getCookieValue('frontendDomain', cookies) ?? global.FRONTEND_DOMAIN,
     instance: url.subdomain,
-    probabilityDesktop: Number(global.FRONTEND_PROBABILITY_DESKTOP),
-    probabilityMobile: Number(global.FRONTEND_PROBABILITY_MOBILE),
+    probability: Number(global.FRONTEND_PROBABILITY),
   }
 }
 
@@ -233,9 +226,8 @@ interface RelevantRequestConfig {
   relevantRequest: true
   instance: Instance
   allowedTypes: string[]
-  probabilityDesktop: number
-  probabilityMobile: number
   frontendDomain: string
+  probability: number
 }
 
 interface IrrelevantRequestConfig {

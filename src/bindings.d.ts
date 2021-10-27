@@ -38,8 +38,7 @@ export interface Variables {
   ENABLE_BASIC_AUTH: 'true' | 'false'
   FRONTEND_ALLOWED_TYPES: string
   FRONTEND_DOMAIN: string
-  FRONTEND_PROBABILITY_DESKTOP: string
-  FRONTEND_PROBABILITY_MOBILE: string
+  FRONTEND_PROBABILITY: string
 }
 
 interface KVs {
