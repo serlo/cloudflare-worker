@@ -101,7 +101,6 @@ export async function frontendProxy(
   const config = getConfig(request)
   const url = Url.fromRequest(request)
   const cookies = request.headers.get('Cookie')
-  const isAuthenticated = getCookieValue('authenticated', cookies) === '1'
   const sentry = sentryFactory.createReporter('frontend')
 
   if (!config.relevantRequest) return null
@@ -110,8 +109,7 @@ export async function frontendProxy(
     const pathInfo = await getPathInfo(config.instance, url.pathname)
     const typename = pathInfo?.typename ?? null
 
-    if (typename === null || !config.allowedTypes.includes(typename))
-      return null
+    if (typename === null || typename === 'Comment') return null
   }
 
   if (getCookieValue('useFrontend', cookies) === 'always')
@@ -125,8 +123,6 @@ export async function frontendProxy(
 
   if (
     url.hasContentApiParameters() ||
-    (global.REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND === 'true' &&
-      isAuthenticated) ||
     request.headers.get('X-From') === 'legacy-serlo.org'
   )
     return await fetchBackend({
@@ -140,18 +136,10 @@ export async function frontendProxy(
   const useFrontendNumber = Number.isNaN(cookieValue)
     ? Math.random()
     : cookieValue
-  const isProbablyMobile =
-    (request.headers.get('user-agent') ?? '').indexOf('Mobi') > -1
-
-  const probability = isProbablyMobile
-    ? config.probabilityMobile
-    : isAuthenticated
-    ? config.probabilityAuthenticated
-    : config.probabilityDesktop
 
   const response = await fetchBackend({
     ...config,
-    useFrontend: useFrontendNumber <= probability,
+    useFrontend: useFrontendNumber <= config.probability,
     pathPrefix: config.instance,
     request,
     sentry,
@@ -223,13 +211,10 @@ function getConfig(request: Request): Config {
 
   return {
     relevantRequest: true,
-    allowedTypes: JSON.parse(global.FRONTEND_ALLOWED_TYPES) as string[],
     frontendDomain:
       getCookieValue('frontendDomain', cookies) ?? global.FRONTEND_DOMAIN,
     instance: url.subdomain,
-    probabilityDesktop: Number(global.FRONTEND_PROBABILITY_DESKTOP),
-    probabilityMobile: Number(global.FRONTEND_PROBABILITY_MOBILE),
-    probabilityAuthenticated: Number(global.FRONTEND_PROBABILITY_AUTHENTICATED),
+    probability: Number(global.FRONTEND_PROBABILITY),
   }
 }
 
@@ -238,11 +223,8 @@ type Config = RelevantRequestConfig | IrrelevantRequestConfig
 interface RelevantRequestConfig {
   relevantRequest: true
   instance: Instance
-  allowedTypes: string[]
-  probabilityDesktop: number
-  probabilityMobile: number
-  probabilityAuthenticated: number
   frontendDomain: string
+  probability: number
 }
 
 interface IrrelevantRequestConfig {

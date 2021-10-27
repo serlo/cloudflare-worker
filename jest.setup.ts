@@ -61,10 +61,7 @@ beforeEach(() => {
   global.DOMAIN = 'serlo.local'
   global.ENVIRONMENT = 'local'
   global.FRONTEND_DOMAIN = 'frontend.serlo.local'
-  global.FRONTEND_PROBABILITY_DESKTOP = '1'
-  global.FRONTEND_PROBABILITY_MOBILE = '1'
-  global.FRONTEND_PROBABILITY_AUTHENTICATED = '1'
-  global.FRONTEND_ALLOWED_TYPES = '[]'
+  global.FRONTEND_PROBABILITY = '1'
 
   global.MAINTENANCE_KV = createKV()
   global.PATH_INFO_KV = createKV()
