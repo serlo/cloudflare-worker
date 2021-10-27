@@ -109,8 +109,7 @@ export async function frontendProxy(
     const pathInfo = await getPathInfo(config.instance, url.pathname)
     const typename = pathInfo?.typename ?? null
 
-    if (typename === null || !config.allowedTypes.includes(typename))
-      return null
+    if (typename === null || typename === 'Comment') return null
   }
 
   if (getCookieValue('useFrontend', cookies) === 'always')
@@ -212,7 +211,6 @@ function getConfig(request: Request): Config {
 
   return {
     relevantRequest: true,
-    allowedTypes: JSON.parse(global.FRONTEND_ALLOWED_TYPES) as string[],
     frontendDomain:
       getCookieValue('frontendDomain', cookies) ?? global.FRONTEND_DOMAIN,
     instance: url.subdomain,
@@ -225,7 +223,6 @@ type Config = RelevantRequestConfig | IrrelevantRequestConfig
 interface RelevantRequestConfig {
   relevantRequest: true
   instance: Instance
-  allowedTypes: string[]
   frontendDomain: string
   probability: number
 }

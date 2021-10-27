@@ -38,7 +38,6 @@ import {
 } from './__utils__'
 
 beforeEach(() => {
-  global.FRONTEND_ALLOWED_TYPES = '["Page"]'
   global.FRONTEND_PROBABILITY = '0.5'
   Math.random = jest.fn().mockReturnValue(0.5)
 
@@ -208,18 +207,6 @@ test('ignore wrongly formatted cookie values', async () => {
   expect(response.headers.get('Set-Cookie')).toEqual(
     expect.stringContaining('useFrontend')
   )
-})
-
-test('chooses legacy backend when type of ressource is not in FRONTEND_ALLOWED_TYPES', async () => {
-  global.FRONTEND_ALLOWED_TYPES = '["Page", "Article"]'
-  givenUuid({ id: 42, __typename: 'TaxonomyTerm' })
-
-  const response = await localTestEnvironment().fetch({
-    subdomain: 'en',
-    pathname: '/42',
-  })
-
-  await expectLegacy(response)
 })
 
 test('chooses legacy backend when type of ressource is unknown', async () => {
