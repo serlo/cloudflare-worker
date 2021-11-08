@@ -28,6 +28,11 @@ import { handleFetchEvent } from '../../src'
 import { Variables } from '../../src/bindings'
 import { isInstance } from '../../src/utils'
 
+declare global {
+  // eslint-disable-next-line no-var
+  var server: ReturnType<typeof import('msw/node').setupServer>
+}
+
 export function currentTestEnvironment(): TestEnvironment {
   const environment = (process.env.TEST_ENVIRONMENT ?? '').toLowerCase()
 
