@@ -35,6 +35,7 @@ export async function frontendSpecialPaths(
 ): Promise<Response | null> {
   const config = getConfig(request)
   const url = Url.fromRequest(request)
+  const cookies = request.headers.get('Cookie')
 
   const sentry = sentryFactory.createReporter('frontend-special-paths')
 
@@ -64,6 +65,19 @@ export async function frontendSpecialPaths(
     return await fetchBackend({ ...config, useFrontend: true, request, sentry })
 
   if (url.pathname == '/user/notifications' || url.pathname == '/consent')
+    return await fetchBackend({
+      ...config,
+      useFrontend: true,
+      request,
+      pathPrefix: config.instance,
+      sentry,
+    })
+
+  // TODO: We need a test for this when it is deployed in production
+  if (
+    url.pathname.startsWith('/entity/repository/add-revision/') &&
+    getCookieValue('useEditorInFrontend', cookies) === '1'
+  )
     return await fetchBackend({
       ...config,
       useFrontend: true,
