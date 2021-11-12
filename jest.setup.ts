@@ -124,11 +124,10 @@ function mockSentryServer() {
 export {}
 
 declare global {
-  namespace NodeJS {
-    interface Global {
-      server: ReturnType<typeof import('msw/node').setupServer>
-      uuids: Uuid[]
-      sentryEvents: SentryEvent[]
-    }
-  }
+  // eslint-disable-next-line no-var
+  var server: ReturnType<typeof import('msw/node').setupServer>
+  // eslint-disable-next-line no-var
+  var uuids: Uuid[]
+  // eslint-disable-next-line no-var
+  var sentryEvents: SentryEvent[]
 }
