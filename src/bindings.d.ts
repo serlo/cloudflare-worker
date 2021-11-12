@@ -1,3 +1,4 @@
+/* eslint-disable no-var */
 /**
  * This file is part of Serlo.org Cloudflare Worker.
  *
@@ -19,17 +20,31 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
+
 declare global {
   declare namespace NodeJS {
     interface Global extends KVs, Variables, Secrets {}
   }
 }
 
-interface Secrets {
-  API_SECRET: string
-  SENTRY_DSN: string
+// Secrets
+declare global {
+  var API_SECRET: string
+  var SENTRY_DSN: string
 }
 
+// Variables
+declare global {
+  var ALLOW_AUTH_FROM_LOCALHOST: 'true' | 'false'
+  var API_ENDPOINT: string
+  var DOMAIN: string
+  var ENVIRONMENT: string
+  var ENABLE_BASIC_AUTH: 'true' | 'false'
+  var FRONTEND_DOMAIN: string
+  var FRONTEND_PROBABILITY: string
+}
+
+// for tests, not sure how to share above types
 export interface Variables {
   ALLOW_AUTH_FROM_LOCALHOST: 'true' | 'false'
   API_ENDPOINT: string
@@ -40,10 +55,11 @@ export interface Variables {
   FRONTEND_PROBABILITY: string
 }
 
-interface KVs {
-  MAINTENANCE_KV: KV<'enabled'>
-  PACKAGES_KV: KV<string>
-  PATH_INFO_KV: KV<import('./utils').CacheKey>
+// KVs
+declare global {
+  var MAINTENANCE_KV: KV<'enabled'>
+  var PACKAGES_KV: KV<string>
+  var PATH_INFO_KV: KV<import('./utils').CacheKey>
 }
 
 export interface KV<Key extends string> {
