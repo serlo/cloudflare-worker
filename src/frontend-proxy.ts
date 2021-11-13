@@ -35,7 +35,7 @@ export async function frontendSpecialPaths(
 ): Promise<Response | null> {
   const config = getConfig(request)
   const url = Url.fromRequest(request)
-
+  const route = getRoute(request)
   const sentry = sentryFactory.createReporter('frontend-special-paths')
 
   if (!config.relevantRequest) return null
@@ -46,50 +46,11 @@ export async function frontendSpecialPaths(
   if (url.pathname === '/disable-frontend')
     return createConfigurationResponse('Disabled: Use of new frontend', 1.1)
 
-  if (url.pathname.startsWith('/api/auth/'))
-    return await fetchBackend({
-      ...config,
-      useFrontend: true,
-      request,
-      redirect: 'manual',
-      sentry,
-    })
+  if (route === null) return null
 
-  if (
-    url.pathname.startsWith('/_next/') ||
-    url.pathname.startsWith('/_assets/') ||
-    url.pathname.startsWith('/api/frontend/') ||
-    url.pathname.startsWith('/___')
-  )
-    return await fetchBackend({ ...config, useFrontend: true, request, sentry })
-
-  if (url.pathname == '/user/notifications' || url.pathname == '/consent')
-    return await fetchBackend({
-      ...config,
-      useFrontend: true,
-      request,
-      pathPrefix: config.instance,
-      sentry,
-    })
-
-  if (
-    url.pathname.startsWith('/auth/activate/') ||
-    url.pathname.startsWith('/auth/password/restore/') ||
-    [
-      '/auth/login',
-      '/auth/logout',
-      '/auth/password/change',
-      '/auth/hydra/login',
-      '/auth/hydra/consent',
-      '/user/register',
-    ].includes(url.pathname)
-  )
-    return await fetchBackend({
-      ...config,
-      useFrontend: false,
-      request,
-      sentry,
-    })
+  if (route.__typename === 'BeforeRedirectsRoute') {
+    return fetchRoute(route.route, config, request, sentry)
+  }
 
   return null
 }
@@ -102,6 +63,7 @@ export async function frontendProxy(
   const url = Url.fromRequest(request)
   const cookies = request.headers.get('Cookie')
   const sentry = sentryFactory.createReporter('frontend')
+  const route = getRoute(request)
 
   if (!config.relevantRequest) return null
 
@@ -112,42 +74,31 @@ export async function frontendProxy(
     if (typename === null || typename === 'Comment') return null
   }
 
-  if (getCookieValue('useFrontend', cookies) === 'always')
-    return await fetchBackend({
+  if (route === null) return null
+
+  if (route.__typename === 'Frontend' || route.__typename === 'Legacy') {
+    return fetchRoute(route, config, request, sentry)
+  }
+
+  if (route.__typename === 'AB') {
+    const cookieValue = Number(getCookieValue('useFrontend', cookies) ?? 'NaN')
+    const useFrontendNumber = Number.isNaN(cookieValue)
+      ? Math.random()
+      : cookieValue
+
+    const response = await fetchBackend({
       ...config,
-      useFrontend: true,
+      useFrontend: useFrontendNumber <= route.probability,
       pathPrefix: config.instance,
       request,
       sentry,
     })
+    if (Number.isNaN(cookieValue))
+      setCookieUseFrontend(response, useFrontendNumber)
 
-  if (
-    url.hasContentApiParameters() ||
-    request.headers.get('X-From') === 'legacy-serlo.org'
-  )
-    return await fetchBackend({
-      ...config,
-      useFrontend: false,
-      request,
-      sentry,
-    })
-
-  const cookieValue = Number(getCookieValue('useFrontend', cookies) ?? 'NaN')
-  const useFrontendNumber = Number.isNaN(cookieValue)
-    ? Math.random()
-    : cookieValue
-
-  const response = await fetchBackend({
-    ...config,
-    useFrontend: useFrontendNumber <= config.probability,
-    pathPrefix: config.instance,
-    request,
-    sentry,
-  })
-  if (Number.isNaN(cookieValue))
-    setCookieUseFrontend(response, useFrontendNumber)
-
-  return response
+    return response
+  }
+  return null
 }
 
 async function fetchBackend({
@@ -229,4 +180,154 @@ interface RelevantRequestConfig {
 
 interface IrrelevantRequestConfig {
   relevantRequest: false
+}
+
+interface ABRoute {
+  __typename: 'AB'
+  probability: number
+}
+
+interface FrontendRoute {
+  __typename: 'Frontend'
+  redirect: 'manual' | 'follow'
+  pathPrefix: boolean
+}
+
+interface LegacyRoute {
+  __typename: 'Legacy'
+}
+
+interface BeforeRedirectsRoute {
+  __typename: 'BeforeRedirectsRoute'
+  route: LegacyRoute | FrontendRoute
+}
+
+type RouteConfig = LegacyRoute | FrontendRoute | ABRoute | BeforeRedirectsRoute
+
+function getRoute(request: Request): RouteConfig | null {
+  const url = Url.fromRequest(request)
+  const cookies = request.headers.get('Cookie')
+
+  if (url.pathname.startsWith('/api/auth/')) {
+    return {
+      __typename: 'BeforeRedirectsRoute',
+      route: {
+        __typename: 'Frontend',
+        redirect: 'manual',
+        pathPrefix: false,
+      },
+    }
+  }
+
+  if (
+    url.pathname.startsWith('/_next/') ||
+    url.pathname.startsWith('/_assets/') ||
+    url.pathname.startsWith('/api/frontend/') ||
+    url.pathname.startsWith('/___')
+  ) {
+    return {
+      __typename: 'BeforeRedirectsRoute',
+      route: {
+        __typename: 'Frontend',
+        redirect: 'follow',
+        pathPrefix: false,
+      },
+    }
+  }
+
+  if (url.pathname == '/user/notifications' || url.pathname == '/consent') {
+    return {
+      __typename: 'BeforeRedirectsRoute',
+      route: {
+        __typename: 'Frontend',
+        redirect: 'follow',
+        pathPrefix: true,
+      },
+    }
+  }
+
+  if (
+    url.pathname.startsWith('/auth/activate/') ||
+    url.pathname.startsWith('/auth/password/restore/') ||
+    [
+      '/auth/login',
+      '/auth/logout',
+      '/auth/password/change',
+      '/auth/hydra/login',
+      '/auth/hydra/consent',
+      '/user/register',
+    ].includes(url.pathname)
+  ) {
+    return {
+      __typename: 'BeforeRedirectsRoute',
+      route: {
+        __typename: 'Legacy',
+      },
+    }
+  }
+
+  if (getCookieValue('useFrontend', cookies) === 'always') {
+    return {
+      __typename: 'Frontend',
+      redirect: 'follow',
+      pathPrefix: true,
+    }
+  }
+
+  if (
+    url.hasContentApiParameters() ||
+    request.headers.get('X-From') === 'legacy-serlo.org'
+  ) {
+    return {
+      __typename: 'Legacy',
+    }
+  }
+
+  // ? when AB?
+  else {
+    return {
+      __typename: 'AB',
+      probability: Number(global.FRONTEND_PROBABILITY),
+    }
+  }
+
+  return null
+}
+
+async function fetchRoute(
+  route: LegacyRoute | FrontendRoute,
+  config: RelevantRequestConfig,
+  request: Request,
+  sentry: SentryReporter
+): Promise<Response | null> {
+  if (route.__typename === 'Legacy') {
+    return await fetchBackend({
+      ...config,
+      useFrontend: false,
+      request,
+      sentry,
+    })
+  }
+
+  if (route.__typename === 'Frontend') {
+    if (route.pathPrefix === true) {
+      return await fetchBackend({
+        ...config,
+        useFrontend: true,
+        request,
+        redirect: route.redirect,
+        pathPrefix: config.instance,
+        sentry,
+      })
+    }
+    return await fetchBackend({
+      ...config,
+      useFrontend: true,
+      request,
+      redirect: route.redirect,
+      sentry,
+    })
+  }
+
+  return null
 }
