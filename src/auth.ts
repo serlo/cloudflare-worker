@@ -24,7 +24,8 @@ import { Instance, createJsonResponse, Url } from './utils'
 export function auth(request: Request): Response | null {
   return (
     authFrontendSectorIdentifierUriValidation(request) ||
-    authKratosIdentitySchema(request)
+    authKratosIdentitySchema(request) ||
+    authKratosGithubJsonnet(request)
   )
 }
 
@@ -101,4 +102,29 @@ function authKratosIdentitySchema(request: Request): Response | null {
   }
 
   return createJsonResponse(schema)
+}
+
+function authKratosGithubJsonnet(request: Request): Response | null {
+  const url = Url.fromRequest(request)
+  if (url.subdomain !== '' || url.pathname !== '/auth/kratos-github.jsonnet') {
+    return null
+  }
+
+  const net = `
+local claims = {
+  email_verified: false
+} + std.extVar('claims');
+
+{
+  identity: {
+    traits: {
+      [if "email" in claims && claims.email_verified then "email" else null]: claims.email,
+    },
+  },
+}
+  `
+
+  return new Response(net, {
+    headers: { 'Content-Type': 'text/plain' },
+  })
 }
