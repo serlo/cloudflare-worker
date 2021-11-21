@@ -190,7 +190,7 @@ interface ABRoute {
 interface FrontendRoute {
   __typename: 'Frontend'
   redirect: 'manual' | 'follow'
-  pathPrefix: boolean
+  appendSubdomainToPath: boolean
 }
 
 interface LegacyRoute {
@@ -214,7 +214,7 @@ function getRoute(request: Request): RouteConfig | null {
       route: {
         __typename: 'Frontend',
         redirect: 'manual',
-        pathPrefix: false,
+        appendSubdomainToPath: false,
       },
     }
   }
@@ -230,7 +230,7 @@ function getRoute(request: Request): RouteConfig | null {
       route: {
         __typename: 'Frontend',
         redirect: 'follow',
-        pathPrefix: false,
+        appendSubdomainToPath: false,
       },
     }
   }
@@ -241,7 +241,7 @@ function getRoute(request: Request): RouteConfig | null {
       route: {
         __typename: 'Frontend',
         redirect: 'follow',
-        pathPrefix: true,
+        appendSubdomainToPath: true,
       },
     }
   }
@@ -270,7 +270,7 @@ function getRoute(request: Request): RouteConfig | null {
     return {
       __typename: 'Frontend',
       redirect: 'follow',
-      pathPrefix: true,
+      appendSubdomainToPath: true,
     }
   }
 
@@ -310,7 +310,7 @@ async function fetchRoute(
   }
 
   if (route.__typename === 'Frontend') {
-    if (route.pathPrefix === true) {
+    if (route.appendSubdomainToPath === true) {
       return await fetchBackend({
         ...config,
         useFrontend: true,
