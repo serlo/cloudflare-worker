@@ -35,7 +35,7 @@ export async function frontendSpecialPaths(
 ): Promise<Response | null> {
   const config = getConfig(request)
   const url = Url.fromRequest(request)
-  const route = getRoute(request)
+  const route = await getRoute(request)
   const sentry = sentryFactory.createReporter('frontend-special-paths')
 
   if (!config.relevantRequest) return null
@@ -49,7 +49,12 @@ export async function frontendSpecialPaths(
   if (route === null) return null
 
   if (route.__typename === 'BeforeRedirectsRoute') {
-    return fetchRoute(route.route, config, request, sentry)
+    return fetchBackend({
+      ...config,
+      request,
+      sentry,
+      route: { ...route.route },
+    })
   }
 
   return null
@@ -60,24 +65,16 @@ export async function frontendProxy(
   sentryFactory: SentryFactory
 ): Promise<Response | null> {
   const config = getConfig(request)
-  const url = Url.fromRequest(request)
   const cookies = request.headers.get('Cookie')
   const sentry = sentryFactory.createReporter('frontend')
-  const route = getRoute(request)
+  const route = await getRoute(request)
 
   if (!config.relevantRequest) return null
-
-  if (url.isFrontendSupportedAndProbablyUuid()) {
-    const pathInfo = await getPathInfo(config.instance, url.pathname)
-    const typename = pathInfo?.typename ?? null
-
-    if (typename === null || typename === 'Comment') return null
-  }
 
   if (route === null) return null
 
   if (route.__typename === 'Frontend' || route.__typename === 'Legacy') {
-    return fetchRoute(route, config, request, sentry)
+    return fetchBackend({ ...config, request, sentry, route })
   }
 
   if (route.__typename === 'AB') {
@@ -88,10 +85,14 @@ export async function frontendProxy(
 
     const response = await fetchBackend({
       ...config,
-      useFrontend: useFrontendNumber <= route.probability,
-      pathPrefix: config.instance,
       request,
       sentry,
+      route: {
+        __typename:
+          useFrontendNumber <= route.probability ? 'Frontend' : 'Legacy',
+        appendSubdomainToPath: true,
+        redirect: 'follow',
+      },
     })
     if (Number.isNaN(cookieValue))
       setCookieUseFrontend(response, useFrontendNumber)
@@ -103,38 +104,34 @@ export async function frontendProxy(
 
 async function fetchBackend({
   frontendDomain,
-  pathPrefix,
+  instance,
   request,
-  useFrontend,
-  redirect,
   sentry,
+  route,
 }: {
-  pathPrefix?: Instance
   request: Request
-  useFrontend: boolean
-  redirect?: Request['redirect']
   sentry: SentryReporter
+  route: LegacyRoute | FrontendRoute
 } & RelevantRequestConfig) {
   const backendUrl = Url.fromRequest(request)
 
-  if (useFrontend) {
+  if (route.__typename === 'Frontend') {
     backendUrl.hostname = frontendDomain
 
-    if (pathPrefix !== undefined)
-      backendUrl.pathname = `/${pathPrefix}${backendUrl.pathname}`
+    if (route.appendSubdomainToPath === true)
+      backendUrl.pathname = `/${instance}${backendUrl.pathname}`
 
     backendUrl.pathname = backendUrl.pathnameWithoutTrailingSlash
   }
   const response = await fetch(new Request(backendUrl.toString(), request), {
-    redirect: redirect ?? (useFrontend ? 'follow' : 'manual'),
+    redirect: route.__typename === 'Frontend' ? route.redirect : 'manual',
   })
 
-  if (useFrontend && response.redirected) {
+  if (route.__typename === 'Frontend' && response.redirected) {
     sentry.setContext('backendUrl', backendUrl)
     sentry.setContext('responseUrl', response.url)
     sentry.captureMessage('Frontend responded with a redirect', 'error')
   }
-
   return new Response(response.body, response)
 }
 
@@ -204,9 +201,10 @@ interface BeforeRedirectsRoute {
 
 type RouteConfig = LegacyRoute | FrontendRoute | ABRoute | BeforeRedirectsRoute
 
-function getRoute(request: Request): RouteConfig | null {
+async function getRoute(request: Request): Promise<RouteConfig | null> {
   const url = Url.fromRequest(request)
   const cookies = request.headers.get('Cookie')
+  const config = getConfig(request)
 
   if (url.pathname.startsWith('/api/auth/')) {
     return {
@@ -283,51 +281,15 @@ function getRoute(request: Request): RouteConfig | null {
     }
   }
 
-  // ? when AB?
-  else {
-    return {
-      __typename: 'AB',
-      probability: Number(global.FRONTEND_PROBABILITY),
-    }
+  if (url.isFrontendSupportedAndProbablyUuid() && config.relevantRequest) {
+    const pathInfo = await getPathInfo(config.instance, url.pathname)
+    const typename = pathInfo?.typename ?? null
+
+    if (typename === null || typename === 'Comment') return null
   }
 
-  return null
-}
-
-async function fetchRoute(
-  route: LegacyRoute | FrontendRoute,
-  config: RelevantRequestConfig,
-  request: Request,
-  sentry: SentryReporter
-): Promise<Response | null> {
-  if (route.__typename === 'Legacy') {
-    return await fetchBackend({
-      ...config,
-      useFrontend: false,
-      request,
-      sentry,
-    })
+  return {
+    __typename: 'AB',
+    probability: Number(global.FRONTEND_PROBABILITY),
   }
-
-  if (route.__typename === 'Frontend') {
-    if (route.appendSubdomainToPath === true) {
-      return await fetchBackend({
-        ...config,
-        useFrontend: true,
-        request,
-        redirect: route.redirect,
-        pathPrefix: config.instance,
-        sentry,
-      })
-    }
-    return await fetchBackend({
-      ...config,
-      useFrontend: true,
-      request,
-      redirect: route.redirect,
-      sentry,
-    })
-  }
-
-  return null
 }
