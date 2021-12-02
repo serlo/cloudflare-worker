@@ -42,13 +42,9 @@ export async function frontendSpecialPaths(
   if (url.pathname === '/disable-frontend')
     return createConfigurationResponse('Disabled: Use of new frontend', 1.1)
 
-  if (route === null) return null
-
-  if (route.__typename === 'BeforeRedirectsRoute') {
-    return fetchBackend({ request, sentry, route: route.route })
-  }
-
-  return null
+  return route !== null && route.__typename === 'BeforeRedirectsRoute'
+    ? fetchBackend({ request, sentry, route: route.route })
+    : null
 }
 
 export async function frontendProxy(
