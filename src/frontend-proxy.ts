@@ -23,7 +23,6 @@ import {
   Url,
   getCookieValue,
   isInstance,
-  Instance,
   getPathInfo,
   SentryReporter,
   SentryFactory,
@@ -33,12 +32,9 @@ export async function frontendSpecialPaths(
   request: Request,
   sentryFactory: SentryFactory
 ): Promise<Response | null> {
-  const config = getConfig(request)
   const url = Url.fromRequest(request)
   const route = await getRoute(request)
   const sentry = sentryFactory.createReporter('frontend-special-paths')
-
-  if (!config.relevantRequest) return null
 
   if (url.pathname === '/enable-frontend')
     return createConfigurationResponse('Enabled: Use of new frontend', 0)
@@ -49,12 +45,7 @@ export async function frontendSpecialPaths(
   if (route === null) return null
 
   if (route.__typename === 'BeforeRedirectsRoute') {
-    return fetchBackend({
-      ...config,
-      request,
-      sentry,
-      route: { ...route.route },
-    })
+    return fetchBackend({ request, sentry, route: route.route })
   }
 
   return null
@@ -64,27 +55,19 @@ export async function frontendProxy(
   request: Request,
   sentryFactory: SentryFactory
 ): Promise<Response | null> {
-  const config = getConfig(request)
   const cookies = request.headers.get('Cookie')
   const sentry = sentryFactory.createReporter('frontend')
   const route = await getRoute(request)
 
-  if (!config.relevantRequest) return null
-
-  if (route === null) return null
-
-  if (route.__typename === 'Frontend' || route.__typename === 'Legacy') {
-    return fetchBackend({ ...config, request, sentry, route })
-  }
-
-  if (route.__typename === 'AB') {
+  if (route === null || route.__typename === 'BeforeRedirectsRoute') {
+    return null
+  } else if (route.__typename === 'AB') {
     const cookieValue = Number(getCookieValue('useFrontend', cookies) ?? 'NaN')
     const useFrontendNumber = Number.isNaN(cookieValue)
       ? Math.random()
       : cookieValue
 
     const response = await fetchBackend({
-      ...config,
       request,
       sentry,
       route: {
@@ -98,13 +81,12 @@ export async function frontendProxy(
       setCookieUseFrontend(response, useFrontendNumber)
 
     return response
+  } else {
+    return fetchBackend({ request, sentry, route })
   }
-  return null
 }
 
 async function fetchBackend({
-  frontendDomain,
-  instance,
   request,
   sentry,
   route,
@@ -112,17 +94,21 @@ async function fetchBackend({
   request: Request
   sentry: SentryReporter
   route: LegacyRoute | FrontendRoute
-} & RelevantRequestConfig) {
+}) {
   const backendUrl = Url.fromRequest(request)
 
   if (route.__typename === 'Frontend') {
-    backendUrl.hostname = frontendDomain
-
     if (route.appendSubdomainToPath === true)
-      backendUrl.pathname = `/${instance}${backendUrl.pathname}`
+      backendUrl.pathname = `/${backendUrl.subdomain}${backendUrl.pathname}`
+
+    const cookies = request.headers.get('Cookie')
+    const frontendDomain =
+      getCookieValue('frontendDomain', cookies) ?? global.FRONTEND_DOMAIN
+    backendUrl.hostname = frontendDomain
 
     backendUrl.pathname = backendUrl.pathnameWithoutTrailingSlash
   }
+
   const response = await fetch(new Request(backendUrl.toString(), request), {
     redirect: route.__typename === 'Frontend' ? route.redirect : 'manual',
   })
@@ -151,34 +137,6 @@ function setCookieUseFrontend(res: Response, useFrontend: number) {
   )
 }
 
-function getConfig(request: Request): Config {
-  const url = Url.fromRequest(request)
-  const cookies = request.headers.get('Cookie')
-
-  if (!isInstance(url.subdomain)) return { relevantRequest: false }
-
-  return {
-    relevantRequest: true,
-    frontendDomain:
-      getCookieValue('frontendDomain', cookies) ?? global.FRONTEND_DOMAIN,
-    instance: url.subdomain,
-    probability: Number(global.FRONTEND_PROBABILITY),
-  }
-}
-
-type Config = RelevantRequestConfig | IrrelevantRequestConfig
-
-interface RelevantRequestConfig {
-  relevantRequest: true
-  instance: Instance
-  frontendDomain: string
-  probability: number
-}
-
-interface IrrelevantRequestConfig {
-  relevantRequest: false
-}
-
 interface ABRoute {
   __typename: 'AB'
   probability: number
@@ -204,7 +162,8 @@ type RouteConfig = LegacyRoute | FrontendRoute | ABRoute | BeforeRedirectsRoute
 async function getRoute(request: Request): Promise<RouteConfig | null> {
   const url = Url.fromRequest(request)
   const cookies = request.headers.get('Cookie')
-  const config = getConfig(request)
+
+  if (!isInstance(url.subdomain)) return null
 
   if (url.pathname.startsWith('/api/auth/')) {
     return {
@@ -281,8 +240,8 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
     }
   }
 
-  if (url.isFrontendSupportedAndProbablyUuid() && config.relevantRequest) {
-    const pathInfo = await getPathInfo(config.instance, url.pathname)
+  if (url.isFrontendSupportedAndProbablyUuid() && isInstance(url.subdomain)) {
+    const pathInfo = await getPathInfo(url.subdomain, url.pathname)
     const typename = pathInfo?.typename ?? null
 
     if (typename === null || typename === 'Comment') return null
