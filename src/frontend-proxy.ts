@@ -54,7 +54,6 @@ export async function frontendProxy(
   const cookies = request.headers.get('Cookie')
   const sentry = sentryFactory.createReporter('frontend')
   const route = await getRoute(request)
-
   if (route === null || route.__typename === 'BeforeRedirectsRoute') {
     return null
   } else if (route.__typename === 'AB') {
@@ -162,6 +161,16 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
       },
     }
   }
+
+  if (
+    url.pathname.startsWith('/entity/repository/add-revision') &&
+    getCookieValue('useEditorInFrontend', cookies) === '1'
+  )
+    return {
+      __typename: 'Frontend',
+      redirect: 'follow',
+      appendSubdomainToPath: true,
+    }
 
   if (
     url.pathname.startsWith('/auth/activate/') ||

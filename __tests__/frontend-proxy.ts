@@ -331,6 +331,18 @@ describe('special paths', () => {
     expect(await response.text()).toEqual(expect.stringContaining('Consent'))
   })
 
+  test('/entity/repository/add-revision and useEditorInFrontEnd cookie always resolve to frontend', async () => {
+    const request = env.createRequest({
+      subdomain: 'en',
+      pathname: '/entity/repository/add-revision',
+    })
+
+    request.headers.set('Cookie', 'useEditorInFrontend=1;authenticated=1')
+    const response = await env.fetchRequest(request)
+
+    await expectFrontend(response)
+  })
+
   test('/event/history always resolve to frontend', async () => {
     const response = await env.fetch({
       subdomain: 'en',
