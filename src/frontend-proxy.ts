@@ -73,8 +73,10 @@ export async function frontendProxy(
         redirect: 'follow',
       },
     })
-    if (Number.isNaN(cookieValue))
+
+    if (Number.isNaN(cookieValue)) {
       setCookieUseFrontend(response, useFrontendNumber)
+    }
 
     return response
   } else {
@@ -116,44 +118,6 @@ async function fetchBackend({
   }
   return new Response(response.body, response)
 }
-
-function createConfigurationResponse(message: string, useFrontend: number) {
-  const response = new Response(message)
-
-  setCookieUseFrontend(response, useFrontend)
-  response.headers.set('Refresh', '1; url=/')
-
-  return response
-}
-
-function setCookieUseFrontend(res: Response, useFrontend: number) {
-  res.headers.append(
-    'Set-Cookie',
-    `useFrontend=${useFrontend}; path=/; domain=.${global.DOMAIN}`
-  )
-}
-
-interface ABRoute {
-  __typename: 'AB'
-  probability: number
-}
-
-interface FrontendRoute {
-  __typename: 'Frontend'
-  redirect: 'manual' | 'follow'
-  appendSubdomainToPath: boolean
-}
-
-interface LegacyRoute {
-  __typename: 'Legacy'
-}
-
-interface BeforeRedirectsRoute {
-  __typename: 'BeforeRedirectsRoute'
-  route: LegacyRoute | FrontendRoute
-}
-
-type RouteConfig = LegacyRoute | FrontendRoute | ABRoute | BeforeRedirectsRoute
 
 async function getRoute(request: Request): Promise<RouteConfig | null> {
   const url = Url.fromRequest(request)
@@ -247,4 +211,42 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
     __typename: 'AB',
     probability: Number(global.FRONTEND_PROBABILITY),
   }
+}
+
+function createConfigurationResponse(message: string, useFrontend: number) {
+  const response = new Response(message)
+
+  setCookieUseFrontend(response, useFrontend)
+  response.headers.set('Refresh', '1; url=/')
+
+  return response
+}
+
+function setCookieUseFrontend(res: Response, useFrontend: number) {
+  res.headers.append(
+    'Set-Cookie',
+    `useFrontend=${useFrontend}; path=/; domain=.${global.DOMAIN}`
+  )
+}
+
+type RouteConfig = LegacyRoute | FrontendRoute | ABRoute | BeforeRedirectsRoute
+
+interface ABRoute {
+  __typename: 'AB'
+  probability: number
+}
+
+interface BeforeRedirectsRoute {
+  __typename: 'BeforeRedirectsRoute'
+  route: LegacyRoute | FrontendRoute
+}
+
+interface FrontendRoute {
+  __typename: 'Frontend'
+  redirect: 'manual' | 'follow'
+  appendSubdomainToPath: boolean
+}
+
+interface LegacyRoute {
+  __typename: 'Legacy'
 }
