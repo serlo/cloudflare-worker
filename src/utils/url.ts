@@ -34,18 +34,6 @@ const contentApiParameters = [
   'fullWidth',
 ]
 
-const pathsFrontendSupportsWithoutUuids = [
-  /^\/$/,
-  /^\/search$/,
-  /^\/spenden$/,
-  /^\/subscriptions\/manage$/,
-  /^\/license\/detail\/\d+$/,
-  /^\/entity\/repository\/history\/\d+$/,
-  /^\/entity\/unrevised$/,
-  /^\/event\/history\/user\/\d+\/.+$/,
-  /^\/event\/history(\/\d+)?$/,
-]
-
 export class Url extends URL {
   public get subdomain(): string {
     return this.hostname.split('.').slice(0, -2).join('.')
@@ -71,27 +59,6 @@ export class Url extends URL {
       .split('&')
       .map((parameterWithValue) => parameterWithValue.split('=')[0])
       .some((queryParameter) => contentApiParameters.includes(queryParameter))
-  }
-
-  public isProbablyUuid(): boolean {
-    // TODO: Only after we have deleted the old alias system we know for sure
-    // which paths resolve to an uuid. So far we can do the following:
-    return this.isFrontendSupportedAndProbablyUuid()
-  }
-
-  public isFrontendSupportedAndProbablyUuid(): boolean {
-    // TODO: We need a test for this when it is deployed in production
-    if (
-      global.ENVIRONMENT === 'staging' &&
-      (/\/entity\/repository\/add-revision\/\d+/.test(this.pathname) ||
-        /\/entity\/repository\/add-revision\/\d+\/\d+/.test(this.pathname))
-    ) {
-      return false
-    }
-
-    return pathsFrontendSupportsWithoutUuids.every(
-      (regex) => regex.exec(this.pathname) === null
-    )
   }
 
   public toRedirect(status?: number) {

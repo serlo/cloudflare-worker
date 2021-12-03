@@ -28,6 +28,18 @@ import {
   SentryFactory,
 } from './utils'
 
+const pathsFrontendSupportsWithoutUuids = [
+  /^\/$/,
+  /^\/search$/,
+  /^\/spenden$/,
+  /^\/subscriptions\/manage$/,
+  /^\/license\/detail\/\d+$/,
+  /^\/entity\/repository\/history\/\d+$/,
+  /^\/entity\/unrevised$/,
+  /^\/event\/history\/user\/\d+\/.+$/,
+  /^\/event\/history(\/\d+)?$/,
+]
+
 export async function frontendSpecialPaths(
   request: Request,
   sentryFactory: SentryFactory
@@ -209,7 +221,12 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
     }
   }
 
-  if (url.isFrontendSupportedAndProbablyUuid() && isInstance(url.subdomain)) {
+  if (
+    pathsFrontendSupportsWithoutUuids.every(
+      (regex) => regex.exec(url.pathname) === null
+    ) &&
+    isInstance(url.subdomain)
+  ) {
     const pathInfo = await getPathInfo(url.subdomain, url.pathname)
     const typename = pathInfo?.typename ?? null
 
