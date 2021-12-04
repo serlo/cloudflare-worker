@@ -21,6 +21,8 @@
  */
 import URL from 'core-js-pure/features/url'
 
+import { getPathInfo, isInstance } from '.'
+
 const contentApiParameters = [
   'contentOnly',
   'hideTopbar',
@@ -59,6 +61,15 @@ export class Url extends URL {
       .split('&')
       .map((parameterWithValue) => parameterWithValue.split('=')[0])
       .some((queryParameter) => contentApiParameters.includes(queryParameter))
+  }
+
+  public async isUuid() {
+    if (!isInstance(this.subdomain)) return false
+
+    const pathInfo = await getPathInfo(this.subdomain, this.pathname)
+    const typename = pathInfo?.typename ?? null
+
+    return typename !== null && typename !== 'Comment'
   }
 
   public toRedirect(status?: number) {
