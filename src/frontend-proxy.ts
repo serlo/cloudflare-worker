@@ -23,8 +23,6 @@ import {
   Url,
   getCookieValue,
   isInstance,
-  Instance,
-  getPathInfo,
   SentryReporter,
   SentryFactory,
 } from './utils'
@@ -33,12 +31,9 @@ export async function frontendSpecialPaths(
   request: Request,
   sentryFactory: SentryFactory
 ): Promise<Response | null> {
-  const config = getConfig(request)
   const url = Url.fromRequest(request)
-
+  const route = await getRoute(request)
   const sentry = sentryFactory.createReporter('frontend-special-paths')
-
-  if (!config.relevantRequest) return null
 
   if (url.pathname === '/enable-frontend')
     return createConfigurationResponse('Enabled: Use of new frontend', 0)
@@ -46,31 +41,135 @@ export async function frontendSpecialPaths(
   if (url.pathname === '/disable-frontend')
     return createConfigurationResponse('Disabled: Use of new frontend', 1.1)
 
-  if (url.pathname.startsWith('/api/auth/'))
-    return await fetchBackend({
-      ...config,
-      useFrontend: true,
+  return route !== null && route.__typename === 'BeforeRedirectsRoute'
+    ? fetchBackend({ request, sentry, route: route.route })
+    : null
+}
+
+export async function frontendProxy(
+  request: Request,
+  sentryFactory: SentryFactory
+): Promise<Response | null> {
+  const cookies = request.headers.get('Cookie')
+  const sentry = sentryFactory.createReporter('frontend')
+  const route = await getRoute(request)
+  if (route === null || route.__typename === 'BeforeRedirectsRoute') {
+    return null
+  } else if (route.__typename === 'AB') {
+    const cookieValue = Number(getCookieValue('useFrontend', cookies) ?? 'NaN')
+    const useFrontendNumber = Number.isNaN(cookieValue)
+      ? Math.random()
+      : cookieValue
+
+    const response = await fetchBackend({
       request,
-      redirect: 'manual',
       sentry,
+      route: {
+        __typename:
+          useFrontendNumber <= route.probability ? 'Frontend' : 'Legacy',
+        appendSubdomainToPath: true,
+        redirect: 'follow',
+      },
     })
+
+    if (Number.isNaN(cookieValue)) {
+      setCookieUseFrontend(response, useFrontendNumber)
+    }
+
+    return response
+  } else {
+    return fetchBackend({ request, sentry, route })
+  }
+}
+
+async function fetchBackend({
+  request,
+  sentry,
+  route,
+}: {
+  request: Request
+  sentry: SentryReporter
+  route: LegacyRoute | FrontendRoute
+}) {
+  const backendUrl = Url.fromRequest(request)
+
+  if (route.__typename === 'Frontend') {
+    if (route.appendSubdomainToPath === true)
+      backendUrl.pathname = `/${backendUrl.subdomain}${backendUrl.pathname}`
+
+    const cookies = request.headers.get('Cookie')
+    const frontendDomain =
+      getCookieValue('frontendDomain', cookies) ?? global.FRONTEND_DOMAIN
+    backendUrl.hostname = frontendDomain
+
+    backendUrl.pathname = backendUrl.pathnameWithoutTrailingSlash
+  }
+
+  const response = await fetch(new Request(backendUrl.toString(), request), {
+    redirect: route.__typename === 'Frontend' ? route.redirect : 'manual',
+  })
+
+  if (route.__typename === 'Frontend' && response.redirected) {
+    sentry.setContext('backendUrl', backendUrl)
+    sentry.setContext('responseUrl', response.url)
+    sentry.captureMessage('Frontend responded with a redirect', 'error')
+  }
+  return new Response(response.body, response)
+}
+
+async function getRoute(request: Request): Promise<RouteConfig | null> {
+  const url = Url.fromRequest(request)
+  const cookies = request.headers.get('Cookie')
+
+  if (!isInstance(url.subdomain)) return null
+
+  if (url.pathname.startsWith('/api/auth/')) {
+    return {
+      __typename: 'BeforeRedirectsRoute',
+      route: {
+        __typename: 'Frontend',
+        redirect: 'manual',
+        appendSubdomainToPath: false,
+      },
+    }
+  }
 
   if (
     url.pathname.startsWith('/_next/') ||
     url.pathname.startsWith('/_assets/') ||
     url.pathname.startsWith('/api/frontend/') ||
     url.pathname.startsWith('/___')
-  )
-    return await fetchBackend({ ...config, useFrontend: true, request, sentry })
+  ) {
+    return {
+      __typename: 'BeforeRedirectsRoute',
+      route: {
+        __typename: 'Frontend',
+        redirect: 'follow',
+        appendSubdomainToPath: false,
+      },
+    }
+  }
 
-  if (url.pathname == '/user/notifications' || url.pathname == '/consent')
-    return await fetchBackend({
-      ...config,
-      useFrontend: true,
-      request,
-      pathPrefix: config.instance,
-      sentry,
-    })
+  if (url.pathname == '/user/notifications' || url.pathname == '/consent') {
+    return {
+      __typename: 'BeforeRedirectsRoute',
+      route: {
+        __typename: 'Frontend',
+        redirect: 'follow',
+        appendSubdomainToPath: true,
+      },
+    }
+  }
+
+  if (
+    url.pathname.startsWith('/entity/repository/add-revision') &&
+    getCookieValue('useEditorInFrontend', cookies) === '1'
+  )
+    return {
+      __typename: 'Frontend',
+      redirect: 'follow',
+      appendSubdomainToPath: true,
+    }
 
   if (
     url.pathname.startsWith('/auth/activate/') ||
@@ -83,108 +182,54 @@ export async function frontendSpecialPaths(
       '/auth/hydra/consent',
       '/user/register',
     ].includes(url.pathname)
-  )
-    return await fetchBackend({
-      ...config,
-      useFrontend: false,
-      request,
-      sentry,
-    })
-
-  return null
-}
-
-export async function frontendProxy(
-  request: Request,
-  sentryFactory: SentryFactory
-): Promise<Response | null> {
-  const config = getConfig(request)
-  const url = Url.fromRequest(request)
-  const cookies = request.headers.get('Cookie')
-  const sentry = sentryFactory.createReporter('frontend')
-
-  if (!config.relevantRequest) return null
-
-  if (url.isFrontendSupportedAndProbablyUuid()) {
-    const pathInfo = await getPathInfo(config.instance, url.pathname)
-    const typename = pathInfo?.typename ?? null
-
-    if (typename === null || typename === 'Comment') return null
+  ) {
+    return {
+      __typename: 'BeforeRedirectsRoute',
+      route: {
+        __typename: 'Legacy',
+      },
+    }
   }
 
-  if (getCookieValue('useFrontend', cookies) === 'always')
-    return await fetchBackend({
-      ...config,
-      useFrontend: true,
-      pathPrefix: config.instance,
-      request,
-      sentry,
-    })
+  if (getCookieValue('useFrontend', cookies) === 'always') {
+    return {
+      __typename: 'Frontend',
+      redirect: 'follow',
+      appendSubdomainToPath: true,
+    }
+  }
 
   if (
     url.hasContentApiParameters() ||
     request.headers.get('X-From') === 'legacy-serlo.org'
-  )
-    return await fetchBackend({
-      ...config,
-      useFrontend: false,
-      request,
-      sentry,
-    })
-
-  const cookieValue = Number(getCookieValue('useFrontend', cookies) ?? 'NaN')
-  const useFrontendNumber = Number.isNaN(cookieValue)
-    ? Math.random()
-    : cookieValue
-
-  const response = await fetchBackend({
-    ...config,
-    useFrontend: useFrontendNumber <= config.probability,
-    pathPrefix: config.instance,
-    request,
-    sentry,
-  })
-  if (Number.isNaN(cookieValue))
-    setCookieUseFrontend(response, useFrontendNumber)
-
-  return response
-}
-
-async function fetchBackend({
-  frontendDomain,
-  pathPrefix,
-  request,
-  useFrontend,
-  redirect,
-  sentry,
-}: {
-  pathPrefix?: Instance
-  request: Request
-  useFrontend: boolean
-  redirect?: Request['redirect']
-  sentry: SentryReporter
-} & RelevantRequestConfig) {
-  const backendUrl = Url.fromRequest(request)
-
-  if (useFrontend) {
-    backendUrl.hostname = frontendDomain
-
-    if (pathPrefix !== undefined)
-      backendUrl.pathname = `/${pathPrefix}${backendUrl.pathname}`
-
-    backendUrl.pathname = backendUrl.pathnameWithoutTrailingSlash
-  }
-  const response = await fetch(new Request(backendUrl.toString(), request), {
-    redirect: redirect ?? (useFrontend ? 'follow' : 'manual'),
-  })
-
-  if (useFrontend && response.redirected) {
-    sentry.setContext('backendUrl', backendUrl)
-    sentry.setContext('responseUrl', response.url)
-    sentry.captureMessage('Frontend responded with a redirect', 'error')
+  ) {
+    return {
+      __typename: 'Legacy',
+    }
   }
 
-  return new Response(response.body, response)
+  if (isInstance(url.subdomain)) {
+    if (
+      (await url.isUuid()) ||
+      url.pathname === '/' ||
+      [
+        '/search',
+        '/spenden',
+        '/subscriptions/manage',
+        '/entity/unrevised',
+      ].includes(url.pathnameWithoutTrailingSlash) ||
+      url.pathname.startsWith('/license/detail') ||
+      url.pathname.startsWith('/entitiy/repository/history') ||
+      url.pathname.startsWith('/event/history')
+    ) {
+      return {
+        __typename: 'AB',
+        probability: Number(global.FRONTEND_PROBABILITY),
+      }
+    }
+  }
+
+  return null
 }
 
 function createConfigurationResponse(message: string, useFrontend: number) {
@@ -203,30 +248,24 @@ function setCookieUseFrontend(res: Response, useFrontend: number) {
   )
 }
 
-function getConfig(request: Request): Config {
-  const url = Url.fromRequest(request)
-  const cookies = request.headers.get('Cookie')
+type RouteConfig = LegacyRoute | FrontendRoute | ABRoute | BeforeRedirectsRoute
 
-  if (!isInstance(url.subdomain)) return { relevantRequest: false }
-
-  return {
-    relevantRequest: true,
-    frontendDomain:
-      getCookieValue('frontendDomain', cookies) ?? global.FRONTEND_DOMAIN,
-    instance: url.subdomain,
-    probability: Number(global.FRONTEND_PROBABILITY),
-  }
-}
-
-type Config = RelevantRequestConfig | IrrelevantRequestConfig
-
-interface RelevantRequestConfig {
-  relevantRequest: true
-  instance: Instance
-  frontendDomain: string
+interface ABRoute {
+  __typename: 'AB'
   probability: number
 }
 
-interface IrrelevantRequestConfig {
-  relevantRequest: false
+interface BeforeRedirectsRoute {
+  __typename: 'BeforeRedirectsRoute'
+  route: LegacyRoute | FrontendRoute
+}
+
+interface FrontendRoute {
+  __typename: 'Frontend'
+  redirect: 'manual' | 'follow'
+  appendSubdomainToPath: boolean
+}
+
+interface LegacyRoute {
+  __typename: 'Legacy'
 }
