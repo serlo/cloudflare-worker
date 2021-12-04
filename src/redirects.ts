@@ -151,11 +151,14 @@ export async function redirects(request: Request) {
   // Redirects for the LENABI project
   // TODO: Add tests for those redirects
   if (url.subdomain === Instance.De) {
-    if (url.pathnameWithoutTrailingSlash === '/lenabi/metadata-api') {
-      return Response.redirect(
-        'https://nbviewer.org/github/serlo/evaluations/blob/216101f9c9eb95d48e6c31e82ef4399e7691bb37/src/Prototype%20of%20metadata%20API%20for%20serlo.org%20%28LENABI%29.ipynb',
-        302
-      )
+    switch (url.pathnameWithoutTrailingSlash) {
+      case '/lenabi/metadata-api':
+        return Response.redirect(
+          'https://nbviewer.org/github/serlo/evaluations/blob/216101f9c9eb95d48e6c31e82ef4399e7691bb37/src/Prototype%20of%20metadata%20API%20for%20serlo.org%20%28LENABI%29.ipynb',
+          302
+        )
+      case '/lenabi/data-wallet':
+        return Response.redirect('https://lenabi.serlo-staging.dev/wallet', 302)
     }
   }
 
