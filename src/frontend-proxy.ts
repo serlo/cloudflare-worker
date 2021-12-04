@@ -23,22 +23,9 @@ import {
   Url,
   getCookieValue,
   isInstance,
-  getPathInfo,
   SentryReporter,
   SentryFactory,
 } from './utils'
-
-const pathsFrontendSupportsWithoutUuids = [
-  /^\/$/,
-  /^\/search$/,
-  /^\/spenden$/,
-  /^\/subscriptions\/manage$/,
-  /^\/license\/detail\/\d+$/,
-  /^\/entity\/repository\/history\/\d+$/,
-  /^\/entity\/unrevised$/,
-  /^\/event\/history\/user\/\d+\/.+$/,
-  /^\/event\/history(\/\d+)?$/,
-]
 
 export async function frontendSpecialPaths(
   request: Request,
@@ -221,22 +208,28 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
     }
   }
 
-  if (
-    pathsFrontendSupportsWithoutUuids.every(
-      (regex) => regex.exec(url.pathname) === null
-    ) &&
-    isInstance(url.subdomain)
-  ) {
-    const pathInfo = await getPathInfo(url.subdomain, url.pathname)
-    const typename = pathInfo?.typename ?? null
-
-    if (typename === null || typename === 'Comment') return null
+  if (isInstance(url.subdomain)) {
+    if (
+      (await url.isUuid()) ||
+      url.pathname === '/' ||
+      [
+        '/search',
+        '/spenden',
+        '/subscriptions/manage',
+        '/entity/unrevised',
+      ].includes(url.pathnameWithoutTrailingSlash) ||
+      url.pathname.startsWith('/license/detail') ||
+      url.pathname.startsWith('/entitiy/repository/history') ||
+      url.pathname.startsWith('/event/history')
+    ) {
+      return {
+        __typename: 'AB',
+        probability: Number(global.FRONTEND_PROBABILITY),
+      }
+    }
   }
 
-  return {
-    __typename: 'AB',
-    probability: Number(global.FRONTEND_PROBABILITY),
-  }
+  return null
 }
 
 function createConfigurationResponse(message: string, useFrontend: number) {
