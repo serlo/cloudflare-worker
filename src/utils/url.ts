@@ -21,6 +21,8 @@
  */
 import URL from 'core-js-pure/features/url'
 
+import { getPathInfo, isInstance } from '.'
+
 const contentApiParameters = [
   'contentOnly',
   'hideTopbar',
@@ -32,18 +34,6 @@ const contentApiParameters = [
   'hideHorizon',
   'hideFooter',
   'fullWidth',
-]
-
-const pathsFrontendSupportsWithoutUuids = [
-  /^\/$/,
-  /^\/search$/,
-  /^\/spenden$/,
-  /^\/subscriptions\/manage$/,
-  /^\/license\/detail\/\d+$/,
-  /^\/entity\/repository\/history\/\d+$/,
-  /^\/entity\/unrevised$/,
-  /^\/event\/history\/user\/\d+\/.+$/,
-  /^\/event\/history(\/\d+)?$/,
 ]
 
 export class Url extends URL {
@@ -73,25 +63,13 @@ export class Url extends URL {
       .some((queryParameter) => contentApiParameters.includes(queryParameter))
   }
 
-  public isProbablyUuid(): boolean {
-    // TODO: Only after we have deleted the old alias system we know for sure
-    // which paths resolve to an uuid. So far we can do the following:
-    return this.isFrontendSupportedAndProbablyUuid()
-  }
+  public async isUuid() {
+    if (!isInstance(this.subdomain)) return false
 
-  public isFrontendSupportedAndProbablyUuid(): boolean {
-    // TODO: We need a test for this when it is deployed in production
-    if (
-      global.ENVIRONMENT === 'staging' &&
-      (/\/entity\/repository\/add-revision\/\d+/.test(this.pathname) ||
-        /\/entity\/repository\/add-revision\/\d+\/\d+/.test(this.pathname))
-    ) {
-      return false
-    }
+    const pathInfo = await getPathInfo(this.subdomain, this.pathname)
+    const typename = pathInfo?.typename ?? null
 
-    return pathsFrontendSupportsWithoutUuids.every(
-      (regex) => regex.exec(this.pathname) === null
-    )
+    return typename !== null && typename !== 'Comment'
   }
 
   public toRedirect(status?: number) {
