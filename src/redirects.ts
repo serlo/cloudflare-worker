@@ -154,7 +154,7 @@ export async function redirects(request: Request) {
     switch (url.pathnameWithoutTrailingSlash) {
       case '/lenabi/metadata-api':
         return Response.redirect(
-          'https://nbviewer.org/github/serlo/evaluations/blob/66dcfd79c5d246feb5202c428f41350e44cf242a/src/Prototype%20of%20metadata%20API%20for%20serlo.org%20%28LENABI%29.ipynb',
+          'https://nbviewer.org/github/serlo/evaluations/blob/6aa37ba97df016258958d336d14aa630a5d3e631/src/Prototype%20of%20metadata%20API%20for%20serlo.org%20%28LENABI%29.ipynb',
           302
         )
       case '/lenabi/data-wallet':
