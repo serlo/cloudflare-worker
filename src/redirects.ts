@@ -36,6 +36,7 @@ const meetRedirects: Record<string, string | undefined> = {
   '/begleitung': 'kon-wdmt-yhb',
   '/reviewing': 'kon-wdmt-yhb',
   '/labschool': 'cvd-pame-zod',
+  '/lenabi': 'hfe-apbh-apq',
   '/fundraising': 'uus-vjgu-ttr',
   '/maxsimon': 'jbx-bjba-qjh',
   '/hochschulmathe': 'oud-dpuy-swx',
