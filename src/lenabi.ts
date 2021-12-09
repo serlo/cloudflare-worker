@@ -50,12 +50,7 @@ const MetadataResponse = t.type({
 })
 
 export async function birdMetadataApi(request: Request) {
-  const url = Url.fromRequest(request)
-
-  if (
-    url.subdomain !== 'lenabi-api' ||
-    url.pathnameWithoutTrailingSlash !== '/metadata/bird_academy'
-  ) {
+  if (!isMetadataApiRequest(request)) {
     return null
   }
 
@@ -124,6 +119,22 @@ function createBirdCourse(entity: Entity, publisher: Publisher) {
       <lectureType>${entity.learningResourceType}</lectureType>
     </bird_course>
   `
+}
+
+function isMetadataApiRequest(request: Request) {
+  const url = Url.fromRequest(request)
+
+  if (ENVIRONMENT !== 'local' && ENVIRONMENT !== 'staging') return false
+
+  if (
+    (url.subdomain === 'lenabi-api' &&
+      url.pathnameWithoutTrailingSlash === '/metadata/bird_academy') ||
+    (url.subdomain === 'lenabi' &&
+      url.pathnameWithoutTrailingSlash === '/api/metadata/bird_academy')
+  )
+    return true
+
+  return false
 }
 
 function createInternalServerError(ctx?: any) {
