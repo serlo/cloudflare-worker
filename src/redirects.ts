@@ -160,6 +160,11 @@ export async function redirects(request: Request) {
         )
       case '/lenabi/data-wallet':
         return Response.redirect('https://lenabi.serlo-staging.dev/wallet', 302)
+      case '/lenabi/user-journey':
+        return Response.redirect(
+          'https://frontend-git-lenabi-flow-serlo.vercel.app/',
+          302
+        )
     }
   }
 
