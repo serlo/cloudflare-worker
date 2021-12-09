@@ -91,9 +91,9 @@ export async function birdMetadataApi(request: Request) {
 <import xmlns="https://www.mathplan.de/moses/xsd/default" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <list type="bird_academy">
         <bird_academy>
-            <id>${publisher.id}</id>
-            <name>${publisher.name}</name>
-            <kurzname>${publisher.alternateName}</kurzname>
+            <id>${escape(publisher.id)}</id>
+            <name>${escape(publisher.name)}</name>
+            <kurzname>${escape(publisher.alternateName)}</kurzname>
         </bird_academy>
     </list>
     <list type="bird_course">
@@ -112,11 +112,11 @@ function createBirdCourse(entity: Entity, publisher: Publisher) {
   return `
     <bird_course>
       <id>${entity.id}</id>
-      <name>${
+      <name>${escape(
         entity.name ?? `${entity.learningResourceType}: ${entity.id}`
-      }</name>
-      <academyId>${publisher.id}</academyId>
-      <lectureType>${entity.learningResourceType}</lectureType>
+      )}</name>
+      <academyId>${escape(publisher.id)}</academyId>
+      <lectureType>${escape(entity.learningResourceType)}</lectureType>
     </bird_course>
   `
 }
@@ -142,4 +142,13 @@ function createInternalServerError(ctx?: any) {
     'An internal server error occured' + JSON.stringify(ctx),
     { status: 500 }
   )
+}
+
+function escape(text: string) {
+  return text
+    .replace(/&apos;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&gt;/g, '>')
+    .replace(/&lt;/g, '<')
+    .replace(/&amp;/g, '&')
 }
