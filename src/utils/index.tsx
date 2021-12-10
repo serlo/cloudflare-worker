@@ -21,7 +21,7 @@
  */
 import { either as E } from 'fp-ts'
 import * as t from 'io-ts'
-import marked from 'marked'
+import { marked } from 'marked'
 import { h, VNode } from 'preact'
 import renderToString from 'preact-render-to-string'
 import sanitize from 'sanitize-html'
@@ -183,7 +183,7 @@ export function sanitizeHtml(html: string): string {
 }
 
 export function markdownToHtml(markdown: string): string {
-  return marked(markdown, { headerIds: false }).trim()
+  return marked.parse(markdown, { headerIds: false }).trim()
 }
 
 export function getBasicAuthHeaders(): Record<string, string> {
