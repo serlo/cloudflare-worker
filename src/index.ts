@@ -33,11 +33,13 @@ import { quickbarProxy } from './quickbar-proxy'
 import { redirects } from './redirects'
 import { SentryFactory, Url } from './utils'
 
-addEventListener('fetch', (event: Event) => {
-  const e = event as FetchEvent
+if (typeof addEventListener === 'function') {
+  addEventListener('fetch', (event: Event) => {
+    const e = event as FetchEvent
 
-  e.respondWith(handleFetchEvent(e))
-})
+    e.respondWith(handleFetchEvent(e))
+  })
+}
 
 export async function handleFetchEvent(event: FetchEvent): Promise<Response> {
   const { request } = event
