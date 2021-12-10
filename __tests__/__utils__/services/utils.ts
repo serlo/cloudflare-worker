@@ -19,15 +19,10 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { rest, ResponseResolver, restContext, MockedRequest } from 'msw'
+import { rest, ResponseResolver, restContext, RestRequest } from 'msw'
 
-export type RestResolver<
-  RequestBodyType = MockedRequest['body'],
-  RequestParamsType = MockedRequest['params']
-> = ResponseResolver<
-  MockedRequest<RequestBodyType, RequestParamsType>,
-  typeof restContext
->
+export type RestResolver<RequestBodyType = RestRequest['body']> =
+  ResponseResolver<RestRequest<RequestBodyType>, typeof restContext>
 
 export function mockHttpGet(url: string, resolver: RestResolver) {
   global.server.use(
