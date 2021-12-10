@@ -591,21 +591,29 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           '#text'
         ] as string
 
-        return returnsPreviewUrl(
-          appletId === applet.id ? applet.thumbnailUrl : undefined
-        )(req, res, ctx)
+        return res(
+          ctx.json(
+            createPreviewUrlJSON(
+              appletId === applet.id ? applet.thumbnailUrl : undefined
+            )
+          )
+        )
       }
     }
 
     function returnsPreviewUrl(previewUrl?: string) {
-      return returnsJson({
+      return returnsJson(createPreviewUrlJSON(previewUrl))
+    }
+
+    function createPreviewUrlJSON(previewUrl?: string) {
+      return {
         responses: {
           response: {
             '-type': 'listing',
             ...(previewUrl ? { item: { previewUrl } } : {}),
           },
         },
-      })
+      }
     }
 
     function givenGeogebraFile(resolver: RestResolver) {
