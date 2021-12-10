@@ -22,7 +22,7 @@
 import { h } from 'preact'
 
 import { createPreactResponse, getBasicAuthHeaders, Url } from '../utils'
-import { AreWeEdtrIoYet, AreWeEdtrIoYetProps } from './template'
+import { AreWeEdtrIoYet } from './template'
 
 export async function edtrIoStats(request: Request) {
   const url = Url.fromRequest(request)
@@ -37,7 +37,5 @@ export async function edtrIoStats(request: Request) {
     headers: getBasicAuthHeaders(),
   })
 
-  return createPreactResponse(
-    <AreWeEdtrIoYet data={(await data.json()) as AreWeEdtrIoYetProps['data']} />
-  )
+  return createPreactResponse(<AreWeEdtrIoYet data={await data.json()} />)
 }

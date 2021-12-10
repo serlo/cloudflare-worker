@@ -140,7 +140,7 @@ export async function getPathInfo(
         body: JSON.stringify({ query, variables }),
       })
     )
-    apiResponseBody = (await apiResponse.json()) as unknown
+    apiResponseBody = await apiResponse.json()
   } catch (e) {
     return null
   }

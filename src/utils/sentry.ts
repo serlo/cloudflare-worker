@@ -85,10 +85,16 @@ export function responseToContext({
   text?: string
   json?: unknown
 }) {
+  const headers = {} as Record<string, string>
+
+  response.headers.forEach((key, value) => {
+    headers[key] = value
+  })
+
   return {
     status: response.status,
     url: response.url,
-    headers: Object.fromEntries(response.headers.entries()),
+    headers,
     ...(text ? { text } : {}),
     ...(json ? { json } : {}),
   }

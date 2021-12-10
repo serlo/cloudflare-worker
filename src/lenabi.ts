@@ -78,7 +78,7 @@ export async function birdMetadataApi(request: Request) {
     return createInternalServerError()
   }
 
-  const data = (await apiResponse.json()) as unknown
+  const data = await apiResponse.json()
 
   if (!MetadataResponse.is(data)) {
     return createInternalServerError(MetadataResponse.decode(data))
