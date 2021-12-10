@@ -34,7 +34,7 @@ export function givenApi(resolver: RestResolver) {
   )
 }
 
-export function defaultApiServer(): RestResolver {
+export function defaultApiServer(): RestResolver<any> {
   return (req, res, ctx) => {
     if (!req.headers.get('Authorization')?.match(/^Serlo Service=ey/))
       return res(ctx.status(401, 'No authorization header given'))
