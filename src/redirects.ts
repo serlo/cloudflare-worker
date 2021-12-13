@@ -165,6 +165,11 @@ export async function redirects(request: Request) {
           'https://frontend-git-lenabi-flow-serlo.vercel.app/',
           302
         )
+      case '/lenabi/sso':
+        return Response.redirect(
+          'https://frontend-git-keycloak-serlo.vercel.app/sso',
+          302
+        )
     }
   }
 
