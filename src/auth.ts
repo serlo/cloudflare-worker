@@ -43,8 +43,14 @@ function authFrontendSectorIdentifierUriValidation(
     ...Object.values(Instance).map((instance) => {
       return `https://${instance}.${global.DOMAIN}/api/auth/callback`
     }),
+    ...Object.values(Instance).map((instance) => {
+      return `https://${instance}.${global.DOMAIN}/api/auth/callback/hydra`
+    }),
     ...(global.ALLOW_AUTH_FROM_LOCALHOST === 'true'
-      ? ['http://localhost:3000/api/auth/callback']
+      ? [
+          'http://localhost:3000/api/auth/callback',
+          'http://localhost:3000/api/auth/callback/hydra',
+        ]
       : []),
   ]
 
