@@ -7,7 +7,7 @@
  * you may not use this file except in compliance with the License
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *    https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS
@@ -16,8 +16,8 @@
  * limitations under the License.
  *
  * @copyright Copyright (c) 2021 Serlo Education e.V.
- * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
- * @link      https://github.com/serlo-org/serlo.org-cloudflare-worker for the canonical source repository
+ * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
+ * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
 import { api } from './api'
 import { edtrIoStats } from './are-we-edtr-io-yet'
@@ -25,7 +25,12 @@ import { auth } from './auth'
 import { embed } from './embed'
 import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
 import { legalPages } from './legal-pages'
-import { birdMetadataApi } from './lenabi'
+import {
+  birdMetadataApi,
+  lenabiProxy,
+  lenabiRedirects,
+  lenabiSpecialPaths,
+} from './lenabi'
 import { maintenanceMode } from './maintenance'
 import { metadataApi } from './metadata-api'
 import { pdfProxy } from './pdf-proxy'
@@ -57,13 +62,16 @@ export async function handleFetchEvent(event: FetchEvent): Promise<Response> {
       (await pdfProxy(request, sentryFactory)) ||
       stagingRobots(request) ||
       (await frontendSpecialPaths(request, sentryFactory)) ||
+      (await lenabiSpecialPaths(request)) ||
       sentryHelloWorld(request, sentryFactory) ||
+      lenabiRedirects(request) ||
       (await redirects(request)) ||
       (await embed(request, sentryFactory)) ||
       (await semanticFileNames(request)) ||
       (await packages(request)) ||
       (await api(request)) ||
       (await frontendProxy(request, sentryFactory)) ||
+      (await lenabiProxy(request)) ||
       (await metadataApi(request, sentryFactory)) ||
       (await fetch(request))
     )
