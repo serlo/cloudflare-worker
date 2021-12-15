@@ -21,7 +21,6 @@
  */
 import { Instance, Url } from '../utils'
 
-// TODO: Add tests for those redirects
 export function lenabiRedirects(request: Request) {
   const url = Url.fromRequest(request)
 
