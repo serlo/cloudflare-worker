@@ -57,7 +57,7 @@ export async function fetchBackend({
   return new Response(response.body, response)
 }
 
-export function getRouteConfig(request: Request): RouteConfig | null {
+export function getRoute(request: Request): RouteConfig | null {
   const url = Url.fromRequest(request)
   const cookies = request.headers.get('Cookie')
 
@@ -90,7 +90,7 @@ export function getRouteConfig(request: Request): RouteConfig | null {
     }
   }
 
-  if (url.pathname == '/user/notifications' || url.pathname == '/consent') {
+  if (url.pathname === '/user/notifications' || url.pathname === '/consent') {
     return {
       __typename: 'BeforeRedirectsRoute',
       route: {

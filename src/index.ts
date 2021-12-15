@@ -25,7 +25,12 @@ import { auth } from './auth'
 import { embed } from './embed'
 import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
 import { legalPages } from './legal-pages'
-import { birdMetadataApi, lenabiRedirects } from './lenabi'
+import {
+  birdMetadataApi,
+  lenabiProxy,
+  lenabiRedirects,
+  lenabiSpecialPaths,
+} from './lenabi'
 import { maintenanceMode } from './maintenance'
 import { metadataApi } from './metadata-api'
 import { pdfProxy } from './pdf-proxy'
@@ -57,6 +62,7 @@ export async function handleFetchEvent(event: FetchEvent): Promise<Response> {
       (await pdfProxy(request, sentryFactory)) ||
       stagingRobots(request) ||
       (await frontendSpecialPaths(request, sentryFactory)) ||
+      (await lenabiSpecialPaths(request)) ||
       sentryHelloWorld(request, sentryFactory) ||
       lenabiRedirects(request) ||
       (await redirects(request)) ||
@@ -65,6 +71,7 @@ export async function handleFetchEvent(event: FetchEvent): Promise<Response> {
       (await packages(request)) ||
       (await api(request)) ||
       (await frontendProxy(request, sentryFactory)) ||
+      (await lenabiProxy(request)) ||
       (await metadataApi(request, sentryFactory)) ||
       (await fetch(request))
     )

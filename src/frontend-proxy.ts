@@ -111,7 +111,7 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
 
   if (!isInstance(url.subdomain)) return null
 
-  const routeConfig = vercelFrontendProxy.getRouteConfig(request)
+  const routeConfig = vercelFrontendProxy.getRoute(request)
 
   if (routeConfig?.__typename === 'Frontend' && !routeConfig.definite) {
     if (getCookieValue('useFrontend', cookies) === 'always') {
