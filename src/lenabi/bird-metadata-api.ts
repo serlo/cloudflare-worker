@@ -21,8 +21,8 @@
  */
 import * as t from 'io-ts'
 
-import { fetchApi } from './api'
-import { Url } from './utils'
+import { fetchApi } from '../api'
+import { Url } from '../utils'
 
 const Publisher = t.type({
   id: t.string,
