@@ -81,7 +81,7 @@ export async function birdMetadataApi(request: Request) {
   const data = await apiResponse.json()
 
   if (!MetadataResponse.is(data)) {
-    return createInternalServerError(MetadataResponse.decode(data))
+    return createInternalServerError()
   }
 
   const { publisher } = data.data.metadata
