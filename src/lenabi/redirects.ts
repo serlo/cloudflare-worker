@@ -45,7 +45,7 @@ export function lenabiRedirects(request: Request) {
         )
       case '/docs/sso':
         return Response.redirect(
-          'https://github.com/serlo/lenabi/wiki/SSO-Konfiguration-mit-Keycloak',
+          'https://github.com/serlo/lenabi/wiki/Implementierung-der-Prototypen#sso',
           302
         )
     }
