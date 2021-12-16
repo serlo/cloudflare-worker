@@ -22,17 +22,20 @@
 import { currentTestEnvironment } from './__utils__'
 
 describe('LENABI redirect links', () => {
-  test.each(['/metadata-api', '/data-wallet', '/sso', '/user-journey'])(
-    '%s',
-    async (pathname) => {
-      const response = await currentTestEnvironment().fetch({
-        subdomain: 'lenabi',
-        pathname,
-      })
+  test.each([
+    '/metadata-api',
+    '/data-wallet',
+    '/sso',
+    '/user-journey',
+    '/docs/sso',
+  ])('%s', async (pathname) => {
+    const response = await currentTestEnvironment().fetch({
+      subdomain: 'lenabi',
+      pathname,
+    })
 
-      expect(response.status).toBe(302)
-    }
-  )
+    expect(response.status).toBe(302)
+  })
 })
 
 describe('Legacy LENABI redirect links', () => {

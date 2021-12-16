@@ -43,6 +43,11 @@ export function lenabiRedirects(request: Request) {
           'https://frontend-git-keycloak-serlo.vercel.app/sso',
           302
         )
+      case '/docs/sso':
+        return Response.redirect(
+          'https://github.com/serlo/lenabi/wiki/SSO-Konfiguration-mit-Keycloak',
+          302
+        )
     }
   }
 
