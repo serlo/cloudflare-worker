@@ -43,6 +43,8 @@ export function lenabiRedirects(request: Request) {
           'https://frontend-git-keycloak-serlo.vercel.app/sso',
           302
         )
+      case '/docs':
+        return Response.redirect('https://github.com/serlo/lenabi', 302)
       case '/docs/sso':
         return Response.redirect(
           'https://github.com/serlo/lenabi/wiki/Implementierung-der-Prototypen#sso',
