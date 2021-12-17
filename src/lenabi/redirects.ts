@@ -25,7 +25,10 @@ export function lenabiRedirects(request: Request) {
   const url = Url.fromRequest(request)
 
   // To avoid cycles, add redirects to lenabi.serlo.org only.
-  if (url.subdomain === 'lenabi' && global.ENVIRONMENT === 'production') {
+  if (
+    url.subdomain === 'lenabi' &&
+    ['production', 'local'].includes(global.ENVIRONMENT)
+  ) {
     switch (url.pathnameWithoutTrailingSlash) {
       case '/metadata-api':
         return Response.redirect(
