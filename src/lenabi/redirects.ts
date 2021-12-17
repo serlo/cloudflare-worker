@@ -29,7 +29,7 @@ export function lenabiRedirects(request: Request) {
     switch (url.pathnameWithoutTrailingSlash) {
       case '/metadata-api':
         return Response.redirect(
-          'https://nbviewer.org/github/serlo/lenabi/blob/10a1aa64031558d723dfaf1dc28eb8f77d07f004/src/Prototype%20of%20metadata%20API%20for%20serlo.org%20%28LENABI%29.ipynb',
+          'https://nbviewer.org/github/serlo/lenabi/blob/4897124b9fb29938916a2ac79ae6d107a10f1433/src/Prototype%20of%20metadata%20API%20for%20serlo.org%20%28LENABI%29.ipynb',
           302
         )
       case '/data-wallet':
@@ -41,6 +41,8 @@ export function lenabiRedirects(request: Request) {
         )
       case '/sso':
         return Response.redirect('https://lenabi.serlo-staging.dev/sso', 302)
+      case '/docs':
+        return Response.redirect('https://github.com/serlo/lenabi', 302)
       case '/docs/sso':
         return Response.redirect(
           'https://github.com/serlo/lenabi/wiki/Implementierung-der-Prototypen#sso',
