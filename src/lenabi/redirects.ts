@@ -24,7 +24,11 @@ import { Instance, Url } from '../utils'
 export function lenabiRedirects(request: Request) {
   const url = Url.fromRequest(request)
 
-  if (url.subdomain === 'lenabi') {
+  // To avoid cycles, add redirects to lenabi.serlo.org only.
+  if (
+    url.subdomain === 'lenabi' &&
+    ['production', 'local'].includes(global.ENVIRONMENT)
+  ) {
     switch (url.pathnameWithoutTrailingSlash) {
       case '/metadata-api':
         return Response.redirect(
@@ -39,10 +43,7 @@ export function lenabiRedirects(request: Request) {
           302
         )
       case '/sso':
-        return Response.redirect(
-          'https://frontend-git-keycloak-serlo.vercel.app/sso',
-          302
-        )
+        return Response.redirect('https://lenabi.serlo-staging.dev/sso', 302)
       case '/docs':
         return Response.redirect('https://github.com/serlo/lenabi', 302)
       case '/docs/sso':

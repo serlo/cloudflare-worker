@@ -19,7 +19,7 @@
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { currentTestEnvironment } from './__utils__'
+import { currentTestEnvironment, currentTestEnvironmentWhen } from './__utils__'
 
 describe('LENABI redirect links', () => {
   test.each([
@@ -30,7 +30,9 @@ describe('LENABI redirect links', () => {
     '/user-journey',
     '/docs/sso',
   ])('%s', async (pathname) => {
-    const response = await currentTestEnvironment().fetch({
+    const response = await currentTestEnvironmentWhen((config) =>
+      ['production', 'local'].includes(config.ENVIRONMENT)
+    ).fetch({
       subdomain: 'lenabi',
       pathname,
     })
