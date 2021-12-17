@@ -25,6 +25,7 @@ describe('LENABI redirect links', () => {
   test.each([
     '/metadata-api',
     '/data-wallet',
+    '/docs',
     '/sso',
     '/user-journey',
     '/docs/sso',
