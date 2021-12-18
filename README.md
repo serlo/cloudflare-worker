@@ -1,6 +1,8 @@
-# Serlo Cloudflare Worker
+<img src="https://raw.githubusercontent.com/serlo/frontend/staging/public/_assets/img/serlo-logo-gh.svg" alt="Serlo Logo" title="Serlo" align="right" height="75" />
 
-This repository contains the source code for the cloudflare worker of Serlo ([https://serlo.org/](https://serlo.org)).
+# serlo.org – Cloudflare Worker
+
+This repository contains the source code for the cloudflare worker of [Serlo](https://serlo.org/).
 
 ## Development
 
