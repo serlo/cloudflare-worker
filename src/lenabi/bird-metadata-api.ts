@@ -130,7 +130,7 @@ function isMetadataApiRequest(request: Request) {
     (url.subdomain === 'lenabi-api' &&
       url.pathnameWithoutTrailingSlash === '/metadata/bird_academy') ||
     (url.subdomain === 'lenabi' &&
-      url.pathnameWithoutTrailingSlash === '/api/metadata/bird_academy')
+      url.pathnameWithoutTrailingSlash === '/metadata-api/bird_academy')
   )
     return true
 
