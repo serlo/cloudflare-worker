@@ -331,7 +331,7 @@ describe('special paths', () => {
     expect(await response.text()).toEqual(expect.stringContaining('Consent'))
   })
 
-  test('/entity/repository/add-revision and useEditorInFrontend cookie always resolve to frontend', async () => {
+  test('GET /entity/repository/add-revision and useEditorInFrontEnd cookie always resolve to frontend', async () => {
     const request = env.createRequest({
       subdomain: 'en',
       pathname: '/entity/repository/add-revision',
@@ -341,6 +341,21 @@ describe('special paths', () => {
     const response = await env.fetchRequest(request)
 
     await expectFrontend(response)
+  })
+
+  test('POST /entity/repository/add-revision uses legacy', async () => {
+    const request = env.createRequest(
+      {
+        subdomain: 'en',
+        pathname: '/entity/repository/add-revision',
+      },
+      { method: 'POST' }
+    )
+
+    request.headers.set('Cookie', 'useEditorInFrontend=1;authenticated=1')
+    const response = await env.fetchRequest(request)
+
+    await expectLegacy(response)
   })
 
   test('/event/history always resolve to frontend', async () => {
