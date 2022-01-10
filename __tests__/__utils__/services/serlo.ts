@@ -27,7 +27,8 @@ import { RestResolver, createUrlRegex } from './utils'
 
 export function givenSerlo(resolver: RestResolver) {
   global.server.use(
-    rest.get(createUrlRegex({ subdomains: Object.values(Instance) }), resolver)
+    rest.get(createUrlRegex({ subdomains: Object.values(Instance) }), resolver),
+    rest.post(createUrlRegex({ subdomains: Object.values(Instance) }), resolver)
   )
 }
 
@@ -48,6 +49,8 @@ export function defaultSerloServer(): RestResolver {
     } else if (url.pathname === '/search') {
       content = url.searchParams.get('q') ?? ''
     } else if (url.pathname === '/license/detail/1') {
+      content = ''
+    } else if (url.pathname.startsWith('/entity/repository/add-revision')) {
       content = ''
     } else {
       const uuid = getUuid(url.subdomain, url.pathname)
