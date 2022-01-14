@@ -44,6 +44,11 @@ export function lenabiRedirects(request: Request) {
         )
       case '/sso':
         return Response.redirect('https://lenabi.serlo-staging.dev/sso', 302)
+      case '/status':
+        return Response.redirect(
+          'https://frontend-git-lenabi-flow-serlo.vercel.app/___lenabi_status',
+          302
+        )
       case '/docs':
         return Response.redirect('https://github.com/serlo/lenabi', 302)
       case '/docs/sso':

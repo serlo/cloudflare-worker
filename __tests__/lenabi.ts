@@ -27,6 +27,7 @@ describe('LENABI redirect links', () => {
     '/data-wallet',
     '/docs',
     '/sso',
+    '/status',
     '/user-journey',
     '/docs/sso',
   ])('%s', async (pathname) => {
