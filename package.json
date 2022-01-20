@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
-    "@cloudflare/workers-types": "^3.0.0",
+    "@cloudflare/workers-types": "^3.3.1",
     "@cloudflare/wrangler": "^1.0.0",
     "@iarna/toml": "^2.0.0",
     "@splish-me/copyright-headers": "^0.0.2",

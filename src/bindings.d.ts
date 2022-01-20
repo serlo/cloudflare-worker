@@ -57,16 +57,7 @@ export interface Variables {
 
 // KVs
 declare global {
-  var MAINTENANCE_KV: KV<'enabled'>
-  var PACKAGES_KV: KV<string>
-  var PATH_INFO_KV: KV<import('./utils').CacheKey>
-}
-
-export interface KV<Key extends string> {
-  get: (key: Key) => Promise<string | null>
-  put: (
-    key: Key,
-    value: string,
-    options?: { expirationTtl: number }
-  ) => Promise<void>
+  var MAINTENANCE_KV: KVNamespace<'enabled'>
+  var PACKAGES_KV: KVNamespace<string>
+  var PATH_INFO_KV: KVNamespace<import('./utils').CacheKey>
 }
