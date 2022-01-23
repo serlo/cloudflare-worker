@@ -33,34 +33,26 @@ export async function api(request: Request) {
 }
 
 export async function fetchApi(request: Request) {
+  request = new Request(request)
+  request.headers.set('Authorization', getAuthorizationHeader(request))
+
+  return await fetch(request)
+}
+
+function getAuthorizationHeader(request: Request) {
+  const authorizationHeader = request.headers.get('Authorization')
   const serviceToken = jwt.sign({}, global.API_SECRET, {
     expiresIn: '2h',
     audience: 'api.serlo.org',
     issuer: 'serlo.org-cloudflare-worker',
   })
 
-  request = new Request(request)
-  request.headers.set('Authorization', getAuthorizationHeader())
-
-  return await fetch(request)
-
-  function getAuthorizationHeader() {
-    const authorizationHeader = request.headers.get('Authorization')
-
-    if (authorizationHeader === null) {
-      const serviceToken = jwt.sign({}, global.API_SECRET, {
-        expiresIn: '2h',
-        audience: 'api.serlo.org',
-        issuer: 'serlo.org-cloudflare-worker',
-      })
-      return `Serlo Service=${serviceToken}`
-    }
-
-    if (authorizationHeader.startsWith('Serlo')) return authorizationHeader
-
-    return `Serlo Service=${serviceToken};User=${authorizationHeader.replace(
-      'Bearer ',
-      ''
-    )}`
+  if (authorizationHeader == null) {
+    return `Serlo Service=${serviceToken}`
+  } else if (authorizationHeader.startsWith('Serlo')) {
+    return authorizationHeader
+  } else {
+    const user = authorizationHeader.replace('Bearer ', '')
+    return `Serlo Service=${serviceToken};User=${user}`
   }
 }
