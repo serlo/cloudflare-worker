@@ -20,7 +20,6 @@
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
 import { rest } from 'msw'
-import * as R from 'ramda'
 
 import { getUuid } from './database'
 import { RestResolver, createUrlRegex } from './utils'
@@ -64,7 +63,8 @@ export function defaultApiServer(): RestResolver<any> {
       return res(ctx.status(404, statusText))
     }
 
-    const result = R.omit(['oldAlias'], uuid)
+    const result = { ...uuid }
+    delete result['oldAlias']
 
     if (result.alias !== undefined)
       result.alias = encodeURIComponent(result.alias).replace(/%2F/g, '/')
