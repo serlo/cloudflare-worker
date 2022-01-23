@@ -19,7 +19,7 @@
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import jwt from 'jsonwebtoken'
+import { SignJWT } from 'jose'
 
 import { Url } from './utils'
 
@@ -34,18 +34,19 @@ export async function api(request: Request) {
 
 export async function fetchApi(request: Request) {
   request = new Request(request)
-  request.headers.set('Authorization', getAuthorizationHeader(request))
+  request.headers.set('Authorization', await getAuthorizationHeader(request))
 
   return await fetch(request)
 }
 
-function getAuthorizationHeader(request: Request) {
+async function getAuthorizationHeader(request: Request) {
   const authorizationHeader = request.headers.get('Authorization')
-  const serviceToken = jwt.sign({}, global.API_SECRET, {
-    expiresIn: '2h',
-    audience: 'api.serlo.org',
-    issuer: 'serlo.org-cloudflare-worker',
-  })
+  const serviceToken = await new SignJWT({})
+    .setProtectedHeader({ alg: 'HS256' })
+    .setExpirationTime('2h')
+    .setAudience('api.serlo.org')
+    .setIssuer('serlo.org-cloudflare-worker')
+    .sign(Buffer.from(global.API_SECRET))
 
   if (authorizationHeader == null) {
     return `Serlo Service=${serviceToken}`
