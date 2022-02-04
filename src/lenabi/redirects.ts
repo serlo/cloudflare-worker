@@ -32,7 +32,7 @@ export function lenabiRedirects(request: Request) {
     switch (url.pathnameWithoutTrailingSlash) {
       case '/metadata-api':
         return Response.redirect(
-          'https://nbviewer.org/github/serlo/lenabi/blob/4897124b9fb29938916a2ac79ae6d107a10f1433/src/Prototype%20of%20metadata%20API%20for%20serlo.org%20%28LENABI%29.ipynb',
+          'https://nbviewer.org/github/serlo/lenabi/blob/20b946ff9f1205444f256995dfd776fd203b6c3c/src/Prototype%20of%20metadata%20API%20for%20serlo.org%20%28LENABI%29.ipynb',
           302
         )
       case '/data-wallet':
