@@ -1,3 +1,6 @@
 dist/
 pacts/
 worker/
+
+# Yarn
+.yarn/
