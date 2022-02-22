@@ -90,7 +90,11 @@ export function getRoute(request: Request): RouteConfig | null {
     }
   }
 
-  if (url.pathname === '/user/notifications' || url.pathname === '/consent') {
+  if (
+    url.pathname === '/user/notifications' ||
+    url.pathname === '/user/settings' ||
+    url.pathname === '/consent'
+  ) {
     return {
       __typename: 'BeforeRedirectsRoute',
       route: {

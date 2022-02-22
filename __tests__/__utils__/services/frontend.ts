@@ -65,6 +65,8 @@ export function defaultFrontendServer(): RestResolver {
 
     if (pathname === '/user/notifications' && instance === 'en') {
       content = 'Notifications'
+    } else if (pathname === '/user/settings' && instance === 'en') {
+      content = 'Settings'
     } else if (pathname === '/spenden' && instance === 'de') {
       content = 'Spenden'
     } else if (pathname === '') {

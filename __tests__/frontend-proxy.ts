@@ -321,6 +321,16 @@ describe('special paths', () => {
     )
   })
 
+  test('/user/settings always resolve to frontend', async () => {
+    const response = await env.fetch({
+      subdomain: 'en',
+      pathname: '/user/settings',
+    })
+
+    expect(response.status).toBe(200)
+    expect(await response.text()).toEqual(expect.stringContaining('Settings'))
+  })
+
   test('/consent always resolve to frontend', async () => {
     const response = await env.fetch({
       subdomain: 'en',
