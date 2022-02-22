@@ -9,7 +9,7 @@ function init() {
   read_arguments "$@"
 
   print_header "Make sure yarn packages are up to date"
-  yarn install --frozen-lock
+  yarn install --immutable --immutable-cache
 }
 
 function read_arguments() {
