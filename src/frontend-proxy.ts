@@ -135,6 +135,7 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
         '/spenden',
         '/subscriptions/manage',
         '/entity/unrevised',
+        '/user/settings',
       ].includes(url.pathnameWithoutTrailingSlash) ||
       url.pathname.startsWith('/license/detail') ||
       url.pathname.startsWith('/entity/repository/history') ||
