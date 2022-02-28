@@ -56,6 +56,11 @@ export function lenabiRedirects(request: Request) {
           'https://github.com/serlo/lenabi/wiki/Implementierung-der-Prototypen#sso',
           302
         )
+      case '/ecec':
+        return Response.redirect(
+          'https://docs.google.com/document/d/1qSbyzDnW2RU58a7J3NHHBFo_MptaW-Ke0iT_c4KOhUA',
+          302
+        )
     }
   }
 
