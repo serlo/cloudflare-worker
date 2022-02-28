@@ -26,6 +26,7 @@ describe('LENABI redirect links', () => {
     '/metadata-api',
     '/data-wallet',
     '/docs',
+    '/ecec',
     '/sso',
     '/status',
     '/user-journey',
