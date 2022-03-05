@@ -22,11 +22,18 @@
 import { currentTestEnvironment, currentTestEnvironmentWhen } from './__utils__'
 
 describe('LENABI redirect links', () => {
+  test('serlo.org/ecec', async () => {
+    const response = await currentTestEnvironmentWhen((config) =>
+      ['production', 'local'].includes(config.ENVIRONMENT)
+    ).fetch({ subdomain: 'de', pathname: '/ecec' })
+
+    expect(response.status).toBe(302)
+  })
+
   test.each([
     '/metadata-api',
     '/data-wallet',
     '/docs',
-    '/ecec',
     '/sso',
     '/status',
     '/user-journey',
