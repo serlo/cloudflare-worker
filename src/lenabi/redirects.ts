@@ -24,6 +24,13 @@ import { Instance, Url } from '../utils'
 export function lenabiRedirects(request: Request) {
   const url = Url.fromRequest(request)
 
+  if (url.pathnameWithoutTrailingSlash === '/ecec') {
+    return Response.redirect(
+      'https://docs.google.com/document/d/1qSbyzDnW2RU58a7J3NHHBFo_MptaW-Ke0iT_c4KOhUA',
+      302
+    )
+  }
+
   // To avoid cycles, add redirects to lenabi.serlo.org only.
   if (
     url.subdomain === 'lenabi' &&
