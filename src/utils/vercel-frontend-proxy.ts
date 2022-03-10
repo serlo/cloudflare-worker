@@ -103,15 +103,15 @@ export function getRoute(request: Request): RouteConfig | null {
   }
 
   if (
-    request.method === 'GET' &&
     url.pathname.startsWith('/entity/repository/add-revision') &&
-    getCookieValue('useEditorInFrontend', cookies) === '1'
+    (request.method === 'POST' ||
+      getCookieValue('useLegacyEditor', cookies) === '1')
   ) {
     return {
-      __typename: 'Frontend',
-      redirect: 'follow',
-      appendSubdomainToPath: true,
-      definite: true,
+      __typename: 'BeforeRedirectsRoute',
+      route: {
+        __typename: 'Legacy',
+      },
     }
   }
 

@@ -139,6 +139,7 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
       ].includes(url.pathnameWithoutTrailingSlash) ||
       url.pathname.startsWith('/license/detail') ||
       url.pathname.startsWith('/entity/repository/history') ||
+      url.pathname.startsWith('/entity/repository/add-revision') ||
       url.pathname.startsWith('/event/history')
     ) {
       return {
