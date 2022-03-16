@@ -51,6 +51,7 @@ export function defaultSerloServer(): RestResolver {
     } else if (url.pathname === '/license/detail/1') {
       content = ''
     } else if (url.pathname.startsWith('/entity/repository/add-revision')) {
+      // add-revision-old/… and add-revision/…
       content = ''
     } else {
       const uuid = getUuid(url.subdomain, url.pathname)
