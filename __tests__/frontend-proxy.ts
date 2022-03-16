@@ -331,10 +331,21 @@ describe('special paths', () => {
     expect(await response.text()).toEqual(expect.stringContaining('Consent'))
   })
 
-  test('GET /entity/repository/add-revision and useLegacyEditor cookie resolves to legacy', async () => {
+  test('GET /entity/repository/add-revision/123 resolves to frontend', async () => {
     const request = env.createRequest({
       subdomain: 'en',
-      pathname: '/entity/repository/add-revision',
+      pathname: '/entity/repository/add-revision/123',
+    })
+
+    const response = await env.fetchRequest(request)
+
+    await expectFrontend(response)
+  })
+
+  test('GET /entity/repository/add-revision/123 and useLegacyEditor cookie resolves to legacy', async () => {
+    const request = env.createRequest({
+      subdomain: 'en',
+      pathname: '/entity/repository/add-revision/123',
     })
 
     request.headers.set('Cookie', 'useLegacyEditor=1;authenticated=1')
@@ -343,11 +354,22 @@ describe('special paths', () => {
     await expectLegacy(response)
   })
 
-  test('POST /entity/repository/add-revision uses legacy', async () => {
+  test('GET /entity/repository/add-revision-old/123 resolves to legacy', async () => {
+    const request = env.createRequest({
+      subdomain: 'en',
+      pathname: '/entity/repository/add-revision-old/123',
+    })
+
+    const response = await env.fetchRequest(request)
+
+    await expectLegacy(response)
+  })
+
+  test('POST /entity/repository/add-revision/123 uses legacy', async () => {
     const request = env.createRequest(
       {
         subdomain: 'en',
-        pathname: '/entity/repository/add-revision',
+        pathname: '/entity/repository/add-revision/123',
       },
       { method: 'POST' }
     )

@@ -78,7 +78,7 @@ export function defaultFrontendServer(): RestResolver {
       content = 'Event Log'
     } else if (req.url.pathname === '/en/entity/unrevised') {
       content = 'Unrevised Revisions'
-    } else if (req.url.pathname === '/en/entity/repository/add-revision') {
+    } else if (req.url.pathname === '/en/entity/repository/add-revision/123') {
       content = 'Edit Page'
     } else if (req.url.pathname === '/en/event/history/user/1/arekkas') {
       content = 'arekkas'

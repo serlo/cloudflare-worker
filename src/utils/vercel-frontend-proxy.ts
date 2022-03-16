@@ -103,9 +103,10 @@ export function getRoute(request: Request): RouteConfig | null {
   }
 
   if (
-    url.pathname.startsWith('/entity/repository/add-revision') &&
-    (request.method === 'POST' ||
-      getCookieValue('useLegacyEditor', cookies) === '1')
+    url.pathname.startsWith('/entity/repository/add-revision-old/') ||
+    (url.pathname.startsWith('/entity/repository/add-revision/') &&
+      (request.method === 'POST' ||
+        getCookieValue('useLegacyEditor', cookies) === '1'))
   ) {
     return {
       __typename: 'BeforeRedirectsRoute',
