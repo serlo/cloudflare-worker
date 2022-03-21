@@ -136,6 +136,12 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
         '/subscriptions/manage',
         '/entity/unrevised',
         '/user/settings',
+        '/mathe',
+        '/biologie',
+        '/nachhaltigkeit',
+        '/informatik',
+        '/chemie',
+        '/lerntipps',
       ].includes(url.pathnameWithoutTrailingSlash) ||
       url.pathname.startsWith('/license/detail') ||
       url.pathname.startsWith('/entity/repository/history') ||
