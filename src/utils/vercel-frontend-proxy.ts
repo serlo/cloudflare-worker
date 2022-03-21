@@ -136,6 +136,18 @@ export function getRoute(request: Request): RouteConfig | null {
     }
   }
 
+  if (
+    /\/taxonomy\/term\/create\/\d+\/\d+/.test(url.pathname) &&
+    global.ENVIRONMENT === 'staging'
+  ) {
+    return {
+      __typename: 'Frontend',
+      redirect: 'follow',
+      appendSubdomainToPath: true,
+      definite: true,
+    }
+  }
+
   return {
     __typename: 'Frontend',
     redirect: 'follow',

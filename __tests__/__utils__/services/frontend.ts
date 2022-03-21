@@ -82,7 +82,11 @@ export function defaultFrontendServer(): RestResolver {
       content = 'Edit Page'
     } else if (req.url.pathname === '/en/event/history/user/1/arekkas') {
       content = 'arekkas'
-    } else if (['/search', '/license/detail/1'].includes(pathname)) {
+    } else if (
+      ['/search', '/license/detail/1', '/taxonomy/term/create/10/10'].includes(
+        pathname
+      )
+    ) {
       content = ''
     } else {
       const uuid = getUuid(instance, pathname.length > 0 ? pathname : '/')

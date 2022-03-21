@@ -48,7 +48,10 @@ export function defaultSerloServer(): RestResolver {
         url.subdomain === 'de' ? 'Startseite' : 'The Open Learning Platform'
     } else if (url.pathname === '/search') {
       content = url.searchParams.get('q') ?? ''
-    } else if (url.pathname === '/license/detail/1') {
+    } else if (
+      url.pathname === '/license/detail/1' ||
+      url.pathname === '/taxonomy/term/create/10/10'
+    ) {
       content = ''
     } else if (url.pathname.startsWith('/entity/repository/add-revision')) {
       // add-revision-old/… and add-revision/…
