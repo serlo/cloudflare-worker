@@ -58,8 +58,8 @@ export function defaultFrontendServer(): RestResolver {
 
     if (req.url.pathname === '/___funfunfun') return res(ctx.body('funfunfun'))
 
-    const instance = req.url.pathname.substr(1, 2)
-    const pathname = req.url.pathname.substr(3)
+    const instance = req.url.pathname.substring(1, 3)
+    const pathname = req.url.pathname.substring(3)
 
     let content
 
