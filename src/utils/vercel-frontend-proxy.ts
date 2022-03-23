@@ -138,7 +138,8 @@ export function getRoute(request: Request): RouteConfig | null {
 
   if (
     /\/taxonomy\/term\/create\/\d+\/\d+/.test(url.pathname) &&
-    global.ENVIRONMENT === 'staging'
+    global.ENVIRONMENT === 'staging' &&
+    request.method === 'GET'
   ) {
     return {
       __typename: 'Frontend',
