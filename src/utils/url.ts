@@ -56,11 +56,9 @@ export class Url extends URL {
   }
 
   public hasContentApiParameters() {
-    return this.search
-      .slice(1)
-      .split('&')
-      .map((parameterWithValue) => parameterWithValue.split('=')[0])
-      .some((queryParameter) => contentApiParameters.includes(queryParameter))
+    return Array.from(this.searchParams.keys()).some((key) =>
+      contentApiParameters.includes(key)
+    )
   }
 
   public async isUuid() {
