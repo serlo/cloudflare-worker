@@ -2384,7 +2384,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^8.3.0
     ts-node: ^10.7.0
-    ts-unused-exports: ^7.0.3
+    ts-unused-exports: ^8.0.0
     typescript: ^4.6.3
     webpack: ^4.46.0
     webpack-cli: ^3.3.12
@@ -15165,9 +15165,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-unused-exports@npm:^7.0.3":
-  version: 7.0.3
-  resolution: "ts-unused-exports@npm:7.0.3"
+"ts-unused-exports@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "ts-unused-exports@npm:8.0.0"
   dependencies:
     chalk: ^4.0.0
     tsconfig-paths: ^3.9.0
@@ -15178,7 +15178,7 @@ __metadata:
       optional: false
   bin:
     ts-unused-exports: bin/ts-unused-exports
-  checksum: 28c2c0b372f4be98a4709841097aa5984c2de365612c09b452a172be86070c057ad82c598a8151a30a08c93f3c5395f6df423168326b7bd2ae2a7af59ae46585
+  checksum: cf8ca140852515491edd6f9f69f5eb129608111dbcb7049826af59dec6d5e127f47327382d70b0f5c273228f823c0fe3f6fd41b0b3a1c85bb83e263d8ebf83e1
   languageName: node
   linkType: hard
 
