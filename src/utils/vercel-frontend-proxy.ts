@@ -58,96 +58,13 @@ export async function fetchBackend({
 }
 
 export function getRoute(request: Request): RouteConfig | null {
-  const url = Url.fromRequest(request)
-  const cookies = request.headers.get('Cookie')
-
-  if (url.pathname.startsWith('/api/auth/')) {
-    return {
-      __typename: 'BeforeRedirectsRoute',
-      route: {
-        __typename: 'Frontend',
-        redirect: 'manual',
-        appendSubdomainToPath: false,
-        definite: true,
-      },
-    }
-  }
-
-  if (
-    url.pathname.startsWith('/_next/') ||
-    url.pathname.startsWith('/_assets/') ||
-    url.pathname.startsWith('/api/frontend/') ||
-    url.pathname.startsWith('/___')
-  ) {
-    return {
-      __typename: 'BeforeRedirectsRoute',
-      route: {
-        __typename: 'Frontend',
-        redirect: 'follow',
-        appendSubdomainToPath: false,
-        definite: true,
-      },
-    }
-  }
-
-  if (url.pathname === '/user/notifications' || url.pathname === '/consent') {
-    return {
-      __typename: 'BeforeRedirectsRoute',
-      route: {
-        __typename: 'Frontend',
-        redirect: 'follow',
-        appendSubdomainToPath: true,
-        definite: true,
-      },
-    }
-  }
-
-  if (
-    url.pathname.startsWith('/entity/repository/add-revision-old/') ||
-    (url.pathname.startsWith('/entity/repository/add-revision/') &&
-      (request.method === 'POST' ||
-        getCookieValue('useLegacyEditor', cookies) === '1'))
-  ) {
+  if (forceLegacyRoute(request))
     return {
       __typename: 'BeforeRedirectsRoute',
       route: {
         __typename: 'Legacy',
       },
     }
-  }
-
-  if (
-    url.pathname.startsWith('/auth/activate/') ||
-    url.pathname.startsWith('/auth/password/restore/') ||
-    [
-      '/auth/login',
-      '/auth/logout',
-      '/auth/password/change',
-      '/auth/hydra/login',
-      '/auth/hydra/consent',
-      '/user/register',
-    ].includes(url.pathname)
-  ) {
-    return {
-      __typename: 'BeforeRedirectsRoute',
-      route: {
-        __typename: 'Legacy',
-      },
-    }
-  }
-
-  if (
-    /\/taxonomy\/term\/create\/\d+\/\d+/.test(url.pathname) &&
-    global.ENVIRONMENT === 'staging' &&
-    request.method === 'GET'
-  ) {
-    return {
-      __typename: 'Frontend',
-      redirect: 'follow',
-      appendSubdomainToPath: true,
-      definite: true,
-    }
-  }
 
   return {
     __typename: 'Frontend',
@@ -155,6 +72,79 @@ export function getRoute(request: Request): RouteConfig | null {
     appendSubdomainToPath: true,
     definite: false,
   }
+}
+
+const legacyPathnames = [
+  '/user/register',
+  '/privacy',
+  '/datenschutz',
+  '/imprint',
+  '/terms',
+  '/disable-frontend',
+  '/enable-frontend',
+  '/beitreten',
+  '/user/register',
+  '/license/manage',
+  '/license/add',
+]
+
+const legacyPathnamesStartsWith = [
+  '/authorization',
+  '/authentication/',
+  '/auth/',
+  '/api/auth',
+  '/discussions',
+  '/entity',
+  '/math/wiki/',
+  '/ref/',
+  '/page',
+  '/taxonomy',
+  '/unsubscribe',
+  '/user/profile/',
+  '/user/register',
+  '/users',
+  '/subscription/update',
+  '/entity/repository/add-revision-old/',
+  '/flag',
+  '/uuid',
+  '/sitemap',
+  '/backend',
+  '/ads',
+  '/blog',
+  '/license/update',
+  '/navigation/',
+]
+
+function forceLegacyRoute(request: Request): boolean {
+  const url = Url.fromRequest(request)
+  const cookies = request.headers.get('Cookie')
+
+  if (request.method === 'POST') return true
+
+  if (
+    url.pathname.startsWith('/taxonomy/term/create/') &&
+    global.ENVIRONMENT !== 'production'
+  ) {
+    return false
+  }
+
+  if (
+    legacyPathnames.includes(url.pathnameWithoutTrailingSlash) ||
+    legacyPathnamesStartsWith.some((pathnameStart) =>
+      url.pathname.startsWith(pathnameStart)
+    )
+  ) {
+    return true
+  }
+
+  if (
+    url.pathname.startsWith('/entity/repository/add-revision/') &&
+    getCookieValue('useLegacyEditor', cookies) === '1'
+  ) {
+    return true
+  }
+
+  return false
 }
 
 export type RouteConfig = LegacyRoute | FrontendRoute | BeforeRedirectsRoute

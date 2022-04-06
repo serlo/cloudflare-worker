@@ -28,19 +28,24 @@ import {
 } from './utils'
 import * as vercelFrontendProxy from './utils/vercel-frontend-proxy'
 
+const useLegacyCookieName = 'useLegacyFrontend'
+
 export async function frontendSpecialPaths(
   request: Request,
   sentryFactory: SentryFactory
 ): Promise<Response | null> {
   const url = Url.fromRequest(request)
-  const route = await getRoute(request)
+  const route = getRoute(request)
   const sentry = sentryFactory.createReporter('frontend-special-paths')
 
-  if (url.pathname === '/enable-frontend')
-    return createConfigurationResponse('Enabled: Use of new frontend', 0)
-
   if (url.pathname === '/disable-frontend')
-    return createConfigurationResponse('Disabled: Use of new frontend', 1.1)
+    return createConfigurationResponse('Disabled: Now using legacy frontend', 1)
+
+  if (url.pathname === '/enable-frontend')
+    return createConfigurationResponse(
+      'Enabled: Now using new frontend again',
+      0
+    )
 
   return route !== null && route.__typename === 'BeforeRedirectsRoute'
     ? fetchBackend({ request, sentry, route: route.route })
@@ -51,34 +56,10 @@ export async function frontendProxy(
   request: Request,
   sentryFactory: SentryFactory
 ): Promise<Response | null> {
-  const cookies = request.headers.get('Cookie')
   const sentry = sentryFactory.createReporter('frontend')
-  const route = await getRoute(request)
+  const route = getRoute(request)
   if (route === null || route.__typename === 'BeforeRedirectsRoute') {
     return null
-  } else if (route.__typename === 'AB') {
-    const cookieValue = Number(getCookieValue('useFrontend', cookies) ?? 'NaN')
-    const useFrontendNumber = Number.isNaN(cookieValue)
-      ? Math.random()
-      : cookieValue
-
-    const response = await fetchBackend({
-      request,
-      sentry,
-      route: {
-        __typename:
-          useFrontendNumber <= route.probability ? 'Frontend' : 'Legacy',
-        appendSubdomainToPath: true,
-        redirect: 'follow',
-        definite: false,
-      },
-    })
-
-    if (Number.isNaN(cookieValue)) {
-      setCookieUseFrontend(response, useFrontendNumber)
-    }
-
-    return response
   } else {
     return fetchBackend({ request, sentry, route })
   }
@@ -105,7 +86,7 @@ async function fetchBackend({
   })
 }
 
-async function getRoute(request: Request): Promise<RouteConfig | null> {
+function getRoute(request: Request): RouteConfig | null {
   const url = Url.fromRequest(request)
   const cookies = request.headers.get('Cookie')
 
@@ -114,71 +95,65 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
   const routeConfig = vercelFrontendProxy.getRoute(request)
 
   if (routeConfig?.__typename === 'Frontend' && !routeConfig.definite) {
-    if (getCookieValue('useFrontend', cookies) === 'always') {
-      return routeConfig
-    }
-
     if (
       url.hasContentApiParameters() ||
-      request.headers.get('X-From') === 'legacy-serlo.org'
+      request.headers.get('X-From') === 'legacy-serlo.org' ||
+      getCookieValue(useLegacyCookieName, cookies) === '1'
     ) {
       return {
         __typename: 'Legacy',
       }
     }
 
-    if (
-      (await url.isUuid()) ||
-      url.pathname === '/' ||
-      [
-        '/search',
-        '/spenden',
-        '/subscriptions/manage',
-        '/entity/unrevised',
-        '/user/settings',
-        '/mathe',
-        '/biologie',
-        '/nachhaltigkeit',
-        '/informatik',
-        '/chemie',
-        '/lerntipps',
-      ].includes(url.pathnameWithoutTrailingSlash) ||
-      url.pathname.startsWith('/license/detail') ||
-      url.pathname.startsWith('/entity/repository/history') ||
-      url.pathname.startsWith('/entity/repository/add-revision/') ||
-      url.pathname.startsWith('/event/history')
-    ) {
-      return {
-        __typename: 'AB',
-        probability: Number(global.FRONTEND_PROBABILITY),
-      }
-    }
+    // if (
+    //   (await url.isUuid()) ||
+    //   url.pathname === '/' ||
+    //   [
+    //     '/search',
+    //     '/spenden',
+    //     '/subscriptions/manage',
+    //     '/entity/unrevised',
+    //     '/user/settings',
+    //     '/mathe',
+    //     '/biologie',
+    //     '/nachhaltigkeit',
+    //     '/informatik',
+    //     '/chemie',
+    //     '/lerntipps',
+    //   ].includes(url.pathnameWithoutTrailingSlash) ||
+    //   url.pathname.startsWith('/license/detail') ||
+    //   url.pathname.startsWith('/entity/repository/history') ||
+    //   url.pathname.startsWith('/entity/repository/add-revision/') ||
+    //   url.pathname.startsWith('/event/history')
+    // ) {
+    //   return {
+    //     __typename: 'AB',
+    //     probability: 1,
+    //   }
+    // }
 
-    return null
+    return routeConfig
   } else {
     return routeConfig
   }
 }
 
-function createConfigurationResponse(message: string, useFrontend: number) {
+function createConfigurationResponse(message: string, useLegacyNumber: number) {
   const response = new Response(message)
 
-  setCookieUseFrontend(response, useFrontend)
+  setCookieUseLegacyFrontend(response, useLegacyNumber)
   response.headers.set('Refresh', '1; url=/')
 
   return response
 }
 
-function setCookieUseFrontend(res: Response, useFrontend: number) {
+function setCookieUseLegacyFrontend(res: Response, useLegacyNumber: number) {
   res.headers.append(
     'Set-Cookie',
-    `useFrontend=${useFrontend}; path=/; domain=.${global.DOMAIN}`
+    `${useLegacyCookieName}=${useLegacyNumber}; path=/; domain=.${
+      global.DOMAIN
+    } ${useLegacyNumber === 0 ? '; expires=Thu, 01 Jan 1970 00:00:00 GMT' : ''}`
   )
 }
 
-type RouteConfig = vercelFrontendProxy.RouteConfig | ABRoute
-
-interface ABRoute {
-  __typename: 'AB'
-  probability: number
-}
+type RouteConfig = vercelFrontendProxy.RouteConfig

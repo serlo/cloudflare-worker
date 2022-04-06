@@ -29,7 +29,3 @@ export enum Backend {
   Frontend = 'frontend',
   Legacy = 'legacy',
 }
-
-export function setupProbabilityFor(backend: Backend) {
-  global.FRONTEND_PROBABILITY = backend === Backend.Frontend ? '1' : '0'
-}

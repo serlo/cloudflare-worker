@@ -5,9 +5,9 @@ webpack_config = "webpack.config.js"
 
 [env.staging]
 kv-namespaces = [
-  { binding = "MAINTENANCE_KV", id = "3c3c25aba0b94b7e99f855f013f5b09c", preview_id = "3c3c25aba0b94b7e99f855f013f5b09c" },
-  { binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be", preview_id = "19f90dc8e6ff49cd8bc42f51346409be" },
-  { binding = "PATH_INFO_KV", id = "839198b2f0a242b491e5723a8c59b7e2", preview_id = "839198b2f0a242b491e5723a8c59b7e2" },
+  {binding = "MAINTENANCE_KV", id = "3c3c25aba0b94b7e99f855f013f5b09c", preview_id = "3c3c25aba0b94b7e99f855f013f5b09c"},
+  {binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be", preview_id = "19f90dc8e6ff49cd8bc42f51346409be"},
+  {binding = "PATH_INFO_KV", id = "839198b2f0a242b491e5723a8c59b7e2", preview_id = "839198b2f0a242b491e5723a8c59b7e2"},
 ]
 name = "serlo-staging"
 route = "*serlo-staging.dev/*"
@@ -17,16 +17,15 @@ zone_id = "0067b08b108fbcf88ddaeaae4ac3d6ac"
 ALLOW_AUTH_FROM_LOCALHOST = "true"
 API_ENDPOINT = "https://api.serlo-staging.dev/graphql"
 DOMAIN = "serlo-staging.dev"
-ENVIRONMENT = "staging"
 ENABLE_BASIC_AUTH = "true"
+ENVIRONMENT = "staging"
 FRONTEND_DOMAIN = "frontend-git-staging-serlo.vercel.app"
-FRONTEND_PROBABILITY = "1"
 
 [env.production]
 kv-namespaces = [
-  { binding = "MAINTENANCE_KV", id = "b1f17ebbe39c4fd9b49d1368ce225faa" },
-  { binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be" },
-  { binding = "PATH_INFO_KV", id = "c3412114bdb04cfd8a367ec5bad46173" },
+  {binding = "MAINTENANCE_KV", id = "b1f17ebbe39c4fd9b49d1368ce225faa"},
+  {binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be"},
+  {binding = "PATH_INFO_KV", id = "c3412114bdb04cfd8a367ec5bad46173"},
 ]
 name = "serlo-production"
 route = "*serlo.org/*"
@@ -36,7 +35,6 @@ zone_id = "1a4afa776acb2e40c3c8a135248328ae"
 ALLOW_AUTH_FROM_LOCALHOST = "false"
 API_ENDPOINT = "https://api.serlo.org/graphql"
 DOMAIN = "serlo.org"
-ENVIRONMENT = "production"
 ENABLE_BASIC_AUTH = "false"
+ENVIRONMENT = "production"
 FRONTEND_DOMAIN = "frontend.serlo.org"
-FRONTEND_PROBABILITY = "1"

@@ -41,7 +41,6 @@ declare global {
   var ENVIRONMENT: string
   var ENABLE_BASIC_AUTH: 'true' | 'false'
   var FRONTEND_DOMAIN: string
-  var FRONTEND_PROBABILITY: string
 }
 
 // for tests, not sure how to share above types
@@ -52,7 +51,6 @@ export interface Variables {
   ENVIRONMENT: string
   ENABLE_BASIC_AUTH: 'true' | 'false'
   FRONTEND_DOMAIN: string
-  FRONTEND_PROBABILITY: string
 }
 
 // KVs

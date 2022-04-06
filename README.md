@@ -72,14 +72,8 @@ MATOMO-OPT-OUT-FORM
 
 ## Frontend Proxy
 
-The cloudflare worker also provides an A-B-testing for the new frontend.
-The following variables define the behavior:
-
-- `FRONTEND_ALLOWED_TYPES`: List of resource types given by the Serlo API which can be redirected to the new frontend.
-- `FRONTEND_DOMAIN`: The domain of the new frontend.
-- `FRONTEND_PROBABILITY_MOBILE`: Probability that users with mobile devices are redirected to frontend (0-1).
-- `FRONTEND_PROBABILITY_DESKTOP`: Probability that users on desktop systems are redirected to frontend (0-1).
-- `FRONTEND_PROBABILITY_AUTHENTICATED`: Probability that authenticated users are redirected to frontend (0-1). Only works if `REDIRECT_AUTHENTICATED_USERS_TO_LEGACY_BACKEND` is `false`.
+The cloudflare worker redirects requests to the new frontend by default.
+For some paths or when the cookie `useLegacyFrontend` is set to `1` requests are directed to the legacy system.
 
 With the cookie `frontendDomain` you can override the variable of `FRONTEND_DOMAIN`.
 
