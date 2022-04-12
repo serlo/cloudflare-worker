@@ -21,7 +21,7 @@
  */
 import URL from 'core-js-pure/features/url'
 
-import { getPathInfo, isInstance } from '.'
+import { getPathInfo, isInstance, Instance } from '.'
 
 const contentApiParameters = [
   'contentOnly',
@@ -35,6 +35,10 @@ const contentApiParameters = [
   'hideFooter',
   'fullWidth',
 ]
+
+export const subjectStartPages: { [I in Instance]?: string[] } = {
+  de: ['/biologie', '/chemie', '/lerntipps', '/mathe', '/nachhaltigkeit'],
+}
 
 export class Url extends URL {
   public get subdomain(): string {
@@ -61,6 +65,17 @@ export class Url extends URL {
       .split('&')
       .map((parameterWithValue) => parameterWithValue.split('=')[0])
       .some((queryParameter) => contentApiParameters.includes(queryParameter))
+  }
+
+  public isSubjectStartPage() {
+    if (!isInstance(this.subdomain)) return false
+
+    const pathnames = subjectStartPages[this.subdomain]
+
+    return (
+      pathnames !== undefined &&
+      pathnames.includes(this.pathnameWithoutTrailingSlash)
+    )
   }
 
   public async isUuid() {
