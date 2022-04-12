@@ -113,23 +113,16 @@ describe('when request contains content api parameter', () => {
       pathname: '/1555?contentOnly',
     })
 
-    expect(response.status).toBe(200)
-    expect(await response.text()).toEqual(
-      expect.stringContaining('(no header)')
-    )
+    await expectFrontend(response)
   })
 
-  // TODO: return 301. could not find the reason so far
-  // test('handles trailing slash and chooses frontend', async () => {
-  //   const response = await currentTestEnvironment().fetch({
-  //     subdomain: 'en',
-  //     pathname: '/1555/?contentOnly',
-  //   })
-  //   expect(response.status).toBe(200)
-  //   expect(await response.text()).toEqual(
-  //     expect.stringContaining('(no header)')
-  //   )
-  // })
+  test('handles trailing slash and redirects', async () => {
+    const response = await currentTestEnvironment().fetch({
+      subdomain: 'en',
+      pathname: '/1555/?contentOnly',
+    })
+    expect(response.status).toBe(301)
+  })
 })
 
 describe('when request contains header X-From: legacy-serlo.org', () => {
