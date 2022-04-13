@@ -82,6 +82,8 @@ export function defaultFrontendServer(): RestResolver {
       content = 'Edit Page'
     } else if (req.url.pathname === '/en/event/history/user/1/arekkas') {
       content = 'arekkas'
+    } else if (req.url.pathname === '/en/content-only/1555') {
+      content = 'Article (no header)'
     } else if (
       ['/search', '/license/detail/1', '/taxonomy/term/create/10/10'].includes(
         pathname

@@ -96,25 +96,32 @@ test('removes trailing slashes and prepends language code when the backend is fr
 })
 
 describe('when request contains content api parameter', () => {
-  let response: Response
-
-  beforeEach(async () => {
+  beforeEach(() => {
     setupProbabilityFor(Backend.Frontend)
 
-    response = await currentTestEnvironment().fetch({
-      subdomain: 'en',
-      pathname: '/?contentOnly',
+    givenUuid({
+      id: 1555,
+      __typename: 'Article',
+      alias: '/1555',
+      instance: Instance.En,
     })
   })
 
-  test('chooses legacy backend', async () => {
-    await expectLegacy(response)
+  test('chooses frontend', async () => {
+    const response = await currentTestEnvironment().fetch({
+      subdomain: 'en',
+      pathname: '/1555?contentOnly',
+    })
+
+    await expectFrontend(response)
   })
 
-  test('does not set cookie with random number', () => {
-    expect(response.headers.get('Set-Cookie')).not.toEqual(
-      expect.stringContaining('useFrontend')
-    )
+  test('handles trailing slash and redirects', async () => {
+    const response = await currentTestEnvironment().fetch({
+      subdomain: 'en',
+      pathname: '/1555/?contentOnly',
+    })
+    expect(response.status).toBe(301)
   })
 })
 
