@@ -51,6 +51,7 @@ export async function frontendProxy(
   request: Request,
   sentryFactory: SentryFactory
 ): Promise<Response | null> {
+  const url = Url.fromRequest(request)
   const cookies = request.headers.get('Cookie')
   const sentry = sentryFactory.createReporter('frontend')
   const route = await getRoute(request)
@@ -62,8 +63,15 @@ export async function frontendProxy(
       ? Math.random()
       : cookieValue
 
+    let contentApiRequest = null
+
+    if (url.hasContentApiParameters()) {
+      url.pathname = '/content-only' + url.pathname
+      contentApiRequest = new Request(url.toString(), new Request(request))
+    }
+
     const response = await fetchBackend({
-      request,
+      request: contentApiRequest ?? request,
       sentry,
       route: {
         __typename:
@@ -118,10 +126,7 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
       return routeConfig
     }
 
-    if (
-      url.hasContentApiParameters() ||
-      request.headers.get('X-From') === 'legacy-serlo.org'
-    ) {
+    if (request.headers.get('X-From') === 'legacy-serlo.org') {
       return {
         __typename: 'Legacy',
       }
