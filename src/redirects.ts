@@ -38,7 +38,7 @@ const meetRedirects: Record<string, string | undefined> = {
   '/fundraising': 'uus-vjgu-ttr',
   '/maxsimon': 'jbx-bjba-qjh',
   '/hochschulmathe': 'oud-dpuy-swx',
-  '/lamatreffen ': 'unm-jesz-ibj',
+  '/lamatreffen': 'unm-jesz-ibj',
   '/plenum': 'unm-jesz-ibj',
   '/1': 'fxn-iprp-ezx',
   '/2': 'yku-aksd-fkk',
