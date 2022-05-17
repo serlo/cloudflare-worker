@@ -302,17 +302,18 @@ describe('special paths', () => {
   })
 
   test('/api/auth/* always resolves to frontend (and transfers request header to backend)', async () => {
+    const referer = env.createUrl({ subdomain: 'en', pathname: 'login' })
     const request = env.createRequest({
       subdomain: 'en',
       pathname: '/api/auth/login',
     })
-    request.headers.set('referer', env.createUrl({ subdomain: 'en' }))
+    request.headers.set('referer', referer)
 
     const response = await env.fetchRequest(request)
 
     expect(response.status).toBe(302)
     expect(response.headers.get('location')).toEqual(
-      expect.stringContaining(env.createUrl({ subdomain: 'hydra' }))
+      expect.stringContaining(encodeURIComponent(referer))
     )
     expect(response.headers.get('Set-Cookie')).not.toEqual(
       expect.stringContaining('useFrontend')
