@@ -1656,16 +1656,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cloudflare/workers-types@npm:^3.4.0":
-  version: 3.4.0
-  resolution: "@cloudflare/workers-types@npm:3.4.0"
-  checksum: 03294ec6ce0494dc0e8a07fa9c2eb1edee674538d8bbf2bf21bbb4e05b23759e8d12bab6e938f558f0ea8d258b9f348145131b2a33816a6a62429f69bb927070
+"@cloudflare/workers-types@npm:^3.10.0":
+  version: 3.10.0
+  resolution: "@cloudflare/workers-types@npm:3.10.0"
+  checksum: 0d59f0cfc8058c48083dec883e10c06972541abab7248a2da780ff04c3f472b101f7aafe05528fffe75a0223c31ab905927705afc95635efc9b851ba41ef085d
   languageName: node
   linkType: hard
 
-"@cloudflare/wrangler@npm:^1.19.11":
-  version: 1.19.11
-  resolution: "@cloudflare/wrangler@npm:1.19.11"
+"@cloudflare/wrangler@npm:^1.19.12":
+  version: 1.19.12
+  resolution: "@cloudflare/wrangler@npm:1.19.12"
   dependencies:
     axios: ^0.21.1
     rimraf: ^3.0.2
@@ -1673,7 +1673,7 @@ __metadata:
   bin:
     wrangler: run-wrangler.js
     wrangler1: run-wrangler.js
-  checksum: b6b598daf22072fd811f6e9c0c3124cb467748930ecff51ede9b7800ea69d37b14a26cc5ea0d1062f737278ae900c70dbf1d7826dc94f3de1447e43ca4203df0
+  checksum: 40cbc1141046a4d7183a79ef61240065ee22d6f643b2a45e31c1e966b6da41e3b81e8a1e3745730a0f50123a0a2b863122e41f1c659e81fa3e67814410689af2
   languageName: node
   linkType: hard
 
@@ -2281,55 +2281,55 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/core@npm:6.11.0":
-  version: 6.11.0
-  resolution: "@sentry/core@npm:6.11.0"
+"@sentry/core@npm:6.19.6":
+  version: 6.19.6
+  resolution: "@sentry/core@npm:6.19.6"
   dependencies:
-    "@sentry/hub": 6.11.0
-    "@sentry/minimal": 6.11.0
-    "@sentry/types": 6.11.0
-    "@sentry/utils": 6.11.0
+    "@sentry/hub": 6.19.6
+    "@sentry/minimal": 6.19.6
+    "@sentry/types": 6.19.6
+    "@sentry/utils": 6.19.6
     tslib: ^1.9.3
-  checksum: 8c85cc7570186d7ff33fbc58a0e1151150ddaeb06f7407941642099d4798e511509a8566cf4dbc8a7ed73d7b3c93ba6640e5acea12fb86ffe5d79e8576fdaf2c
+  checksum: b714f12c8a59db845cbc05074818725dd37d0a5f31f2abdb12a07c1b7f0a759e8d876b1a6e58e5c4af8a593754bb8b7c66810d3e59a7cf7ead76f439b4802105
   languageName: node
   linkType: hard
 
-"@sentry/hub@npm:6.11.0":
-  version: 6.11.0
-  resolution: "@sentry/hub@npm:6.11.0"
+"@sentry/hub@npm:6.19.6":
+  version: 6.19.6
+  resolution: "@sentry/hub@npm:6.19.6"
   dependencies:
-    "@sentry/types": 6.11.0
-    "@sentry/utils": 6.11.0
+    "@sentry/types": 6.19.6
+    "@sentry/utils": 6.19.6
     tslib: ^1.9.3
-  checksum: ba602dee9e267bf6887ff9b98a763782f501367f782fe4a0e438ca73cfd66b58340989bd849d7a01f3afd78ad9dae4f679b4f42ad3bd5c8ccecd70ae6003d94f
+  checksum: 150fdcb06c3107016aedf880e7c806aa8279a1d91c2651d9e3439bc752335ce5eec5ac8af4e515b73d29ec5a9f4bc717f7537245cb3675be89f15e01195a21a8
   languageName: node
   linkType: hard
 
-"@sentry/minimal@npm:6.11.0":
-  version: 6.11.0
-  resolution: "@sentry/minimal@npm:6.11.0"
+"@sentry/minimal@npm:6.19.6":
+  version: 6.19.6
+  resolution: "@sentry/minimal@npm:6.19.6"
   dependencies:
-    "@sentry/hub": 6.11.0
-    "@sentry/types": 6.11.0
+    "@sentry/hub": 6.19.6
+    "@sentry/types": 6.19.6
     tslib: ^1.9.3
-  checksum: b2a53e9d870ead288c2d7c9d36fb383be137f47e6046c038bde846fc2fcb09e94c3907c06ee5fd8dd3e0add29ac5ddb7524aa0cb39b6a5f3741f3c916a996a9f
+  checksum: f6ee93095076b4ec2906fa6e796b91b461e33ed172222bc717e5621a7042c74eb2358e0b7c4b68079a60ae790c19de103f14207058a986eb0612fc79dcbba4c8
   languageName: node
   linkType: hard
 
-"@sentry/types@npm:6.11.0":
-  version: 6.11.0
-  resolution: "@sentry/types@npm:6.11.0"
-  checksum: b3a8cb4a4d0150b2515bc7bcfb05c8f6f496490991152eae7fab815a81cb3295503c6124f44a09bda4c516d7adfdbe9610348927615edb537ece3d5add9924e6
+"@sentry/types@npm:6.19.6":
+  version: 6.19.6
+  resolution: "@sentry/types@npm:6.19.6"
+  checksum: a1564dabb657bf44a6ee380eb58dabcc6ea1c21b4060127469f8d39c76376d0e3f8c6b3fa27193fc50d9f1415ce63312fc3926d271918bba3e75f1f39691223a
   languageName: node
   linkType: hard
 
-"@sentry/utils@npm:6.11.0":
-  version: 6.11.0
-  resolution: "@sentry/utils@npm:6.11.0"
+"@sentry/utils@npm:6.19.6":
+  version: 6.19.6
+  resolution: "@sentry/utils@npm:6.19.6"
   dependencies:
-    "@sentry/types": 6.11.0
+    "@sentry/types": 6.19.6
     tslib: ^1.9.3
-  checksum: 37d68df464399c4a3946f3e2b5b4ffb2fccaf60c3005c50911b0b97543ca30a55c6e9093363244b7b072706e3c34b6c718012da24961f3b954f9c552ec5fc734
+  checksum: 73a582b6827ea519f8a352f3bdc8b0f22fbbced99506af56f566a6567ad0d6df2f8c3e39532f8588bdccb93f9bf03289681ae90404fd1dd9904c3175d314136a
   languageName: node
   linkType: hard
 
@@ -2338,8 +2338,8 @@ __metadata:
   resolution: "@serlo/serlo.org-cloudflare-worker@workspace:."
   dependencies:
     "@babel/core": ^7.17.8
-    "@cloudflare/workers-types": ^3.4.0
-    "@cloudflare/wrangler": ^1.19.11
+    "@cloudflare/workers-types": ^3.10.0
+    "@cloudflare/wrangler": ^1.19.12
     "@iarna/toml": ^2.2.5
     "@splish-me/copyright-headers": ^0.0.2
     "@storybook/preact": ^6.4.20
@@ -2348,7 +2348,7 @@ __metadata:
     "@types/core-js": ^2.5.5
     "@types/iarna__toml": ^2.0.2
     "@types/jest": ^27.4.1
-    "@types/luxon": ^2.3.1
+    "@types/luxon": ^2.3.2
     "@types/marked": ^4.0.3
     "@types/node": ^16.11.26
     "@types/rimraf": ^3.0.2
@@ -2356,31 +2356,31 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^5.18.0
     "@typescript-eslint/parser": ^5.18.0
     babel-loader: ^8.2.4
-    core-js-pure: ^3.21.1
+    core-js-pure: ^3.22.5
     cross-env: ^7.0.3
     eslint: ^8.12.0
     eslint-config-prettier: ^8.5.0
     eslint-plugin-import: ^2.25.4
     eslint-plugin-react: ^7.29.4
-    fp-ts: ^2.11.9
+    fp-ts: ^2.12.1
     glob: ^7.2.0
     io-ts: ^2.2.16
     jest: ^27.5.1
-    jose: ^4.6.0
-    luxon: ^2.3.1
-    marked: ^4.0.12
+    jose: ^4.8.1
+    luxon: ^2.4.0
+    marked: ^4.0.15
     msw: ^0.39.2
     node-fetch: 3.0.0-beta.9
-    nodemon: ^2.0.15
+    nodemon: ^2.0.16
     npm-run-all: ^4.1.5
-    preact: ^10.7.0
-    preact-render-to-string: ^5.1.20
+    preact: ^10.7.2
+    preact-render-to-string: ^5.2.0
     prettier: ^2.6.2
     prettier-plugin-packagejson: ^2.2.17
     prettier-plugin-sh: ^0.10.0
     rimraf: ^3.0.2
     sanitize-html: ^2.7.0
-    toucan-js: ^2.5.0
+    toucan-js: ^2.6.0
     ts-jest: ^27.1.4
     ts-loader: ^8.3.0
     ts-node: ^10.7.0
@@ -3291,7 +3291,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/cookie@npm:0.4.1, @types/cookie@npm:^0.4.1":
+"@types/cookie@npm:0.5.0":
+  version: 0.5.0
+  resolution: "@types/cookie@npm:0.5.0"
+  checksum: c0ea731cfe2f08dbc8851fa27212e5b34dadb871c14892d309b0970a158d36bf3d20324847263e0698ce6b1c3a5f151bd4fe45c0f9fc3243d1c8115e41d0e1ce
+  languageName: node
+  linkType: hard
+
+"@types/cookie@npm:^0.4.1":
   version: 0.4.1
   resolution: "@types/cookie@npm:0.4.1"
   checksum: 3275534ed69a76c68eb1a77d547d75f99fedc80befb75a3d1d03662fb08d697e6f8b1274e12af1a74c6896071b11510631ba891f64d30c78528d0ec45a9c1a18
@@ -3431,10 +3438,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/luxon@npm:^2.3.1":
-  version: 2.3.1
-  resolution: "@types/luxon@npm:2.3.1"
-  checksum: e75928929aaf4e8796dcbdccd23a2dda029f637db01f5b06c7a72033ae106966df716e179ee41711280d782bd851228810643bce9bffc4ff62ae906e94ee1df2
+"@types/luxon@npm:^2.3.2":
+  version: 2.3.2
+  resolution: "@types/luxon@npm:2.3.2"
+  checksum: b9fe79118681f4bb9f2e37696a7df992a82683ba4448e7ad1af8cc241443ffc64ef08fdeaad749de9e6259b42b0d4b6540d7e880bca39bb504e0f3863d503c98
   languageName: node
   linkType: hard
 
@@ -3665,10 +3672,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/uuid@npm:8.3.1":
-  version: 8.3.1
-  resolution: "@types/uuid@npm:8.3.1"
-  checksum: b41bdc5e86c6f0f1899306be10455636da0f2168c9489b869edd6837ddeb7c0e501b1ff7d857402462986bada2a379125743dd895fa801d03437cd632116a373
+"@types/uuid@npm:8.3.4":
+  version: 8.3.4
+  resolution: "@types/uuid@npm:8.3.4"
+  checksum: 6f11f3ff70f30210edaa8071422d405e9c1d4e53abbe50fdce365150d3c698fe7bbff65c1e71ae080cbfb8fded860dbb5e174da96fdbbdfcaa3fb3daa474d20f
   languageName: node
   linkType: hard
 
@@ -5929,6 +5936,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cookie@npm:0.5.0":
+  version: 0.5.0
+  resolution: "cookie@npm:0.5.0"
+  checksum: 1f4bd2ca5765f8c9689a7e8954183f5332139eb72b6ff783d8947032ec1fdf43109852c178e21a953a30c0dd42257828185be01b49d1eb1a67fd054ca588a180
+  languageName: node
+  linkType: hard
+
 "cookie@npm:^0.4.2":
   version: 0.4.2
   resolution: "cookie@npm:0.4.2"
@@ -5983,10 +5997,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js-pure@npm:^3.21.1":
-  version: 3.21.1
-  resolution: "core-js-pure@npm:3.21.1"
-  checksum: 00a5dff599b7fb0b30746a638b9d0edbdc0df24ed1580ca56be595fbe3c78c375d37fc4e1bff23627109229702c9ee8ea2587a66b8280eb33b85160aa4e401e9
+"core-js-pure@npm:^3.22.5":
+  version: 3.22.5
+  resolution: "core-js-pure@npm:3.22.5"
+  checksum: 923c7391f20dcd6fae861a2c9cb92caa0158b9d65fd8ff24eb273814cdf84df4b409fe4cf2c3fcff609daa1a408c64ba752c28f030d8bc31ac1128de8616ad1a
   languageName: node
   linkType: hard
 
@@ -7839,10 +7853,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fp-ts@npm:^2.11.9":
-  version: 2.11.9
-  resolution: "fp-ts@npm:2.11.9"
-  checksum: bcab4b9d97f9b77fa7283d5834fd847e58955067d5560eb0a9316900d6c92e959d8109038caf78ffb8ba93015ba8044a7a922c5acae8ca2fda4067f7e4e24bab
+"fp-ts@npm:^2.12.1":
+  version: 2.12.1
+  resolution: "fp-ts@npm:2.12.1"
+  checksum: 1e20e6b468191640a5f83cd52ccbfb361d27a6afbc47230870e63094b569cd9ae8763d0b9dee50eaed568bce8dd72e32ad1d695161bda8ec73e0296a02359832
   languageName: node
   linkType: hard
 
@@ -10183,10 +10197,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jose@npm:^4.6.0":
-  version: 4.6.0
-  resolution: "jose@npm:4.6.0"
-  checksum: 7f48cb030c9e8586e825ad5cc71e792f7b71b420afd3c45913e0719fd4abe6a756179c732604d42fbbb53c64b63f78818669599eeef11c988c0c34dd1178fe43
+"jose@npm:^4.8.1":
+  version: 4.8.1
+  resolution: "jose@npm:4.8.1"
+  checksum: c3e239ccbb07863c28250aedea3e734e4a3b26abc1cbf6acf333381db5ef31e5d1eeced791299076f13b24f41b4b463a7a1e4eaa0079ae0febf9bfd60acb555a
   languageName: node
   linkType: hard
 
@@ -10700,10 +10714,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"luxon@npm:^2.3.1":
-  version: 2.3.1
-  resolution: "luxon@npm:2.3.1"
-  checksum: ce5eec873a0172a0956618531e28010e8d8319a8b3a836b893d0f92239413a1fc5f77841ca24988e27bd61e8b2748e160e9dfcb13e92d7f031c1e31ad1c8ae91
+"luxon@npm:^2.4.0":
+  version: 2.4.0
+  resolution: "luxon@npm:2.4.0"
+  checksum: 6071028d65cc3d3bdab5e6a3995dd97411c92bb3b3163a02deb7b7014318ad3a6fd750ae77131c42141b717c14aef8880d3130f265281d500ef2365f7265b3f3
   languageName: node
   linkType: hard
 
@@ -10814,12 +10828,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"marked@npm:^4.0.12":
-  version: 4.0.12
-  resolution: "marked@npm:4.0.12"
+"marked@npm:^4.0.15":
+  version: 4.0.15
+  resolution: "marked@npm:4.0.15"
   bin:
     marked: bin/marked.js
-  checksum: 7575117f85a8986652f3ac8b8a7b95056c4c5fce01a1fc76dc4c7960412cb4c9bd9da8133487159b6b3ff84f52b543dfe9a36f826a5f358892b5ec4b6824f192
+  checksum: 8992c37669b872846a226f90dc5a8fa1e5d56bba6e32fa36270fd3d327dd9e11fedc5b47b68de611dcdce1573d30fbadf61bf23f86c1a679e5385424d7b9d9f3
   languageName: node
   linkType: hard
 
@@ -11484,9 +11498,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemon@npm:^2.0.15":
-  version: 2.0.15
-  resolution: "nodemon@npm:2.0.15"
+"nodemon@npm:^2.0.16":
+  version: 2.0.16
+  resolution: "nodemon@npm:2.0.16"
   dependencies:
     chokidar: ^3.5.2
     debug: ^3.2.7
@@ -11500,7 +11514,7 @@ __metadata:
     update-notifier: ^5.1.0
   bin:
     nodemon: bin/nodemon.js
-  checksum: 0569b09b713fdcc76f06734d7cc106950e69e02069cbf44bda3fae8d266926bdfa003aeddd22f8fcdf46ea6ff51ca64f5528f8006536e79820a26e648ef346cf
+  checksum: ff818aa91b283bd0f1f6cfb8fdc9b5c3e74d5efa0cb72276dc242b742dc35d3f0720d35d99dbe85ecf6df7185f083ef9b1f7908094e43fd4e2508b6805d644dc
   languageName: node
   linkType: hard
 
@@ -12489,21 +12503,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"preact-render-to-string@npm:^5.1.20":
-  version: 5.1.20
-  resolution: "preact-render-to-string@npm:5.1.20"
+"preact-render-to-string@npm:^5.2.0":
+  version: 5.2.0
+  resolution: "preact-render-to-string@npm:5.2.0"
   dependencies:
     pretty-format: ^3.8.0
   peerDependencies:
     preact: ">=10"
-  checksum: 69e36751415cd81b68ac23811122e674f761efca0f5365b5ac90e62498ee1f4d25abe718b6c21f52faa8764582a667378fe1817dadba69ad24259033fddd6d21
+  checksum: aae92b67da07c062eee682fc17081b174ce25201dd985497cb02cc3fe5892fc4264a5e967ff32d6ca747d0e40490a0c0c19eef32bea743fd8ea7c23d2e886886
   languageName: node
   linkType: hard
 
-"preact@npm:^10.7.0":
-  version: 10.7.0
-  resolution: "preact@npm:10.7.0"
-  checksum: fd0c0164379279f1b381c1438ef29bb56aaf55965ff5e72fce6b0d8e06aa1c621f685c17f3e1c969e0c609df6053106e4f0463c737f6dcc1fe98c8e24fa7a012
+"preact@npm:^10.7.2":
+  version: 10.7.2
+  resolution: "preact@npm:10.7.2"
+  checksum: 2f0655e0430f1c6927b40cb4abffb2c0ee4fe63e3201d44e37d0992c0ab534346f206cf23c0405572b70908e3eba2f7f60ab8e4531f409ebcbc35af06920cd60
   languageName: node
   linkType: hard
 
@@ -14985,20 +14999,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"toucan-js@npm:^2.5.0":
-  version: 2.5.0
-  resolution: "toucan-js@npm:2.5.0"
+"toucan-js@npm:^2.6.0":
+  version: 2.6.0
+  resolution: "toucan-js@npm:2.6.0"
   dependencies:
-    "@sentry/core": 6.11.0
-    "@sentry/hub": 6.11.0
-    "@sentry/types": 6.11.0
-    "@sentry/utils": 6.11.0
-    "@types/cookie": 0.4.1
-    "@types/uuid": 8.3.1
-    cookie: 0.4.1
+    "@sentry/core": 6.19.6
+    "@sentry/hub": 6.19.6
+    "@sentry/types": 6.19.6
+    "@sentry/utils": 6.19.6
+    "@types/cookie": 0.5.0
+    "@types/uuid": 8.3.4
+    cookie: 0.5.0
     stacktrace-js: 2.0.2
     uuid: 8.3.2
-  checksum: 2de1c84bee4dad30289391bb933badfa6af2d58f8363b30d7729403375178199b5a3273096f58f873fae150e90ac119ab4bce2271043a763539a813e70dca45c
+  checksum: 874d0df7f1b4af0e9db978c5e71e1cb485b27f60bfc6899b47eaa1fbf98e85e2729b4311c38e22879a1c61557b0e3a100bdc62500aed807d5f78fa5200eb51f6
   languageName: node
   linkType: hard
 
