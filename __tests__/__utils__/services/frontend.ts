@@ -52,7 +52,7 @@ export function defaultFrontendServer(): RestResolver {
 
       return res(
         ctx.status(302),
-        ctx.set('location', 'https://hydra.serlo.local/' + origin)
+        ctx.set('location', 'https://hydra.serlo.localhost/' + origin)
       )
     }
 
