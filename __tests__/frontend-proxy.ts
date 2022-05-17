@@ -84,7 +84,9 @@ describe('returned response set cookie with calculated random number', () => {
     const response = await env.fetch({ subdomain: 'en', pathname: '/math' })
 
     const cookieHeader = response.headers.get('Set-Cookie')
-    expect(cookieHeader).toBe('useFrontend=0.25; path=/; domain=.serlo.local')
+    expect(cookieHeader).toBe(
+      'useFrontend=0.25; path=/; domain=.serlo.localhost'
+    )
   })
 })
 
