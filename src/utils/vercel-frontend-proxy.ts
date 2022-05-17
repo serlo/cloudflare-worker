@@ -150,7 +150,7 @@ export function getRoute(request: Request): RouteConfig | null {
   }
 
   if (
-    '/discussions' === url.pathnameWithoutTrailingSlash &&
+    '/backend' === url.pathnameWithoutTrailingSlash &&
     global.ENVIRONMENT === 'staging'
   ) {
     return {
