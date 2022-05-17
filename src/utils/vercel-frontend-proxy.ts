@@ -149,6 +149,18 @@ export function getRoute(request: Request): RouteConfig | null {
     }
   }
 
+  if (
+    '/discussions' === url.pathnameWithoutTrailingSlash &&
+    global.ENVIRONMENT === 'staging'
+  ) {
+    return {
+      __typename: 'Frontend',
+      redirect: 'follow',
+      appendSubdomainToPath: true,
+      definite: true,
+    }
+  }
+
   return {
     __typename: 'Frontend',
     redirect: 'follow',
