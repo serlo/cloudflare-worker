@@ -142,6 +142,7 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
         '/entity/unrevised',
         '/user/settings',
         '/discussions',
+        '/backend',
         '/mathe',
         '/biologie',
         '/nachhaltigkeit',
