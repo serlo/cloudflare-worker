@@ -77,3 +77,17 @@ test('Disallow robots in staging', async () => {
 
   expect(await response.text()).toBe('User-agent: *\nDisallow: /\n')
 })
+
+test('Return explicit robots rules in production', async () => {
+  global.DOMAIN = 'serlo.org'
+  const env = currentTestEnvironmentWhen(
+    (config) => config.DOMAIN === 'serlo.org'
+  )
+
+  const request = new Request('https://de.serlo.org/robots.txt')
+  const response = await env.fetchRequest(request)
+  const text = await response.text()
+
+  expect(text).toContain('User-agent: *')
+  expect(text).toContain('Disallow: /backend')
+})
