@@ -122,7 +122,7 @@ function robotsTxt(request: Request) {
   if (url.pathname !== '/robots.txt') return null
 
   return new Response(
-    url.domain === 'serlo.org'
+    global.ENVIRONMENT === 'production'
       ? robotsProduction
       : 'User-agent: *\nDisallow: /\n'
   )
