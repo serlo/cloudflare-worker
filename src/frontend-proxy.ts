@@ -142,6 +142,8 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
         '/entity/unrevised',
         '/user/settings',
         '/discussions',
+        '/backend',
+        '/uuid/recycle-bin',
         '/mathe',
         '/biologie',
         '/nachhaltigkeit',
@@ -152,6 +154,10 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
       url.pathname.startsWith('/license/detail') ||
       url.pathname.startsWith('/entity/repository/history') ||
       url.pathname.startsWith('/entity/repository/add-revision/') ||
+      url.pathname.startsWith('/entity/taxonomy/update/') ||
+      url.pathname.startsWith('/entity/license/update/') ||
+      url.pathname.startsWith('/taxonomy/term/move/batch/') ||
+      url.pathname.startsWith('/taxonomy/term/copy/batch/') ||
       url.pathname.startsWith('/event/history')
     ) {
       return {
