@@ -19,6 +19,7 @@
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
+import { robotsProduction } from '../__fixtures__/robots'
 import { api } from './api'
 import { edtrIoStats } from './are-we-edtr-io-yet'
 import { auth } from './auth'
@@ -61,7 +62,7 @@ export async function handleFetchEvent(event: FetchEvent): Promise<Response> {
       (await legalPages(request)) ||
       (await quickbarProxy(request, sentryFactory)) ||
       (await pdfProxy(request, sentryFactory)) ||
-      stagingRobots(request) ||
+      robotsTxt(request) ||
       (await frontendSpecialPaths(request, sentryFactory)) ||
       (await lenabiSpecialPaths(request)) ||
       sentryHelloWorld(request, sentryFactory) ||
@@ -116,14 +117,15 @@ async function enforceHttps(request: Request) {
   return Promise.resolve(url.toRedirect())
 }
 
-function stagingRobots(request: Request) {
+function robotsTxt(request: Request) {
   const url = Url.fromRequest(request)
+  if (url.pathname !== '/robots.txt') return null
 
-  if (url.domain === 'serlo-staging.dev' && url.pathname === '/robots.txt') {
-    return new Response('User-agent: *\nDisallow: /\n')
-  } else {
-    return null
-  }
+  return new Response(
+    global.ENVIRONMENT === 'production'
+      ? robotsProduction
+      : 'User-agent: *\nDisallow: /\n'
+  )
 }
 
 async function semanticFileNames(request: Request) {
