@@ -158,6 +158,7 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
       url.pathname.startsWith('/entity/license/update/') ||
       url.pathname.startsWith('/taxonomy/term/move/batch/') ||
       url.pathname.startsWith('/taxonomy/term/copy/batch/') ||
+      url.pathname.startsWith('/taxonomy/term/sort/entities/') ||
       url.pathname.startsWith('/event/history')
     ) {
       return {
