@@ -143,6 +143,7 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
         '/user/settings',
         '/discussions',
         '/backend',
+        '/pages',
         '/uuid/recycle-bin',
         '/mathe',
         '/biologie',
