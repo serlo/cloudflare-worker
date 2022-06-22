@@ -69,4 +69,5 @@ interface AbstractUuid<Typename extends string> {
   instance?: Instance
   content?: string
   legacyObject?: { alias: string }
+  trashed?: boolean
 }

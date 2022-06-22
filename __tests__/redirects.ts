@@ -425,4 +425,33 @@ describe('redirects to current path of an resource', () => {
     })
     expectToBeRedirectTo(response, target, 301)
   })
+
+  test('redirects to article when old comment link is requested', async () => {
+    const response = await env.fetch({
+      subdomain: 'de',
+      pathname: '/discussion/65395',
+    })
+
+    const target = env.createUrl({ subdomain: 'de', pathname: '/65395' })
+
+    expectToBeRedirectTo(response, target, 301)
+  })
+
+  test('redirects to error when comment is deleted', async () => {
+    givenUuid({
+      id: 65395,
+      __typename: 'Comment',
+      alias: '/mathe/65395/65395',
+      trashed: true,
+      legacyObject: { alias: '/mathe/1573/vektor' },
+    })
+
+    const response = await env.fetch({ subdomain: 'de', pathname: '/65395' })
+
+    const target = env.createUrl({
+      subdomain: 'de',
+      pathname: '/error/deleted/Comment',
+    })
+    expectToBeRedirectTo(response, target, 301)
+  })
 })
