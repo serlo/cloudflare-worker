@@ -160,7 +160,8 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
       url.pathname.startsWith('/taxonomy/term/move/batch/') ||
       url.pathname.startsWith('/taxonomy/term/copy/batch/') ||
       url.pathname.startsWith('/taxonomy/term/sort/entities/') ||
-      url.pathname.startsWith('/event/history')
+      url.pathname.startsWith('/event/history') ||
+      url.pathname.startsWith('/error/deleted')
     ) {
       return {
         __typename: 'AB',
