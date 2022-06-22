@@ -149,6 +149,17 @@ export async function redirects(request: Request) {
     }
   }
 
+  if (isInstance(url.subdomain)) {
+    // support for legacy links to comment that are still used in mails
+    // `/discussion/{id}`
+    // can be deleted after we move the mailings
+    const match = /^\/discussion\/(\d+)$/.exec(url.pathname)
+    if (match) {
+      url.pathname = `/${match[1]}`
+      return url.toRedirect(301)
+    }
+  }
+
   if (
     isInstance(url.subdomain) &&
     request.headers.get('X-Requested-With') !== 'XMLHttpRequest'
