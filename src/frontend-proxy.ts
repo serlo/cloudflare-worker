@@ -132,6 +132,18 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
       }
     }
 
+    if (global.ENVIRONMENT === 'staging') {
+      if (
+        url.pathnameWithoutTrailingSlash === '/pages' ||
+        url.pathname.startsWith('/taxonomy/term/sort/entities/')
+      ) {
+        return {
+          __typename: 'AB',
+          probability: Number(global.FRONTEND_PROBABILITY),
+        }
+      }
+    }
+
     if (
       (await url.isUuid()) ||
       url.pathname === '/' ||
