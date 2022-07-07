@@ -2375,9 +2375,9 @@ __metadata:
     npm-run-all: ^4.1.5
     preact: ^10.7.2
     preact-render-to-string: ^5.2.0
-    prettier: ^2.6.2
+    prettier: ^2.7.1
     prettier-plugin-packagejson: ^2.2.18
-    prettier-plugin-sh: ^0.11.0
+    prettier-plugin-sh: ^0.12.6
     rimraf: ^3.0.2
     sanitize-html: ^2.7.0
     toucan-js: ^2.6.0
@@ -12582,14 +12582,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier-plugin-sh@npm:^0.11.0":
-  version: 0.11.0
-  resolution: "prettier-plugin-sh@npm:0.11.0"
+"prettier-plugin-sh@npm:^0.12.6":
+  version: 0.12.6
+  resolution: "prettier-plugin-sh@npm:0.12.6"
   dependencies:
     mvdan-sh: ^0.10.1
   peerDependencies:
     prettier: ^2.0.0
-  checksum: c7821082507c849f4a7d915cb9ec4ad1e25ac787d3aae3937901cd4d4b8faf00a6b2f2ccbc7e91ca92c2f32bbb00be9d324ca01002bbb843da684ba9a95540b5
+  checksum: ad296792b25f51665e3527e687891f41c7289a84bf11293a76300114d33544bcaa30d6a60ab6b89d134725fd4fa1b947432737d4042dbd27f80943ee0de54c4b
   languageName: node
   linkType: hard
 
@@ -12602,12 +12602,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^2.6.2":
-  version: 2.6.2
-  resolution: "prettier@npm:2.6.2"
+"prettier@npm:^2.7.1":
+  version: 2.7.1
+  resolution: "prettier@npm:2.7.1"
   bin:
     prettier: bin-prettier.js
-  checksum: 48d08dde8e9fb1f5bccdd205baa7f192e9fc8bc98f86e1b97d919de804e28c806b0e6cc685e4a88211aa7987fa9668f30baae19580d87ced3ed0f2ec6572106f
+  checksum: 55a4409182260866ab31284d929b3cb961e5fdb91fe0d2e099dac92eaecec890f36e524b4c19e6ceae839c99c6d7195817579cdffc8e2c80da0cb794463a748b
   languageName: node
   linkType: hard
 
