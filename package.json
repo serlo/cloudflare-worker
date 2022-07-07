@@ -40,7 +40,7 @@
     "jose": "^4.8.3",
     "luxon": "^2.4.0",
     "marked": "^4.0.17",
-    "preact": "^10.7.2",
+    "preact": "^10.9.0",
     "preact-render-to-string": "^5.2.0",
     "sanitize-html": "^2.7.0",
     "toucan-js": "^2.6.0"
