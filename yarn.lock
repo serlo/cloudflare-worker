@@ -2356,7 +2356,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^5.18.0
     "@typescript-eslint/parser": ^5.18.0
     babel-loader: ^8.2.4
-    core-js-pure: ^3.22.5
+    core-js-pure: ^3.23.3
     cross-env: ^7.0.3
     eslint: ^8.12.0
     eslint-config-prettier: ^8.5.0
@@ -2366,18 +2366,18 @@ __metadata:
     glob: ^8.0.3
     io-ts: ^2.2.16
     jest: ^27.5.1
-    jose: ^4.8.1
+    jose: ^4.8.3
     luxon: ^2.4.0
-    marked: ^4.0.15
+    marked: ^4.0.17
     msw: ^0.39.2
     node-fetch: 3.0.0-beta.9
-    nodemon: ^2.0.16
+    nodemon: ^2.0.18
     npm-run-all: ^4.1.5
     preact: ^10.7.2
     preact-render-to-string: ^5.2.0
-    prettier: ^2.6.2
+    prettier: ^2.7.1
     prettier-plugin-packagejson: ^2.2.18
-    prettier-plugin-sh: ^0.11.0
+    prettier-plugin-sh: ^0.12.6
     rimraf: ^3.0.2
     sanitize-html: ^2.7.0
     toucan-js: ^2.6.0
@@ -6006,10 +6006,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js-pure@npm:^3.22.5":
-  version: 3.22.5
-  resolution: "core-js-pure@npm:3.22.5"
-  checksum: 923c7391f20dcd6fae861a2c9cb92caa0158b9d65fd8ff24eb273814cdf84df4b409fe4cf2c3fcff609daa1a408c64ba752c28f030d8bc31ac1128de8616ad1a
+"core-js-pure@npm:^3.23.3":
+  version: 3.23.3
+  resolution: "core-js-pure@npm:3.23.3"
+  checksum: 09a477a56963ca4409ca383d36429ea3b51b658ff85e94331a510543c77c4d1b44cb6b305b0f185d729eb059c71f1289c62fdec6371ff46ce838a16988cdcb2e
   languageName: node
   linkType: hard
 
@@ -10219,10 +10219,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jose@npm:^4.8.1":
-  version: 4.8.1
-  resolution: "jose@npm:4.8.1"
-  checksum: c3e239ccbb07863c28250aedea3e734e4a3b26abc1cbf6acf333381db5ef31e5d1eeced791299076f13b24f41b4b463a7a1e4eaa0079ae0febf9bfd60acb555a
+"jose@npm:^4.8.3":
+  version: 4.8.3
+  resolution: "jose@npm:4.8.3"
+  checksum: a4a03d329d3611696d94a81df06e7fe160cef987da032ecc9e0a9d1e5e751b5101d1657eed16ead5f1905c9c2009d48820538412af4e5257f205a8754dd09d31
   languageName: node
   linkType: hard
 
@@ -10850,12 +10850,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"marked@npm:^4.0.15":
-  version: 4.0.15
-  resolution: "marked@npm:4.0.15"
+"marked@npm:^4.0.17":
+  version: 4.0.17
+  resolution: "marked@npm:4.0.17"
   bin:
     marked: bin/marked.js
-  checksum: 8992c37669b872846a226f90dc5a8fa1e5d56bba6e32fa36270fd3d327dd9e11fedc5b47b68de611dcdce1573d30fbadf61bf23f86c1a679e5385424d7b9d9f3
+  checksum: 33a3c43a20b47bddaf045a59bfc7c3d41cc321931cc663ed231ca3b5b3b195fb2ac2973e687c2afd65b79539c14619baa07d19793f70130160f0af80c06d9b3a
   languageName: node
   linkType: hard
 
@@ -11527,9 +11527,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemon@npm:^2.0.16":
-  version: 2.0.16
-  resolution: "nodemon@npm:2.0.16"
+"nodemon@npm:^2.0.18":
+  version: 2.0.18
+  resolution: "nodemon@npm:2.0.18"
   dependencies:
     chokidar: ^3.5.2
     debug: ^3.2.7
@@ -11543,7 +11543,7 @@ __metadata:
     update-notifier: ^5.1.0
   bin:
     nodemon: bin/nodemon.js
-  checksum: ff818aa91b283bd0f1f6cfb8fdc9b5c3e74d5efa0cb72276dc242b742dc35d3f0720d35d99dbe85ecf6df7185f083ef9b1f7908094e43fd4e2508b6805d644dc
+  checksum: dc742018a3f528129b76d5eecc3a3d4286a5c1666f42ced4aee7b19e28076499e3705fcf274ae0d90ae8fada53c9d0e0a112a1cdb65a22d4349e73ab477241f5
   languageName: node
   linkType: hard
 
@@ -12582,14 +12582,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier-plugin-sh@npm:^0.11.0":
-  version: 0.11.0
-  resolution: "prettier-plugin-sh@npm:0.11.0"
+"prettier-plugin-sh@npm:^0.12.6":
+  version: 0.12.6
+  resolution: "prettier-plugin-sh@npm:0.12.6"
   dependencies:
     mvdan-sh: ^0.10.1
   peerDependencies:
     prettier: ^2.0.0
-  checksum: c7821082507c849f4a7d915cb9ec4ad1e25ac787d3aae3937901cd4d4b8faf00a6b2f2ccbc7e91ca92c2f32bbb00be9d324ca01002bbb843da684ba9a95540b5
+  checksum: ad296792b25f51665e3527e687891f41c7289a84bf11293a76300114d33544bcaa30d6a60ab6b89d134725fd4fa1b947432737d4042dbd27f80943ee0de54c4b
   languageName: node
   linkType: hard
 
@@ -12602,12 +12602,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^2.6.2":
-  version: 2.6.2
-  resolution: "prettier@npm:2.6.2"
+"prettier@npm:^2.7.1":
+  version: 2.7.1
+  resolution: "prettier@npm:2.7.1"
   bin:
     prettier: bin-prettier.js
-  checksum: 48d08dde8e9fb1f5bccdd205baa7f192e9fc8bc98f86e1b97d919de804e28c806b0e6cc685e4a88211aa7987fa9668f30baae19580d87ced3ed0f2ec6572106f
+  checksum: 55a4409182260866ab31284d929b3cb961e5fdb91fe0d2e099dac92eaecec890f36e524b4c19e6ceae839c99c6d7195817579cdffc8e2c80da0cb794463a748b
   languageName: node
   linkType: hard
 
