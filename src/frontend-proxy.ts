@@ -132,18 +132,6 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
       }
     }
 
-    if (global.ENVIRONMENT === 'staging') {
-      if (
-        url.pathnameWithoutTrailingSlash === '/pages' ||
-        url.pathname.startsWith('/taxonomy/term/sort/entities/')
-      ) {
-        return {
-          __typename: 'AB',
-          probability: Number(global.FRONTEND_PROBABILITY),
-        }
-      }
-    }
-
     if (
       (await url.isUuid()) ||
       url.pathname === '/' ||
@@ -156,6 +144,7 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
         '/discussions',
         '/backend',
         '/uuid/recycle-bin',
+        '/pages',
         '/mathe',
         '/biologie',
         '/nachhaltigkeit',
@@ -167,9 +156,11 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
       url.pathname.startsWith('/entity/repository/history') ||
       url.pathname.startsWith('/entity/repository/add-revision/') ||
       url.pathname.startsWith('/entity/taxonomy/update/') ||
+      url.pathname.startsWith('/entity/link/order/') ||
       url.pathname.startsWith('/entity/license/update/') ||
       url.pathname.startsWith('/taxonomy/term/move/batch/') ||
       url.pathname.startsWith('/taxonomy/term/copy/batch/') ||
+      url.pathname.startsWith('/taxonomy/term/sort/entities/') ||
       url.pathname.startsWith('/event/history') ||
       url.pathname.startsWith('/error/deleted')
     ) {
