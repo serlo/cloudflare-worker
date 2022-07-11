@@ -133,6 +133,16 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
     }
 
     if (
+      global.ENVIRONMENT === 'staging' &&
+      url.pathname.startsWith('/entity/create/')
+    ) {
+      return {
+        __typename: 'AB',
+        probability: Number(global.FRONTEND_PROBABILITY),
+      }
+    }
+
+    if (
       (await url.isUuid()) ||
       url.pathname === '/' ||
       [
@@ -158,6 +168,7 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
       url.pathname.startsWith('/entity/taxonomy/update/') ||
       url.pathname.startsWith('/entity/link/order/') ||
       url.pathname.startsWith('/entity/license/update/') ||
+      url.pathname.startsWith('/entity/create/') ||
       url.pathname.startsWith('/taxonomy/term/move/batch/') ||
       url.pathname.startsWith('/taxonomy/term/copy/batch/') ||
       url.pathname.startsWith('/taxonomy/term/sort/entities/') ||
