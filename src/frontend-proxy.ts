@@ -133,6 +133,16 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
     }
 
     if (
+      global.ENVIRONMENT === 'staging' &&
+      url.pathname.startsWith('/entity/create/')
+    ) {
+      return {
+        __typename: 'AB',
+        probability: Number(global.FRONTEND_PROBABILITY),
+      }
+    }
+
+    if (
       (await url.isUuid()) ||
       url.pathname === '/' ||
       [
