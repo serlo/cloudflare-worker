@@ -78,31 +78,29 @@ function authKratosIdentitySchema(request: Request): Response | null {
             type: 'string',
             format: 'email',
             'ory.sh/kratos': {
-              credentials: {
-                password: {
-                  identifier: true,
-                },
-              },
-              verification: {
-                via: 'email',
-              },
-              recovery: {
-                via: 'email',
-              },
+              credentials: { password: { identifier: true } },
+              verification: { via: 'email' },
+              recovery: { via: 'email' },
             },
           },
           username: {
             type: 'string',
             'ory.sh/kratos': {
-              credentials: {
-                password: {
-                  identifier: true,
-                },
-              },
+              credentials: { password: { identifier: true } },
             },
+          },
+          description: {
+            type: 'string',
+          },
+          motivation: {
+            type: 'string',
+          },
+          profile_image: {
+            type: 'string',
           },
         },
         required: ['email', 'username'],
+        additionalProperties: false,
       },
     },
   }
