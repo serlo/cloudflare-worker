@@ -88,3 +88,12 @@ test('Kratos Identity Schema', async () => {
 
   expect(response.status).toBe(200)
 })
+
+test('Kratos After Registration Hook Payload', async () => {
+  const env = currentTestEnvironment()
+  const response = await env.fetch({
+    pathname: '/auth/after-registration-hook-payload.jsonnet',
+  })
+
+  expect(response.status).toBe(200)
+})
