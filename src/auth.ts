@@ -25,7 +25,8 @@ export function auth(request: Request): Response | null {
   return (
     authFrontendSectorIdentifierUriValidation(request) ||
     authKratosIdentitySchema(request) ||
-    authKratosGithubJsonnet(request)
+    authKratosGithubJsonnet(request) ||
+    authKratosAfterRegistrationHookPayloadJsonnet(request)
   )
 }
 
@@ -106,6 +107,26 @@ function authKratosIdentitySchema(request: Request): Response | null {
   }
 
   return createJsonResponse(schema)
+}
+
+function authKratosAfterRegistrationHookPayloadJsonnet(
+  request: Request
+): Response | null {
+  const url = Url.fromRequest(request)
+  if (
+    url.subdomain !== '' ||
+    url.pathname !== '/auth/after-registration-hook-payload.jsonnet'
+  ) {
+    return null
+  }
+
+  const payload = `
+function(ctx) { userId: ctx.identity.id }
+  `
+
+  return new Response(payload, {
+    headers: { 'Content-Type': 'text/plain' },
+  })
 }
 
 function authKratosGithubJsonnet(request: Request): Response | null {
