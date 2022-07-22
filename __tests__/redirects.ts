@@ -47,6 +47,7 @@ describe('meet.serlo.org', () => {
     ['/hochschulmathe', '/oud-dpuy-swx'],
     ['/lamatreffen', '/unm-jesz-ibj'],
     ['/plenum', '/unm-jesz-ibj'],
+    ['/party', '/fho-mbdm-gtv'],
     ['/1', '/fxn-iprp-ezx'],
     ['/2', '/yku-aksd-fkk'],
     ['/3', '/qma-zouf-vcz'],
