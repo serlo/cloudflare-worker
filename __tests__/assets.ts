@@ -39,6 +39,9 @@ beforeEach(() => {
     '/legacy/58f090745b909_16a4cba82bd1cb09434b7f582e555b9ac7531922.png': {
       contentLength: 899629,
     },
+    '/1658759018166-f30bdef5-b33f-480c-95b9-41b20a7926af.png': {
+      contentLength: 490,
+    },
   })
 })
 
@@ -59,6 +62,15 @@ test('assets.serlo.org/<hash>/<fileName>.<ext>', async () => {
   })
 
   expectAsset({ response, expectedStoredContentLength: 4774 })
+})
+
+test('assets.serlo.org/<hash>/<fileName>.<ext> (with uuid version 4)', async () => {
+  const response = await env.fetch({
+    subdomain: 'assets',
+    pathname: '/1658759018166-f30bdef5-b33f-480c-95b9-41b20a7926af/black.png',
+  })
+
+  expectAsset({ response, expectedStoredContentLength: 490 })
 })
 
 test('assets.serlo.org/legacy/<hash>/<fileName>.<ext>', async () => {
