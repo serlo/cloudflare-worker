@@ -135,7 +135,7 @@ async function semanticFileNames(request: Request) {
 
   url.host = 'assets.serlo.org'
 
-  const re = /^\/(legacy\/|)((?!legacy)\w+)\/([\w\-+]+)\.(\w+)$/
+  const re = /^\/(legacy\/|)((?!legacy)[\w-]+)\/([\w\-+]+)\.(\w+)$/
   const match = re.exec(url.pathname)
 
   if (!url.pathname.startsWith('/meta') && match) {
