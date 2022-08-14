@@ -99,6 +99,9 @@ function authKratosIdentitySchema(request: Request): Response | null {
           profile_image: {
             type: 'string',
           },
+          language: {
+            type: 'string',
+          },
         },
         required: ['email', 'username'],
         additionalProperties: false,
