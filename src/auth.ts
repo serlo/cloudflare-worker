@@ -101,7 +101,7 @@ function authKratosIdentitySchema(request: Request): Response | null {
           },
           language: {
             type: 'string',
-          },
+          }
         },
         required: ['email', 'username'],
         additionalProperties: false,
