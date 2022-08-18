@@ -163,6 +163,7 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
         '/lerntipps',
       ].includes(url.pathnameWithoutTrailingSlash) ||
       url.pathname.startsWith('/license/detail') ||
+      (url.subdomain === 'de' && url.pathname.startsWith('/jobs')) ||
       url.pathname.startsWith('/entity/repository/history') ||
       url.pathname.startsWith('/entity/repository/add-revision/') ||
       url.pathname.startsWith('/entity/taxonomy/update/') ||
