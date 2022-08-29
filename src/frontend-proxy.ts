@@ -152,6 +152,7 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
         '/informatik',
         '/chemie',
         '/lerntipps',
+        '/authorization/roles',
       ].includes(url.pathnameWithoutTrailingSlash) ||
       url.pathname.startsWith('/license/detail') ||
       (url.subdomain === 'de' && url.pathname.startsWith('/jobs')) ||
