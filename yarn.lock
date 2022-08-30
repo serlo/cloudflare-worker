@@ -2466,7 +2466,7 @@ __metadata:
     "@types/core-js": ^2.5.5
     "@types/iarna__toml": ^2.0.2
     "@types/jest": ^27.4.1
-    "@types/luxon": ^2.3.2
+    "@types/luxon": ^3.0.0
     "@types/marked": ^4.0.6
     "@types/node": ^16.11.43
     "@types/rimraf": ^3.0.2
@@ -2485,7 +2485,7 @@ __metadata:
     io-ts: ^2.2.18
     jest: ^27.5.1
     jose: ^4.8.3
-    luxon: ^2.4.0
+    luxon: ^3.0.3
     marked: ^4.0.19
     msw: ^0.39.2
     node-fetch: 3.0.0-beta.9
@@ -3556,10 +3556,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/luxon@npm:^2.3.2":
-  version: 2.3.2
-  resolution: "@types/luxon@npm:2.3.2"
-  checksum: b9fe79118681f4bb9f2e37696a7df992a82683ba4448e7ad1af8cc241443ffc64ef08fdeaad749de9e6259b42b0d4b6540d7e880bca39bb504e0f3863d503c98
+"@types/luxon@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "@types/luxon@npm:3.0.0"
+  checksum: 7738d3f4b91097a8139eca966ab53c6b40bb417b2cc2014c3bbd0aee033d6ff54af14c62046c2eb042434923b6bf796874f24b2af90e07ef422e6d841463d4b2
   languageName: node
   linkType: hard
 
@@ -11025,10 +11025,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"luxon@npm:^2.4.0":
-  version: 2.4.0
-  resolution: "luxon@npm:2.4.0"
-  checksum: 6071028d65cc3d3bdab5e6a3995dd97411c92bb3b3163a02deb7b7014318ad3a6fd750ae77131c42141b717c14aef8880d3130f265281d500ef2365f7265b3f3
+"luxon@npm:^3.0.3":
+  version: 3.0.3
+  resolution: "luxon@npm:3.0.3"
+  checksum: 67d143f102f520761c4202086579a5cf30b230ea299da27cacb31e9f9d372cadef90f14cbe7e2621b70825b267fe00128b8176ed8b7172b48f77a403a662d5aa
   languageName: node
   linkType: hard
 
