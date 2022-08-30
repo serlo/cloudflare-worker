@@ -2484,7 +2484,7 @@ __metadata:
     glob: ^8.0.3
     io-ts: ^2.2.18
     jest: ^27.5.1
-    jose: ^4.8.3
+    jose: ^4.9.1
     luxon: ^3.0.3
     marked: ^4.0.19
     msw: ^0.39.2
@@ -10499,10 +10499,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jose@npm:^4.8.3":
-  version: 4.8.3
-  resolution: "jose@npm:4.8.3"
-  checksum: a4a03d329d3611696d94a81df06e7fe160cef987da032ecc9e0a9d1e5e751b5101d1657eed16ead5f1905c9c2009d48820538412af4e5257f205a8754dd09d31
+"jose@npm:^4.9.1":
+  version: 4.9.1
+  resolution: "jose@npm:4.9.1"
+  checksum: ebd9a4c9610d7fb93e9385f042554f0f3a83b16f3932a0aa42a7b78499c2ffae0607bce6b50a256521b3bf700d65140fdfb8de73988f1f29100491f3312a3707
   languageName: node
   linkType: hard
 
