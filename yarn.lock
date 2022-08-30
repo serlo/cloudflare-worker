@@ -2453,7 +2453,7 @@ __metadata:
     "@types/iarna__toml": ^2.0.2
     "@types/jest": ^27.4.1
     "@types/luxon": ^2.3.2
-    "@types/marked": ^4.0.3
+    "@types/marked": ^4.0.6
     "@types/node": ^16.11.43
     "@types/rimraf": ^3.0.2
     "@types/sanitize-html": ^2.6.2
@@ -2472,7 +2472,7 @@ __metadata:
     jest: ^27.5.1
     jose: ^4.8.3
     luxon: ^2.4.0
-    marked: ^4.0.17
+    marked: ^4.0.19
     msw: ^0.39.2
     node-fetch: 3.0.0-beta.9
     nodemon: ^2.0.18
@@ -3549,10 +3549,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/marked@npm:^4.0.3":
-  version: 4.0.3
-  resolution: "@types/marked@npm:4.0.3"
-  checksum: 2fc409a6291cb770688731a444f54e7eab6257c9b565dea4e9d2f3b6654b606e9dd8ea4a924e306b2d2f581dedcb7a27f10f2ca7aed828b11642ab85955341f1
+"@types/marked@npm:^4.0.6":
+  version: 4.0.6
+  resolution: "@types/marked@npm:4.0.6"
+  checksum: 223f7d8e9481287aa0274df573dd56df6cb11a1090649fabd63fd97f900ed318e730d9dfaff598aa75d8946a212c1d8959a421c5cb46d90c5a6f734a1e4a7d78
   languageName: node
   linkType: hard
 
@@ -11104,12 +11104,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"marked@npm:^4.0.17":
-  version: 4.0.17
-  resolution: "marked@npm:4.0.17"
+"marked@npm:^4.0.19":
+  version: 4.0.19
+  resolution: "marked@npm:4.0.19"
   bin:
     marked: bin/marked.js
-  checksum: 33a3c43a20b47bddaf045a59bfc7c3d41cc321931cc663ed231ca3b5b3b195fb2ac2973e687c2afd65b79539c14619baa07d19793f70130160f0af80c06d9b3a
+  checksum: 0521f3c6a06a078b91ec5b6754f939e7be1a621e1a7c1e85d4e6a4eb7848e798275566b38dea05ea8a57e85d557fbc9edad4f3fa3e8b494a371133b9ba2fb720
   languageName: node
   linkType: hard
 
