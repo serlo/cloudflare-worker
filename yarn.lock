@@ -2483,7 +2483,7 @@ __metadata:
     prettier-plugin-packagejson: ^2.2.18
     prettier-plugin-sh: ^0.12.6
     rimraf: ^3.0.2
-    sanitize-html: ^2.7.0
+    sanitize-html: ^2.7.1
     toucan-js: ^2.6.0
     ts-jest: ^27.1.4
     ts-loader: ^8.3.0
@@ -14035,9 +14035,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sanitize-html@npm:^2.7.0":
-  version: 2.7.0
-  resolution: "sanitize-html@npm:2.7.0"
+"sanitize-html@npm:^2.7.1":
+  version: 2.7.1
+  resolution: "sanitize-html@npm:2.7.1"
   dependencies:
     deepmerge: ^4.2.2
     escape-string-regexp: ^4.0.0
@@ -14045,7 +14045,7 @@ __metadata:
     is-plain-object: ^5.0.0
     parse-srcset: ^1.0.2
     postcss: ^8.3.11
-  checksum: 73a4d66f69578bace3506519ca0734279b7117e15c33c7e4d075cdb483b1586261a18acd35934f6c6109f3b2a4a82f82c242171a94d5dc23fba5b09b01ea5b22
+  checksum: 57b45ee74c828afdf670d78051623b3e8452610d23af6b24992f0519fee173e2eec38500656d0eee639053cedc651d02d135b2524bca57100f2b54c83676ee0b
   languageName: node
   linkType: hard
 

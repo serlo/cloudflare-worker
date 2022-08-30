@@ -42,7 +42,7 @@
     "marked": "^4.0.19",
     "preact": "^10.9.0",
     "preact-render-to-string": "^5.2.0",
-    "sanitize-html": "^2.7.0",
+    "sanitize-html": "^2.7.1",
     "toucan-js": "^2.6.0"
   },
   "devDependencies": {
