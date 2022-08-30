@@ -2460,7 +2460,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^5.30.5
     "@typescript-eslint/parser": ^5.30.5
     babel-loader: ^8.2.5
-    core-js-pure: ^3.23.3
+    core-js-pure: ^3.25.0
     cross-env: ^7.0.3
     eslint: ^8.19.0
     eslint-config-prettier: ^8.5.0
@@ -6139,10 +6139,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js-pure@npm:^3.23.3":
-  version: 3.23.3
-  resolution: "core-js-pure@npm:3.23.3"
-  checksum: 09a477a56963ca4409ca383d36429ea3b51b658ff85e94331a510543c77c4d1b44cb6b305b0f185d729eb059c71f1289c62fdec6371ff46ce838a16988cdcb2e
+"core-js-pure@npm:^3.25.0":
+  version: 3.25.0
+  resolution: "core-js-pure@npm:3.25.0"
+  checksum: 041cef3c4fa03b30eea6aa8539db00a02ea264e8542b9b787428f43e727e67050c742f46dbd75bc9ab544524a54e1ee55d8b23602dc8a2da485a3741a5f95df7
   languageName: node
   linkType: hard
 

@@ -34,7 +34,7 @@
     "_prettier": "prettier ."
   },
   "dependencies": {
-    "core-js-pure": "^3.23.3",
+    "core-js-pure": "^3.25.0",
     "fp-ts": "^2.12.1",
     "io-ts": "^2.2.16",
     "jose": "^4.8.3",
