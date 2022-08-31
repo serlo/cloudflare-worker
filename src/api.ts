@@ -48,12 +48,9 @@ async function getAuthorizationHeader(request: Request) {
     .setIssuer('serlo.org-cloudflare-worker')
     .sign(Buffer.from(global.API_SECRET))
 
-  if (authorizationHeader == null) {
-    return `Serlo Service=${serviceToken}`
-  } else if (authorizationHeader.startsWith('Serlo')) {
+  if (authorizationHeader && authorizationHeader.startsWith('Serlo')) {
     return authorizationHeader
   } else {
-    const user = authorizationHeader.replace('Bearer ', '')
-    return `Serlo Service=${serviceToken};User=${user}`
+    return `Serlo Service=${serviceToken}`
   }
 }
