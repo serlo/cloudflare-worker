@@ -1,7 +1,7 @@
 /**
  * This file is part of Serlo.org Cloudflare Worker.
  *
- * Copyright (c) 2021 Serlo Education e.V.
+ * Copyright (c) 2021-2022 Serlo Education e.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @copyright Copyright (c) 2021 Serlo Education e.V.
+ * @copyright Copyright (c) 2022 Serlo Education e.V.
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
@@ -38,6 +38,9 @@ const meetRedirects: Record<string, string | undefined> = {
   '/fundraising': 'uus-vjgu-ttr',
   '/maxsimon': 'jbx-bjba-qjh',
   '/hochschulmathe': 'oud-dpuy-swx',
+  '/lamatreffen': 'unm-jesz-ibj',
+  '/plenum': 'unm-jesz-ibj',
+  '/party': 'fho-mbdm-gtv',
   '/1': 'fxn-iprp-ezx',
   '/2': 'yku-aksd-fkk',
   '/3': 'qma-zouf-vcz',
@@ -144,6 +147,17 @@ export async function redirects(request: Request) {
 
         return url.toRedirect(301)
       }
+    }
+  }
+
+  if (isInstance(url.subdomain)) {
+    // support for legacy links to comment that are still used in mails
+    // `/discussion/{id}`
+    // can be deleted after we move the mailings
+    const match = /^\/discussion\/(\d+)$/.exec(url.pathname)
+    if (match) {
+      url.pathname = `/${match[1]}`
+      return url.toRedirect(301)
     }
   }
 

@@ -1,7 +1,7 @@
 /**
  * This file is part of Serlo.org Cloudflare Worker.
  *
- * Copyright (c) 2021 Serlo Education e.V.
+ * Copyright (c) 2021-2022 Serlo Education e.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @copyright Copyright (c) 2021 Serlo Education e.V.
+ * @copyright Copyright (c) 2022 Serlo Education e.V.
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
@@ -51,6 +51,7 @@ export async function frontendProxy(
   request: Request,
   sentryFactory: SentryFactory
 ): Promise<Response | null> {
+  const url = Url.fromRequest(request)
   const cookies = request.headers.get('Cookie')
   const sentry = sentryFactory.createReporter('frontend')
   const route = await getRoute(request)
@@ -62,8 +63,15 @@ export async function frontendProxy(
       ? Math.random()
       : cookieValue
 
+    let contentApiRequest = null
+
+    if (url.hasContentApiParameters()) {
+      url.pathname = '/content-only' + url.pathname
+      contentApiRequest = new Request(url.toString(), new Request(request))
+    }
+
     const response = await fetchBackend({
-      request,
+      request: contentApiRequest ?? request,
       sentry,
       route: {
         __typename:
@@ -118,12 +126,19 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
       return routeConfig
     }
 
-    if (
-      url.hasContentApiParameters() ||
-      request.headers.get('X-From') === 'legacy-serlo.org'
-    ) {
+    if (request.headers.get('X-From') === 'legacy-serlo.org') {
       return {
         __typename: 'Legacy',
+      }
+    }
+
+    if (
+      global.ENVIRONMENT === 'staging' &&
+      url.pathname.startsWith('/entity/create/')
+    ) {
+      return {
+        __typename: 'AB',
+        probability: Number(global.FRONTEND_PROBABILITY),
       }
     }
 
@@ -136,6 +151,10 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
         '/subscriptions/manage',
         '/entity/unrevised',
         '/user/settings',
+        '/discussions',
+        '/backend',
+        '/uuid/recycle-bin',
+        '/pages',
         '/mathe',
         '/biologie',
         '/nachhaltigkeit',
@@ -144,9 +163,17 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
         '/lerntipps',
       ].includes(url.pathnameWithoutTrailingSlash) ||
       url.pathname.startsWith('/license/detail') ||
+      (url.subdomain === 'de' && url.pathname.startsWith('/jobs')) ||
       url.pathname.startsWith('/entity/repository/history') ||
       url.pathname.startsWith('/entity/repository/add-revision/') ||
-      url.pathname.startsWith('/event/history')
+      url.pathname.startsWith('/entity/taxonomy/update/') ||
+      url.pathname.startsWith('/entity/link/order/') ||
+      url.pathname.startsWith('/entity/license/update/') ||
+      url.pathname.startsWith('/taxonomy/term/move/batch/') ||
+      url.pathname.startsWith('/taxonomy/term/copy/batch/') ||
+      url.pathname.startsWith('/taxonomy/term/sort/entities/') ||
+      url.pathname.startsWith('/event/history') ||
+      url.pathname.startsWith('/error/deleted')
     ) {
       return {
         __typename: 'AB',

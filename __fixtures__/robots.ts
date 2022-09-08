@@ -19,8 +19,22 @@
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-/* eslint-disable @typescript-eslint/no-var-requires,import/no-commonjs */
-module.exports = {
-  semi: false,
-  singleQuote: true,
-}
+export const robotsProduction = `User-agent: *
+Disallow: /page/revision/revisions/
+Disallow: /page/revision/revision/
+Disallow: /page/revision/
+Disallow: /entity/repository/history/
+Disallow: /entity/repository/compare/
+Disallow: /backend
+Disallow: /users
+Disallow: /horizon
+Disallow: /flag
+Disallow: /license
+Disallow: /uuid/recycle-bin
+Disallow: /navigation/
+Disallow: /authorization/
+Disallow: /pages
+Disallow: /uuid/recycle-bin
+Disallow: /index.php/
+Disallow: /index.php
+Disallow: /*/entity/trash-bin`

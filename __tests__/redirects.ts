@@ -1,7 +1,7 @@
 /**
  * This file is part of Serlo.org Cloudflare Worker.
  *
- * Copyright (c) 2021 Serlo Education e.V.
+ * Copyright (c) 2021-2022 Serlo Education e.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @copyright Copyright (c) 2021 Serlo Education e.V.
+ * @copyright Copyright (c) 2022 Serlo Education e.V.
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
@@ -45,6 +45,9 @@ describe('meet.serlo.org', () => {
     ['/fundraising', '/uus-vjgu-ttr'],
     ['/maxsimon', '/jbx-bjba-qjh'],
     ['/hochschulmathe', '/oud-dpuy-swx'],
+    ['/lamatreffen', '/unm-jesz-ibj'],
+    ['/plenum', '/unm-jesz-ibj'],
+    ['/party', '/fho-mbdm-gtv'],
     ['/1', '/fxn-iprp-ezx'],
     ['/2', '/yku-aksd-fkk'],
     ['/3', '/qma-zouf-vcz'],
@@ -445,6 +448,35 @@ describe('redirects to current path of an resource', () => {
     const target = env.createUrl({
       subdomain: 'de',
       pathname: '/mathe/1573/vektor#comment-65395',
+    })
+    expectToBeRedirectTo(response, target, 301)
+  })
+
+  test('redirects to article when old comment link is requested', async () => {
+    const response = await env.fetch({
+      subdomain: 'de',
+      pathname: '/discussion/65395',
+    })
+
+    const target = env.createUrl({ subdomain: 'de', pathname: '/65395' })
+
+    expectToBeRedirectTo(response, target, 301)
+  })
+
+  test('redirects to error when comment is deleted', async () => {
+    givenUuid({
+      id: 65395,
+      __typename: 'Comment',
+      alias: '/mathe/65395/65395',
+      trashed: true,
+      legacyObject: { alias: '/mathe/1573/vektor' },
+    })
+
+    const response = await env.fetch({ subdomain: 'de', pathname: '/65395' })
+
+    const target = env.createUrl({
+      subdomain: 'de',
+      pathname: '/error/deleted/Comment',
     })
     expectToBeRedirectTo(response, target, 301)
   })

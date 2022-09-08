@@ -1,7 +1,7 @@
 /**
  * This file is part of Serlo.org Cloudflare Worker.
  *
- * Copyright (c) 2021 Serlo Education e.V.
+ * Copyright (c) 2021-2022 Serlo Education e.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @copyright Copyright (c) 2021 Serlo Education e.V.
+ * @copyright Copyright (c) 2022 Serlo Education e.V.
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
@@ -84,7 +84,9 @@ describe('returned response set cookie with calculated random number', () => {
     const response = await env.fetch({ subdomain: 'en', pathname: '/math' })
 
     const cookieHeader = response.headers.get('Set-Cookie')
-    expect(cookieHeader).toBe('useFrontend=0.25; path=/; domain=.serlo.local')
+    expect(cookieHeader).toBe(
+      'useFrontend=0.25; path=/; domain=.serlo.localhost'
+    )
   })
 })
 
@@ -96,25 +98,32 @@ test('removes trailing slashes and prepends language code when the backend is fr
 })
 
 describe('when request contains content api parameter', () => {
-  let response: Response
-
-  beforeEach(async () => {
+  beforeEach(() => {
     setupProbabilityFor(Backend.Frontend)
 
-    response = await currentTestEnvironment().fetch({
-      subdomain: 'en',
-      pathname: '/?contentOnly',
+    givenUuid({
+      id: 1555,
+      __typename: 'Article',
+      alias: '/1555',
+      instance: Instance.En,
     })
   })
 
-  test('chooses legacy backend', async () => {
-    await expectLegacy(response)
+  test('chooses frontend', async () => {
+    const response = await currentTestEnvironment().fetch({
+      subdomain: 'en',
+      pathname: '/1555?contentOnly',
+    })
+
+    await expectFrontend(response)
   })
 
-  test('does not set cookie with random number', () => {
-    expect(response.headers.get('Set-Cookie')).not.toEqual(
-      expect.stringContaining('useFrontend')
-    )
+  test('handles trailing slash and redirects', async () => {
+    const response = await currentTestEnvironment().fetch({
+      subdomain: 'en',
+      pathname: '/1555/?contentOnly',
+    })
+    expect(response.status).toBe(301)
   })
 })
 
@@ -293,17 +302,18 @@ describe('special paths', () => {
   })
 
   test('/api/auth/* always resolves to frontend (and transfers request header to backend)', async () => {
+    const referer = env.createUrl({ subdomain: 'en', pathname: 'login' })
     const request = env.createRequest({
       subdomain: 'en',
       pathname: '/api/auth/login',
     })
-    request.headers.set('referer', env.createUrl({ subdomain: 'en' }))
+    request.headers.set('referer', referer)
 
     const response = await env.fetchRequest(request)
 
     expect(response.status).toBe(302)
     expect(response.headers.get('location')).toEqual(
-      expect.stringContaining(env.createUrl({ subdomain: 'hydra' }))
+      expect.stringContaining(encodeURIComponent(referer))
     )
     expect(response.headers.get('Set-Cookie')).not.toEqual(
       expect.stringContaining('useFrontend')
