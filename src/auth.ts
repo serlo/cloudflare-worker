@@ -1,7 +1,7 @@
 /**
  * This file is part of Serlo.org Cloudflare Worker.
  *
- * Copyright (c) 2021 Serlo Education e.V.
+ * Copyright (c) 2021-2022 Serlo Education e.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @copyright Copyright (c) 2021 Serlo Education e.V.
+ * @copyright Copyright (c) 2022 Serlo Education e.V.
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
@@ -25,7 +25,8 @@ export function auth(request: Request): Response | null {
   return (
     authFrontendSectorIdentifierUriValidation(request) ||
     authKratosIdentitySchema(request) ||
-    authKratosGithubJsonnet(request)
+    authKratosGithubJsonnet(request) ||
+    authKratosAfterRegistrationHookPayloadJsonnet(request)
   )
 }
 
@@ -78,36 +79,57 @@ function authKratosIdentitySchema(request: Request): Response | null {
             type: 'string',
             format: 'email',
             'ory.sh/kratos': {
-              credentials: {
-                password: {
-                  identifier: true,
-                },
-              },
-              verification: {
-                via: 'email',
-              },
-              recovery: {
-                via: 'email',
-              },
+              credentials: { password: { identifier: true } },
+              verification: { via: 'email' },
+              recovery: { via: 'email' },
             },
           },
           username: {
             type: 'string',
             'ory.sh/kratos': {
-              credentials: {
-                password: {
-                  identifier: true,
-                },
-              },
+              credentials: { password: { identifier: true } },
             },
+          },
+          description: {
+            type: 'string',
+          },
+          motivation: {
+            type: 'string',
+          },
+          profile_image: {
+            type: 'string',
+          },
+          language: {
+            type: 'string',
           },
         },
         required: ['email', 'username'],
+        additionalProperties: false,
       },
     },
   }
 
   return createJsonResponse(schema)
+}
+
+function authKratosAfterRegistrationHookPayloadJsonnet(
+  request: Request
+): Response | null {
+  const url = Url.fromRequest(request)
+  if (
+    url.subdomain !== '' ||
+    url.pathname !== '/auth/after-registration-hook-payload.jsonnet'
+  ) {
+    return null
+  }
+
+  const payload = `
+function(ctx) { userId: ctx.identity.id }
+  `
+
+  return new Response(payload, {
+    headers: { 'Content-Type': 'text/plain' },
+  })
 }
 
 function authKratosGithubJsonnet(request: Request): Response | null {

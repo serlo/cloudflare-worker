@@ -1,7 +1,7 @@
 /**
  * This file is part of Serlo.org Cloudflare Worker.
  *
- * Copyright (c) 2021 Serlo Education e.V.
+ * Copyright (c) 2021-2022 Serlo Education e.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @copyright Copyright (c) 2021 Serlo Education e.V.
+ * @copyright Copyright (c) 2022 Serlo Education e.V.
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
@@ -39,6 +39,9 @@ beforeEach(() => {
     '/legacy/58f090745b909_16a4cba82bd1cb09434b7f582e555b9ac7531922.png': {
       contentLength: 899629,
     },
+    '/1658759018166-f30bdef5-b33f-480c-95b9-41b20a7926af.png': {
+      contentLength: 490,
+    },
   })
 })
 
@@ -59,6 +62,15 @@ test('assets.serlo.org/<hash>/<fileName>.<ext>', async () => {
   })
 
   expectAsset({ response, expectedStoredContentLength: 4774 })
+})
+
+test('assets.serlo.org/<hash>/<fileName>.<ext> (with uuid version 4)', async () => {
+  const response = await env.fetch({
+    subdomain: 'assets',
+    pathname: '/1658759018166-f30bdef5-b33f-480c-95b9-41b20a7926af/black.png',
+  })
+
+  expectAsset({ response, expectedStoredContentLength: 490 })
 })
 
 test('assets.serlo.org/legacy/<hash>/<fileName>.<ext>', async () => {

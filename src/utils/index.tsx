@@ -1,7 +1,7 @@
 /**
  * This file is part of Serlo.org Cloudflare Worker.
  *
- * Copyright (c) 2021 Serlo Education e.V.
+ * Copyright (c) 2021-2022 Serlo Education e.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @copyright Copyright (c) 2021 Serlo Education e.V.
+ * @copyright Copyright (c) 2022 Serlo Education e.V.
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
@@ -75,6 +75,7 @@ const ApiResult = t.type({
         exercise: t.type({ alias: t.string }),
         legacyObject: t.type({ alias: t.string }),
         id: t.number,
+        trashed: t.boolean,
       }),
     ]),
   }),
@@ -122,6 +123,7 @@ export async function getPathInfo(
         }
         ... on Comment {
           id
+          trashed
           legacyObject {
             alias
           }
@@ -148,21 +150,24 @@ export async function getPathInfo(
   const apiResult = ApiResult.decode(apiResponseBody)
 
   if (E.isLeft(apiResult)) return null
-
   const uuid = apiResult.right.data.uuid
-  const currentPath =
-    uuid.legacyObject !== undefined
-      ? uuid.legacyObject.alias
-      : uuid.exercise !== undefined
-      ? uuid.exercise.alias
-      : uuid.pages !== undefined && uuid.pages.length > 0
-      ? uuid.pages[0].alias
-      : uuid.alias ?? path
+
+  const isTrashedComment = uuid.__typename === 'Comment' && uuid.trashed
+
+  const currentPath = isTrashedComment
+    ? `error/deleted/${uuid.__typename}`
+    : uuid.legacyObject !== undefined
+    ? uuid.legacyObject.alias
+    : uuid.exercise !== undefined
+    ? uuid.exercise.alias
+    : uuid.pages !== undefined && uuid.pages.length > 0
+    ? uuid.pages[0].alias
+    : uuid.alias ?? path
   const result = {
     typename: uuid.__typename,
     currentPath,
     instance: uuid.instance,
-    ...(uuid.legacyObject !== undefined
+    ...(uuid.legacyObject !== undefined && !isTrashedComment
       ? { hash: `#comment-${uuid.id ?? 0}` }
       : {}),
   }
