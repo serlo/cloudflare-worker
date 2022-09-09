@@ -21,7 +21,7 @@
  */
 import URL from 'core-js-pure/features/url'
 
-import { getPathInfo, isInstance, Instance } from '.'
+import { getPathInfo, isInstance } from '.'
 
 const contentApiParameters = [
   'contentOnly',
@@ -35,10 +35,6 @@ const contentApiParameters = [
   'hideFooter',
   'fullWidth',
 ]
-
-export const subjectStartPages: { [I in Instance]?: string[] } = {
-  de: ['/biologie', '/chemie', '/lerntipps', '/mathe', '/nachhaltigkeit'],
-}
 
 export class Url extends URL {
   public get subdomain(): string {
@@ -62,17 +58,6 @@ export class Url extends URL {
   public hasContentApiParameters() {
     return Array.from(this.searchParams.keys()).some((key) =>
       contentApiParameters.includes(key)
-    )
-  }
-
-  public isSubjectStartPage() {
-    if (!isInstance(this.subdomain)) return false
-
-    const pathnames = subjectStartPages[this.subdomain]
-
-    return (
-      pathnames !== undefined &&
-      pathnames.includes(this.pathnameWithoutTrailingSlash)
     )
   }
 

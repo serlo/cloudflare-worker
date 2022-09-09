@@ -163,7 +163,6 @@ export async function redirects(request: Request) {
 
   if (
     isInstance(url.subdomain) &&
-    !url.isSubjectStartPage() &&
     request.headers.get('X-Requested-With') !== 'XMLHttpRequest'
   ) {
     const pathInfo = await getPathInfo(url.subdomain, url.pathname)
