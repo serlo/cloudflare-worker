@@ -190,7 +190,7 @@ type Variables = Pick<
   'ENVIRONMENT' | 'ALLOW_AUTH_FROM_LOCALHOST' | 'DOMAIN'
 >
 
-type RemoteEnvironmentName = 'staging' | 'production'
+type RemoteEnvironmentName = Exclude<typeof ENVIRONMENT, 'local'>
 
 function isRemoteEnvironmentName(env: string): env is RemoteEnvironmentName {
   return env === 'staging' || env === 'production'
