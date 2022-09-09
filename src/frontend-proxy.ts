@@ -229,14 +229,6 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
     }
   }
 
-  if (getCookieValue('useFrontend', cookies) === 'always') {
-    return {
-      __typename: 'Frontend',
-      redirect: 'follow',
-      appendSubdomainToPath: true,
-    }
-  }
-
   if (request.headers.get('X-From') === 'legacy-serlo.org') {
     return {
       __typename: 'Legacy',
