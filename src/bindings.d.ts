@@ -20,13 +20,6 @@
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-
-declare global {
-  declare namespace NodeJS {
-    interface Global extends KVs, Variables, Secrets {}
-  }
-}
-
 // Secrets
 declare global {
   var API_SECRET: string
