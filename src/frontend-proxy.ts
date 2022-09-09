@@ -100,10 +100,6 @@ async function fetchBackend({
   sentry: SentryReporter
   route: LegacyRoute | FrontendRoute
 }) {
-  const cookies = request.headers.get('Cookie')
-  const domain =
-    getCookieValue('frontendDomain', cookies) ?? global.FRONTEND_DOMAIN
-
   const backendUrl = Url.fromRequest(request)
 
   if (route.__typename === 'Frontend') {
@@ -111,7 +107,7 @@ async function fetchBackend({
       backendUrl.pathname = `/${backendUrl.subdomain}${backendUrl.pathname}`
     }
 
-    backendUrl.hostname = domain
+    backendUrl.hostname = global.FRONTEND_DOMAIN
     backendUrl.pathname = backendUrl.pathnameWithoutTrailingSlash
   }
 
