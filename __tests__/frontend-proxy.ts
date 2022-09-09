@@ -181,19 +181,6 @@ describe('uses cookie "useFrontend" to determine backend', () => {
   })
 })
 
-test('uses cookie "frontendUrl" to determine the url of the frontend', async () => {
-  setupProbabilityFor(Backend.Frontend)
-  mockHttpGet('https://myfrontend.org/en/math', returnsText('content'))
-
-  const env = localTestEnvironment()
-
-  const request = env.createRequest({ subdomain: 'en', pathname: '/math' })
-  request.headers.set('Cookie', 'frontendDomain=myfrontend.org')
-  const response = await env.fetchRequest(request)
-
-  expect(await response.text()).toBe('content')
-})
-
 test('uses frontend when cookie "useFrontend" is "always"', async () => {
   setupProbabilityFor(Backend.Legacy)
   const env = currentTestEnvironment()
