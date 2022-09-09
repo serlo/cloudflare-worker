@@ -21,36 +21,19 @@
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
 // Secrets
-declare global {
-  var API_SECRET: string
-  var SENTRY_DSN: string
-}
+declare var API_SECRET: string
+declare var SENTRY_DSN: string
 
 // Variables
-declare global {
-  var ALLOW_AUTH_FROM_LOCALHOST: 'true' | 'false'
-  var API_ENDPOINT: string
-  var DOMAIN: string
-  var ENVIRONMENT: string
-  var ENABLE_BASIC_AUTH: 'true' | 'false'
-  var FRONTEND_DOMAIN: string
-  var FRONTEND_PROBABILITY: string
-}
-
-// for tests, not sure how to share above types
-export interface Variables {
-  ALLOW_AUTH_FROM_LOCALHOST: 'true' | 'false'
-  API_ENDPOINT: string
-  DOMAIN: string
-  ENVIRONMENT: string
-  ENABLE_BASIC_AUTH: 'true' | 'false'
-  FRONTEND_DOMAIN: string
-  FRONTEND_PROBABILITY: string
-}
+declare var ALLOW_AUTH_FROM_LOCALHOST: 'true' | 'false'
+declare var API_ENDPOINT: string
+declare var DOMAIN: string
+declare var ENVIRONMENT: string
+declare var ENABLE_BASIC_AUTH: 'true' | 'false'
+declare var FRONTEND_DOMAIN: string
+declare var FRONTEND_PROBABILITY: string
 
 // KVs
-declare global {
-  var MAINTENANCE_KV: KVNamespace<'enabled'>
-  var PACKAGES_KV: KVNamespace<string>
-  var PATH_INFO_KV: KVNamespace<import('./utils').CacheKey>
-}
+declare var MAINTENANCE_KV: KVNamespace<'enabled'>
+declare var PACKAGES_KV: KVNamespace<string>
+declare var PATH_INFO_KV: KVNamespace<import('./utils').CacheKey>
