@@ -32,6 +32,10 @@ import { NotFound } from '../ui'
 export * from './sentry'
 export * from './url'
 
+export const subjectStartPages: { [I in Instance]?: string[] } = {
+  de: ['/biologie', '/chemie', '/lerntipps', '/mathe', '/nachhaltigkeit'],
+}
+
 export enum Instance {
   De = 'de',
   En = 'en',

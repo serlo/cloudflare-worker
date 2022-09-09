@@ -19,7 +19,12 @@
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { getCookieValue, SentryReporter } from '.'
+import {
+  getCookieValue,
+  SentryReporter,
+  isInstance,
+  subjectStartPages,
+} from '.'
 import { Url } from './url'
 
 export async function fetchBackend({
@@ -146,6 +151,22 @@ export function getRoute(request: Request): RouteConfig | null {
       redirect: 'follow',
       appendSubdomainToPath: true,
       definite: true,
+    }
+  }
+
+  if (
+    isInstance(url.subdomain) &&
+    subjectStartPages[url.subdomain] &&
+    subjectStartPages[url.subdomain]?.includes(url.pathnameWithoutTrailingSlash)
+  ) {
+    return {
+      __typename: 'BeforeRedirectsRoute',
+      route: {
+        __typename: 'Frontend',
+        redirect: 'follow',
+        appendSubdomainToPath: true,
+        definite: true,
+      },
     }
   }
 
