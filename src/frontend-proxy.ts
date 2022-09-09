@@ -233,12 +233,6 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
     }
   }
 
-  /*return {
-    __typename: 'Frontend',
-    redirect: 'follow',
-    appendSubdomainToPath: true,
-  }*/
-
   if (getCookieValue('useFrontend', cookies) === 'always') {
     return {
       __typename: 'Frontend',
