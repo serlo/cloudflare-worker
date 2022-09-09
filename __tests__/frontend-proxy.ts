@@ -181,17 +181,6 @@ describe('uses cookie "useFrontend" to determine backend', () => {
   })
 })
 
-test('uses frontend when cookie "useFrontend" is "always"', async () => {
-  setupProbabilityFor(Backend.Legacy)
-  const env = currentTestEnvironment()
-
-  const request = env.createRequest({ subdomain: 'en' })
-  request.headers.set('Cookie', 'useFrontend=always;authenticated=1')
-  const response = await env.fetchRequest(request)
-
-  await expectFrontend(response)
-})
-
 test('ignore wrongly formatted cookie values', async () => {
   setupProbabilityFor(Backend.Frontend)
   const env = currentTestEnvironment()
