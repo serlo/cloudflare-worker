@@ -33,7 +33,14 @@ export * from './sentry'
 export * from './url'
 
 export const subjectStartPages: { [I in Instance]?: string[] } = {
-  de: ['/biologie', '/chemie', '/lerntipps', '/mathe', '/nachhaltigkeit'],
+  de: [
+    '/biologie',
+    '/chemie',
+    '/lerntipps',
+    '/mathe',
+    '/nachhaltigkeit',
+    '/informatik',
+  ],
 }
 
 export enum Instance {
