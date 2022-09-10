@@ -141,6 +141,7 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
         '/subscriptions/manage',
         '/entity/unrevised',
         '/entity/create/',
+        '/page/create',
         '/user/settings',
         '/discussions',
         '/backend',
