@@ -33,12 +33,27 @@ import {
   givenSerlo,
 } from './__utils__'
 
-// Subject -> no redirect
-
 test('Always choose new frontend as default route', async () => {
   await expectFrontend(
     await currentTestEnvironment().fetch({ subdomain: 'en' })
   )
+})
+
+test('No redirect for subjects', async () => {
+  givenUuid({
+    id: 1555,
+    __typename: 'Article',
+    alias: '/informatik/1235',
+    oldAlias: '/informatik',
+    instance: Instance.De,
+  })
+
+  const response = await currentTestEnvironment().fetch({
+    subdomain: 'de',
+    pathname: '/informatik',
+  })
+
+  await expectFrontend(response)
 })
 
 test('Uses legacy frontend when cookie "useLegacyFrontend" is "true"', async () => {
