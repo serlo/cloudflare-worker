@@ -60,11 +60,9 @@ export async function frontendProxy(
   const sentry = sentryFactory.createReporter('frontend')
   const route = getRoute(request)
 
-  if (route === null || route.__typename === 'BeforeRedirectsRoute') {
-    return null
-  } else {
-    return fetchBackend({ request, sentry, route })
-  }
+  return route !== null && route.__typename !== 'BeforeRedirectsRoute'
+    ? fetchBackend({ request, sentry, route })
+    : null
 }
 
 async function fetchBackend({
