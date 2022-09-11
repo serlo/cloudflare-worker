@@ -43,7 +43,6 @@ import {
   defaultFrontendServer,
 } from './__tests__/__utils__'
 
-const randomCopy = Math.random
 const timeout = currentTestEnvironment().getNeededTimeout()
 
 if (timeout) {
@@ -81,7 +80,6 @@ beforeEach(() => {
 
 afterEach(() => {
   global.server.resetHandlers()
-  Math.random = randomCopy
 })
 
 afterAll(() => {
