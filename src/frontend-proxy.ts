@@ -33,7 +33,7 @@ export async function frontendSpecialPaths(
   sentryFactory: SentryFactory
 ): Promise<Response | null> {
   const url = Url.fromRequest(request)
-  const route = await getRoute(request)
+  const route = getRoute(request)
   const sentry = sentryFactory.createReporter('frontend-special-paths')
 
   if (url.pathname === '/enable-frontend')
@@ -51,42 +51,11 @@ export async function frontendProxy(
   request: Request,
   sentryFactory: SentryFactory
 ): Promise<Response | null> {
-  const url = Url.fromRequest(request)
-  const cookies = request.headers.get('Cookie')
   const sentry = sentryFactory.createReporter('frontend')
   const route = getRoute(request)
 
   if (route === null || route.__typename === 'BeforeRedirectsRoute') {
     return null
-  } else if (route.__typename === 'AB') {
-    const cookieValue = Number(getCookieValue('useFrontend', cookies) ?? 'NaN')
-    const useFrontendNumber = Number.isNaN(cookieValue)
-      ? Math.random()
-      : cookieValue
-
-    let contentApiRequest = null
-
-    if (url.hasContentApiParameters()) {
-      url.pathname = '/content-only' + url.pathname
-      contentApiRequest = new Request(url.toString(), new Request(request))
-    }
-
-    const response = await fetchBackend({
-      request: contentApiRequest ?? request,
-      sentry,
-      route: {
-        __typename:
-          useFrontendNumber <= route.probability ? 'Frontend' : 'Legacy',
-        appendSubdomainToPath: true,
-        redirect: 'follow',
-      },
-    })
-
-    if (Number.isNaN(cookieValue)) {
-      setCookieUseFrontend(response, useFrontendNumber)
-    }
-
-    return response
   } else {
     return fetchBackend({ request, sentry, route })
   }
@@ -104,6 +73,10 @@ async function fetchBackend({
   const backendUrl = Url.fromRequest(request)
 
   if (route.__typename === 'Frontend') {
+    if (backendUrl.hasContentApiParameters()) {
+      backendUrl.pathname = '/content-only' + backendUrl.pathname
+    }
+
     if (route.appendSubdomainToPath) {
       backendUrl.pathname = `/${backendUrl.subdomain}${backendUrl.pathname}`
     }
@@ -216,12 +189,7 @@ function setCookieUseFrontend(res: Response, useFrontend: number) {
   )
 }
 
-type RouteConfig = LegacyRoute | FrontendRoute | BeforeRedirectsRoute | ABRoute
-
-interface ABRoute {
-  __typename: 'AB'
-  probability: number
-}
+type RouteConfig = LegacyRoute | FrontendRoute | BeforeRedirectsRoute
 
 interface BeforeRedirectsRoute {
   __typename: 'BeforeRedirectsRoute'
