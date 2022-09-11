@@ -185,7 +185,7 @@ describe('requests to /enable-frontend enable use of frontend', () => {
 
   test('sets cookie so that new frontend will be used', () => {
     expect(ressponse.headers.get('Set-Cookie')).toEqual(
-      expect.stringContaining('useFrontend=0;')
+      expect.stringContaining('useLegacyFrontend=false;')
     )
   })
 
@@ -211,7 +211,7 @@ describe('requests to /disable-frontend disable use of frontend', () => {
 
   test('sets cookie to that legacy backend will be used', () => {
     expect(response.headers.get('Set-Cookie')).toEqual(
-      expect.stringContaining('useFrontend=1.1;')
+      expect.stringContaining('useLegacyFrontend=true;')
     )
   })
 
