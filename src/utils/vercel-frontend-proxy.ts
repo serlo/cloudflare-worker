@@ -19,13 +19,19 @@
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import {
-  getCookieValue,
-  SentryReporter,
-  isInstance,
-  subjectStartPages,
-} from '.'
+import { getCookieValue, SentryReporter, isInstance, Instance } from '.'
 import { Url } from './url'
+
+const subjectStartPages: { [I in Instance]?: string[] } = {
+  de: [
+    '/biologie',
+    '/chemie',
+    '/lerntipps',
+    '/mathe',
+    '/nachhaltigkeit',
+    '/informatik',
+  ],
+}
 
 export async function fetchBackend({
   request,

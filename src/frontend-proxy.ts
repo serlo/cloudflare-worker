@@ -25,7 +25,7 @@ import {
   SentryFactory,
   SentryReporter,
   Url,
-  subjectStartPages,
+  Instance,
 } from './utils'
 
 export async function frontendSpecialPaths(
@@ -121,6 +121,17 @@ function getRoute(request: Request): RouteConfig | null {
         appendSubdomainToPath: false,
       },
     }
+  }
+
+  const subjectStartPages: { [I in Instance]?: string[] } = {
+    de: [
+      '/biologie',
+      '/chemie',
+      '/lerntipps',
+      '/mathe',
+      '/nachhaltigkeit',
+      '/informatik',
+    ],
   }
 
   if (

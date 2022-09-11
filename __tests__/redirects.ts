@@ -20,7 +20,7 @@
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-import { Instance, subjectStartPages } from '../src/utils'
+import { Instance } from '../src/utils'
 import {
   expectIsNotFoundResponse,
   expectToBeRedirectTo,
@@ -296,31 +296,6 @@ describe('redirects to current path of an resource', () => {
     })
 
     await expectContainsText(response, ['Applets vertauscht'])
-  })
-
-  describe('no redirect when requested path belongs to subject start page', () => {
-    const instances = Object.keys(subjectStartPages) as Instance[]
-
-    describe.each(instances)('instance = %s', (instance) => {
-      test.each(subjectStartPages[instance]!)(
-        'pathname = %s',
-        async (pathname) => {
-          givenUuid({
-            __typename: 'Page',
-            alias: pathname,
-            content: '',
-            instance,
-          })
-
-          const response = await currentTestEnvironment().fetch({
-            subdomain: instance,
-            pathname,
-          })
-
-          expect(response.status).toBe(200)
-        }
-      )
-    })
   })
 
   describe('redirects to first course page when requested entity is a course', () => {
