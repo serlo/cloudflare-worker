@@ -61,7 +61,6 @@ beforeEach(() => {
   global.DOMAIN = 'serlo.localhost'
   global.ENVIRONMENT = 'local'
   global.FRONTEND_DOMAIN = 'frontend.serlo.localhost'
-  global.FRONTEND_PROBABILITY = '1'
 
   global.MAINTENANCE_KV = createKV()
   global.PATH_INFO_KV = createKV()

@@ -24,10 +24,6 @@ import {
   mockHttpGet,
   returnsText,
   givenUuid,
-  givenApi,
-  returnsJson,
-  Backend,
-  setupProbabilityFor,
   localTestEnvironment,
   currentTestEnvironment,
   redirectsTo,
@@ -35,11 +31,9 @@ import {
   expectSentryEvent,
   expectToBeRedirectTo,
   givenSerlo,
-  currentTestEnvironmentWhen,
 } from './__utils__'
 
 beforeEach(() => {
-  global.FRONTEND_PROBABILITY = '0.5'
   Math.random = jest.fn().mockReturnValue(0.5)
 
   givenUuid({
