@@ -33,15 +33,6 @@ import {
   givenSerlo,
 } from './__utils__'
 
-beforeEach(() => {
-  givenUuid({
-    id: 23591,
-    __typename: 'Page',
-    alias: '/math',
-    instance: Instance.En,
-  })
-})
-
 // Choses legacy when useLegacyFrontend=true
 
 // Choses always new frontend
