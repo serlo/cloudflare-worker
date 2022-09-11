@@ -35,7 +35,7 @@ export enum EntityType {
   video = 'video',
 }
 
-export interface AreWeEdtrIoYetProps {
+interface AreWeEdtrIoYetProps {
   data: Record<EntityType, EntityProps['data']>
 }
 
