@@ -34,8 +34,6 @@ import {
 } from './__utils__'
 
 beforeEach(() => {
-  Math.random = jest.fn().mockReturnValue(0.5)
-
   givenUuid({
     id: 23591,
     __typename: 'Page',
