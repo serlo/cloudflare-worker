@@ -37,10 +37,16 @@ export async function frontendSpecialPaths(
   const sentry = sentryFactory.createReporter('frontend-special-paths')
 
   if (url.pathname === '/enable-frontend')
-    return createConfigurationResponse('Enabled: Use of new frontend', 0)
+    return createConfigurationResponse({
+      message: 'Enabled: Use of new frontend',
+      useLegacyFrontend: false,
+    })
 
   if (url.pathname === '/disable-frontend')
-    return createConfigurationResponse('Disabled: Use of new frontend', 1.1)
+    return createConfigurationResponse({
+      message: 'Disabled: Use of new frontend',
+      useLegacyFrontend: true,
+    })
 
   return route !== null && route.__typename === 'BeforeRedirectsRoute'
     ? fetchBackend({ request, sentry, route: route.route })
@@ -173,12 +179,20 @@ function getRoute(request: Request): RouteConfig | null {
   }
 }
 
-function createConfigurationResponse(message: string, useFrontend: number) {
+function createConfigurationResponse({
+  message,
+  useLegacyFrontend,
+}: {
+  message: string
+  useLegacyFrontend: boolean
+}) {
   const response = new Response(message)
 
   response.headers.append(
     'Set-Cookie',
-    `useFrontend=${useFrontend}; path=/; domain=.${global.DOMAIN}`
+    `useLegacyFrontend=${useLegacyFrontend.toString()}; path=/; domain=.${
+      global.DOMAIN
+    }`
   )
   response.headers.set('Refresh', '1; url=/')
 
