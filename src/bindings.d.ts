@@ -31,7 +31,6 @@ declare var DOMAIN: string
 declare var ENVIRONMENT: 'staging' | 'production' | 'local'
 declare var ENABLE_BASIC_AUTH: 'true' | 'false'
 declare var FRONTEND_DOMAIN: string
-declare var FRONTEND_PROBABILITY: string
 
 // KVs
 declare var MAINTENANCE_KV: KVNamespace<'enabled'>

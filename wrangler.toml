@@ -20,7 +20,6 @@ DOMAIN = "serlo-staging.dev"
 ENVIRONMENT = "staging"
 ENABLE_BASIC_AUTH = "true"
 FRONTEND_DOMAIN = "frontend-git-staging-serlo.vercel.app"
-FRONTEND_PROBABILITY = "1"
 
 [env.production]
 kv-namespaces = [
@@ -39,4 +38,3 @@ DOMAIN = "serlo.org"
 ENVIRONMENT = "production"
 ENABLE_BASIC_AUTH = "false"
 FRONTEND_DOMAIN = "frontend.serlo.org"
-FRONTEND_PROBABILITY = "1"
