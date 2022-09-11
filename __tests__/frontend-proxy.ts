@@ -33,11 +33,17 @@ import {
   givenSerlo,
 } from './__utils__'
 
-// Choses legacy when useLegacyFrontend=true
-
 // Choses always new frontend
-// Choses legacy for
 // Subject -> no redirect
+
+test('Uses legacy frontend when cookie "useLegacyFrontend" is "true"', async () => {
+  const env = currentTestEnvironment()
+  const request = env.createRequest({ subdomain: 'en' })
+
+  request.headers.append('Cookie', 'useLegacyFrontend=true;')
+
+  await expectLegacy(await env.fetchRequest(request))
+})
 
 test('removes trailing slashes and prepends language code when the backend is frontend', async () => {
   await expectFrontend(

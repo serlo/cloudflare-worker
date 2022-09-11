@@ -108,6 +108,10 @@ function getRoute(request: Request): RouteConfig | null {
 
   if (!isInstance(url.subdomain)) return null
 
+  if (getCookieValue('useLegacyFrontend', cookies) === 'true') {
+    return { __typename: 'Legacy' }
+  }
+
   if (url.pathname.startsWith('/api/auth/')) {
     return {
       __typename: 'BeforeRedirectsRoute',
