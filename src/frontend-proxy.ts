@@ -176,17 +176,13 @@ function getRoute(request: Request): RouteConfig | null {
 function createConfigurationResponse(message: string, useFrontend: number) {
   const response = new Response(message)
 
-  setCookieUseFrontend(response, useFrontend)
-  response.headers.set('Refresh', '1; url=/')
-
-  return response
-}
-
-function setCookieUseFrontend(res: Response, useFrontend: number) {
-  res.headers.append(
+  response.headers.append(
     'Set-Cookie',
     `useFrontend=${useFrontend}; path=/; domain=.${global.DOMAIN}`
   )
+  response.headers.set('Refresh', '1; url=/')
+
+  return response
 }
 
 type RouteConfig = LegacyRoute | FrontendRoute | BeforeRedirectsRoute
