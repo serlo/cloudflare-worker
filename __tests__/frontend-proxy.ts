@@ -33,8 +33,13 @@ import {
   givenSerlo,
 } from './__utils__'
 
-// Choses always new frontend
 // Subject -> no redirect
+
+test('Always choose new frontend as default route', async () => {
+  await expectFrontend(
+    await currentTestEnvironment().fetch({ subdomain: 'en' })
+  )
+})
 
 test('Uses legacy frontend when cookie "useLegacyFrontend" is "true"', async () => {
   const env = currentTestEnvironment()
@@ -43,12 +48,6 @@ test('Uses legacy frontend when cookie "useLegacyFrontend" is "true"', async () 
   request.headers.append('Cookie', 'useLegacyFrontend=true;')
 
   await expectLegacy(await env.fetchRequest(request))
-})
-
-test('removes trailing slashes and prepends language code when the backend is frontend', async () => {
-  await expectFrontend(
-    await currentTestEnvironment().fetch({ subdomain: 'en' })
-  )
 })
 
 describe('when request contains content api parameter', () => {
