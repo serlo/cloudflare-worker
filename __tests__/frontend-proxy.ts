@@ -153,17 +153,6 @@ test('creates a copy of backend responses (otherwise there is an error in cloudf
   expect(response).not.toBe(backendResponse)
 })
 
-/* TODO:
-test('passes query string to backend', async () => {
-  const response = await fetchBackend({
-    backend: Backend.Legacy,
-    pathname: '/search?q=Pythagoras',
-  })
-
-  expect(await response.text()).toEqual(expect.stringContaining('Pythagoras'))
-})
-*/
-
 describe('requests to /enable-frontend enable use of frontend', () => {
   let ressponse: Response
 
