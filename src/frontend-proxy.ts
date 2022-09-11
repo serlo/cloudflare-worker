@@ -54,7 +54,8 @@ export async function frontendProxy(
   const url = Url.fromRequest(request)
   const cookies = request.headers.get('Cookie')
   const sentry = sentryFactory.createReporter('frontend')
-  const route = await getRoute(request)
+  const route = getRoute(request)
+
   if (route === null || route.__typename === 'BeforeRedirectsRoute') {
     return null
   } else if (route.__typename === 'AB') {
@@ -124,7 +125,7 @@ async function fetchBackend({
   return new Response(response.body, response)
 }
 
-async function getRoute(request: Request): Promise<RouteConfig | null> {
+function getRoute(request: Request): RouteConfig | null {
   const url = Url.fromRequest(request)
   const cookies = request.headers.get('Cookie')
 
@@ -145,7 +146,13 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
     url.pathname.startsWith('/_next/') ||
     url.pathname.startsWith('/_assets/') ||
     url.pathname.startsWith('/api/frontend/') ||
-    url.pathname.startsWith('/___')
+    url.pathname.startsWith('/___') ||
+    url.pathname === '/user/notifications' ||
+    url.pathname === '/consent' ||
+    (subjectStartPages[url.subdomain] &&
+      subjectStartPages[url.subdomain]?.includes(
+        url.pathnameWithoutTrailingSlash
+      ))
   ) {
     return {
       __typename: 'BeforeRedirectsRoute',
@@ -153,31 +160,6 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
         __typename: 'Frontend',
         redirect: 'follow',
         appendSubdomainToPath: false,
-      },
-    }
-  }
-
-  if (url.pathname === '/user/notifications' || url.pathname === '/consent') {
-    return {
-      __typename: 'BeforeRedirectsRoute',
-      route: {
-        __typename: 'Frontend',
-        redirect: 'follow',
-        appendSubdomainToPath: true,
-      },
-    }
-  }
-
-  if (
-    url.pathname.startsWith('/entity/repository/add-revision-old/') ||
-    (url.pathname.startsWith('/entity/repository/add-revision/') &&
-      (request.method === 'POST' ||
-        getCookieValue('useLegacyEditor', cookies) === '1'))
-  ) {
-    return {
-      __typename: 'BeforeRedirectsRoute',
-      route: {
-        __typename: 'Legacy',
       },
     }
   }
@@ -192,7 +174,16 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
       '/auth/hydra/login',
       '/auth/hydra/consent',
       '/user/register',
-    ].includes(url.pathname)
+    ].includes(url.pathname) ||
+    request.headers.get('X-From') === 'legacy-serlo.org' ||
+    (global.ENVIRONMENT === 'production' &&
+      url.pathname.startsWith('/entity/create/')) ||
+    (/\/taxonomy\/term\/create\/\d+\/\d+/.test(url.pathname) &&
+      (global.ENVIRONMENT === 'production' || request.method === 'POST')) ||
+    url.pathname.startsWith('/entity/repository/add-revision-old/') ||
+    (url.pathname.startsWith('/entity/repository/add-revision/') &&
+      (request.method === 'POST' ||
+        getCookieValue('useLegacyEditor', cookies) === '1'))
   ) {
     return {
       __typename: 'BeforeRedirectsRoute',
@@ -202,89 +193,11 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
     }
   }
 
-  if (
-    /\/taxonomy\/term\/create\/\d+\/\d+/.test(url.pathname) &&
-    global.ENVIRONMENT === 'staging' &&
-    request.method === 'GET'
-  ) {
-    return {
-      __typename: 'Frontend',
-      redirect: 'follow',
-      appendSubdomainToPath: true,
-    }
+  return {
+    __typename: 'Frontend',
+    redirect: 'follow',
+    appendSubdomainToPath: true,
   }
-
-  if (
-    isInstance(url.subdomain) &&
-    subjectStartPages[url.subdomain] &&
-    subjectStartPages[url.subdomain]?.includes(url.pathnameWithoutTrailingSlash)
-  ) {
-    return {
-      __typename: 'BeforeRedirectsRoute',
-      route: {
-        __typename: 'Frontend',
-        redirect: 'follow',
-        appendSubdomainToPath: true,
-      },
-    }
-  }
-
-  if (request.headers.get('X-From') === 'legacy-serlo.org') {
-    return {
-      __typename: 'Legacy',
-    }
-  }
-
-  if (
-    global.ENVIRONMENT === 'staging' &&
-    url.pathname.startsWith('/entity/create/')
-  ) {
-    return {
-      __typename: 'AB',
-      probability: Number(global.FRONTEND_PROBABILITY),
-    }
-  }
-
-  if (
-    (await url.isUuid()) ||
-    url.pathname === '/' ||
-    [
-      '/search',
-      '/spenden',
-      '/subscriptions/manage',
-      '/entity/unrevised',
-      '/user/settings',
-      '/discussions',
-      '/backend',
-      '/uuid/recycle-bin',
-      '/pages',
-      '/mathe',
-      '/biologie',
-      '/nachhaltigkeit',
-      '/informatik',
-      '/chemie',
-      '/lerntipps',
-    ].includes(url.pathnameWithoutTrailingSlash) ||
-    url.pathname.startsWith('/license/detail') ||
-    (url.subdomain === 'de' && url.pathname.startsWith('/jobs')) ||
-    url.pathname.startsWith('/entity/repository/history') ||
-    url.pathname.startsWith('/entity/repository/add-revision/') ||
-    url.pathname.startsWith('/entity/taxonomy/update/') ||
-    url.pathname.startsWith('/entity/link/order/') ||
-    url.pathname.startsWith('/entity/license/update/') ||
-    url.pathname.startsWith('/taxonomy/term/move/batch/') ||
-    url.pathname.startsWith('/taxonomy/term/copy/batch/') ||
-    url.pathname.startsWith('/taxonomy/term/sort/entities/') ||
-    url.pathname.startsWith('/event/history') ||
-    url.pathname.startsWith('/error/deleted')
-  ) {
-    return {
-      __typename: 'AB',
-      probability: Number(global.FRONTEND_PROBABILITY),
-    }
-  }
-
-  return null
 }
 
 function createConfigurationResponse(message: string, useFrontend: number) {
