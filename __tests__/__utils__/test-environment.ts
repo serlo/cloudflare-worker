@@ -25,7 +25,6 @@ import { FetchError } from 'node-fetch'
 import path from 'path'
 
 import { handleFetchEvent } from '../../src'
-import { Variables } from '../../src/bindings'
 import { isInstance } from '../../src/utils'
 
 declare global {
@@ -186,7 +185,12 @@ interface Config {
   }
 }
 
-type RemoteEnvironmentName = 'staging' | 'production'
+type Variables = Pick<
+  typeof global,
+  'ENVIRONMENT' | 'ALLOW_AUTH_FROM_LOCALHOST' | 'DOMAIN'
+>
+
+type RemoteEnvironmentName = Exclude<typeof ENVIRONMENT, 'local'>
 
 function isRemoteEnvironmentName(env: string): env is RemoteEnvironmentName {
   return env === 'staging' || env === 'production'
