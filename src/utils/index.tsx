@@ -59,7 +59,7 @@ export function getCookieValue(
 }
 
 const PathInfo = t.intersection([
-  t.type({ currentPath: t.string }),
+  t.type({ typename: t.string, currentPath: t.string }),
   t.partial({ instance: t.string, hash: t.string }),
 ])
 type PathInfo = t.TypeOf<typeof PathInfo>
@@ -86,7 +86,7 @@ export async function getPathInfo(
   path: string
 ): Promise<PathInfo | null> {
   if (path === '/user/me' || path === '/user/public')
-    return { currentPath: path }
+    return { typename: 'User', currentPath: path }
 
   const cacheKey = await toCacheKey(`/${lang}${path}`)
   const cachedValue = await global.PATH_INFO_KV.get(cacheKey)
@@ -164,6 +164,7 @@ export async function getPathInfo(
     ? uuid.pages[0].alias
     : uuid.alias ?? path
   const result = {
+    typename: uuid.__typename,
     currentPath,
     instance: uuid.instance,
     ...(uuid.legacyObject !== undefined && !isTrashedComment
