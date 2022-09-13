@@ -157,6 +157,12 @@ function getRoute(request: Request): RouteConfig | null {
   }
 
   if (
+    url.pathname.startsWith('/entity/api/rss/') ||
+    url.pathname.startsWith('/entity/api/json/')
+  )
+    return null
+
+  if (
     url.pathname.startsWith('/auth/activate/') ||
     url.pathname.startsWith('/auth/password/restore/') ||
     [
