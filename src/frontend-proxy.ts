@@ -133,16 +133,6 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
     }
 
     if (
-      global.ENVIRONMENT === 'staging' &&
-      url.pathname.startsWith('/entity/create/')
-    ) {
-      return {
-        __typename: 'AB',
-        probability: Number(global.FRONTEND_PROBABILITY),
-      }
-    }
-
-    if (
       (await url.isUuid()) ||
       url.pathname === '/' ||
       [
@@ -150,6 +140,8 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
         '/spenden',
         '/subscriptions/manage',
         '/entity/unrevised',
+        '/entity/create/',
+        '/page/create',
         '/user/settings',
         '/discussions',
         '/backend',
@@ -161,6 +153,7 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
         '/informatik',
         '/chemie',
         '/lerntipps',
+        '/authorization/roles',
       ].includes(url.pathnameWithoutTrailingSlash) ||
       url.pathname.startsWith('/license/detail') ||
       (url.subdomain === 'de' && url.pathname.startsWith('/jobs')) ||
