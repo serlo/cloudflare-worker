@@ -34,9 +34,15 @@ export async function api(request: Request) {
 
 export async function fetchApi(request: Request) {
   request = new Request(request)
+
   request.headers.set('Authorization', await getAuthorizationHeader(request))
 
-  return await fetch(request)
+  const response = buildResponseWithDynamicCors(
+    await fetch(request),
+    request.headers.get('Origin')
+  )
+
+  return response
 }
 
 async function getAuthorizationHeader(request: Request) {
@@ -53,4 +59,14 @@ async function getAuthorizationHeader(request: Request) {
   } else {
     return `Serlo Service=${serviceToken}`
   }
+}
+
+// Actually, it is supposed to be handled in api but Cloudflare keeps somehow always setting response CORS to *
+function buildResponseWithDynamicCors(
+  originalResponse: Response,
+  origin: string | null
+) {
+  const response = new Response(originalResponse.body, originalResponse)
+  response.headers.set('Access-Control-Allow-Origin', origin || '*')
+  return response
 }
