@@ -74,6 +74,7 @@ export async function handleFetchEvent(event: FetchEvent): Promise<Response> {
       (await api(request)) ||
       (await frontendProxy(request, sentryFactory)) ||
       (await lenabiProxy(request)) ||
+      (await kratosStagingFix(request)) ||
       (await metadataApi(request, sentryFactory)) ||
       (await fetch(request))
     )
@@ -81,6 +82,17 @@ export async function handleFetchEvent(event: FetchEvent): Promise<Response> {
     sentryFactory.createReporter('handle-fetch-event').captureException(e)
     throw e
   }
+}
+
+async function kratosStagingFix(request: Request) {
+  const url = Url.fromRequest(request)
+
+  if (global.ENVIRONMENT !== 'staging' || url.subdomain != 'kratos-vercel')
+    return null
+
+  const response = await fetch(request)
+  response.headers.set('Access-Control-Allow-Origin', origin)
+  return response
 }
 
 async function keycloakAndEnmeshedCors(request: Request) {
