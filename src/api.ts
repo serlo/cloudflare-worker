@@ -29,11 +29,20 @@ export async function api(request: Request) {
   if (url.subdomain !== 'api') return null
   if (url.pathname !== '/graphql') return null
 
-  return await fetchApi(request)
+  // Actually, the header `Access-Control-Allow-Origin` is supposed to be
+  // handled in api but Cloudflare keeps somehow setting it to `*`
+  const originalResponse = await fetchApi(request)
+  const response = new Response(originalResponse.body, originalResponse)
+  response.headers.set(
+    'Access-Control-Allow-Origin',
+    request.headers.get('Origin') ?? '*'
+  )
+  return response
 }
 
 export async function fetchApi(request: Request) {
   request = new Request(request)
+
   request.headers.set('Authorization', await getAuthorizationHeader(request))
 
   return await fetch(request)
