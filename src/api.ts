@@ -29,7 +29,15 @@ export async function api(request: Request) {
   if (url.subdomain !== 'api') return null
   if (url.pathname !== '/graphql') return null
 
-  return await fetchApi(request)
+  // Actually, the header `Access-Control-Allow-Origin` is supposed to be
+  // handled in api but Cloudflare keeps somehow setting it to `*`
+  const originalResponse = await fetchApi(request)
+  const response = new Response(originalResponse.body, originalResponse)
+  response.headers.set(
+    'Access-Control-Allow-Origin',
+    request.headers.get('Origin') ?? '*'
+  )
+  return response
 }
 
 export async function fetchApi(request: Request) {
@@ -37,12 +45,7 @@ export async function fetchApi(request: Request) {
 
   request.headers.set('Authorization', await getAuthorizationHeader(request))
 
-  const response = buildResponseWithDynamicCors(
-    await fetch(request),
-    request.headers.get('Origin')
-  )
-
-  return response
+  return await fetch(request)
 }
 
 async function getAuthorizationHeader(request: Request) {
@@ -59,14 +62,4 @@ async function getAuthorizationHeader(request: Request) {
   } else {
     return `Serlo Service=${serviceToken}`
   }
-}
-
-// Actually, it is supposed to be handled in api but Cloudflare keeps somehow always setting response CORS to *
-function buildResponseWithDynamicCors(
-  originalResponse: Response,
-  origin: string | null
-) {
-  const response = new Response(originalResponse.body, originalResponse)
-  response.headers.set('Access-Control-Allow-Origin', origin || '*')
-  return response
 }
