@@ -21,17 +21,18 @@
  */
 import { givenUuid, currentTestEnvironment } from './__utils__'
 
-describe('api calls', () => {
-  test('get a signature', async () => {
-    const env = currentTestEnvironment()
+let response: Response
 
-    givenUuid({
-      id: 23591,
-      __typename: 'Page',
-      alias: '/23591/math',
-    })
+beforeEach(async () => {
+  const env = currentTestEnvironment()
 
-    const query = `
+  givenUuid({
+    id: 23591,
+    __typename: 'Page',
+    alias: '/23591/math',
+  })
+
+  const query = `
       query($alias: AliasInput) {
         uuid(alias: $alias) {
           __typename
@@ -42,21 +43,27 @@ describe('api calls', () => {
         }
       }
     `
-    const response = await env.fetch(
-      { subdomain: 'api', pathname: '/graphql' },
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query,
-          variables: { alias: { instance: 'de', path: '/23591' } },
-        }),
-      }
-    )
 
-    expect(response.status).toBe(200)
-    expect(await response.json()).toEqual({
-      data: { uuid: { __typename: 'Page', alias: '/23591/math', id: 23591 } },
-    })
+  response = await env.fetch(
+    { subdomain: 'api', pathname: '/graphql' },
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Origin: 'origin' },
+      body: JSON.stringify({
+        query,
+        variables: { alias: { instance: 'de', path: '/23591' } },
+      }),
+    }
+  )
+})
+
+test('Calls to API get a signature', async () => {
+  expect(response.status).toBe(200)
+  expect(await response.json()).toEqual({
+    data: { uuid: { __typename: 'Page', alias: '/23591/math', id: 23591 } },
   })
+})
+
+test('header `Access-Control-Allow-Origin` is fixed', () => {
+  expect(response.headers.get('Access-Control-Allow-Origin')).toBe('origin')
 })
