@@ -1745,16 +1745,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cloudflare/workers-types@npm:^3.14.1":
-  version: 3.14.1
-  resolution: "@cloudflare/workers-types@npm:3.14.1"
-  checksum: eba53686f24ec671a6930da07c7872e2c05420ffdff78e179bc440775fa0dc6fd673e1febf3069ac5099fc4725c68281be100af89dcc7855eacbffee244da5f9
+"@cloudflare/workers-types@npm:^3.16.0":
+  version: 3.16.0
+  resolution: "@cloudflare/workers-types@npm:3.16.0"
+  checksum: 5fad4d7e5b495e299b8b037043ee406a4e6aadc533e90d2a87009934cd82e1072710264451c5fefc3b71502bbf659f9b1f530f2fcceeaa036704da605194f4f6
   languageName: node
   linkType: hard
 
-"@cloudflare/wrangler@npm:^1.19.12":
-  version: 1.19.12
-  resolution: "@cloudflare/wrangler@npm:1.19.12"
+"@cloudflare/wrangler@npm:^1.19.13":
+  version: 1.19.13
+  resolution: "@cloudflare/wrangler@npm:1.19.13"
   dependencies:
     axios: ^0.21.1
     rimraf: ^3.0.2
@@ -1762,7 +1762,7 @@ __metadata:
   bin:
     wrangler: run-wrangler.js
     wrangler1: run-wrangler.js
-  checksum: 40cbc1141046a4d7183a79ef61240065ee22d6f643b2a45e31c1e966b6da41e3b81e8a1e3745730a0f50123a0a2b863122e41f1c659e81fa3e67814410689af2
+  checksum: f2d42fdce644d2b35bc7258c10e64160c2176b977233511f5a10a6712e76e2d4e936c61024773ffddafdaec54757ff4888cfeffa648281c0bbf2fa43cb81d810
   languageName: node
   linkType: hard
 
@@ -2456,8 +2456,8 @@ __metadata:
   resolution: "@serlo/serlo.org-cloudflare-worker@workspace:."
   dependencies:
     "@babel/core": ^7.18.6
-    "@cloudflare/workers-types": ^3.14.1
-    "@cloudflare/wrangler": ^1.19.12
+    "@cloudflare/workers-types": ^3.16.0
+    "@cloudflare/wrangler": ^1.19.13
     "@iarna/toml": ^2.2.5
     "@splish-me/copyright-headers": ^0.0.2
     "@storybook/preact": ^6.4.20
