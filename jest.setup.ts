@@ -104,6 +104,7 @@ function addGlobalMocks() {
         )
       },
     },
+    randomUUID: cryptoNode.randomUUID,
   } as unknown as typeof crypto
   global.TextEncoder = util.TextEncoder
 }
