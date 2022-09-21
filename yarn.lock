@@ -2536,7 +2536,7 @@ __metadata:
     prettier-plugin-sh: ^0.12.8
     rimraf: ^3.0.2
     sanitize-html: ^2.7.2
-    toucan-js: ^2.6.0
+    toucan-js: ^2.6.1
     ts-jest: ^29.0.1
     ts-loader: ^8.4.0
     ts-node: ^10.9.1
@@ -3776,13 +3776,6 @@ __metadata:
   version: 2.0.6
   resolution: "@types/unist@npm:2.0.6"
   checksum: 25cb860ff10dde48b54622d58b23e66214211a61c84c0f15f88d38b61aa1b53d4d46e42b557924a93178c501c166aa37e28d7f6d994aba13d24685326272d5db
-  languageName: node
-  linkType: hard
-
-"@types/uuid@npm:8.3.4":
-  version: 8.3.4
-  resolution: "@types/uuid@npm:8.3.4"
-  checksum: 6f11f3ff70f30210edaa8071422d405e9c1d4e53abbe50fdce365150d3c698fe7bbff65c1e71ae080cbfb8fded860dbb5e174da96fdbbdfcaa3fb3daa474d20f
   languageName: node
   linkType: hard
 
@@ -15093,20 +15086,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"toucan-js@npm:^2.6.0":
-  version: 2.6.0
-  resolution: "toucan-js@npm:2.6.0"
+"toucan-js@npm:^2.6.1":
+  version: 2.6.1
+  resolution: "toucan-js@npm:2.6.1"
   dependencies:
     "@sentry/core": 6.19.6
     "@sentry/hub": 6.19.6
     "@sentry/types": 6.19.6
     "@sentry/utils": 6.19.6
     "@types/cookie": 0.5.0
-    "@types/uuid": 8.3.4
     cookie: 0.5.0
     stacktrace-js: 2.0.2
-    uuid: 8.3.2
-  checksum: 874d0df7f1b4af0e9db978c5e71e1cb485b27f60bfc6899b47eaa1fbf98e85e2729b4311c38e22879a1c61557b0e3a100bdc62500aed807d5f78fa5200eb51f6
+  checksum: 0ed91321e61cc97f7834f34fa1d34105274fa9b40b9d4e9de8d7e23c93e4b8206c3935d4bd95cdca7a78619d20906d37a0640659888027f732f1b1fcf00373b6
   languageName: node
   linkType: hard
 
@@ -15800,15 +15791,6 @@ __metadata:
   version: 1.0.1
   resolution: "utils-merge@npm:1.0.1"
   checksum: c81095493225ecfc28add49c106ca4f09cdf56bc66731aa8dabc2edbbccb1e1bfe2de6a115e5c6a380d3ea166d1636410b62ef216bb07b3feb1cfde1d95d5080
-  languageName: node
-  linkType: hard
-
-"uuid@npm:8.3.2":
-  version: 8.3.2
-  resolution: "uuid@npm:8.3.2"
-  bin:
-    uuid: dist/bin/uuid
-  checksum: 5575a8a75c13120e2f10e6ddc801b2c7ed7d8f3c8ac22c7ed0c7b2ba6383ec0abda88c905085d630e251719e0777045ae3236f04c812184b7c765f63a70e58df
   languageName: node
   linkType: hard
 
