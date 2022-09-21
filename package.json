@@ -34,15 +34,15 @@
     "_prettier": "prettier ."
   },
   "dependencies": {
-    "core-js-pure": "^3.25.0",
-    "fp-ts": "^2.12.2",
+    "core-js-pure": "^3.25.2",
+    "fp-ts": "^2.12.3",
     "io-ts": "^2.2.18",
-    "jose": "^4.9.1",
+    "jose": "^4.9.3",
     "luxon": "^3.0.3",
-    "marked": "^4.0.19",
+    "marked": "^4.1.0",
     "preact": "^10.10.6",
     "preact-render-to-string": "^5.2.2",
-    "sanitize-html": "^2.7.1",
+    "sanitize-html": "^2.7.2",
     "toucan-js": "^2.6.0"
   },
   "devDependencies": {
@@ -57,8 +57,8 @@
     "@types/core-js": "^2.5.5",
     "@types/iarna__toml": "^2.0.2",
     "@types/jest": "^27.4.1",
-    "@types/luxon": "^3.0.0",
-    "@types/marked": "^4.0.6",
+    "@types/luxon": "^3.0.1",
+    "@types/marked": "^4.0.7",
     "@types/node": "^16.11.43",
     "@types/rimraf": "^3.0.2",
     "@types/sanitize-html": "^2.6.2",
