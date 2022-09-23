@@ -30,6 +30,7 @@ import {
   expectContainsText,
   currentTestEnvironment,
   localTestEnvironment,
+  currentTestEnvironmentWhen,
 } from './__utils__'
 
 const env = currentTestEnvironment()
@@ -225,6 +226,35 @@ test('/ref/:id redirects to /:id', async () => {
 
   const target = env.createUrl({ subdomain: 'de', pathname: '/1' })
   expectToBeRedirectTo(response, target, 301)
+})
+
+describe('LENABI redirect links', () => {
+  test('serlo.org/ecec', async () => {
+    const response = await currentTestEnvironmentWhen((config) =>
+      ['production', 'local'].includes(config.ENVIRONMENT)
+    ).fetch({ subdomain: 'de', pathname: '/ecec' })
+
+    expect(response.status).toBe(302)
+  })
+
+  test.each([
+    '/metadata-api',
+    '/data-wallet',
+    '/docs',
+    '/sso',
+    '/status',
+    '/user-journey',
+    '/docs/sso',
+  ])('%s', async (pathname) => {
+    const response = await currentTestEnvironmentWhen((config) =>
+      ['production', 'local'].includes(config.ENVIRONMENT)
+    ).fetch({
+      subdomain: 'lenabi',
+      pathname,
+    })
+
+    expect(response.status).toBe(302)
+  })
 })
 
 describe('redirects to current path of an resource', () => {
