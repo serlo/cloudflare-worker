@@ -53,7 +53,6 @@ export async function handleFetchEvent(event: FetchEvent): Promise<Response> {
       (await maintenanceMode(request)) ||
       (await enforceHttps(request)) ||
       (await birdMetadataApi(request)) ||
-      (await keycloakAndEnmeshedCors(request)) ||
       (await legalPages(request)) ||
       (await quickbarProxy(request, sentryFactory)) ||
       (await pdfProxy(request, sentryFactory)) ||
@@ -74,20 +73,6 @@ export async function handleFetchEvent(event: FetchEvent): Promise<Response> {
     sentryFactory.createReporter('handle-fetch-event').captureException(e)
     throw e
   }
-}
-
-async function keycloakAndEnmeshedCors(request: Request) {
-  const url = Url.fromRequest(request)
-
-  if (global.ENVIRONMENT !== 'staging') return null
-  if (url.subdomain !== 'keycloak' && url.subdomain !== 'enmeshed') return null
-
-  const originalResponse = await fetch(request)
-  const response = new Response(originalResponse.body, originalResponse)
-
-  response.headers.set('Access-Control-Allow-Origin', '*')
-
-  return response
 }
 
 function sentryHelloWorld(request: Request, sentryFactory: SentryFactory) {
