@@ -20,5 +20,4 @@
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
 export * from './bird-metadata-api'
-export * from './frontend-proxy'
 export * from './redirects'
