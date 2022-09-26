@@ -25,8 +25,8 @@ import {
   SentryFactory,
   SentryReporter,
   Url,
+  subjectStartPages,
 } from './utils'
-import * as vercelFrontendProxy from './utils/vercel-frontend-proxy'
 
 export async function frontendSpecialPaths(
   request: Request,
@@ -78,7 +78,6 @@ export async function frontendProxy(
           useFrontendNumber <= route.probability ? 'Frontend' : 'Legacy',
         appendSubdomainToPath: true,
         redirect: 'follow',
-        definite: false,
       },
     })
 
@@ -99,18 +98,34 @@ async function fetchBackend({
 }: {
   request: Request
   sentry: SentryReporter
-  route: vercelFrontendProxy.LegacyRoute | vercelFrontendProxy.FrontendRoute
+  route: LegacyRoute | FrontendRoute
 }) {
   const cookies = request.headers.get('Cookie')
   const domain =
     getCookieValue('frontendDomain', cookies) ?? global.FRONTEND_DOMAIN
 
-  return vercelFrontendProxy.fetchBackend({
-    request,
-    sentry,
-    domain,
-    route,
+  const backendUrl = Url.fromRequest(request)
+
+  if (route.__typename === 'Frontend') {
+    if (route.appendSubdomainToPath) {
+      backendUrl.pathname = `/${backendUrl.subdomain}${backendUrl.pathname}`
+    }
+
+    backendUrl.hostname = domain
+    backendUrl.pathname = backendUrl.pathnameWithoutTrailingSlash
+  }
+
+  const response = await fetch(new Request(backendUrl.toString(), request), {
+    redirect: route.__typename === 'Frontend' ? route.redirect : 'manual',
   })
+
+  if (sentry && route.__typename === 'Frontend' && response.redirected) {
+    sentry.setContext('backendUrl', backendUrl)
+    sentry.setContext('responseUrl', response.url)
+    sentry.captureMessage('Frontend responded with a redirect', 'error')
+  }
+
+  return new Response(response.body, response)
 }
 
 async function getRoute(request: Request): Promise<RouteConfig | null> {
@@ -119,65 +134,169 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
 
   if (!isInstance(url.subdomain)) return null
 
-  const routeConfig = vercelFrontendProxy.getRoute(request)
-
-  if (routeConfig?.__typename === 'Frontend' && !routeConfig.definite) {
-    if (getCookieValue('useFrontend', cookies) === 'always') {
-      return routeConfig
+  if (url.pathname.startsWith('/api/auth/')) {
+    return {
+      __typename: 'BeforeRedirectsRoute',
+      route: {
+        __typename: 'Frontend',
+        redirect: 'manual',
+        appendSubdomainToPath: false,
+      },
     }
-
-    if (request.headers.get('X-From') === 'legacy-serlo.org') {
-      return {
-        __typename: 'Legacy',
-      }
-    }
-
-    if (
-      (await url.isUuid()) ||
-      url.pathname === '/' ||
-      [
-        '/search',
-        '/spenden',
-        '/subscriptions/manage',
-        '/entity/unrevised',
-        '/entity/create/',
-        '/page/create',
-        '/user/settings',
-        '/discussions',
-        '/backend',
-        '/uuid/recycle-bin',
-        '/pages',
-        '/mathe',
-        '/biologie',
-        '/nachhaltigkeit',
-        '/informatik',
-        '/chemie',
-        '/lerntipps',
-        '/authorization/roles',
-      ].includes(url.pathnameWithoutTrailingSlash) ||
-      url.pathname.startsWith('/license/detail') ||
-      (url.subdomain === 'de' && url.pathname.startsWith('/jobs')) ||
-      url.pathname.startsWith('/entity/repository/history') ||
-      url.pathname.startsWith('/entity/repository/add-revision/') ||
-      url.pathname.startsWith('/entity/taxonomy/update/') ||
-      url.pathname.startsWith('/entity/link/order/') ||
-      url.pathname.startsWith('/entity/license/update/') ||
-      url.pathname.startsWith('/taxonomy/term/move/batch/') ||
-      url.pathname.startsWith('/taxonomy/term/copy/batch/') ||
-      url.pathname.startsWith('/taxonomy/term/sort/entities/') ||
-      url.pathname.startsWith('/event/history') ||
-      url.pathname.startsWith('/error/deleted')
-    ) {
-      return {
-        __typename: 'AB',
-        probability: Number(global.FRONTEND_PROBABILITY),
-      }
-    }
-
-    return null
-  } else {
-    return routeConfig
   }
+
+  if (
+    url.pathname.startsWith('/_next/') ||
+    url.pathname.startsWith('/_assets/') ||
+    url.pathname.startsWith('/api/frontend/') ||
+    url.pathname.startsWith('/___')
+  ) {
+    return {
+      __typename: 'BeforeRedirectsRoute',
+      route: {
+        __typename: 'Frontend',
+        redirect: 'follow',
+        appendSubdomainToPath: false,
+      },
+    }
+  }
+
+  if (url.pathname === '/user/notifications' || url.pathname === '/consent') {
+    return {
+      __typename: 'BeforeRedirectsRoute',
+      route: {
+        __typename: 'Frontend',
+        redirect: 'follow',
+        appendSubdomainToPath: true,
+      },
+    }
+  }
+
+  if (
+    url.pathname.startsWith('/entity/repository/add-revision-old/') ||
+    (url.pathname.startsWith('/entity/repository/add-revision/') &&
+      (request.method === 'POST' ||
+        getCookieValue('useLegacyEditor', cookies) === '1'))
+  ) {
+    return {
+      __typename: 'BeforeRedirectsRoute',
+      route: {
+        __typename: 'Legacy',
+      },
+    }
+  }
+
+  if (
+    url.pathname.startsWith('/auth/activate/') ||
+    url.pathname.startsWith('/auth/password/restore/') ||
+    [
+      '/auth/login',
+      '/auth/logout',
+      '/auth/password/change',
+      '/auth/hydra/login',
+      '/auth/hydra/consent',
+      '/user/register',
+    ].includes(url.pathname)
+  ) {
+    return {
+      __typename: 'BeforeRedirectsRoute',
+      route: {
+        __typename: 'Legacy',
+      },
+    }
+  }
+
+  if (
+    /\/taxonomy\/term\/create\/\d+\/\d+/.test(url.pathname) &&
+    global.ENVIRONMENT === 'staging' &&
+    request.method === 'GET'
+  ) {
+    return {
+      __typename: 'Frontend',
+      redirect: 'follow',
+      appendSubdomainToPath: true,
+    }
+  }
+
+  if (
+    isInstance(url.subdomain) &&
+    subjectStartPages[url.subdomain] &&
+    subjectStartPages[url.subdomain]?.includes(url.pathnameWithoutTrailingSlash)
+  ) {
+    return {
+      __typename: 'BeforeRedirectsRoute',
+      route: {
+        __typename: 'Frontend',
+        redirect: 'follow',
+        appendSubdomainToPath: true,
+      },
+    }
+  }
+
+  if (getCookieValue('useFrontend', cookies) === 'always') {
+    return {
+      __typename: 'Frontend',
+      redirect: 'follow',
+      appendSubdomainToPath: true,
+    }
+  }
+
+  if (request.headers.get('X-From') === 'legacy-serlo.org') {
+    return {
+      __typename: 'Legacy',
+    }
+  }
+
+  if (
+    global.ENVIRONMENT === 'staging' &&
+    url.pathname.startsWith('/entity/create/')
+  ) {
+    return {
+      __typename: 'AB',
+      probability: Number(global.FRONTEND_PROBABILITY),
+    }
+  }
+
+  if (
+    (await url.isUuid()) ||
+    url.pathname === '/' ||
+    [
+      '/search',
+      '/spenden',
+      '/subscriptions/manage',
+      '/entity/unrevised',
+      '/user/settings',
+      '/discussions',
+      '/backend',
+      '/uuid/recycle-bin',
+      '/pages',
+      '/mathe',
+      '/biologie',
+      '/nachhaltigkeit',
+      '/informatik',
+      '/chemie',
+      '/lerntipps',
+    ].includes(url.pathnameWithoutTrailingSlash) ||
+    url.pathname.startsWith('/license/detail') ||
+    (url.subdomain === 'de' && url.pathname.startsWith('/jobs')) ||
+    url.pathname.startsWith('/entity/repository/history') ||
+    url.pathname.startsWith('/entity/repository/add-revision/') ||
+    url.pathname.startsWith('/entity/taxonomy/update/') ||
+    url.pathname.startsWith('/entity/link/order/') ||
+    url.pathname.startsWith('/entity/license/update/') ||
+    url.pathname.startsWith('/taxonomy/term/move/batch/') ||
+    url.pathname.startsWith('/taxonomy/term/copy/batch/') ||
+    url.pathname.startsWith('/taxonomy/term/sort/entities/') ||
+    url.pathname.startsWith('/event/history') ||
+    url.pathname.startsWith('/error/deleted')
+  ) {
+    return {
+      __typename: 'AB',
+      probability: Number(global.FRONTEND_PROBABILITY),
+    }
+  }
+
+  return null
 }
 
 function createConfigurationResponse(message: string, useFrontend: number) {
@@ -196,9 +315,24 @@ function setCookieUseFrontend(res: Response, useFrontend: number) {
   )
 }
 
-type RouteConfig = vercelFrontendProxy.RouteConfig | ABRoute
+type RouteConfig = LegacyRoute | FrontendRoute | BeforeRedirectsRoute | ABRoute
 
 interface ABRoute {
   __typename: 'AB'
   probability: number
+}
+
+interface BeforeRedirectsRoute {
+  __typename: 'BeforeRedirectsRoute'
+  route: LegacyRoute | FrontendRoute
+}
+
+interface FrontendRoute {
+  __typename: 'Frontend'
+  redirect: 'manual' | 'follow'
+  appendSubdomainToPath: boolean
+}
+
+interface LegacyRoute {
+  __typename: 'Legacy'
 }

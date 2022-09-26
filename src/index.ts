@@ -26,12 +26,6 @@ import { auth } from './auth'
 import { embed } from './embed'
 import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
 import { legalPages } from './legal-pages'
-import {
-  birdMetadataApi,
-  lenabiProxy,
-  lenabiRedirects,
-  lenabiSpecialPaths,
-} from './lenabi'
 import { maintenanceMode } from './maintenance'
 import { metadataApi } from './metadata-api'
 import { pdfProxy } from './pdf-proxy'
@@ -57,23 +51,18 @@ export async function handleFetchEvent(event: FetchEvent): Promise<Response> {
       (await edtrIoStats(request)) ||
       (await maintenanceMode(request)) ||
       (await enforceHttps(request)) ||
-      (await birdMetadataApi(request)) ||
-      (await keycloakAndEnmeshedCors(request)) ||
       (await legalPages(request)) ||
       (await quickbarProxy(request, sentryFactory)) ||
       (await pdfProxy(request, sentryFactory)) ||
       robotsTxt(request) ||
       (await frontendSpecialPaths(request, sentryFactory)) ||
-      (await lenabiSpecialPaths(request)) ||
       sentryHelloWorld(request, sentryFactory) ||
-      lenabiRedirects(request) ||
       (await redirects(request)) ||
       (await embed(request, sentryFactory)) ||
       (await semanticFileNames(request)) ||
       (await packages(request)) ||
       (await api(request)) ||
       (await frontendProxy(request, sentryFactory)) ||
-      (await lenabiProxy(request)) ||
       (await metadataApi(request, sentryFactory)) ||
       (await fetch(request))
     )
@@ -81,20 +70,6 @@ export async function handleFetchEvent(event: FetchEvent): Promise<Response> {
     sentryFactory.createReporter('handle-fetch-event').captureException(e)
     throw e
   }
-}
-
-async function keycloakAndEnmeshedCors(request: Request) {
-  const url = Url.fromRequest(request)
-
-  if (global.ENVIRONMENT !== 'staging') return null
-  if (url.subdomain !== 'keycloak' && url.subdomain !== 'enmeshed') return null
-
-  const originalResponse = await fetch(request)
-  const response = new Response(originalResponse.body, originalResponse)
-
-  response.headers.set('Access-Control-Allow-Origin', '*')
-
-  return response
 }
 
 function sentryHelloWorld(request: Request, sentryFactory: SentryFactory) {
