@@ -161,7 +161,11 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
     }
   }
 
-  if (url.pathname === '/user/notifications' || url.pathname === '/consent') {
+  if (
+    url.pathname === '/user/notifications' ||
+    url.pathname === '/consent' ||
+    url.pathname.startsWith('/entity/repository/compare/')
+  ) {
     return {
       __typename: 'BeforeRedirectsRoute',
       route: {
