@@ -30,6 +30,7 @@ import {
 const meetRedirects: Record<string, string | undefined> = {
   '/': 'vtk-ncrc-rdp',
   '/dev': 'rci-pize-jow',
+  '/ansprache': 'xcj-bzoy-sez',
   '/einbindung': 'qzv-ojgk-xqw',
   '/begleitung': 'kon-wdmt-yhb',
   '/reviewing': 'kon-wdmt-yhb',
