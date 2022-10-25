@@ -43,7 +43,7 @@
     "preact": "^10.11.2",
     "preact-render-to-string": "^5.2.6",
     "sanitize-html": "^2.7.2",
-    "toucan-js": "^2.6.1"
+    "toucan-js": "^2.7.0"
   },
   "devDependencies": {
     "@babel/core": "^7.19.6",
