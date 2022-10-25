@@ -2694,7 +2694,7 @@ __metadata:
     prettier-plugin-sh: ^0.12.8
     rimraf: ^3.0.2
     sanitize-html: ^2.7.2
-    toucan-js: ^2.6.1
+    toucan-js: ^2.7.0
     ts-jest: ^29.0.3
     ts-loader: ^8.4.0
     ts-node: ^10.9.1
@@ -15345,9 +15345,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"toucan-js@npm:^2.6.1":
-  version: 2.6.1
-  resolution: "toucan-js@npm:2.6.1"
+"toucan-js@npm:^2.7.0":
+  version: 2.7.0
+  resolution: "toucan-js@npm:2.7.0"
   dependencies:
     "@sentry/core": 6.19.6
     "@sentry/hub": 6.19.6
@@ -15356,7 +15356,7 @@ __metadata:
     "@types/cookie": 0.5.0
     cookie: 0.5.0
     stacktrace-js: 2.0.2
-  checksum: 0ed91321e61cc97f7834f34fa1d34105274fa9b40b9d4e9de8d7e23c93e4b8206c3935d4bd95cdca7a78619d20906d37a0640659888027f732f1b1fcf00373b6
+  checksum: 2ad055f9c09949605e0df2f301cd2d39581c1ffb3e37ccc5e387e4e2c14430d8d2efdcb0d871262b5eaf60183ae453f6abe86d733ab169677b681c2192dc0ee6
   languageName: node
   linkType: hard
 
