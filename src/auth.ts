@@ -89,10 +89,7 @@ function authKratosIdentitySchema(request: Request): Response | null {
             'ory.sh/kratos': {
               credentials: { password: { identifier: true } },
             },
-            // disable needed in order to maintain scaping of regex
-            // prettier-ignore
-            // eslint-disable-next-line no-useless-escape
-            pattern: '^[\w\-]+$',
+            pattern: '^[\\w\\-]+$',
           },
           description: {
             type: 'string',
