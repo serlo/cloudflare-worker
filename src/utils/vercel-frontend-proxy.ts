@@ -136,6 +136,7 @@ export function getRoute(request: Request): RouteConfig | null {
       '/auth/password/change',
       '/auth/hydra/login',
       '/auth/hydra/consent',
+      '/auth/hydra/logout',
       '/user/register',
     ].includes(url.pathname)
   ) {
