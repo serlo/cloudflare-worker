@@ -91,7 +91,7 @@ function authKratosIdentitySchema(request: Request): Response | null {
             },
             pattern: '^[\\w\\-]+$',
             minLength: 2,
-            maxLength: 42,
+            maxLength: 32,
           },
           description: {
             type: 'string',
