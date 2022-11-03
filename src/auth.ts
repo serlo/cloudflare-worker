@@ -90,6 +90,8 @@ function authKratosIdentitySchema(request: Request): Response | null {
               credentials: { password: { identifier: true } },
             },
             pattern: '^[\\w\\-]+$',
+            minLength: 2,
+            maxLength: 42,
           },
           description: {
             type: 'string',
