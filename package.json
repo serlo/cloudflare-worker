@@ -16,7 +16,7 @@
     "format": "run-p -ln -c \"format:*\"",
     "format:eslint": "yarn _eslint --fix",
     "format:prettier": "yarn _prettier --write",
-    "lint": "run-p -ln lint:prettier lint:tsc lint:eslint",
+    "lint": "run-p -ln \"lint:*\"",
     "lint:eslint": "yarn _eslint",
     "lint:prettier": "yarn _prettier --check",
     "lint:tsc": "tsc --noEmit",
