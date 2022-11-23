@@ -94,7 +94,7 @@ export async function redirects(request: Request) {
         return Response.redirect('https://lenabi.serlo-staging.dev/wallet', 302)
       case '/user-journey':
         return Response.redirect(
-          'https://frontend-git-lenabi-flow-serlo.vercel.app/',
+          'https://frontend-git-lenabi-mock-serlo.vercel.app/',
           302
         )
       case '/sso':
