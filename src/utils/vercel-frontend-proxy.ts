@@ -66,7 +66,10 @@ export function getRoute(request: Request): RouteConfig | null {
   const url = Url.fromRequest(request)
   const cookies = request.headers.get('Cookie')
 
-  if (url.pathname.startsWith('/api/auth/')) {
+  if (
+    url.pathname.startsWith('/api/auth/') ||
+    url.pathname.startsWith('/auth/')
+  ) {
     return {
       __typename: 'BeforeRedirectsRoute',
       route: {
