@@ -33,8 +33,6 @@ import {
   redirectsTo,
   givenFrontend,
   expectSentryEvent,
-  expectToBeRedirectTo,
-  givenSerlo,
   currentTestEnvironmentWhen,
 } from './__utils__'
 
@@ -562,24 +560,6 @@ test('Resports to sentry when frontend responded with redirect', async () => {
       responseUrl: 'https://frontend.serlo.org/',
     },
   })
-})
-
-test('Redirects of the legacy backend are always passed to the client', async () => {
-  setupProbabilityFor(Backend.Legacy)
-
-  const env = localTestEnvironment()
-  const location = env.createUrl({
-    subdomain: 'en',
-    pathname: '/auth/hydra/login?login_challenge=foo',
-  })
-  givenSerlo(redirectsTo(location))
-
-  const response = await env.fetch({
-    subdomain: 'en',
-    pathname: '/auth/hydra/login',
-  })
-
-  expectToBeRedirectTo(response, location, 302)
 })
 
 test('creates a copy of backend responses (otherwise there is an error in cloudflare)', async () => {
