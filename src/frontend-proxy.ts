@@ -166,17 +166,6 @@ function getRoute(request: Request): RouteConfig | null {
     return null
 
   if (
-    url.pathname.startsWith('/auth/activate/') ||
-    url.pathname.startsWith('/auth/password/restore/') ||
-    [
-      '/auth/login',
-      '/auth/logout',
-      '/auth/password/change',
-      '/auth/hydra/login',
-      '/auth/hydra/consent',
-      '/auth/hydra/logout',
-      '/user/register',
-    ].includes(url.pathname) ||
     request.headers.get('X-From') === 'legacy-serlo.org' ||
     (/\/taxonomy\/term\/create\/\d+\/\d+/.test(url.pathname) &&
       (global.ENVIRONMENT === 'production' || request.method === 'POST')) ||
