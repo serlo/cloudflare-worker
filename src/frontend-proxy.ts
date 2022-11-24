@@ -112,7 +112,10 @@ function getRoute(request: Request): RouteConfig | null {
     return { __typename: 'Legacy' }
   }
 
-  if (url.pathname.startsWith('/api/auth/')) {
+  if (
+    url.pathname.startsWith('/api/auth/') ||
+    url.pathname.startsWith('/api/.ory/')
+  ) {
     return {
       __typename: 'BeforeRedirectsRoute',
       route: {
