@@ -26,7 +26,8 @@ export function auth(request: Request): Response | null {
     authFrontendSectorIdentifierUriValidation(request) ||
     authKratosIdentitySchema(request) ||
     authKratosGithubJsonnet(request) ||
-    authKratosAfterRegistrationHookPayloadJsonnet(request)
+    authKratosAfterRegistrationHookPayloadJsonnet(request) ||
+    authRedirectVerificationToRightInstance(request)
   )
 }
 
@@ -158,4 +159,29 @@ local claims = {
   return new Response(net, {
     headers: { 'Content-Type': 'text/plain' },
   })
+}
+
+/**
+ * This quite a hack in order to redirect the user to the original instance after verification of email
+ */
+function authRedirectVerificationToRightInstance(
+  request: Request
+): Response | null {
+  const url = Url.fromRequest(request)
+  if (url.subdomain !== '' || url.pathname !== '/auth/verification') {
+    return null
+  }
+  const returnTo = url.searchParams.get('return_to')
+
+  console.log({ returnTo })
+
+  if (!returnTo) return null
+
+  const returnToUrl = new Url(returnTo)
+
+  console.log({ returnToUrl })
+
+  url.subdomain = returnToUrl.subdomain ?? Instance.De
+
+  return url.toRedirect(303)
 }
