@@ -35,7 +35,6 @@ import {
   expectSentryEvent,
   expectToBeRedirectTo,
   givenSerlo,
-  currentTestEnvironmentWhen,
 } from './__utils__'
 
 beforeEach(() => {
@@ -429,53 +428,6 @@ describe('special paths', () => {
     expect(await response.text()).toEqual(
       expect.stringContaining('Unrevised Revisions')
     )
-  })
-
-  describe('/taxonomy/term/create/:id/:id', () => {
-    test('resolves to frontend in staging', async () => {
-      global.ENVIRONMENT = 'staging'
-      const env = currentTestEnvironmentWhen(
-        (config) => config.ENVIRONMENT === 'staging'
-      )
-
-      const response = await env.fetch({
-        subdomain: 'de',
-        pathname: '/taxonomy/term/create/10/10',
-      })
-
-      await expectFrontend(response)
-    })
-
-    test('resolves to legacy in staging with POST', async () => {
-      global.ENVIRONMENT = 'staging'
-      const env = currentTestEnvironmentWhen(
-        (config) => config.ENVIRONMENT === 'staging'
-      )
-
-      const response = await env.fetch(
-        {
-          subdomain: 'de',
-          pathname: '/taxonomy/term/create/10/10',
-        },
-        { method: 'POST' }
-      )
-
-      await expectLegacy(response)
-    })
-
-    test('resolves to Legacy in production', async () => {
-      global.ENVIRONMENT = 'production'
-      const env = currentTestEnvironmentWhen(
-        (config) => config.ENVIRONMENT === 'production'
-      )
-
-      const response = await env.fetch({
-        subdomain: 'de',
-        pathname: '/taxonomy/term/create/10/10',
-      })
-
-      await expectLegacy(response)
-    })
   })
 
   test('links starting with /___ always resolve to frontend', async () => {
