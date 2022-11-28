@@ -199,6 +199,7 @@ async function getGeogebraThumbnail(url: URL, sentry: SentryReporter) {
         },
       },
     }),
+    cf: { cacheTtl: 7 * 24 * 60 * 60, cacheEverything: true },
   })
   const apiResponseText = await apiResponse.text()
 
