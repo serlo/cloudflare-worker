@@ -13,7 +13,7 @@
     "check:all": "scripts/run_all_checks.sh",
     "dev": "wrangler dev --env staging",
     "deploy": "wrangler publish",
-    "format": "run-p -c \"format:*\"",
+    "format": "run-s --continue-on-error \"format:*\"",
     "format:eslint": "yarn _eslint --fix",
     "format:prettier": "yarn _prettier --write",
     "lint": "run-p \"lint:*\"",
