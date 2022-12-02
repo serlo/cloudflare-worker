@@ -175,8 +175,6 @@ function getRoute(request: Request): RouteConfig | null {
       '/user/register',
     ].includes(url.pathname) ||
     request.headers.get('X-From') === 'legacy-serlo.org' ||
-    (/\/taxonomy\/term\/create\/\d+\/\d+/.test(url.pathname) &&
-      (global.ENVIRONMENT === 'production' || request.method === 'POST')) ||
     url.pathname.startsWith('/entity/repository/add-revision-old/') ||
     (url.pathname.startsWith('/entity/repository/add-revision/') &&
       (request.method === 'POST' ||

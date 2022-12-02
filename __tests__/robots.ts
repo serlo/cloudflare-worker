@@ -19,6 +19,28 @@
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-export * from './bird-metadata-api'
-export * from './frontend-proxy'
-export * from './redirects'
+import { currentTestEnvironmentWhen } from './__utils__'
+
+test('Disallow robots in non-productive environments', async () => {
+  const env = currentTestEnvironmentWhen(
+    (config) => config.ENVIRONMENT !== 'production'
+  )
+
+  const response = await env.fetch({ subdomain: 'de', pathname: '/robots.txt' })
+
+  expect(await response.text()).toBe('User-agent: *\nDisallow: /\n')
+})
+
+test('Return explicit robots rules in production', async () => {
+  global.ENVIRONMENT = 'production'
+  const env = currentTestEnvironmentWhen(
+    (config) => config.ENVIRONMENT === 'production'
+  )
+
+  const request = new Request('https://de.serlo.org/robots.txt')
+  const response = await env.fetchRequest(request)
+  const text = await response.text()
+
+  expect(text).toContain('User-agent: *')
+  expect(text).toContain('Disallow: /backend')
+})
