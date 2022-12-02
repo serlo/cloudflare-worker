@@ -210,11 +210,7 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
     }
   }
 
-  if (
-    /\/taxonomy\/term\/create\/\d+\/\d+/.test(url.pathname) &&
-    global.ENVIRONMENT === 'staging' &&
-    request.method === 'GET'
-  ) {
+  if (/\/taxonomy\/term\/create\/\d+\/\d+/.test(url.pathname)) {
     return {
       __typename: 'Frontend',
       redirect: 'follow',
