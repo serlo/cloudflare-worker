@@ -105,3 +105,7 @@ test("header `Access-Control-Allow-Origin` is set to Serlo's domain or subdomain
     responseWithWrongOrigin.headers.get('Access-Control-Allow-Origin')
   ).not.toBe(`https://verybad-${env.getDomain()}`)
 })
+
+test('header `Vary` avoids caching of Origin header', () => {
+  expect(response.headers.get('Vary')).toBe('Origin')
+})
