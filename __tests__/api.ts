@@ -73,27 +73,29 @@ async function fetchWithOriginHeader(origin: string) {
 }
 
 test("header `Access-Control-Allow-Origin` is set to Serlo's domain or subdomains", async () => {
-  const domainUrl = `https://${env.getDomain()}`
+  const domainOrigin = `https://${env.getDomain()}`
 
   const responseWithoutOriginHeader = response
 
   expect(
     responseWithoutOriginHeader.headers.get('Access-Control-Allow-Origin')
-  ).toBe(domainUrl)
+  ).toBe(domainOrigin)
 
-  const responseWithRightDomain = await fetchWithOriginHeader(domainUrl)
+  const responseWithRightDomain = await fetchWithOriginHeader(domainOrigin)
 
   expect(
     responseWithRightDomain.headers.get('Access-Control-Allow-Origin')
-  ).toBe(domainUrl)
+  ).toBe(domainOrigin)
 
-  const subdomainUrl = `https://de.${env.getDomain()}`
+  const subdomainOrigin = `https://de.${env.getDomain()}`
 
-  const responseWithRightSubdomain = await fetchWithOriginHeader(subdomainUrl)
+  const responseWithRightSubdomain = await fetchWithOriginHeader(
+    subdomainOrigin
+  )
 
   expect(
     responseWithRightSubdomain.headers.get('Access-Control-Allow-Origin')
-  ).toBe(subdomainUrl)
+  ).toBe(subdomainOrigin)
 
   const responseWithWrongOrigin = await fetchWithOriginHeader(
     `https://verybad-${env.getDomain()}`
