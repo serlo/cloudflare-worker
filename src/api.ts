@@ -39,14 +39,14 @@ export async function api(request: Request) {
 }
 
 function setAllowedOrigin(requestOrigin: string | null) {
-  const domainUrl = `https://${global.DOMAIN}`
+  const domainOrigin = `https://${global.DOMAIN}`
 
-  if (requestOrigin === null) return domainUrl
+  if (requestOrigin === null) return domainOrigin
 
   const requestDomain = new Url(requestOrigin).domain
   if (requestDomain === global.DOMAIN) return requestOrigin
 
-  return domainUrl
+  return domainOrigin
 }
 
 export async function fetchApi(request: Request) {
