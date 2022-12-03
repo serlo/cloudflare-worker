@@ -35,6 +35,7 @@ export async function api(request: Request) {
     'Access-Control-Allow-Origin',
     setAllowedOrigin(request.headers.get('Origin'))
   )
+  response.headers.set('Vary', 'Origin')
   return response
 }
 
