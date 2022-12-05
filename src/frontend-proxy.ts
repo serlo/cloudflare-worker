@@ -114,6 +114,7 @@ function getRoute(request: Request): RouteConfig | null {
 
   if (
     url.pathname.startsWith('/api/auth/') ||
+    url.pathname.startsWith('/api/oauth/') ||
     url.pathname.startsWith('/api/.ory/')
   ) {
     return {
