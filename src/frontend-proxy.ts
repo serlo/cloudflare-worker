@@ -25,7 +25,7 @@ import {
   SentryFactory,
   SentryReporter,
   Url,
-  subjectStartPages,
+  Instance,
 } from './utils'
 
 export async function frontendSpecialPaths(
@@ -33,14 +33,20 @@ export async function frontendSpecialPaths(
   sentryFactory: SentryFactory
 ): Promise<Response | null> {
   const url = Url.fromRequest(request)
-  const route = await getRoute(request)
+  const route = getRoute(request)
   const sentry = sentryFactory.createReporter('frontend-special-paths')
 
   if (url.pathname === '/enable-frontend')
-    return createConfigurationResponse('Enabled: Use of new frontend', 0)
+    return createConfigurationResponse({
+      message: 'Enabled: Use of new frontend',
+      useLegacyFrontend: false,
+    })
 
   if (url.pathname === '/disable-frontend')
-    return createConfigurationResponse('Disabled: Use of new frontend', 1.1)
+    return createConfigurationResponse({
+      message: 'Disabled: Use of new frontend',
+      useLegacyFrontend: true,
+    })
 
   return route !== null && route.__typename === 'BeforeRedirectsRoute'
     ? fetchBackend({ request, sentry, route: route.route })
@@ -51,44 +57,12 @@ export async function frontendProxy(
   request: Request,
   sentryFactory: SentryFactory
 ): Promise<Response | null> {
-  const url = Url.fromRequest(request)
-  const cookies = request.headers.get('Cookie')
   const sentry = sentryFactory.createReporter('frontend')
-  const route = await getRoute(request)
-  if (route === null || route.__typename === 'BeforeRedirectsRoute') {
-    return null
-  } else if (route.__typename === 'AB') {
-    const cookieValue = Number(getCookieValue('useFrontend', cookies) ?? 'NaN')
-    const useFrontendNumber = Number.isNaN(cookieValue)
-      ? Math.random()
-      : cookieValue
+  const route = getRoute(request)
 
-    let contentApiRequest = null
-
-    if (url.hasContentApiParameters()) {
-      url.pathname = '/content-only' + url.pathname
-      contentApiRequest = new Request(url.toString(), new Request(request))
-    }
-
-    const response = await fetchBackend({
-      request: contentApiRequest ?? request,
-      sentry,
-      route: {
-        __typename:
-          useFrontendNumber <= route.probability ? 'Frontend' : 'Legacy',
-        appendSubdomainToPath: true,
-        redirect: 'follow',
-      },
-    })
-
-    if (Number.isNaN(cookieValue)) {
-      setCookieUseFrontend(response, useFrontendNumber)
-    }
-
-    return response
-  } else {
-    return fetchBackend({ request, sentry, route })
-  }
+  return route !== null && route.__typename !== 'BeforeRedirectsRoute'
+    ? fetchBackend({ request, sentry, route })
+    : null
 }
 
 async function fetchBackend({
@@ -100,18 +74,18 @@ async function fetchBackend({
   sentry: SentryReporter
   route: LegacyRoute | FrontendRoute
 }) {
-  const cookies = request.headers.get('Cookie')
-  const domain =
-    getCookieValue('frontendDomain', cookies) ?? global.FRONTEND_DOMAIN
-
   const backendUrl = Url.fromRequest(request)
 
   if (route.__typename === 'Frontend') {
+    if (backendUrl.hasContentApiParameters()) {
+      backendUrl.pathname = '/content-only' + backendUrl.pathname
+    }
+
     if (route.appendSubdomainToPath) {
       backendUrl.pathname = `/${backendUrl.subdomain}${backendUrl.pathname}`
     }
 
-    backendUrl.hostname = domain
+    backendUrl.hostname = global.FRONTEND_DOMAIN
     backendUrl.pathname = backendUrl.pathnameWithoutTrailingSlash
   }
 
@@ -119,20 +93,48 @@ async function fetchBackend({
     redirect: route.__typename === 'Frontend' ? route.redirect : 'manual',
   })
 
-  if (sentry && route.__typename === 'Frontend' && response.redirected) {
-    sentry.setContext('backendUrl', backendUrl)
-    sentry.setContext('responseUrl', response.url)
-    sentry.captureMessage('Frontend responded with a redirect', 'error')
+  if (sentry) {
+    if (route.__typename === 'Frontend' && response.redirected) {
+      sentry.setContext('backendUrl', backendUrl)
+      sentry.setContext('responseUrl', response.url)
+      sentry.captureMessage('Frontend responded with a redirect', 'error')
+    }
+
+    if (isLegacyRequestToBeReported()) {
+      sentry.setContext('legacyUrl', backendUrl)
+      sentry.setContext('method', request.method)
+      sentry.setContext(
+        'useLegacyFrontend',
+        getCookieValue('useLegacyFrontend', request.headers.get('Cookie'))
+      )
+      sentry.captureMessage('Request to legacy system registered', 'info')
+    }
   }
 
   return new Response(response.body, response)
+
+  function isLegacyRequestToBeReported() {
+    if (route.__typename != 'Legacy') return false
+    if (
+      request.method === 'GET' &&
+      response.headers.get('Content-type') === 'text/html'
+    )
+      return true
+    if (request.method === 'POST') return true
+
+    return false
+  }
 }
 
-async function getRoute(request: Request): Promise<RouteConfig | null> {
+function getRoute(request: Request): RouteConfig | null {
   const url = Url.fromRequest(request)
   const cookies = request.headers.get('Cookie')
 
   if (!isInstance(url.subdomain)) return null
+
+  if (getCookieValue('useLegacyFrontend', cookies) === 'true') {
+    return { __typename: 'Legacy' }
+  }
 
   if (url.pathname.startsWith('/api/auth/')) {
     return {
@@ -145,11 +147,28 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
     }
   }
 
+  const subjectStartPages: { [I in Instance]?: string[] } = {
+    de: [
+      '/biologie',
+      '/chemie',
+      '/lerntipps',
+      '/mathe',
+      '/nachhaltigkeit',
+      '/informatik',
+    ],
+  }
+
   if (
     url.pathname.startsWith('/_next/') ||
     url.pathname.startsWith('/_assets/') ||
     url.pathname.startsWith('/api/frontend/') ||
-    url.pathname.startsWith('/___')
+    url.pathname.startsWith('/___') ||
+    url.pathname === '/user/notifications' ||
+    url.pathname === '/consent' ||
+    (subjectStartPages[url.subdomain] &&
+      subjectStartPages[url.subdomain]?.includes(
+        url.pathnameWithoutTrailingSlash
+      ))
   ) {
     return {
       __typename: 'BeforeRedirectsRoute',
@@ -162,21 +181,25 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
   }
 
   if (
-    url.pathname === '/user/notifications' ||
-    url.pathname === '/consent' ||
-    url.pathname.startsWith('/entity/repository/compare/')
-  ) {
-    return {
-      __typename: 'BeforeRedirectsRoute',
-      route: {
-        __typename: 'Frontend',
-        redirect: 'follow',
-        appendSubdomainToPath: true,
-      },
-    }
-  }
+    url.pathname.startsWith('/entity/api/rss/') ||
+    url.pathname.startsWith('/entity/api/json/')
+  )
+    return null
 
   if (
+    url.pathname.startsWith('/auth/activate/') ||
+    url.pathname.startsWith('/auth/password/restore/') ||
+    [
+      '/auth/login',
+      '/auth/logout',
+      '/auth/password/change',
+      '/auth/hydra/login',
+      '/auth/hydra/consent',
+      '/auth/hydra/logout',
+      '/user/register',
+    ].includes(url.pathname) ||
+    request.headers.get('X-From') === 'legacy-serlo.org' ||
+    url.pathname.startsWith('/taxonomy/term/organize/') ||
     url.pathname.startsWith('/entity/repository/add-revision-old/') ||
     (url.pathname.startsWith('/entity/repository/add-revision/') &&
       (request.method === 'POST' ||
@@ -190,137 +213,34 @@ async function getRoute(request: Request): Promise<RouteConfig | null> {
     }
   }
 
-  if (
-    url.pathname.startsWith('/auth/activate/') ||
-    url.pathname.startsWith('/auth/password/restore/') ||
-    [
-      '/auth/login',
-      '/auth/logout',
-      '/auth/password/change',
-      '/auth/hydra/login',
-      '/auth/hydra/consent',
-      '/user/register',
-    ].includes(url.pathname)
-  ) {
-    return {
-      __typename: 'BeforeRedirectsRoute',
-      route: {
-        __typename: 'Legacy',
-      },
-    }
+  return {
+    __typename: 'Frontend',
+    redirect: 'follow',
+    appendSubdomainToPath: true,
   }
-
-  if (/\/taxonomy\/term\/create\/\d+\/\d+/.test(url.pathname)) {
-    return {
-      __typename: 'Frontend',
-      redirect: 'follow',
-      appendSubdomainToPath: true,
-    }
-  }
-
-  if (
-    isInstance(url.subdomain) &&
-    subjectStartPages[url.subdomain] &&
-    subjectStartPages[url.subdomain]?.includes(url.pathnameWithoutTrailingSlash)
-  ) {
-    return {
-      __typename: 'BeforeRedirectsRoute',
-      route: {
-        __typename: 'Frontend',
-        redirect: 'follow',
-        appendSubdomainToPath: true,
-      },
-    }
-  }
-
-  if (getCookieValue('useFrontend', cookies) === 'always') {
-    return {
-      __typename: 'Frontend',
-      redirect: 'follow',
-      appendSubdomainToPath: true,
-    }
-  }
-
-  if (request.headers.get('X-From') === 'legacy-serlo.org') {
-    return {
-      __typename: 'Legacy',
-    }
-  }
-
-  if (
-    global.ENVIRONMENT === 'staging' &&
-    url.pathname.startsWith('/entity/create/')
-  ) {
-    return {
-      __typename: 'AB',
-      probability: Number(global.FRONTEND_PROBABILITY),
-    }
-  }
-
-  if (
-    (await url.isUuid()) ||
-    url.pathname === '/' ||
-    [
-      '/search',
-      '/spenden',
-      '/subscriptions/manage',
-      '/entity/unrevised',
-      '/user/settings',
-      '/discussions',
-      '/backend',
-      '/uuid/recycle-bin',
-      '/pages',
-      '/mathe',
-      '/biologie',
-      '/nachhaltigkeit',
-      '/informatik',
-      '/chemie',
-      '/lerntipps',
-    ].includes(url.pathnameWithoutTrailingSlash) ||
-    url.pathname.startsWith('/license/detail') ||
-    (url.subdomain === 'de' && url.pathname.startsWith('/jobs')) ||
-    url.pathname.startsWith('/entity/repository/history') ||
-    url.pathname.startsWith('/entity/repository/add-revision/') ||
-    url.pathname.startsWith('/entity/taxonomy/update/') ||
-    url.pathname.startsWith('/entity/link/order/') ||
-    url.pathname.startsWith('/entity/license/update/') ||
-    url.pathname.startsWith('/taxonomy/term/move/batch/') ||
-    url.pathname.startsWith('/taxonomy/term/copy/batch/') ||
-    url.pathname.startsWith('/taxonomy/term/sort/entities/') ||
-    url.pathname.startsWith('/event/history') ||
-    url.pathname.startsWith('/error/deleted')
-  ) {
-    return {
-      __typename: 'AB',
-      probability: Number(global.FRONTEND_PROBABILITY),
-    }
-  }
-
-  return null
 }
 
-function createConfigurationResponse(message: string, useFrontend: number) {
+function createConfigurationResponse({
+  message,
+  useLegacyFrontend,
+}: {
+  message: string
+  useLegacyFrontend: boolean
+}) {
   const response = new Response(message)
 
-  setCookieUseFrontend(response, useFrontend)
+  response.headers.append(
+    'Set-Cookie',
+    `useLegacyFrontend=${useLegacyFrontend.toString()}; path=/; domain=.${
+      global.DOMAIN
+    }`
+  )
   response.headers.set('Refresh', '1; url=/')
 
   return response
 }
 
-function setCookieUseFrontend(res: Response, useFrontend: number) {
-  res.headers.append(
-    'Set-Cookie',
-    `useFrontend=${useFrontend}; path=/; domain=.${global.DOMAIN}`
-  )
-}
-
-type RouteConfig = LegacyRoute | FrontendRoute | BeforeRedirectsRoute | ABRoute
-
-interface ABRoute {
-  __typename: 'AB'
-  probability: number
-}
+type RouteConfig = LegacyRoute | FrontendRoute | BeforeRedirectsRoute
 
 interface BeforeRedirectsRoute {
   __typename: 'BeforeRedirectsRoute'
