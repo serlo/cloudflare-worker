@@ -90,7 +90,8 @@ function authKratosIdentitySchema(request: Request): Response | null {
               credentials: { password: { identifier: true } },
             },
             pattern: '^[\\w\\-]+$',
-            minLength: 2,
+            // TODO: check if minimal username length should be reintroduced or delete it
+            // minLength: 2,
             maxLength: 32,
           },
           description: {
