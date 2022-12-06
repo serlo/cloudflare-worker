@@ -19,7 +19,7 @@ API_ENDPOINT = "https://api.serlo-staging.dev/graphql"
 DOMAIN = "serlo-staging.dev"
 ENVIRONMENT = "staging"
 ENABLE_BASIC_AUTH = "true"
-FRONTEND_DOMAIN = "frontend-git-kratos-serlo.vercel.app"
+FRONTEND_DOMAIN = "frontend-git-staging-serlo.vercel.app"
 
 [env.production]
 kv-namespaces = [
