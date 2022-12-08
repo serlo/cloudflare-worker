@@ -19,22 +19,28 @@
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-export const robotsProduction = `User-agent: *
-Disallow: /page/revision/revisions/
-Disallow: /page/revision/revision/
-Disallow: /page/revision/
-Disallow: /entity/repository/history/
-Disallow: /entity/repository/compare/
-Disallow: /backend
-Disallow: /users
-Disallow: /horizon
-Disallow: /flag
-Disallow: /license
-Disallow: /uuid/recycle-bin
-Disallow: /navigation/
-Disallow: /authorization/
-Disallow: /pages
-Disallow: /uuid/recycle-bin
-Disallow: /index.php/
-Disallow: /index.php
-Disallow: /*/entity/trash-bin`
+import { currentTestEnvironmentWhen } from './__utils__'
+
+test('Disallow robots in non-productive environments', async () => {
+  const env = currentTestEnvironmentWhen(
+    (config) => config.ENVIRONMENT !== 'production'
+  )
+
+  const response = await env.fetch({ subdomain: 'de', pathname: '/robots.txt' })
+
+  expect(await response.text()).toBe('User-agent: *\nDisallow: /\n')
+})
+
+test('Return explicit robots rules in production', async () => {
+  global.ENVIRONMENT = 'production'
+  const env = currentTestEnvironmentWhen(
+    (config) => config.ENVIRONMENT === 'production'
+  )
+
+  const request = new Request('https://de.serlo.org/robots.txt')
+  const response = await env.fetchRequest(request)
+  const text = await response.text()
+
+  expect(text).toContain('User-agent: *')
+  expect(text).toContain('Disallow: /backend')
+})

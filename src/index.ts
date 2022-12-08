@@ -19,9 +19,7 @@
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { robotsProduction } from '../__fixtures__/robots'
 import { api } from './api'
-import { edtrIoStats } from './are-we-edtr-io-yet'
 import { auth } from './auth'
 import { embed } from './embed'
 import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
@@ -31,6 +29,7 @@ import { metadataApi } from './metadata-api'
 import { pdfProxy } from './pdf-proxy'
 import { quickbarProxy } from './quickbar-proxy'
 import { redirects } from './redirects'
+import { robotsTxt } from './robots'
 import { SentryFactory, Url } from './utils'
 
 if (typeof addEventListener === 'function') {
@@ -48,7 +47,6 @@ export async function handleFetchEvent(event: FetchEvent): Promise<Response> {
   try {
     return (
       auth(request) ||
-      (await edtrIoStats(request)) ||
       (await maintenanceMode(request)) ||
       (await enforceHttps(request)) ||
       (await legalPages(request)) ||
@@ -90,17 +88,6 @@ async function enforceHttps(request: Request) {
   if (url.protocol !== 'http:') return null
   url.protocol = 'https:'
   return Promise.resolve(url.toRedirect())
-}
-
-function robotsTxt(request: Request) {
-  const url = Url.fromRequest(request)
-  if (url.pathname !== '/robots.txt') return null
-
-  return new Response(
-    global.ENVIRONMENT === 'production'
-      ? robotsProduction
-      : 'User-agent: *\nDisallow: /\n'
-  )
 }
 
 async function semanticFileNames(request: Request) {

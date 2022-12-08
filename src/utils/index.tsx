@@ -32,17 +32,6 @@ import { NotFound } from '../ui'
 export * from './sentry'
 export * from './url'
 
-export const subjectStartPages: { [I in Instance]?: string[] } = {
-  de: [
-    '/biologie',
-    '/chemie',
-    '/lerntipps',
-    '/mathe',
-    '/nachhaltigkeit',
-    '/informatik',
-  ],
-}
-
 export enum Instance {
   De = 'de',
   En = 'en',
@@ -200,12 +189,6 @@ export function sanitizeHtml(html: string): string {
 
 export function markdownToHtml(markdown: string): string {
   return marked.parse(markdown, { headerIds: false }).trim()
-}
-
-export function getBasicAuthHeaders(): Record<string, string> {
-  return global.ENABLE_BASIC_AUTH === 'true'
-    ? { Authorization: 'Basic c2VybG90ZWFtOnNlcmxvdGVhbQ==' }
-    : {}
 }
 
 export function createPreactResponse(component: VNode, opt?: ResponseInit) {
