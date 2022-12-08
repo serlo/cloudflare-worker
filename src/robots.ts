@@ -19,20 +19,35 @@
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { h } from 'preact'
+import { Url } from './utils'
 
-import { data } from '../__fixtures__/are-we-edtr-io-yet'
-import { AreWeEdtrIoYet as Original } from '../src/are-we-edtr-io-yet/template'
-import { createStaticComponent } from './utils'
+export const robotsProduction = `User-agent: *
+Disallow: /page/revision/revisions/
+Disallow: /page/revision/revision/
+Disallow: /page/revision/
+Disallow: /entity/repository/history/
+Disallow: /entity/repository/compare/
+Disallow: /backend
+Disallow: /users
+Disallow: /horizon
+Disallow: /flag
+Disallow: /license
+Disallow: /uuid/recycle-bin
+Disallow: /navigation/
+Disallow: /authorization/
+Disallow: /pages
+Disallow: /uuid/recycle-bin
+Disallow: /index.php/
+Disallow: /index.php
+Disallow: /*/entity/trash-bin`
 
-const AreWeEdtrIoYet = createStaticComponent(Original)
+export function robotsTxt(request: Request) {
+  const url = Url.fromRequest(request)
+  if (url.pathname !== '/robots.txt') return null
 
-// eslint-disable-next-line import/no-default-export
-export default {
-  component: AreWeEdtrIoYet,
-  title: 'are-we-edtr-io-yet',
-}
-
-export function Simple() {
-  return <AreWeEdtrIoYet data={data} />
+  return new Response(
+    global.ENVIRONMENT === 'production'
+      ? robotsProduction
+      : 'User-agent: *\nDisallow: /\n'
+  )
 }

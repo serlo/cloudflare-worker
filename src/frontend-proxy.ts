@@ -93,13 +93,37 @@ async function fetchBackend({
     redirect: route.__typename === 'Frontend' ? route.redirect : 'manual',
   })
 
-  if (sentry && route.__typename === 'Frontend' && response.redirected) {
-    sentry.setContext('backendUrl', backendUrl)
-    sentry.setContext('responseUrl', response.url)
-    sentry.captureMessage('Frontend responded with a redirect', 'error')
+  if (sentry) {
+    if (route.__typename === 'Frontend' && response.redirected) {
+      sentry.setContext('backendUrl', backendUrl)
+      sentry.setContext('responseUrl', response.url)
+      sentry.captureMessage('Frontend responded with a redirect', 'error')
+    }
+
+    if (isLegacyRequestToBeReported()) {
+      sentry.setContext('legacyUrl', backendUrl)
+      sentry.setContext('method', request.method)
+      sentry.setContext(
+        'useLegacyFrontend',
+        getCookieValue('useLegacyFrontend', request.headers.get('Cookie'))
+      )
+      sentry.captureMessage('Request to legacy system registered', 'info')
+    }
   }
 
   return new Response(response.body, response)
+
+  function isLegacyRequestToBeReported() {
+    if (route.__typename != 'Legacy') return false
+    if (
+      request.method === 'GET' &&
+      response.headers.get('Content-type') === 'text/html'
+    )
+      return true
+    if (request.method === 'POST') return true
+
+    return false
+  }
 }
 
 function getRoute(request: Request): RouteConfig | null {
@@ -168,8 +192,7 @@ function getRoute(request: Request): RouteConfig | null {
 
   if (
     request.headers.get('X-From') === 'legacy-serlo.org' ||
-    (/\/taxonomy\/term\/create\/\d+\/\d+/.test(url.pathname) &&
-      (global.ENVIRONMENT === 'production' || request.method === 'POST')) ||
+    url.pathname.startsWith('/taxonomy/term/organize/') ||
     url.pathname.startsWith('/entity/repository/add-revision-old/') ||
     (url.pathname.startsWith('/entity/repository/add-revision/') &&
       (request.method === 'POST' ||
