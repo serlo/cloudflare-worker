@@ -43,7 +43,6 @@ import {
   defaultFrontendServer,
 } from './__tests__/__utils__'
 
-const randomCopy = Math.random
 const timeout = currentTestEnvironment().getNeededTimeout()
 
 if (timeout) {
@@ -61,7 +60,6 @@ beforeEach(() => {
   global.DOMAIN = 'serlo.localhost'
   global.ENVIRONMENT = 'local'
   global.FRONTEND_DOMAIN = 'frontend.serlo.localhost'
-  global.FRONTEND_PROBABILITY = '1'
 
   global.MAINTENANCE_KV = createKV()
   global.PATH_INFO_KV = createKV()
@@ -82,7 +80,6 @@ beforeEach(() => {
 
 afterEach(() => {
   global.server.resetHandlers()
-  Math.random = randomCopy
 })
 
 afterAll(() => {
