@@ -20,7 +20,6 @@
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
 import { api } from './api'
-import { edtrIoStats } from './are-we-edtr-io-yet'
 import { auth } from './auth'
 import { embed } from './embed'
 import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
@@ -48,7 +47,6 @@ export async function handleFetchEvent(event: FetchEvent): Promise<Response> {
   try {
     return (
       auth(request) ||
-      (await edtrIoStats(request)) ||
       (await maintenanceMode(request)) ||
       (await enforceHttps(request)) ||
       (await legalPages(request)) ||
