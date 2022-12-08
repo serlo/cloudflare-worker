@@ -19,6 +19,8 @@
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
+import { Url } from './utils'
+
 export const robotsProduction = `User-agent: *
 Disallow: /page/revision/revisions/
 Disallow: /page/revision/revision/
@@ -38,3 +40,14 @@ Disallow: /uuid/recycle-bin
 Disallow: /index.php/
 Disallow: /index.php
 Disallow: /*/entity/trash-bin`
+
+export function robotsTxt(request: Request) {
+  const url = Url.fromRequest(request)
+  if (url.pathname !== '/robots.txt') return null
+
+  return new Response(
+    global.ENVIRONMENT === 'production'
+      ? robotsProduction
+      : 'User-agent: *\nDisallow: /\n'
+  )
+}

@@ -1,4 +1,3 @@
-/* eslint-disable no-var */
 /**
  * This file is part of Serlo.org Cloudflare Worker.
  *
@@ -20,19 +19,28 @@
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-// Secrets
-declare var API_SECRET: string
-declare var SENTRY_DSN: string
+import { currentTestEnvironmentWhen } from './__utils__'
 
-// Variables
-declare var ALLOW_AUTH_FROM_LOCALHOST: 'true' | 'false'
-declare var API_ENDPOINT: string
-declare var DOMAIN: string
-declare var ENVIRONMENT: 'staging' | 'production' | 'local'
-declare var ENABLE_BASIC_AUTH: 'true' | 'false'
-declare var FRONTEND_DOMAIN: string
+test('Disallow robots in non-productive environments', async () => {
+  const env = currentTestEnvironmentWhen(
+    (config) => config.ENVIRONMENT !== 'production'
+  )
 
-// KVs
-declare var MAINTENANCE_KV: KVNamespace<'enabled'>
-declare var PACKAGES_KV: KVNamespace<string>
-declare var PATH_INFO_KV: KVNamespace<import('./utils').CacheKey>
+  const response = await env.fetch({ subdomain: 'de', pathname: '/robots.txt' })
+
+  expect(await response.text()).toBe('User-agent: *\nDisallow: /\n')
+})
+
+test('Return explicit robots rules in production', async () => {
+  global.ENVIRONMENT = 'production'
+  const env = currentTestEnvironmentWhen(
+    (config) => config.ENVIRONMENT === 'production'
+  )
+
+  const request = new Request('https://de.serlo.org/robots.txt')
+  const response = await env.fetchRequest(request)
+  const text = await response.text()
+
+  expect(text).toContain('User-agent: *')
+  expect(text).toContain('Disallow: /backend')
+})
