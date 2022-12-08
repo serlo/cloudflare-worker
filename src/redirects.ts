@@ -30,9 +30,11 @@ import {
 const meetRedirects: Record<string, string | undefined> = {
   '/': 'vtk-ncrc-rdp',
   '/dev': 'rci-pize-jow',
+  '/ansprache': 'pwr-bbca-hru',
   '/einbindung': 'qzv-ojgk-xqw',
   '/begleitung': 'kon-wdmt-yhb',
   '/reviewing': 'kon-wdmt-yhb',
+  '/klausurtagung22': 'fnm-apbe-iqp',
   '/labschool': 'cvd-pame-zod',
   '/lenabi': 'hfe-apbh-apq',
   '/fundraising': 'uus-vjgu-ttr',
@@ -67,6 +69,51 @@ export async function redirects(request: Request) {
         return Response.redirect('https://de.serlo.org/imprint', 301)
       case '/nutzungsbedingungen':
         return Response.redirect('https://de.serlo.org/terms', 301)
+    }
+  }
+
+  if (url.pathnameWithoutTrailingSlash === '/ecec') {
+    return Response.redirect(
+      'https://docs.google.com/document/d/1qSbyzDnW2RU58a7J3NHHBFo_MptaW-Ke0iT_c4KOhUA',
+      302
+    )
+  }
+
+  // To avoid cycles, add redirects to lenabi.serlo.org only.
+  if (
+    url.subdomain === 'lenabi' &&
+    ['production', 'local'].includes(global.ENVIRONMENT)
+  ) {
+    switch (url.pathnameWithoutTrailingSlash) {
+      case '/metadata-api':
+        return Response.redirect(
+          'https://nbviewer.org/github/serlo/lenabi/blob/20b946ff9f1205444f256995dfd776fd203b6c3c/src/Prototype%20of%20metadata%20API%20for%20serlo.org%20%28LENABI%29.ipynb',
+          302
+        )
+      case '/data-wallet':
+        return Response.redirect('https://lenabi.serlo-staging.dev/wallet', 302)
+      case '/user-journey':
+        return Response.redirect(
+          'https://frontend-git-lenabi-mock-serlo.vercel.app/',
+          302
+        )
+      case '/sso':
+        return Response.redirect('https://lenabi.serlo-staging.dev/sso', 302)
+      case '/status':
+        return Response.redirect(
+          'https://frontend-git-lenabi-flow-serlo.vercel.app/___lenabi_status',
+          302
+        )
+      case '/docs':
+        return Response.redirect(
+          'https://github.com/serlo/lenabi-konzeptionsphase',
+          302
+        )
+      case '/docs/sso':
+        return Response.redirect(
+          'https://github.com/serlo/lenabi-konzeptionsphase/wiki/Implementierung-der-Prototypen#sso',
+          302
+        )
     }
   }
 

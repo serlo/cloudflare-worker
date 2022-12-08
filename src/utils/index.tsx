@@ -191,12 +191,6 @@ export function markdownToHtml(markdown: string): string {
   return marked.parse(markdown, { headerIds: false }).trim()
 }
 
-export function getBasicAuthHeaders(): Record<string, string> {
-  return global.ENABLE_BASIC_AUTH === 'true'
-    ? { Authorization: 'Basic c2VybG90ZWFtOnNlcmxvdGVhbQ==' }
-    : {}
-}
-
 export function createPreactResponse(component: VNode, opt?: ResponseInit) {
   return new Response(renderToString(component), {
     ...opt,
