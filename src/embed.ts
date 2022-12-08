@@ -199,6 +199,7 @@ async function getGeogebraThumbnail(url: URL, sentry: SentryReporter) {
         },
       },
     }),
+    cf: { cacheTtl: 7 * 24 * 60 * 60, cacheEverything: true },
   })
   const apiResponseText = await apiResponse.text()
 
@@ -284,9 +285,8 @@ async function getWikimediaThumbnail(url: URL) {
 
   // note: this adds manual caching settings,
   // since wikimedia does not return a max - age setting that cf can adopt
-  // TODO: disable `cacheEverything` when blocked image is working again
   const imgRes = await fetch(previewImageUrl, {
-    cf: { cacheTtl: 24 * 60 * 60, cacheEverything: true },
+    cf: { cacheTtl: 7 * 24 * 60 * 60, cacheEverything: true },
   })
   if (isImageResponse(imgRes)) return imgRes
 
