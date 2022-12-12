@@ -23,89 +23,89 @@ import { givenUuid, currentTestEnvironment } from './__utils__'
 
 const env = currentTestEnvironment()
 
-const url = { subdomain: 'api', pathname: '/graphql' }
-
-const query = `
-query($alias: AliasInput) {
-  uuid(alias: $alias) {
-    __typename
-    id
-    ... on Page {
-      alias
-    }
-  }
-}
-`
-
-const requestPayload = {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    query,
-    variables: { alias: { instance: 'de', path: '/23591' } },
-  }),
-}
-
-let response: Response
-
-beforeEach(async () => {
+beforeEach(() => {
   givenUuid({
     id: 23591,
     __typename: 'Page',
     alias: '/23591/math',
   })
-
-  response = await env.fetch(url, requestPayload)
 })
 
-test('Calls to API get a signature', async () => {
+test('calls to API are signed', async () => {
+  const response = await fetchApi()
+
+  // unsigned calls would result in an unseccessful response
   expect(response.status).toBe(200)
   expect(await response.json()).toEqual({
     data: { uuid: { __typename: 'Page', alias: '/23591/math', id: 23591 } },
   })
 })
 
-async function fetchWithOriginHeader(origin: string) {
-  return await env.fetch(url, {
-    ...requestPayload,
-    headers: { ...requestPayload.headers, Origin: origin },
+describe('setting of response header `Access-Control-Allow-Origin`', () => {
+  let domain: string
+
+  beforeAll(() => {
+    domain = `https://${env.getDomain()}`
   })
-}
 
-test("header `Access-Control-Allow-Origin` is set to Serlo's domain or subdomains", async () => {
-  const domainOrigin = `https://${env.getDomain()}`
+  test('when `Origin` is not set, `Access-Control-Allow-Origin` defaults to the current domain', async () => {
+    const response = await fetchApi()
 
-  const responseWithoutOriginHeader = response
+    expect(response.headers.get('Access-Control-Allow-Origin')).toBe(domain)
+  })
 
-  expect(
-    responseWithoutOriginHeader.headers.get('Access-Control-Allow-Origin')
-  ).toBe(domainOrigin)
+  test('when `Origin` is the current serlo domain, it is returned as as `Access-Control-Allow-Origin`', async () => {
+    const response = await fetchApi({ headers: { Origin: domain } })
 
-  const responseWithRightDomain = await fetchWithOriginHeader(domainOrigin)
+    expect(response.headers.get('Access-Control-Allow-Origin')).toBe(domain)
+  })
 
-  expect(
-    responseWithRightDomain.headers.get('Access-Control-Allow-Origin')
-  ).toBe(domainOrigin)
+  test('when `Origin` is a subdomain of the current serlo domain, this subdomain is returned as `Access-Control-Allow-Origin`', async () => {
+    const subdomain = env.createUrl({ subdomain: 'de' })
 
-  const subdomainOrigin = `https://de.${env.getDomain()}`
+    const response = await fetchApi({ headers: { Origin: subdomain } })
 
-  const responseWithRightSubdomain = await fetchWithOriginHeader(
-    subdomainOrigin
-  )
+    expect(response.headers.get('Access-Control-Allow-Origin')).toBe(subdomain)
+  })
 
-  expect(
-    responseWithRightSubdomain.headers.get('Access-Control-Allow-Origin')
-  ).toBe(subdomainOrigin)
+  test('when `Origin` is not a subdomain of the current serlo domain, the current serlo domain is returned as `Access-Control-Allow-Origin`', async () => {
+    const response = await fetchApi({
+      headers: { Content: `https://verybad-${domain}` },
+    })
 
-  const responseWithWrongOrigin = await fetchWithOriginHeader(
-    `https://verybad-${env.getDomain()}`
-  )
-
-  expect(
-    responseWithWrongOrigin.headers.get('Access-Control-Allow-Origin')
-  ).not.toBe(`https://verybad-${env.getDomain()}`)
+    expect(response.headers.get('Access-Control-Allow-Origin')).toBe(domain)
+  })
 })
 
-test('header `Vary` avoids caching of Origin header', () => {
+test('header `Vary` is set to `Origin` to avoid caching of requests', async () => {
+  const response = await fetchApi()
+
   expect(response.headers.get('Vary')).toBe('Origin')
 })
+
+function fetchApi(args?: { headers?: RequestInit['headers'] }) {
+  const { headers = {} } = args ?? {}
+  const query = `
+    query($alias: AliasInput) {
+      uuid(alias: $alias) {
+        __typename
+        id
+        ... on Page {
+          alias
+        }
+      }
+    }
+  `
+
+  return env.fetch(
+    { subdomain: 'api', pathname: '/graphql' },
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...headers },
+      body: JSON.stringify({
+        query,
+        variables: { alias: { instance: 'de', path: '/23591' } },
+      }),
+    }
+  )
+}
