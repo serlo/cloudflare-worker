@@ -42,38 +42,63 @@ test('calls to API are signed', async () => {
 })
 
 describe('setting of response header `Access-Control-Allow-Origin`', () => {
-  let domain: string
+  const currentDomain = `https://${env.getDomain()}`
+  const subdomainOfCurrentDomain = `https://de.${env.getDomain()}`
 
-  beforeAll(() => {
-    domain = `https://${env.getDomain()}`
-  })
-
-  test('when `Origin` is not set, `Access-Control-Allow-Origin` defaults to the current domain', async () => {
+  test('when `Origin` is not set, `Access-Control-Allow-Origin` defaults to the current serlo domain', async () => {
     const response = await fetchApi()
 
-    expect(response.headers.get('Access-Control-Allow-Origin')).toBe(domain)
+    expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+      currentDomain
+    )
   })
 
-  test('when `Origin` is the current serlo domain, it is returned as as `Access-Control-Allow-Origin`', async () => {
-    const response = await fetchApi({ headers: { Origin: domain } })
+  test.each([
+    currentDomain,
+    subdomainOfCurrentDomain,
+    env.createUrl({ pathname: '/', protocol: 'http' }),
+    env.createUrl({ pathname: '/', subdomain: 'de' }),
+    env.createUrl({ pathname: '/foo', subdomain: 'ta' }),
+  ])(
+    'when `Origin` is `%s`, the same value is returned as `Access-Control-Allow-Origin`',
+    async (origin) => {
+      const response = await fetchApi({
+        headers: origin ? { Origin: origin } : {},
+      })
 
-    expect(response.headers.get('Access-Control-Allow-Origin')).toBe(domain)
-  })
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(origin)
+    }
+  )
 
-  test('when `Origin` is a subdomain of the current serlo domain, this subdomain is returned as `Access-Control-Allow-Origin`', async () => {
-    const subdomain = env.createUrl({ subdomain: 'de' })
+  describe('when `Origin` is from within the current serlo domain, the same value is returned as `Access-Control-Allow-Origin`', () => {
+    test.each([
+      currentDomain,
+      subdomainOfCurrentDomain,
+      env.createUrl({ pathname: '/', protocol: 'http' }),
+      env.createUrl({ pathname: '/', subdomain: 'de' }),
+      env.createUrl({ pathname: '/foo', subdomain: 'ta' }),
+    ])('when `Origin` is `%s`', async (origin) => {
+      const response = await fetchApi({
+        headers: origin ? { Origin: origin } : {},
+      })
 
-    const response = await fetchApi({ headers: { Origin: subdomain } })
-
-    expect(response.headers.get('Access-Control-Allow-Origin')).toBe(subdomain)
-  })
-
-  test('when `Origin` is not a subdomain of the current serlo domain, the current serlo domain is returned as `Access-Control-Allow-Origin`', async () => {
-    const response = await fetchApi({
-      headers: { Content: `https://verybad-${domain}` },
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(origin)
     })
+  })
 
-    expect(response.headers.get('Access-Control-Allow-Origin')).toBe(domain)
+  describe('when `Origin` is not from the current serlo domain, the current serlo domain is returned as `Access-Control-Allow-Origin`', () => {
+    test.each([`http://verybad-${env.getDomain()}`])(
+      'when `Origin` is `%s`',
+      async (origin) => {
+        const response = await fetchApi({
+          headers: origin ? { Origin: origin } : {},
+        })
+
+        expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+          currentDomain
+        )
+      }
+    )
   })
 })
 
