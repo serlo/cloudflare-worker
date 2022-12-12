@@ -94,7 +94,7 @@ export abstract class TestEnvironment {
 
 class LocalEnvironment extends TestEnvironment {
   public getDomain() {
-    return global.DOMAIN
+    return 'serlo.localhost'
   }
 
   public async fetchRequest(originalRequest: Request): Promise<Response> {
