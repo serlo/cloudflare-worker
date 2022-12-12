@@ -41,6 +41,7 @@ import {
   currentTestEnvironment,
   givenFrontend,
   defaultFrontendServer,
+  localTestEnvironment,
 } from './__tests__/__utils__'
 
 const timeout = currentTestEnvironment().getNeededTimeout()
@@ -57,7 +58,7 @@ beforeAll(() => {
 
 beforeEach(() => {
   global.API_SECRET = 'secret'
-  global.DOMAIN = 'serlo.localhost'
+  global.DOMAIN = localTestEnvironment().getDomain()
   global.ENVIRONMENT = 'local'
   global.FRONTEND_DOMAIN = 'frontend.serlo.localhost'
 
