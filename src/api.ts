@@ -35,7 +35,11 @@ export async function api(request: Request) {
     'Access-Control-Allow-Origin',
     setAllowedOrigin(request.headers.get('Origin'))
   )
+
+  // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin#cors_and_caching
+  // for an explanation why this header is needed to be set
   response.headers.set('Vary', 'Origin')
+
   return response
 }
 
