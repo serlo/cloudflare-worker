@@ -22,11 +22,24 @@
 import { DateTime } from 'luxon'
 import { h } from 'preact'
 
-import { createPreactResponse, Url } from '../utils'
+import { createPreactResponse, getCookieValue, isInstance, Url } from '../utils'
 import { Maintenance } from './template'
 
 export async function maintenanceMode(request: Request) {
   const url = Url.fromRequest(request)
+
+  if (
+    global.DOMAIN !== 'serlo.localhost' && // To make the tests happy :-)
+    isInstance(url.subdomain) &&
+    (url.pathnameWithoutTrailingSlash.startsWith('/auth/') ||
+      url.pathnameWithoutTrailingSlash.startsWith('/user/register')) &&
+    getCookieValue('allowed2Auth', request.headers.get('Cookie')) !== '1'
+  ) {
+    return createMaintenanceResponse({
+      lang: url.subdomain === 'de' ? 'de' : 'en',
+    })
+  }
+
   const enabled = await global.MAINTENANCE_KV.get('enabled')
   if (!enabled) return null
   const {
