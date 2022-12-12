@@ -29,14 +29,18 @@ export async function api(request: Request) {
   if (url.subdomain !== 'api') return null
   if (url.pathname !== '/graphql') return null
 
-  // Actually, the header `Access-Control-Allow-Origin` is supposed to be
-  // handled in api but Cloudflare keeps somehow setting it to `*`
   const originalResponse = await fetchApi(request)
   const response = new Response(originalResponse.body, originalResponse)
+
   response.headers.set(
     'Access-Control-Allow-Origin',
-    request.headers.get('Origin') ?? '*'
+    getAllowedOrigin(request.headers.get('Origin'))
   )
+
+  // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin#cors_and_caching
+  // for an explanation why this header is needed to be set
+  response.headers.set('Vary', 'Origin')
+
   return response
 }
 
@@ -62,4 +66,21 @@ async function getAuthorizationHeader(request: Request) {
   } else {
     return `Serlo Service=${serviceToken}`
   }
+}
+
+function getAllowedOrigin(requestOrigin: string | null) {
+  try {
+    if (
+      requestOrigin != null &&
+      requestOrigin !== '*' &&
+      requestOrigin !== 'null' &&
+      new Url(requestOrigin).domain === global.DOMAIN
+    ) {
+      return requestOrigin
+    }
+  } catch (err) {
+    // return default value
+  }
+
+  return `https://${global.DOMAIN}`
 }
