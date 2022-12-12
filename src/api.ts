@@ -69,10 +69,18 @@ async function getAuthorizationHeader(request: Request) {
 }
 
 function getAllowedOrigin(requestOrigin: string | null) {
-  const domainOrigin = `https://${global.DOMAIN}`
+  try {
+    if (
+      requestOrigin != null &&
+      requestOrigin !== '*' &&
+      requestOrigin !== 'null' &&
+      new Url(requestOrigin).domain === global.DOMAIN
+    ) {
+      return requestOrigin
+    }
+  } catch (err) {
+    // return default value
+  }
 
-  return requestOrigin != null &&
-    new Url(requestOrigin).domain === global.DOMAIN
-    ? requestOrigin
-    : domainOrigin
+  return `https://${global.DOMAIN}`
 }

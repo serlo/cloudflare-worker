@@ -87,18 +87,20 @@ describe('setting of response header `Access-Control-Allow-Origin`', () => {
   })
 
   describe('when `Origin` is not from the current serlo domain, the current serlo domain is returned as `Access-Control-Allow-Origin`', () => {
-    test.each([`http://verybad-${env.getDomain()}`])(
-      'when `Origin` is `%s`',
-      async (origin) => {
-        const response = await fetchApi({
-          headers: origin ? { Origin: origin } : {},
-        })
+    test.each([
+      `http://verybad-${env.getDomain()}`,
+      '*',
+      'null',
+      'http//invalid-url',
+    ])('when `Origin` is `%s`', async (origin) => {
+      const response = await fetchApi({
+        headers: origin ? { Origin: origin } : {},
+      })
 
-        expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
-          currentDomain
-        )
-      }
-    )
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+        currentDomain
+      )
+    })
   })
 })
 
