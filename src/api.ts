@@ -31,9 +31,10 @@ export async function api(request: Request) {
 
   const originalResponse = await fetchApi(request)
   const response = new Response(originalResponse.body, originalResponse)
+
   response.headers.set(
     'Access-Control-Allow-Origin',
-    setAllowedOrigin(request.headers.get('Origin'))
+    getAllowedOrigin(request.headers.get('Origin'))
   )
 
   // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin#cors_and_caching
@@ -41,17 +42,6 @@ export async function api(request: Request) {
   response.headers.set('Vary', 'Origin')
 
   return response
-}
-
-function setAllowedOrigin(requestOrigin: string | null) {
-  const domainOrigin = `https://${global.DOMAIN}`
-
-  if (requestOrigin === null) return domainOrigin
-
-  const requestDomain = new Url(requestOrigin).domain
-  if (requestDomain === global.DOMAIN) return requestOrigin
-
-  return domainOrigin
 }
 
 export async function fetchApi(request: Request) {
@@ -76,4 +66,13 @@ async function getAuthorizationHeader(request: Request) {
   } else {
     return `Serlo Service=${serviceToken}`
   }
+}
+
+function getAllowedOrigin(requestOrigin: string | null) {
+  const domainOrigin = `https://${global.DOMAIN}`
+
+  return requestOrigin != null &&
+    new Url(requestOrigin).domain === global.DOMAIN
+    ? requestOrigin
+    : domainOrigin
 }
