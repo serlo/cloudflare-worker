@@ -89,6 +89,10 @@ function authKratosIdentitySchema(request: Request): Response | null {
             'ory.sh/kratos': {
               credentials: { password: { identifier: true } },
             },
+            pattern: '^[\\w\\-]+$',
+            // TODO: check if minimal username length should be reintroduced or delete it
+            // minLength: 2,
+            maxLength: 32,
           },
           description: {
             type: 'string',
