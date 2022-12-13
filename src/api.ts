@@ -29,11 +29,24 @@ export async function api(request: Request) {
   if (url.subdomain !== 'api') return null
   if (url.pathname !== '/graphql') return null
 
-  return await fetchApi(request)
+  const originalResponse = await fetchApi(request)
+  const response = new Response(originalResponse.body, originalResponse)
+
+  response.headers.set(
+    'Access-Control-Allow-Origin',
+    getAllowedOrigin(request.headers.get('Origin'))
+  )
+
+  // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin#cors_and_caching
+  // for an explanation why this header is needed to be set
+  response.headers.set('Vary', 'Origin')
+
+  return response
 }
 
 export async function fetchApi(request: Request) {
   request = new Request(request)
+
   request.headers.set('Authorization', await getAuthorizationHeader(request))
 
   return await fetch(request)
@@ -48,12 +61,26 @@ async function getAuthorizationHeader(request: Request) {
     .setIssuer('serlo.org-cloudflare-worker')
     .sign(Buffer.from(global.API_SECRET))
 
-  if (authorizationHeader == null) {
-    return `Serlo Service=${serviceToken}`
-  } else if (authorizationHeader.startsWith('Serlo')) {
+  if (authorizationHeader && authorizationHeader.startsWith('Serlo')) {
     return authorizationHeader
   } else {
-    const user = authorizationHeader.replace('Bearer ', '')
-    return `Serlo Service=${serviceToken};User=${user}`
+    return `Serlo Service=${serviceToken}`
   }
+}
+
+function getAllowedOrigin(requestOrigin: string | null) {
+  try {
+    if (
+      requestOrigin != null &&
+      requestOrigin !== '*' &&
+      requestOrigin !== 'null' &&
+      new Url(requestOrigin).domain === global.DOMAIN
+    ) {
+      return requestOrigin
+    }
+  } catch (err) {
+    // return default value
+  }
+
+  return `https://${global.DOMAIN}`
 }

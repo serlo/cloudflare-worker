@@ -136,7 +136,11 @@ function getRoute(request: Request): RouteConfig | null {
     return { __typename: 'Legacy' }
   }
 
-  if (url.pathname.startsWith('/api/auth/')) {
+  if (
+    url.pathname.startsWith('/api/auth/') ||
+    url.pathname.startsWith('/api/oauth/') ||
+    url.pathname.startsWith('/api/.ory/')
+  ) {
     return {
       __typename: 'BeforeRedirectsRoute',
       route: {
@@ -187,17 +191,6 @@ function getRoute(request: Request): RouteConfig | null {
     return null
 
   if (
-    url.pathname.startsWith('/auth/activate/') ||
-    url.pathname.startsWith('/auth/password/restore/') ||
-    [
-      '/auth/login',
-      '/auth/logout',
-      '/auth/password/change',
-      '/auth/hydra/login',
-      '/auth/hydra/consent',
-      '/auth/hydra/logout',
-      '/user/register',
-    ].includes(url.pathname) ||
     request.headers.get('X-From') === 'legacy-serlo.org' ||
     url.pathname.startsWith('/taxonomy/term/organize/') ||
     url.pathname.startsWith('/entity/repository/add-revision-old/') ||
