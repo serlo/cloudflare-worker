@@ -47,6 +47,7 @@ export async function handleFetchEvent(event: FetchEvent): Promise<Response> {
   try {
     return (
       auth(request) ||
+      temporarilyDisableBotOrNot(request) ||
       (await maintenanceMode(request)) ||
       (await enforceHttps(request)) ||
       (await legalPages(request)) ||
@@ -134,4 +135,14 @@ async function packages(request: Request) {
   }
 
   return response
+}
+
+function temporarilyDisableBotOrNot(request: Request) {
+  const url = Url.fromRequest(request)
+
+  if (url.pathname !== '/___bot_or_not') return null
+
+  return new Response(
+    'Sorry, we have disabled Bot or Not for a while. Check Slack to know when it will be enabled again.'
+  )
 }
