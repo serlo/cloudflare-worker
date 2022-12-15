@@ -362,7 +362,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       givenWikimedia(defaultWikimediaServer())
     })
 
-    test('returns thumbnail', async () => {
+    test.skip('returns thumbnail', async () => {
       const response = await requestThumbnail(video.embedUrl)
 
       expectImageResponseWithError({
