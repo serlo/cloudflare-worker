@@ -34,7 +34,6 @@
     "_prettier": "prettier ."
   },
   "dependencies": {
-    "core-js-pure": "^3.26.1",
     "fp-ts": "^2.13.1",
     "io-ts": "^2.2.20",
     "jose": "^4.11.1",
@@ -54,7 +53,6 @@
     "@storybook/preact": "^6.5.14",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/preact": "^3.2.2",
-    "@types/core-js": "^2.5.5",
     "@types/iarna__toml": "^2.0.2",
     "@types/jest": "^29.2.4",
     "@types/luxon": "^3.1.0",
