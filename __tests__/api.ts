@@ -27,7 +27,7 @@ beforeEach(() => {
   givenUuid({
     id: 23591,
     __typename: 'Page',
-    alias: '/23591/math',
+    alias: '/23591/mathematics-homepage',
   })
 })
 
@@ -37,7 +37,13 @@ test('calls to API are signed', async () => {
   // unsigned calls would result in an unseccessful response
   expect(response.status).toBe(200)
   expect(await response.json()).toEqual({
-    data: { uuid: { __typename: 'Page', alias: '/23591/math', id: 23591 } },
+    data: {
+      uuid: {
+        __typename: 'Page',
+        alias: '/23591/mathematics-homepage',
+        id: 23591,
+      },
+    },
   })
 })
 
@@ -107,7 +113,7 @@ describe('setting of response header `Access-Control-Allow-Origin`', () => {
 test('header `Vary` is set to `Origin` to avoid caching of requests', async () => {
   const response = await fetchApi()
 
-  expect(response.headers.get('Vary')).toBe('Origin')
+  expect(response.headers.get('Vary')).toContain('Origin')
 })
 
 function fetchApi(args?: { headers?: RequestInit['headers'] }) {
