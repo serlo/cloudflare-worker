@@ -1522,10 +1522,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cloudflare/workers-types@npm:^3.18.0":
-  version: 3.18.0
-  resolution: "@cloudflare/workers-types@npm:3.18.0"
-  checksum: 9a54a4fbd12eed19495cf6774cd48b0e97aaee093d40d2ae8e7a11c58937b8ad5173588efca5e138c373c6d6730faf96f2385eee203dab3fdb91565885efb0cd
+"@cloudflare/workers-types@npm:^4.20221111.1":
+  version: 4.20221111.1
+  resolution: "@cloudflare/workers-types@npm:4.20221111.1"
+  checksum: 6ee1ba28ee3c59926f0f49da7023a887846bb637d43da0d8787ed87b2ed624bd83471feba9519a404a58cecad73f3a74a67bc3f52ccfda916947d297cfaa988c
   languageName: node
   linkType: hard
 
@@ -2129,14 +2129,13 @@ __metadata:
   resolution: "@serlo/serlo.org-cloudflare-worker@workspace:."
   dependencies:
     "@babel/core": ^7.20.5
-    "@cloudflare/workers-types": ^3.18.0
+    "@cloudflare/workers-types": ^4.20221111.1
     "@cloudflare/wrangler": ^1.20.0
     "@iarna/toml": ^2.2.5
     "@splish-me/copyright-headers": ^0.0.2
     "@storybook/preact": ^6.5.14
     "@testing-library/jest-dom": ^5.16.5
     "@testing-library/preact": ^3.2.2
-    "@types/core-js": ^2.5.5
     "@types/iarna__toml": ^2.0.2
     "@types/jest": ^29.2.4
     "@types/luxon": ^3.1.0
@@ -2147,7 +2146,6 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^5.46.1
     "@typescript-eslint/parser": ^5.46.1
     babel-loader: ^9.1.0
-    core-js-pure: ^3.26.1
     cross-env: ^7.0.3
     eslint: ^8.29.0
     eslint-config-prettier: ^8.5.0
@@ -3046,13 +3044,6 @@ __metadata:
   version: 0.4.1
   resolution: "@types/cookie@npm:0.4.1"
   checksum: 3275534ed69a76c68eb1a77d547d75f99fedc80befb75a3d1d03662fb08d697e6f8b1274e12af1a74c6896071b11510631ba891f64d30c78528d0ec45a9c1a18
-  languageName: node
-  linkType: hard
-
-"@types/core-js@npm:^2.5.5":
-  version: 2.5.5
-  resolution: "@types/core-js@npm:2.5.5"
-  checksum: 54eb91dc52206d8e524771cd079be4bed6a41947d08183a7954df7a3dc25ae21c8b7176143dc7203df82a6e5ff1df8998edc8d407c4a082bdbf0ede35369c5c3
   languageName: node
   linkType: hard
 
@@ -5817,13 +5808,6 @@ __metadata:
     browserslist: ^4.19.1
     semver: 7.0.0
   checksum: 7914d2f8a2f7c1b400e1c04c7560f4c96028bf23cec3cea6063ba594e38023cccbd38ad88af41c5d6b65450e97a989eb37598f609e3f7fbc6ebc1856d4195cbb
-  languageName: node
-  linkType: hard
-
-"core-js-pure@npm:^3.26.1":
-  version: 3.26.1
-  resolution: "core-js-pure@npm:3.26.1"
-  checksum: d88c40e5e29e413c11d1ef991a8d5b6a63f00bd94707af0f649d3fc18b3524108b202f4ae75ce77620a1557d1ba340bc3362b4f25d590eccc37cf80fc75f7cd4
   languageName: node
   linkType: hard
 

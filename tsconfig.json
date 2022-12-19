@@ -3,7 +3,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "importHelpers": true,
-    "lib": ["esnext", "webworker"],
+    "lib": ["esnext"],
     "jsx": "react",
     "jsxFactory": "h",
     "module": "commonjs",
@@ -11,6 +11,6 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2019",
-    "types": ["@cloudflare/workers-types"]
+    "types": ["@cloudflare/workers-types/2022-08-04"]
   }
 }
