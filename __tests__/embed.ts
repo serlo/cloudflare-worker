@@ -362,8 +362,13 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       givenWikimedia(defaultWikimediaServer())
     })
 
-    test.skip('returns thumbnail', async () => {
-      const response = await requestThumbnail(video.embedUrl)
+    test('returns thumbnail', async () => {
+      // TODO: After fixing https://github.com/serlo/cloudflare-worker/issues/241
+      // set `env` to `currentTestEnvironment()`
+      const response = await requestThumbnail(
+        video.embedUrl,
+        localTestEnvironment()
+      )
 
       expectImageResponseWithError({
         response,
