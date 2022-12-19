@@ -1,5 +1,5 @@
 account_id = "3bfabc4463c2c3c340f7301d22ed18c0"
-compatibility_date = "2021-09-27"
+compatibility_date = "2022-11-30"
 type = "webpack"
 webpack_config = "webpack.config.js"
 
