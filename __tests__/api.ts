@@ -34,7 +34,7 @@ beforeEach(() => {
 test('calls to API are signed', async () => {
   const response = await fetchApi()
 
-  // unsigned calls would result in an unseccessful response
+  // unsigned calls would result in an unsuccessful response
   expect(response.status).toBe(200)
   expect(await response.json()).toEqual({
     data: { uuid: { __typename: 'Page', alias: '/23591/math', id: 23591 } },
@@ -70,19 +70,40 @@ describe('setting of response header `Access-Control-Allow-Origin`', () => {
     }
   )
 
-  describe('when `Origin` is from within the current serlo domain, the same value is returned as `Access-Control-Allow-Origin`', () => {
-    test.each([
-      currentDomain,
-      subdomainOfCurrentDomain,
-      env.createUrl({ pathname: '/', protocol: 'http' }),
-      env.createUrl({ pathname: '/', subdomain: 'de' }),
-      env.createUrl({ pathname: '/foo', subdomain: 'ta' }),
-    ])('when `Origin` is `%s`', async (origin) => {
-      const response = await fetchApi({
-        headers: origin ? { Origin: origin } : {},
-      })
+  describe('the same value is returned as `Access-Control-Allow-Origin`,', () => {
+    test('when developing using staging API and local frontend', async () => {
+      const localhostOrigin = 'http://localhost:3000'
 
-      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(origin)
+      const header = { headers: { Origin: localhostOrigin } }
+
+      let response = await fetchApi(header)
+
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+        localhostOrigin
+      )
+
+      global.ENVIRONMENT = 'production'
+
+      response = await fetchApi(header)
+
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+        currentDomain
+      )
+    })
+
+    describe('when `Origin` is from within the current serlo domain', () => {
+      test.each([
+        currentDomain,
+        subdomainOfCurrentDomain,
+        env.createUrl({ pathname: '/', protocol: 'http' }),
+        env.createUrl({ pathname: '/', subdomain: 'de' }),
+        env.createUrl({ pathname: '/foo', subdomain: 'ta' }),
+      ])('when `Origin` is `%s`', async (origin) => {
+        const response = await fetchApi({
+          headers: origin ? { Origin: origin } : {},
+        })
+        expect(response.headers.get('Access-Control-Allow-Origin')).toBe(origin)
+      })
     })
   })
 
