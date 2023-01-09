@@ -21,7 +21,7 @@
  */
 import { Url } from './utils'
 
-export const robotsProduction = `User-agent: *
+const robotsProduction = `User-agent: *
 Disallow: /page/revision/revisions/
 Disallow: /page/revision/revision/
 Disallow: /page/revision/

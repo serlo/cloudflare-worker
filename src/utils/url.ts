@@ -19,8 +19,6 @@
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import URL from 'core-js-pure/features/url'
-
 const contentApiParameters = [
   'contentOnly',
   'hideTopbar',
