@@ -444,6 +444,7 @@ describe('redirects to current path of an resource', () => {
     givenUuid({
       id: 65395,
       __typename: 'Comment',
+      trashed: false,
       alias: '/mathe/65395/65395',
       legacyObject: { alias: '/mathe/1573/vektor' },
     })

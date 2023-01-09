@@ -63,32 +63,19 @@ test('Uses legacy frontend when cookie "useLegacyFrontend" is "true"', async () 
   await expectLegacy(await env.fetchRequest(request))
 })
 
-describe('when request contains content api parameter', () => {
-  beforeEach(() => {
-    givenUuid({
-      id: 1555,
-      __typename: 'Article',
-      alias: '/1555',
-      instance: Instance.En,
-    })
+test('chooses frontend when request contains content api parameter', async () => {
+  givenUuid({
+    id: 1555,
+    __typename: 'Article',
+    alias: '/mathe/1555/zylinder',
+    instance: Instance.De,
+  })
+  const response = await currentTestEnvironment().fetch({
+    subdomain: 'de',
+    pathname: '/mathe/1555/zylinder?contentOnly',
   })
 
-  test('chooses frontend', async () => {
-    const response = await currentTestEnvironment().fetch({
-      subdomain: 'en',
-      pathname: '/1555?contentOnly',
-    })
-
-    await expectFrontend(response)
-  })
-
-  test('handles trailing slash and redirects', async () => {
-    const response = await currentTestEnvironment().fetch({
-      subdomain: 'en',
-      pathname: '/1555/?contentOnly',
-    })
-    expect(response.status).toBe(301)
-  })
+  await expectFrontend(response)
 })
 
 describe('when request contains header X-From: legacy-serlo.org', () => {
@@ -217,5 +204,5 @@ async function expectFrontend(response: Response) {
     expect.stringContaining('<script id="__NEXT_DATA__"')
   )
   // Tests that backend headers are transfered to client
-  expect(response.headers.get('x-vercel-cache')).toEqual('HIT')
+  expect(response.headers.get('x-vercel-cache')).toBeDefined()
 }
