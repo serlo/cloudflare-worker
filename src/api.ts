@@ -69,6 +69,13 @@ async function getAuthorizationHeader(request: Request) {
 }
 
 function getAllowedOrigin(requestOrigin: string | null) {
+  if (
+    global.ENVIRONMENT !== 'production' &&
+    requestOrigin?.includes('localhost:3000')
+  ) {
+    return requestOrigin
+  }
+
   try {
     if (
       requestOrigin != null &&
@@ -78,7 +85,7 @@ function getAllowedOrigin(requestOrigin: string | null) {
     ) {
       return requestOrigin
     }
-  } catch (err) {
+  } catch {
     // return default value
   }
 
