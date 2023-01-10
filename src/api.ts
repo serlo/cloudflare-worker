@@ -77,12 +77,7 @@ function getAllowedOrigin(requestOrigin: string | null) {
     ) {
       const url = new Url(requestOrigin)
 
-      if (
-        url.domain === global.DOMAIN ||
-        (global.ENVIRONMENT !== 'production' &&
-          url.domain === 'localhost' &&
-          url.port === '3000')
-      ) {
+      if (url.domain === global.DOMAIN || global.ENVIRONMENT !== 'production') {
         return requestOrigin
       }
     }
