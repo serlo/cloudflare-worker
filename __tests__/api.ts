@@ -95,11 +95,11 @@ describe('setting of response header `Access-Control-Allow-Origin`', () => {
     })
   })
 
-  describe('when CORS is send from the local frontend development', () => {
+  describe('when CORS is sent from the local frontend development', () => {
     const localhostOrigin = 'http://localhost:3000'
     const header = { headers: { Origin: localhostOrigin } }
 
-    test('when we are in the staging environment, the same value is send back in `Access-Control-Allow-Origin`', async () => {
+    test('when we are in the staging environment, the same value is sent back in `Access-Control-Allow-Origin`', async () => {
       global.ENVIRONMENT = 'staging'
 
       const response = await fetchApi(
