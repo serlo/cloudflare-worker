@@ -21,17 +21,6 @@
  */
 import { Fragment, h } from 'preact'
 
-import { Template } from '../ui'
-import {
-  createJsonResponse,
-  createNotFoundResponse,
-  createPreactResponse,
-  isInstance,
-  Instance,
-  markdownToHtml,
-  sanitizeHtml,
-  Url,
-} from '../utils'
 import {
   Config,
   revisedConfig as defaultRevisedConfig,
@@ -44,6 +33,17 @@ import {
   UnrevisedConfig,
   UnrevisedType,
 } from './config'
+import { Template } from '../ui'
+import {
+  createJsonResponse,
+  createNotFoundResponse,
+  createPreactResponse,
+  isInstance,
+  Instance,
+  markdownToHtml,
+  sanitizeHtml,
+  Url,
+} from '../utils'
 
 const defaultLanguage = Instance.En
 
