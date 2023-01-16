@@ -22,8 +22,8 @@
 import { DateTime } from 'luxon'
 import { h } from 'preact'
 
-import { Maintenance as MaintenanceOriginal } from '../src/maintenance/template'
 import { createStaticComponent } from './utils'
+import { Maintenance as MaintenanceOriginal } from '../src/maintenance/template'
 
 const Maintenance = createStaticComponent(MaintenanceOriginal)
 

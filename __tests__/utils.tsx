@@ -22,6 +22,17 @@
 
 import { h } from 'preact'
 
+import {
+  expectContainsText,
+  expectContentTypeIsHtml,
+  expectIsJsonResponse,
+  expectIsNotFoundResponse,
+  givenApi,
+  givenUuid,
+  hasInternalServerError,
+  returnsMalformedJson,
+  returnsJson,
+} from './__utils__'
 import { Template } from '../src/ui'
 import {
   getCookieValue,
@@ -35,17 +46,6 @@ import {
   Instance,
   toCacheKey,
 } from '../src/utils'
-import {
-  expectContainsText,
-  expectContentTypeIsHtml,
-  expectIsJsonResponse,
-  expectIsNotFoundResponse,
-  givenApi,
-  givenUuid,
-  hasInternalServerError,
-  returnsMalformedJson,
-  returnsJson,
-} from './__utils__'
 
 describe('getCookieValue()', () => {
   describe('returns the cookie value of a given cookie header', () => {
