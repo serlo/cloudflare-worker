@@ -21,13 +21,13 @@
  */
 import { h } from 'preact'
 
+import { createStaticComponent } from './utils'
 import {
   UnrevisedPage as UnrevisedPageOriginal,
   RevisedPage as RevisedPageOriginal,
   RevisionsOverview as RevisionsOverviewOriginal,
 } from '../src/legal-pages'
 import { Instance } from '../src/utils'
-import { createStaticComponent } from './utils'
 
 const UnrevisedPage = createStaticComponent(UnrevisedPageOriginal)
 const RevisedPage = createStaticComponent(RevisedPageOriginal)

@@ -21,9 +21,9 @@
  */
 import { rest } from 'msw'
 
-import { Url, Instance } from '../../../src/utils'
 import { getUuid } from './database'
 import { RestResolver, createUrlRegex } from './utils'
+import { Url, Instance } from '../../../src/utils'
 
 export function givenSerlo(resolver: RestResolver) {
   global.server.use(
