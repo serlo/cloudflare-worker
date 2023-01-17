@@ -21,8 +21,8 @@
  */
 import { h } from 'preact'
 
-import { NotFound as NotFoundOriginal } from '../src/ui'
 import { createStaticComponent } from './utils'
+import { NotFound as NotFoundOriginal } from '../src/ui'
 
 const NotFound = createStaticComponent(NotFoundOriginal)
 

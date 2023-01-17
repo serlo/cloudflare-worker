@@ -21,7 +21,6 @@
  */
 import { DateTime } from 'luxon'
 
-import { Instance } from '../src/utils'
 import {
   expectContentTypeIsHtml,
   expectContainsText,
@@ -29,6 +28,7 @@ import {
   givenUuid,
   localTestEnvironment,
 } from './__utils__'
+import { Instance } from '../src/utils'
 
 beforeEach(() => {
   givenUuid({

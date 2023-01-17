@@ -22,8 +22,8 @@
 import { DateTime } from 'luxon'
 import { h } from 'preact'
 
-import { createPreactResponse, Url } from '../utils'
 import { Maintenance } from './template'
+import { createPreactResponse, Url } from '../utils'
 
 export async function maintenanceMode(request: Request) {
   const url = Url.fromRequest(request)
