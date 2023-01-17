@@ -95,34 +95,38 @@ describe('setting of response header `Access-Control-Allow-Origin`', () => {
     })
   })
 
-  describe('when CORS is sent from the local frontend development', () => {
-    const localhostOrigin = 'http://localhost:3000'
-    const header = { headers: { Origin: localhostOrigin } }
+  describe('when CORS is sent from the local frontend development or preview deployment', () => {
+    const domains = [
+      'http://localhost:3000',
+      'https://frontend-7md9ymhyw-serlo.vercel.app',
+    ]
 
-    test('when we are in the staging environment, the same value is sent back in `Access-Control-Allow-Origin`', async () => {
-      global.ENVIRONMENT = 'staging'
+    describe('when we are in the staging environment, the same value is sent back in `Access-Control-Allow-Origin`', () => {
+      test.each(domains)('when `Origin` is `%s`', async (origin) => {
+        global.ENVIRONMENT = 'staging'
 
-      const response = await fetchApi(
-        header,
-        currentTestEnvironmentWhen((conf) => conf.ENVIRONMENT === 'staging')
-      )
+        const response = await fetchApi(
+          { headers: { Origin: origin } },
+          currentTestEnvironmentWhen((conf) => conf.ENVIRONMENT === 'staging')
+        )
 
-      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
-        localhostOrigin
-      )
+        expect(response.headers.get('Access-Control-Allow-Origin')).toBe(origin)
+      })
     })
 
-    test('when we are in the production environment, the current domain is sent back in `Access-Control-Allow-Origin`', async () => {
-      global.ENVIRONMENT = 'production'
-      const env = currentTestEnvironmentWhen(
-        (conf) => conf.ENVIRONMENT === 'production'
-      )
+    describe('when we are in the production environment, the current domain is sent back in `Access-Control-Allow-Origin`', () => {
+      test.each(domains)('when `Origin` is `%s`', async (origin) => {
+        global.ENVIRONMENT = 'production'
+        const env = currentTestEnvironmentWhen(
+          (conf) => conf.ENVIRONMENT === 'production'
+        )
 
-      const response = await fetchApi(header, env)
+        const response = await fetchApi({ headers: { Origin: origin } }, env)
 
-      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
-        `https://${env.getDomain()}`
-      )
+        expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+          `https://${env.getDomain()}`
+        )
+      })
     })
   })
 
