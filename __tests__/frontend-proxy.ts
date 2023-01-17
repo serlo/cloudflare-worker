@@ -19,7 +19,6 @@
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { Instance } from '../src/utils'
 import {
   mockHttpGet,
   returnsText,
@@ -30,6 +29,7 @@ import {
   givenFrontend,
   expectSentryEvent,
 } from './__utils__'
+import { Instance } from '../src/utils'
 
 test('Always choose new frontend as default route', async () => {
   await expectFrontend(

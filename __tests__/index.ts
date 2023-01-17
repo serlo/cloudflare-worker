@@ -20,7 +20,6 @@
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-import { Instance } from '../src/utils'
 import {
   mockHttpGet,
   returnsText,
@@ -29,6 +28,7 @@ import {
   expectToBeRedirectTo,
   localTestEnvironment,
 } from './__utils__'
+import { Instance } from '../src/utils'
 
 describe('Enforce HTTPS', () => {
   const env = currentTestEnvironment()

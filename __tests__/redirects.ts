@@ -20,7 +20,6 @@
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
 
-import { Instance } from '../src/utils'
 import {
   expectIsNotFoundResponse,
   expectToBeRedirectTo,
@@ -32,6 +31,7 @@ import {
   localTestEnvironment,
   currentTestEnvironmentWhen,
 } from './__utils__'
+import { Instance } from '../src/utils'
 
 const env = currentTestEnvironment()
 
