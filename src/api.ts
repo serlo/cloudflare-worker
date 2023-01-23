@@ -69,25 +69,25 @@ async function getAuthorizationHeader(request: Request) {
 }
 
 function getAllowedOrigin(requestOrigin: string | null) {
-  if (
-    global.ENVIRONMENT !== 'production' &&
-    requestOrigin?.includes('localhost:3000')
-  ) {
-    return requestOrigin
-  }
-
   try {
     if (
       requestOrigin != null &&
       requestOrigin !== '*' &&
-      requestOrigin !== 'null' &&
-      new Url(requestOrigin).domain === global.DOMAIN
+      requestOrigin !== 'null'
     ) {
-      return requestOrigin
+      const url = new Url(requestOrigin)
+
+      if (
+        url.domain === global.DOMAIN ||
+        (global.ENVIRONMENT !== 'production' &&
+          ((url.domain === 'localhost' && url.port === '3000') ||
+            url.hostname.includes('-serlo.vercel.app')))
+      ) {
+        return requestOrigin
+      }
     }
   } catch {
     // return default value
   }
-
   return `https://${global.DOMAIN}`
 }

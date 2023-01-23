@@ -19,9 +19,13 @@
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { givenUuid, currentTestEnvironment } from './__utils__'
+import {
+  givenUuid,
+  currentTestEnvironment,
+  currentTestEnvironmentWhen,
+} from './__utils__'
 
-const env = currentTestEnvironment()
+const currentEnv = currentTestEnvironment()
 
 beforeEach(() => {
   givenUuid({
@@ -48,8 +52,8 @@ test('calls to API are signed', async () => {
 })
 
 describe('setting of response header `Access-Control-Allow-Origin`', () => {
-  const currentDomain = `https://${env.getDomain()}`
-  const subdomainOfCurrentDomain = `https://de.${env.getDomain()}`
+  const currentDomain = `https://${currentEnv.getDomain()}`
+  const subdomainOfCurrentDomain = `https://de.${currentEnv.getDomain()}`
 
   test('when `Origin` is not set, `Access-Control-Allow-Origin` defaults to the current serlo domain', async () => {
     const response = await fetchApi()
@@ -62,9 +66,9 @@ describe('setting of response header `Access-Control-Allow-Origin`', () => {
   test.each([
     currentDomain,
     subdomainOfCurrentDomain,
-    env.createUrl({ pathname: '/', protocol: 'http' }),
-    env.createUrl({ pathname: '/', subdomain: 'de' }),
-    env.createUrl({ pathname: '/foo', subdomain: 'ta' }),
+    currentEnv.createUrl({ pathname: '/', protocol: 'http' }),
+    currentEnv.createUrl({ pathname: '/', subdomain: 'de' }),
+    currentEnv.createUrl({ pathname: '/foo', subdomain: 'ta' }),
   ])(
     'when `Origin` is `%s`, the same value is returned as `Access-Control-Allow-Origin`',
     async (origin) => {
@@ -76,46 +80,59 @@ describe('setting of response header `Access-Control-Allow-Origin`', () => {
     }
   )
 
-  describe('the same value is returned as `Access-Control-Allow-Origin`,', () => {
-    test('when developing using staging API and local frontend', async () => {
-      const localhostOrigin = 'http://localhost:3000'
+  describe('when `Origin` is from within the current serlo domain, the same value is returned as `Access-Control-Allow-Origin`', () => {
+    test.each([
+      currentDomain,
+      subdomainOfCurrentDomain,
+      currentEnv.createUrl({ pathname: '/', protocol: 'http' }),
+      currentEnv.createUrl({ pathname: '/', subdomain: 'de' }),
+      currentEnv.createUrl({ pathname: '/foo', subdomain: 'ta' }),
+    ])('when `Origin` is `%s`', async (origin) => {
+      const response = await fetchApi({
+        headers: origin ? { Origin: origin } : {},
+      })
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(origin)
+    })
+  })
 
-      const header = { headers: { Origin: localhostOrigin } }
+  describe('when CORS is sent from the local frontend development or preview deployment', () => {
+    const domains = [
+      'http://localhost:3000',
+      'https://frontend-7md9ymhyw-serlo.vercel.app',
+    ]
 
-      let response = await fetchApi(header)
+    describe('when we are in the staging environment, the same value is sent back in `Access-Control-Allow-Origin`', () => {
+      test.each(domains)('when `Origin` is `%s`', async (origin) => {
+        global.ENVIRONMENT = 'staging'
 
-      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
-        localhostOrigin
-      )
+        const response = await fetchApi(
+          { headers: { Origin: origin } },
+          currentTestEnvironmentWhen((conf) => conf.ENVIRONMENT === 'staging')
+        )
 
-      global.ENVIRONMENT = 'production'
-
-      response = await fetchApi(header)
-
-      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
-        currentDomain
-      )
+        expect(response.headers.get('Access-Control-Allow-Origin')).toBe(origin)
+      })
     })
 
-    describe('when `Origin` is from within the current serlo domain', () => {
-      test.each([
-        currentDomain,
-        subdomainOfCurrentDomain,
-        env.createUrl({ pathname: '/', protocol: 'http' }),
-        env.createUrl({ pathname: '/', subdomain: 'de' }),
-        env.createUrl({ pathname: '/foo', subdomain: 'ta' }),
-      ])('when `Origin` is `%s`', async (origin) => {
-        const response = await fetchApi({
-          headers: origin ? { Origin: origin } : {},
-        })
-        expect(response.headers.get('Access-Control-Allow-Origin')).toBe(origin)
+    describe('when we are in the production environment, the current domain is sent back in `Access-Control-Allow-Origin`', () => {
+      test.each(domains)('when `Origin` is `%s`', async (origin) => {
+        global.ENVIRONMENT = 'production'
+        const env = currentTestEnvironmentWhen(
+          (conf) => conf.ENVIRONMENT === 'production'
+        )
+
+        const response = await fetchApi({ headers: { Origin: origin } }, env)
+
+        expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+          `https://${env.getDomain()}`
+        )
       })
     })
   })
 
   describe('when `Origin` is not from the current serlo domain, the current serlo domain is returned as `Access-Control-Allow-Origin`', () => {
     test.each([
-      `http://verybad-${env.getDomain()}`,
+      `http://verybad-${currentEnv.getDomain()}`,
       '*',
       'null',
       'http//invalid-url',
@@ -137,7 +154,10 @@ test('header `Vary` is set to `Origin` to avoid caching of requests', async () =
   expect(response.headers.get('Vary')).toContain('Origin')
 })
 
-function fetchApi(args?: { headers?: RequestInit['headers'] }) {
+function fetchApi(
+  args?: { headers?: RequestInit['headers'] },
+  env = currentEnv
+) {
   const { headers = {} } = args ?? {}
   const query = `
     query($alias: AliasInput) {
