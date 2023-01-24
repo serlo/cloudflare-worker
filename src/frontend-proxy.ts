@@ -193,6 +193,7 @@ function getRoute(request: Request): RouteConfig | null {
   if (
     request.headers.get('X-From') === 'legacy-serlo.org' ||
     url.pathname.startsWith('/taxonomy/term/organize/') ||
+    url.pathname.startsWith('/notification/') ||
     url.pathname.startsWith('/entity/repository/add-revision-old/') ||
     (url.pathname.startsWith('/entity/repository/add-revision/') &&
       (request.method === 'POST' ||
