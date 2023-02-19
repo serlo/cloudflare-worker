@@ -106,8 +106,13 @@ function authKratosIdentitySchema(request: Request): Response | null {
           language: {
             type: 'string',
           },
+          interest: {
+            type: 'string',
+            // empty string is needed to support users that registered before it was made required
+            enum: ['parent', 'teacher', 'pupil', 'student', 'other', ''],
+          },
         },
-        required: ['email', 'username'],
+        required: ['email', 'username', 'interest'],
         additionalProperties: false,
       },
     },
