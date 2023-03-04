@@ -72,11 +72,17 @@ export async function redirects(request: Request) {
     }
   }
 
-  if (url.pathnameWithoutTrailingSlash === '/ecec') {
-    return Response.redirect(
-      'https://docs.google.com/document/d/1qSbyzDnW2RU58a7J3NHHBFo_MptaW-Ke0iT_c4KOhUA',
-      302
-    )
+  switch (url.pathnameWithoutTrailingSlash) {
+    case '/ecec':
+      return Response.redirect(
+        'https://docs.google.com/document/d/1qSbyzDnW2RU58a7J3NHHBFo_MptaW-Ke0iT_c4KOhUA',
+        302
+      )
+    case '/chancenwerk':
+      return Response.redirect(
+        'https://de.serlo.org/mathe/268835/chancenwerk',
+        302
+      )
   }
 
   // To avoid cycles, add redirects to lenabi.serlo.org only.
