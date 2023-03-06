@@ -83,6 +83,8 @@ export async function redirects(request: Request) {
         'https://de.serlo.org/mathe/268835/chancenwerk',
         302
       )
+    case '/editor':
+      return Response.redirect('https://en.serlo.org/editor', 301)
   }
 
   // To avoid cycles, add redirects to lenabi.serlo.org only.
