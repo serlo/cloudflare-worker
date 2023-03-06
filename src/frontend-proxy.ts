@@ -169,7 +169,6 @@ function getRoute(request: Request): RouteConfig | null {
     url.pathname.startsWith('/___') ||
     url.pathname === '/user/notifications' ||
     url.pathname === '/consent' ||
-    url.pathname === '/editor' ||
     (subjectStartPages[url.subdomain] &&
       subjectStartPages[url.subdomain]?.includes(
         url.pathnameWithoutTrailingSlash
