@@ -27,7 +27,7 @@ import {
 } from './__utils__'
 
 test('Frontend Sector Identifier URI Validation (block localhost)', async () => {
-  global.ALLOW_AUTH_FROM_LOCALHOST = 'false'
+  globalThis.ALLOW_AUTH_FROM_LOCALHOST = 'false'
   const env = currentTestEnvironmentWhen(
     (config) => config.ALLOW_AUTH_FROM_LOCALHOST === 'false'
   )
@@ -53,7 +53,7 @@ test('Frontend Sector Identifier URI Validation (block localhost)', async () => 
 })
 
 test('Frontend Sector Identifier URI Validation (allow localhost)', async () => {
-  global.ALLOW_AUTH_FROM_LOCALHOST = 'true'
+  globalThis.ALLOW_AUTH_FROM_LOCALHOST = 'true'
   const env = currentTestEnvironmentWhen(
     (config) => config.ALLOW_AUTH_FROM_LOCALHOST === 'true'
   )

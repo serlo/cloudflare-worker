@@ -54,7 +54,7 @@ test('Response of https://stats.serlo.org/login is not changed by CF worker', as
 })
 
 function mockStatsServer() {
-  global.server.use(
+  globalThis.server.use(
     rest.get(createUrlRegex({ subdomains: ['stats'] }), (req, res, ctx) => {
       return req.url.pathname !== '/login'
         ? res(ctx.status(302), ctx.set('location', '/login'))

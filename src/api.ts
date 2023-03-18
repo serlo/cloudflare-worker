@@ -59,7 +59,7 @@ async function getAuthorizationHeader(request: Request) {
     .setExpirationTime('2h')
     .setAudience('api.serlo.org')
     .setIssuer('serlo.org-cloudflare-worker')
-    .sign(Buffer.from(global.API_SECRET))
+    .sign(Buffer.from(globalThis.API_SECRET))
 
   if (authorizationHeader && authorizationHeader.startsWith('Serlo')) {
     return authorizationHeader
@@ -78,8 +78,8 @@ function getAllowedOrigin(requestOrigin: string | null) {
       const url = new Url(requestOrigin)
 
       if (
-        url.domain === global.DOMAIN ||
-        (global.ENVIRONMENT !== 'production' &&
+        url.domain === globalThis.DOMAIN ||
+        (globalThis.ENVIRONMENT !== 'production' &&
           ((url.domain === 'localhost' && url.port === '3000') ||
             url.hostname.includes('-serlo.vercel.app')))
       ) {
@@ -89,5 +89,5 @@ function getAllowedOrigin(requestOrigin: string | null) {
   } catch {
     // return default value
   }
-  return `https://${global.DOMAIN}`
+  return `https://${globalThis.DOMAIN}`
 }
