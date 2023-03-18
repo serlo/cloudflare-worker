@@ -36,29 +36,20 @@ import { Instance } from '../src/utils'
 const env = currentTestEnvironment()
 
 describe('meet.serlo.org', () => {
-  test.each([
-    ['/', '/vtk-ncrc-rdp'],
-    ['/dev', '/rci-pize-jow'],
-    ['/einbindung', '/qzv-ojgk-xqw'],
-    ['/begleitung', '/kon-wdmt-yhb'],
-    ['/reviewing', '/kon-wdmt-yhb'],
-    ['/labschool', '/cvd-pame-zod'],
-    ['/fundraising', '/uus-vjgu-ttr'],
-    ['/maxsimon', '/jbx-bjba-qjh'],
-    ['/hochschulmathe', '/oud-dpuy-swx'],
-    ['/lamatreffen', '/unm-jesz-ibj'],
-    ['/plenum', '/unm-jesz-ibj'],
-    ['/party', '/fho-mbdm-gtv'],
-    ['/1', '/fxn-iprp-ezx'],
-    ['/2', '/yku-aksd-fkk'],
-    ['/3', '/qma-zouf-vcz'],
-    ['/4', '/ynr-brkr-vds'],
-    ['/5', '/xqt-cdpm-nco'],
-    ['/6', '/sui-yuwv-suh'],
-  ])('meet.serlo.org%s', async (pathname, googleMeetRoom) => {
-    const response = await env.fetch({ subdomain: 'meet', pathname })
+  test('meet.serlo.org redirects to meet.google.com/vtk-ncrc-rdp', async () => {
+    const response = await env.fetch({ subdomain: 'meet' })
 
-    const target = `https://meet.google.com${googleMeetRoom}`
+    const target = `https://meet.google.com/vtk-ncrc-rdp`
+    expectToBeRedirectTo(response, target, 302)
+  })
+
+  test('meet.serlo.org/ansprache redirects to meet.google.com/pwr-bbca-hru', async () => {
+    const response = await env.fetch({
+      subdomain: 'meet',
+      pathname: '/ansprache',
+    })
+
+    const target = `https://meet.google.com/pwr-bbca-hru`
     expectToBeRedirectTo(response, target, 302)
   })
 
