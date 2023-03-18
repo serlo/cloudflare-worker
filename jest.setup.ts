@@ -51,47 +51,47 @@ if (timeout) {
 }
 
 beforeAll(() => {
-  global.API_ENDPOINT = 'https://api.serlo.org/graphql'
-  global.server = setupServer()
-  global.server.listen({ onUnhandledRequest: 'error' })
+  globalThis.API_ENDPOINT = 'https://api.serlo.org/graphql'
+  globalThis.server = setupServer()
+  globalThis.server.listen({ onUnhandledRequest: 'error' })
 })
 
 beforeEach(() => {
-  global.API_SECRET = 'secret'
-  global.DOMAIN = localTestEnvironment().getDomain()
-  global.ENVIRONMENT = 'local'
-  global.FRONTEND_DOMAIN = 'frontend.serlo.localhost'
+  globalThis.API_SECRET = 'secret'
+  globalThis.DOMAIN = localTestEnvironment().getDomain()
+  globalThis.ENVIRONMENT = 'local'
+  globalThis.FRONTEND_DOMAIN = 'frontend.serlo.localhost'
 
-  global.MAINTENANCE_KV = createKV()
-  global.PATH_INFO_KV = createKV()
-  global.PACKAGES_KV = createKV()
+  globalThis.MAINTENANCE_KV = createKV()
+  globalThis.PATH_INFO_KV = createKV()
+  globalThis.PACKAGES_KV = createKV()
 
-  global.uuids = new Array<Uuid>()
+  globalThis.uuids = new Array<Uuid>()
 
   givenApi(defaultApiServer())
   givenFrontend(defaultFrontendServer())
   givenSerlo(defaultSerloServer())
 
-  global.SENTRY_DSN = 'https://public@127.0.0.1/0'
-  global.sentryEvents = []
+  globalThis.SENTRY_DSN = 'https://public@127.0.0.1/0'
+  globalThis.sentryEvents = []
   mockSentryServer()
 
   addGlobalMocks()
 })
 
 afterEach(() => {
-  global.server.resetHandlers()
+  globalThis.server.resetHandlers()
 })
 
 afterAll(() => {
-  global.server.close()
+  globalThis.server.close()
 })
 
 function addGlobalMocks() {
-  global.fetch = fetchNode as unknown as typeof fetch
-  global.Response = NodeResponse as unknown as typeof Response
-  global.Request = NodeRequest as unknown as typeof Request
-  global.crypto = {
+  globalThis.fetch = fetchNode as unknown as typeof fetch
+  globalThis.Response = NodeResponse as unknown as typeof Response
+  globalThis.Request = NodeRequest as unknown as typeof Request
+  globalThis.crypto = {
     subtle: {
       digest(encoding: string, message: Uint8Array) {
         return Promise.resolve(
@@ -104,16 +104,16 @@ function addGlobalMocks() {
     },
     randomUUID: cryptoNode.randomUUID,
   } as unknown as typeof crypto
-  global.TextEncoder = util.TextEncoder
+  globalThis.TextEncoder = util.TextEncoder
 }
 
 function mockSentryServer() {
-  const { hostname, pathname } = new URL(global.SENTRY_DSN)
+  const { hostname, pathname } = new URL(globalThis.SENTRY_DSN)
   const sentryUrl = `https://${hostname}/api${pathname}/store/`
 
-  global.server.use(
+  globalThis.server.use(
     rest.post<SentryEvent>(sentryUrl, (req, res, ctx) => {
-      global.sentryEvents.push(req.body)
+      globalThis.sentryEvents.push(req.body)
 
       return res(ctx.status(200))
     })

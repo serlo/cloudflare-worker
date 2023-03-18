@@ -25,7 +25,7 @@ import { getUuid } from './database'
 import { RestResolver, createUrlRegex } from './utils'
 
 export function givenApi(resolver: RestResolver) {
-  global.server.use(
+  globalThis.server.use(
     rest.post(
       createUrlRegex({ subdomains: ['api'], pathname: '/graphql' }),
       resolver

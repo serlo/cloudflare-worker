@@ -116,7 +116,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     })
 
     function givenYoutube(resolver: RestResolver) {
-      global.server.use(
+      globalThis.server.use(
         rest.get('https://i.ytimg.com/vi/:videoId/:format', resolver)
       )
     }
@@ -309,7 +309,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     })
 
     function givenVimeoCdn(resolver: RestResolver) {
-      global.server.use(
+      globalThis.server.use(
         rest.get<never, any, { thumbnailFilename: string }>(
           'https://i.vimeocdn.com/video/:thumbnailFilename',
           resolver
@@ -330,7 +330,9 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     }
 
     function givenVimeoApi(resolver: RestResolver) {
-      global.server.use(rest.get('https://vimeo.com/api/oembed.json', resolver))
+      globalThis.server.use(
+        rest.get('https://vimeo.com/api/oembed.json', resolver)
+      )
     }
 
     function defaultVimeoApi(): RestResolver {
@@ -399,7 +401,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     })
 
     function givenWikimedia(resolver: RestResolver) {
-      global.server.use(
+      globalThis.server.use(
         rest.get(
           'https://upload.wikimedia.org/wikipedia/commons/thumb/*',
           resolver
@@ -584,7 +586,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     })
 
     function givenGeogebraApi(resolver: RestResolver) {
-      global.server.use(
+      globalThis.server.use(
         rest.post('https://www.geogebra.org/api/json.php', resolver)
       )
     }
@@ -622,7 +624,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     }
 
     function givenGeogebraFile(resolver: RestResolver) {
-      global.server.use(rest.get(applet.thumbnailUrl, resolver))
+      globalThis.server.use(rest.get(applet.thumbnailUrl, resolver))
     }
 
     function defaultGeogebraFile(): RestResolver {

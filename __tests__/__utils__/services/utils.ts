@@ -32,7 +32,7 @@ export type RestResolver<
 > = ResponseResolver<RestRequest<RequestBodyType>, typeof restContext>
 
 export function mockHttpGet(url: string, resolver: RestResolver) {
-  global.server.use(
+  globalThis.server.use(
     rest.get(url, (req, res, ctx) => {
       if (req.url.toString() !== url)
         return res(ctx.status(400, 'Bad Request: Query string does not match'))
@@ -74,7 +74,7 @@ export function createUrlRegex({
       matchStrings(subdomains) +
       '\\.' +
       // TODO: Remove "serlo.org"
-      matchStrings([global.DOMAIN, 'serlo.org']) +
+      matchStrings([globalThis.DOMAIN, 'serlo.org']) +
       (typeof pathname === 'string' ? escapeRegex(pathname) : pathname.source)
   )
 }

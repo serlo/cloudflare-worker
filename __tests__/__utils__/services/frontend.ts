@@ -25,7 +25,7 @@ import { getUuid } from './database'
 import { createUrlRegex, RestResolver } from './utils'
 
 export function givenFrontend(resolver: RestResolver) {
-  global.server.use(
+  globalThis.server.use(
     rest.get(createUrlRegex({ subdomains: ['frontend'] }), resolver)
   )
 }

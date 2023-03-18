@@ -84,7 +84,7 @@ test('assets.serlo.org/legacy/<hash>/<fileName>.<ext>', async () => {
 })
 
 function givenAssets(assets: { [P in string]?: { contentLength: number } }) {
-  global.server.use(
+  globalThis.server.use(
     rest.get(createUrlRegex({ subdomains: ['assets'] }), (req, res, ctx) => {
       const asset = assets[req.url.pathname]
 
