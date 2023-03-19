@@ -59,7 +59,7 @@ async function getAuthorizationHeader(request: Request) {
     .setExpirationTime('2h')
     .setAudience('api.serlo.org')
     .setIssuer('serlo.org-cloudflare-worker')
-    .sign(Buffer.from(globalThis.API_SECRET))
+    .sign(new TextEncoder().encode(globalThis.API_SECRET))
 
   if (authorizationHeader && authorizationHeader.startsWith('Serlo')) {
     return authorizationHeader
