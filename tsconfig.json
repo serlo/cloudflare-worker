@@ -1,4 +1,6 @@
 {
+  "include": ["src"],
+  "exclude": ["node_modules", "__tests__"],
   "compilerOptions": {
     "incremental": true,
     "outDir": "dist",
