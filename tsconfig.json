@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
+    "incremental": true,
+    "outDir": "dist",
+    "noEmit": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "importHelpers": true,
