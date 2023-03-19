@@ -21,7 +21,13 @@
  */
 import * as t from 'io-ts'
 
-import { SentryFactory, SentryReporter, responseToContext, Url } from './utils'
+import {
+  SentryFactory,
+  SentryReporter,
+  responseToContext,
+  Url,
+  decodeBase64,
+} from './utils'
 
 export async function embed(
   request: Request,
@@ -294,15 +300,17 @@ async function getWikimediaThumbnail(url: URL) {
 }
 
 function getPlaceholder() {
-  const placeholderB64 =
+  const placeholderBase64 =
     'iVBORw0KGgoAAAANSUhEUgAAAwAAAAGwAQMAAAAkGpCRAAAAA1BMVEXv9/t0VvapAAAAP0lEQVR42u3BMQEAAADCIPuntsUuYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQOqOwAAHrgHqAAAAAAElFTkSuQmCC'
-  const buffer = Buffer.from(placeholderB64, 'base64')
-  return new Response(buffer, {
+  const placeholder = Uint8Array.from(atob(placeholderBase64), (c) =>
+    c.charCodeAt(0)
+  )
+  return new Response(placeholder, {
     status: 200,
     statusText: 'OK',
     headers: {
       'Content-Type': 'image/png',
-      'Content-Length': Buffer.byteLength(buffer).toString(),
+      'Content-Length': placeholder.length.toString(),
     },
   })
 }
