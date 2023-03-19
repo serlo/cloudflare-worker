@@ -3,7 +3,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "importHelpers": true,
-    "lib": ["esnext"],
+    "lib": ["es2021"],
     "jsx": "react",
     "jsxFactory": "h",
     "module": "commonjs",
