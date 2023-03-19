@@ -82,8 +82,6 @@
     "ts-node": "^10.9.1",
     "ts-unused-exports": "^9.0.4",
     "typescript": "^4.9.5",
-    "webpack": "^4.46.0",
-    "webpack-cli": "^3.3.12",
     "wrangler": "^2.12.3"
   },
   "packageManager": "yarn@3.1.1",
