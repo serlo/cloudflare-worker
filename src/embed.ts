@@ -21,13 +21,7 @@
  */
 import * as t from 'io-ts'
 
-import {
-  SentryFactory,
-  SentryReporter,
-  responseToContext,
-  Url,
-  decodeBase64,
-} from './utils'
+import { SentryFactory, SentryReporter, responseToContext, Url } from './utils'
 
 export async function embed(
   request: Request,
