@@ -103,7 +103,7 @@ describe('setting of response header `Access-Control-Allow-Origin`', () => {
 
     describe('when we are in the staging environment, the same value is sent back in `Access-Control-Allow-Origin`', () => {
       test.each(domains)('when `Origin` is `%s`', async (origin) => {
-        global.ENVIRONMENT = 'staging'
+        globalThis.ENVIRONMENT = 'staging'
 
         const response = await fetchApi(
           { headers: { Origin: origin } },
@@ -116,7 +116,7 @@ describe('setting of response header `Access-Control-Allow-Origin`', () => {
 
     describe('when we are in the production environment, the current domain is sent back in `Access-Control-Allow-Origin`', () => {
       test.each(domains)('when `Origin` is `%s`', async (origin) => {
-        global.ENVIRONMENT = 'production'
+        globalThis.ENVIRONMENT = 'production'
         const env = currentTestEnvironmentWhen(
           (conf) => conf.ENVIRONMENT === 'production'
         )

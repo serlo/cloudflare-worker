@@ -85,7 +85,7 @@ async function fetchBackend({
       backendUrl.pathname = `/${backendUrl.subdomain}${backendUrl.pathname}`
     }
 
-    backendUrl.hostname = global.FRONTEND_DOMAIN
+    backendUrl.hostname = globalThis.FRONTEND_DOMAIN
     backendUrl.pathname = backendUrl.pathnameWithoutTrailingSlash
   }
 
@@ -226,7 +226,7 @@ function createConfigurationResponse({
   response.headers.append(
     'Set-Cookie',
     `useLegacyFrontend=${useLegacyFrontend.toString()}; path=/; domain=.${
-      global.DOMAIN
+      globalThis.DOMAIN
     }`
   )
   response.headers.set('Refresh', '1; url=/')

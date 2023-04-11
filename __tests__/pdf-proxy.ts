@@ -39,7 +39,7 @@ describe('proxy for pdf.serlo.org', () => {
   })
 
   function setupPdfSerloOrg() {
-    global.server.use(
+    globalThis.server.use(
       rest.get('https://pdf.serlo.org/api/100', (_req, res, ctx) => {
         return res(ctx.set('content-type', 'application/pdf'))
       })

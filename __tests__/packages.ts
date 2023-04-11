@@ -26,7 +26,10 @@ import { createUrlRegex, currentTestEnvironment } from './__utils__'
 beforeEach(async () => {
   givenCssOnPackagesServer('/serlo-org-client@10.0.0/main.css')
 
-  await global.PACKAGES_KV.put('serlo-org-client@10', 'serlo-org-client@10.0.0')
+  await globalThis.PACKAGES_KV.put(
+    'serlo-org-client@10',
+    'serlo-org-client@10.0.0'
+  )
 })
 
 test('resolves to specific package version when package name is in PACKAGES_KV', async () => {
@@ -53,7 +56,7 @@ function expectCssResponse(response: Response) {
 }
 
 function givenCssOnPackagesServer(pathname: string) {
-  global.server.use(
+  globalThis.server.use(
     rest.get(createUrlRegex({ subdomains: ['packages'] }), (req, res, ctx) => {
       return req.url.pathname === pathname
         ? res(ctx.set('content-type', 'text/css'))

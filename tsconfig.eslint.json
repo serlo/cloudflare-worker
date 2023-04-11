@@ -1,6 +1,15 @@
 {
   "extends": "./tsconfig.json",
-  "include": [".*.js", "src/**/.*.js"],
+  "exclude": ["node_modules"],
+  "include": [
+    "*.js",
+    "*.ts",
+    "__tests__",
+    "scripts",
+    "src",
+    "__stories__",
+    ".eslintrc.js"
+  ],
   "compilerOptions": {
     "checkJs": true
   }

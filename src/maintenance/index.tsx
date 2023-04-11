@@ -27,7 +27,7 @@ import { createPreactResponse, Url } from '../utils'
 
 export async function maintenanceMode(request: Request) {
   const url = Url.fromRequest(request)
-  const enabled = await global.MAINTENANCE_KV.get('enabled')
+  const enabled = await globalThis.MAINTENANCE_KV.get('enabled')
   if (!enabled) return null
   const {
     start: startISO,

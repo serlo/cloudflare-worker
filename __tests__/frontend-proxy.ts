@@ -128,7 +128,7 @@ test('Resports to sentry when frontend responded with redirect', async () => {
 
 test('creates a copy of backend responses (otherwise there is an error in cloudflare)', async () => {
   const backendResponse = new Response('')
-  global.fetch = jest.fn().mockResolvedValue(backendResponse)
+  globalThis.fetch = jest.fn().mockResolvedValue(backendResponse)
 
   // There is not type checking for the main page and thus we do not need
   // to mock the api request here

@@ -9,7 +9,7 @@
   "license": "Apache-2.0",
   "author": "Serlo Education e.V.",
   "scripts": {
-    "build": "wrangler build",
+    "build": "wrangler publish --dry-run --outdir=dist",
     "check:all": "scripts/run_all_checks.sh",
     "dev": "wrangler dev --env staging",
     "deploy": "wrangler publish",
@@ -47,7 +47,6 @@
   "devDependencies": {
     "@babel/core": "^7.21.0",
     "@cloudflare/workers-types": "^4.20221111.1",
-    "@cloudflare/wrangler": "^1.21.0",
     "@iarna/toml": "^2.2.5",
     "@splish-me/copyright-headers": "^0.0.2",
     "@storybook/preact": "^6.5.16",
@@ -57,7 +56,6 @@
     "@types/jest": "^29.4.0",
     "@types/luxon": "^3.2.0",
     "@types/marked": "^4.0.8",
-    "@types/node": "^16.18.12",
     "@types/rimraf": "^3.0.2",
     "@types/sanitize-html": "^2.6.2",
     "@typescript-eslint/eslint-plugin": "^5.54.0",
@@ -79,12 +77,10 @@
     "prettier-plugin-sh": "^0.12.8",
     "rimraf": "^3.0.2",
     "ts-jest": "^29.0.5",
-    "ts-loader": "^8.4.0",
     "ts-node": "^10.9.1",
     "ts-unused-exports": "^9.0.4",
     "typescript": "^4.9.5",
-    "webpack": "^4.46.0",
-    "webpack-cli": "^3.3.12"
+    "wrangler": "^2.12.3"
   },
   "packageManager": "yarn@3.1.1",
   "engines": {

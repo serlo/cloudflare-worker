@@ -78,7 +78,7 @@ export function expectSentryEvent({
 }) {
   const finalTags = { ...tags, ...(service ? { service } : {}) }
 
-  expect(global.sentryEvents).toContainEqual(
+  expect(globalThis.sentryEvents).toContainEqual(
     expect.objectContaining({
       ...(level ? { level } : error ? { level: 'error' } : {}),
       ...(message ? { message } : {}),
@@ -102,5 +102,5 @@ export function expectSentryEvent({
 }
 
 export function expectNoSentryError() {
-  expect(global.sentryEvents).toHaveLength(0)
+  expect(globalThis.sentryEvents).toHaveLength(0)
 }

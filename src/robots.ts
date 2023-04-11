@@ -46,7 +46,7 @@ export function robotsTxt(request: Request) {
   if (url.pathname !== '/robots.txt') return null
 
   return new Response(
-    global.ENVIRONMENT === 'production'
+    globalThis.ENVIRONMENT === 'production'
       ? robotsProduction
       : 'User-agent: *\nDisallow: /\n'
   )
