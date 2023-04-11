@@ -1,16 +1,21 @@
 {
+  "include": ["src"],
+  "exclude": ["node_modules", "__tests__"],
   "compilerOptions": {
+    "incremental": true,
+    "outDir": "dist",
+    "noEmit": true,
+    "target": "es2021",
+    "lib": ["es2021"],
+    "jsx": "react",
+    "jsxFactory": "h",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "importHelpers": true,
-    "lib": ["esnext"],
-    "jsx": "react",
-    "jsxFactory": "h",
     "module": "commonjs",
     "moduleResolution": "node",
     "skipLibCheck": true,
     "strict": true,
-    "target": "es2019",
     "types": ["@cloudflare/workers-types/2022-08-04"]
   }
 }

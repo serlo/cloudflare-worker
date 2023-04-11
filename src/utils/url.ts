@@ -19,6 +19,8 @@
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
+import type { URLSearchParams } from '@cloudflare/workers-types'
+
 const contentApiParameters = [
   'contentOnly',
   'hideTopbar',
@@ -52,7 +54,12 @@ export class Url extends URL {
   }
 
   public hasContentApiParameters() {
-    return Array.from(this.searchParams.keys()).some((key) =>
+    // FIXME: Somehow Typescript does not take the URLSearchParams definition
+    // of `@cloudflare/worker-types`. This a a shaky workaround to make
+    // Typescript happy.
+    const params = this.searchParams as URLSearchParams
+
+    return Array.from(params.keys()).some((key) =>
       contentApiParameters.includes(key)
     )
   }

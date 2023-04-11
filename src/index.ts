@@ -119,7 +119,7 @@ async function packages(request: Request) {
 
   const paths = url.pathname.split('/')
   const resolvedPackage =
-    paths.length >= 2 ? await global.PACKAGES_KV.get(paths[1]) : null
+    paths.length >= 2 ? await globalThis.PACKAGES_KV.get(paths[1]) : null
 
   if (resolvedPackage) {
     paths[1] = resolvedPackage

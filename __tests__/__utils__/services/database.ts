@@ -23,7 +23,7 @@
 import { Instance } from '../../../src/utils'
 
 export function givenUuid(uuid: Uuid) {
-  global.uuids.push(uuid)
+  globalThis.uuids.push(uuid)
 }
 
 export function getUuid(instance: string, path: string) {
@@ -37,11 +37,11 @@ export function getUuid(instance: string, path: string) {
 
     if (match) {
       const id = parseInt(match?.groups?.id ?? '')
-      return global.uuids.find((u) => u.id === id)
+      return globalThis.uuids.find((u) => u.id === id)
     }
   }
 
-  return global.uuids.find(
+  return globalThis.uuids.find(
     (u) =>
       u.instance === instance &&
       [u.alias, u.oldAlias].includes(decodeURIComponent(path))

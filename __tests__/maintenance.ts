@@ -40,7 +40,7 @@ beforeEach(() => {
 })
 
 test('Disabled (no maintenance planned)', async () => {
-  global.MAINTENANCE_KV = createKV()
+  globalThis.MAINTENANCE_KV = createKV()
 
   await expectNoMaintenanceModeForDe()
 })
@@ -51,7 +51,7 @@ test('Disabled (before scheduled maintenance)', async () => {
     end: DateTime.local().plus({ minutes: 20 }).toISO(),
     subdomains: ['de'],
   }
-  await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
+  await globalThis.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
 
   await expectNoMaintenanceModeForDe()
 })
@@ -62,7 +62,7 @@ test('Disabled (after scheduled maintenance)', async () => {
     end: DateTime.local().minus({ minutes: 10 }).toISO(),
     subdomains: ['de'],
   }
-  await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
+  await globalThis.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
 
   await expectNoMaintenanceModeForDe()
 })
@@ -74,7 +74,7 @@ test('Enabled (de, w/ end)', async () => {
     end: end.toISO(),
     subdomains: ['de'],
   }
-  await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
+  await globalThis.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
 
   const response = await fetchMainPage('de')
 
@@ -95,7 +95,7 @@ test('Enabled (en, w/ end)', async () => {
     end: end.toISO(),
     subdomains: ['en'],
   }
-  await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
+  await globalThis.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
 
   const response = await fetchMainPage('en')
 
@@ -114,7 +114,7 @@ test('Enabled (de, w/o end)', async () => {
     start: DateTime.local().minus({ minutes: 10 }).toISO(),
     subdomains: ['de'],
   }
-  await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
+  await globalThis.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
 
   const response = await fetchMainPage('de')
 
@@ -129,7 +129,7 @@ test('Enabled (en, w/o end)', async () => {
     start: DateTime.local().minus({ minutes: 10 }).toISO(),
     subdomains: ['en'],
   }
-  await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
+  await globalThis.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
 
   const response = await fetchMainPage('en')
 
@@ -149,7 +149,7 @@ test('Enabled (different subdomain, w/ end)', async () => {
     end: end.toISO(),
     subdomains: ['en'],
   }
-  await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
+  await globalThis.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
 
   await expectNoMaintenanceModeForDe()
 })
@@ -159,7 +159,7 @@ test('Enabled (different subdomain, w/o end)', async () => {
     start: DateTime.local().minus({ minutes: 10 }).toISO(),
     subdomains: ['en'],
   }
-  await global.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
+  await globalThis.MAINTENANCE_KV.put('enabled', JSON.stringify(value))
 
   await expectNoMaintenanceModeForDe()
 })

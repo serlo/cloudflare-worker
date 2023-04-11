@@ -89,7 +89,7 @@ export async function getPathInfo(
     return { typename: 'User', currentPath: path }
 
   const cacheKey = await toCacheKey(`/${lang}${path}`)
-  const cachedValue = await global.PATH_INFO_KV.get(cacheKey)
+  const cachedValue = await globalThis.PATH_INFO_KV.get(cacheKey)
 
   if (cachedValue !== null) {
     try {
@@ -136,7 +136,7 @@ export async function getPathInfo(
 
   try {
     const apiResponse = await fetchApi(
-      new Request(global.API_ENDPOINT, {
+      new Request(globalThis.API_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query, variables }),
@@ -172,7 +172,7 @@ export async function getPathInfo(
       : {}),
   }
 
-  await global.PATH_INFO_KV.put(cacheKey, JSON.stringify(result), {
+  await globalThis.PATH_INFO_KV.put(cacheKey, JSON.stringify(result), {
     expirationTtl: 60 * 60,
   })
 

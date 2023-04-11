@@ -43,7 +43,7 @@ describe('de.serlo.org/api/stats/quickbar.json', () => {
   })
 
   function setupArrrg() {
-    global.server.use(
+    globalThis.server.use(
       rest.get(
         'https://arrrg.de/serlo-stats/quickbar.json',
         (_req, res, ctx) => {

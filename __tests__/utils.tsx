@@ -114,7 +114,7 @@ describe('getPathInfo()', () => {
   describe('uses PATH_INFO_KV as a cache', () => {
     test('use value in cache', async () => {
       const cacheValue = { typename: 'Article', currentPath: '/current-path' }
-      await global.PATH_INFO_KV.put(
+      await globalThis.PATH_INFO_KV.put(
         await toCacheKey('/en/path'),
         JSON.stringify(cacheValue)
       )
@@ -136,7 +136,9 @@ describe('getPathInfo()', () => {
 
       await getPathInfo(Instance.En, '/42')
 
-      expect(await global.PATH_INFO_KV.get(await toCacheKey('/en/42'))).toEqual(
+      expect(
+        await globalThis.PATH_INFO_KV.get(await toCacheKey('/en/42'))
+      ).toEqual(
         JSON.stringify({ typename: 'Article', currentPath: '/current-path' })
       )
     })
@@ -179,7 +181,7 @@ describe('getPathInfo()', () => {
       })
 
       test('when cached value is malformed JSON', async () => {
-        await global.PATH_INFO_KV.put(
+        await globalThis.PATH_INFO_KV.put(
           await toCacheKey('/en/42'),
           'malformed json'
         )
@@ -188,13 +190,13 @@ describe('getPathInfo()', () => {
 
         expect(pathInfo).toEqual(target)
         expect(
-          await global.PATH_INFO_KV.get(await toCacheKey('/en/42'))
+          await globalThis.PATH_INFO_KV.get(await toCacheKey('/en/42'))
         ).toEqual(JSON.stringify(target))
       })
 
       test('when cached value is no PathInfo', async () => {
         const malformedPathInfo = JSON.stringify({ typename: 'Course' })
-        await global.PATH_INFO_KV.put(
+        await globalThis.PATH_INFO_KV.put(
           await toCacheKey('/en/42'),
           malformedPathInfo
         )
@@ -203,7 +205,7 @@ describe('getPathInfo()', () => {
 
         expect(pathInfo).toEqual(target)
         expect(
-          await global.PATH_INFO_KV.get(await toCacheKey('/en/42'))
+          await globalThis.PATH_INFO_KV.get(await toCacheKey('/en/42'))
         ).toEqual(JSON.stringify(target))
       })
     })

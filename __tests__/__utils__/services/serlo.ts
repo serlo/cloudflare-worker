@@ -26,7 +26,7 @@ import { RestResolver, createUrlRegex } from './utils'
 import { Url, Instance } from '../../../src/utils'
 
 export function givenSerlo(resolver: RestResolver) {
-  global.server.use(
+  globalThis.server.use(
     rest.get(createUrlRegex({ subdomains: Object.values(Instance) }), resolver),
     rest.post(createUrlRegex({ subdomains: Object.values(Instance) }), resolver)
   )
