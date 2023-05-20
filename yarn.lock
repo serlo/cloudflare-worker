@@ -2530,7 +2530,6 @@ __metadata:
     "@types/jest": ^29.4.0
     "@types/luxon": ^3.2.0
     "@types/marked": ^4.0.8
-    "@types/rimraf": ^3.0.2
     "@types/sanitize-html": ^2.6.2
     "@typescript-eslint/eslint-plugin": ^5.54.0
     "@typescript-eslint/parser": ^5.54.0
@@ -2556,7 +2555,6 @@ __metadata:
     prettier: ^2.8.4
     prettier-plugin-packagejson: ^2.4.3
     prettier-plugin-sh: ^0.12.8
-    rimraf: ^3.0.2
     sanitize-html: ^2.7.3
     toucan-js: ^2.7.0
     ts-jest: ^29.0.5
@@ -3707,16 +3705,6 @@ __metadata:
   version: 6.9.7
   resolution: "@types/qs@npm:6.9.7"
   checksum: 7fd6f9c25053e9b5bb6bc9f9f76c1d89e6c04f7707a7ba0e44cc01f17ef5284adb82f230f542c2d5557d69407c9a40f0f3515e8319afd14e1e16b5543ac6cdba
-  languageName: node
-  linkType: hard
-
-"@types/rimraf@npm:^3.0.2":
-  version: 3.0.2
-  resolution: "@types/rimraf@npm:3.0.2"
-  dependencies:
-    "@types/glob": "*"
-    "@types/node": "*"
-  checksum: b47fa302f46434cba704d20465861ad250df79467d3d289f9d6490d3aeeb41e8cb32dd80bd1a8fd833d1e185ac719fbf9be12e05ad9ce9be094d8ee8f1405347
   languageName: node
   linkType: hard
 
