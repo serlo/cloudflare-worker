@@ -16,6 +16,6 @@
     "moduleResolution": "node",
     "skipLibCheck": true,
     "strict": true,
-    "types": ["@cloudflare/workers-types/2022-08-04"]
+    "types": ["@cloudflare/workers-types/2022-08-04", "jest"]
   }
 }
