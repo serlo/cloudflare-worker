@@ -60,6 +60,7 @@ export class SentryReporter {
       dsn: globalThis.SENTRY_DSN,
       context: this.event,
       environment: globalThis.ENVIRONMENT,
+      normalizeDepth: 5,
     })
 
     this.toucan.setTag('service', this.service)
