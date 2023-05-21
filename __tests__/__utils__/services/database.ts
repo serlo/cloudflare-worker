@@ -22,6 +22,11 @@
 
 import { Instance } from '../../../src/utils'
 
+declare global {
+  // eslint-disable-next-line no-var
+  var uuids: Uuid[]
+}
+
 export function givenUuid(uuid: Uuid) {
   globalThis.uuids.push(uuid)
 }

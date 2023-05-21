@@ -42,12 +42,13 @@
     "preact": "^10.13.0",
     "preact-render-to-string": "^5.2.6",
     "sanitize-html": "^2.10.0",
-    "toucan-js": "^2.7.0"
+    "toucan-js": "^3.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.21.0",
     "@cloudflare/workers-types": "^4.20221111.1",
     "@iarna/toml": "^2.2.5",
+    "@sentry/types": "^7.52.1",
     "@splish-me/copyright-headers": "^0.0.2",
     "@storybook/preact": "^6.5.16",
     "@testing-library/jest-dom": "^5.16.5",
