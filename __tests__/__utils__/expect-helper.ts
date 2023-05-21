@@ -78,26 +78,32 @@ export function expectSentryEvent({
 }) {
   const finalTags = { ...tags, ...(service ? { service } : {}) }
 
-  expect(globalThis.sentryEvents).toContainEqual(
-    expect.objectContaining({
-      ...(level ? { level } : error ? { level: 'error' } : {}),
-      ...(message ? { message } : {}),
-      ...(error
-        ? {
-            exception: {
-              values: expect.arrayContaining([
-                expect.objectContaining({ value: error }) as unknown,
-              ]) as unknown,
-            },
-          }
-        : {}),
-      ...(Object.keys(finalTags).length > 0
-        ? { tags: expect.objectContaining(finalTags) as unknown }
-        : {}),
-      ...(context
-        ? { extra: { context: expect.objectContaining(context) as unknown } }
-        : {}),
-    })
+  expect(globalThis.sentryEvents).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        ...(level ? { level } : error ? { level: 'error' } : {}),
+        ...(message ? { message } : {}),
+        ...(error
+          ? {
+              exception: {
+                values: expect.arrayContaining([
+                  expect.objectContaining({ value: error }) as unknown,
+                ]) as unknown,
+              },
+            }
+          : {}),
+        ...(Object.keys(finalTags).length > 0
+          ? { tags: expect.objectContaining(finalTags) as unknown }
+          : {}),
+        ...(context
+          ? {
+              extra: {
+                context: expect.objectContaining(context) as unknown,
+              },
+            }
+          : {}),
+      }),
+    ])
   )
 }
 
