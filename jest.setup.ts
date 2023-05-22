@@ -21,6 +21,7 @@
  */
 // eslint-disable-next-line import/no-unassigned-import
 import '@testing-library/jest-dom'
+import { type Event as SentryEvent } from '@sentry/types'
 import * as cryptoNode from 'crypto'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
@@ -28,7 +29,6 @@ import fetchNode, {
   Response as NodeResponse,
   Request as NodeRequest,
 } from 'node-fetch'
-import { Event as SentryEvent } from 'toucan-js/dist/types'
 import * as util from 'util'
 
 import {
@@ -109,11 +109,15 @@ function addGlobalMocks() {
 
 function mockSentryServer() {
   const { hostname, pathname } = new URL(globalThis.SENTRY_DSN)
-  const sentryUrl = `https://${hostname}/api${pathname}/store/`
+  const sentryUrl = `https://${hostname}/api${pathname}/envelope/`
 
   globalThis.server.use(
-    rest.post<SentryEvent>(sentryUrl, (req, res, ctx) => {
-      globalThis.sentryEvents.push(req.body)
+    rest.post<SentryEvent>(sentryUrl, async (req, res, ctx) => {
+      globalThis.sentryEvents.push(
+        ...(await req.text())
+          .split('\n')
+          .map((x) => JSON.parse(x) as SentryEvent)
+      )
 
       return res(ctx.status(200))
     })
@@ -125,8 +129,6 @@ export {}
 declare global {
   // eslint-disable-next-line no-var
   var server: ReturnType<typeof import('msw/node').setupServer>
-  // eslint-disable-next-line no-var
-  var uuids: Uuid[]
   // eslint-disable-next-line no-var
   var sentryEvents: SentryEvent[]
 }

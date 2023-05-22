@@ -19,7 +19,7 @@
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import { Level } from 'toucan-js/dist/types'
+import { SeverityLevel } from '@sentry/types'
 
 export async function expectContainsText(response: Response, texts: string[]) {
   expect(response).not.toBeNull()
@@ -70,7 +70,7 @@ export function expectSentryEvent({
   context,
 }: {
   message?: string
-  level?: Level
+  level?: SeverityLevel
   error?: string
   service?: string
   tags?: Record<string, string | number | boolean>
@@ -78,26 +78,32 @@ export function expectSentryEvent({
 }) {
   const finalTags = { ...tags, ...(service ? { service } : {}) }
 
-  expect(globalThis.sentryEvents).toContainEqual(
-    expect.objectContaining({
-      ...(level ? { level } : error ? { level: 'error' } : {}),
-      ...(message ? { message } : {}),
-      ...(error
-        ? {
-            exception: {
-              values: expect.arrayContaining([
-                expect.objectContaining({ value: error }) as unknown,
-              ]) as unknown,
-            },
-          }
-        : {}),
-      ...(Object.keys(finalTags).length > 0
-        ? { tags: expect.objectContaining(finalTags) as unknown }
-        : {}),
-      ...(context
-        ? { extra: { context: expect.objectContaining(context) as unknown } }
-        : {}),
-    })
+  expect(globalThis.sentryEvents).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        ...(level ? { level } : error ? { level: 'error' } : {}),
+        ...(message ? { message } : {}),
+        ...(error
+          ? {
+              exception: {
+                values: expect.arrayContaining([
+                  expect.objectContaining({ value: error }) as unknown,
+                ]) as unknown,
+              },
+            }
+          : {}),
+        ...(Object.keys(finalTags).length > 0
+          ? { tags: expect.objectContaining(finalTags) as unknown }
+          : {}),
+        ...(context
+          ? {
+              extra: {
+                context: expect.objectContaining(context) as unknown,
+              },
+            }
+          : {}),
+      }),
+    ])
   )
 }
 
