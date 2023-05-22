@@ -113,11 +113,12 @@ function mockSentryServer() {
 
   globalThis.server.use(
     rest.post<SentryEvent>(sentryUrl, async (req, res, ctx) => {
-      globalThis.sentryEvents.push(
-        ...(await req.text())
-          .split('\n')
-          .map((x) => JSON.parse(x) as SentryEvent)
-      )
+      const reqText = await req.text()
+      const events = reqText
+        .split('\n')
+        .map((x) => JSON.parse(x) as SentryEvent)
+
+      globalThis.sentryEvents.push(...events)
 
       return res(ctx.status(200))
     })
