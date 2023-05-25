@@ -19,7 +19,7 @@
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link      https://github.com/serlo/serlo.org-cloudflare-worker for the canonical source repository
  */
-import Toucan from 'toucan-js'
+import { Toucan } from 'toucan-js'
 
 export class SentryFactory {
   constructor(private event: FetchEvent) {}
@@ -60,6 +60,7 @@ export class SentryReporter {
       dsn: globalThis.SENTRY_DSN,
       context: this.event,
       environment: globalThis.ENVIRONMENT,
+      normalizeDepth: 5,
     })
 
     this.toucan.setTag('service', this.service)
