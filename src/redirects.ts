@@ -72,6 +72,10 @@ export async function redirects(request: Request) {
     }
   }
 
+  if (url.pathnameWithoutTrailingSlash === '/organization') {
+    return Response.redirect('https://de.serlo.org/serlo')
+  }
+
   if (
     url.subdomain !== Instance.En &&
     url.pathnameWithoutTrailingSlash === '/editor'
