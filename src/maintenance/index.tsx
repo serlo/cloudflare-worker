@@ -41,8 +41,9 @@ function createMaintenanceResponse({
   lang: 'de' | 'en'
   end?: DateTime
 }) {
+  const endHTTP = end?.toHTTP()
   return createPreactResponse(<Maintenance lang={lang} end={end} />, {
     status: 503,
-    headers: end ? { 'Retry-After': end.toHTTP() } : {},
+    headers: endHTTP ? { 'Retry-After': endHTTP } : {},
   })
 }
