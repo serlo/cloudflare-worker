@@ -2708,10 +2708,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/types@npm:^7.52.1":
-  version: 7.52.1
-  resolution: "@sentry/types@npm:7.52.1"
-  checksum: 9afbba9239107024207418755d189972887c2cd5c3948157531c520be202b5efcd1542b1864120b3d1a535e7f61ebbef802b64ad0cd7ad02d2d8d669454f5abb
+"@sentry/types@npm:^7.55.2":
+  version: 7.55.2
+  resolution: "@sentry/types@npm:7.55.2"
+  checksum: 37ca4043dd88e05ea104172e7b0aa39e802f71c01ab3bcc31beb5ef25bccfa98fe1305e57cc929d65cdc59f0da6d71e464556a0309379371e5e350f6866cbf3c
   languageName: node
   linkType: hard
 
@@ -2732,7 +2732,7 @@ __metadata:
     "@babel/core": ^7.22.5
     "@cloudflare/workers-types": ^4.20230518.0
     "@iarna/toml": ^2.2.5
-    "@sentry/types": ^7.52.1
+    "@sentry/types": ^7.55.2
     "@storybook/preact": ^6.5.16
     "@testing-library/jest-dom": ^5.16.5
     "@testing-library/preact": ^3.2.3
