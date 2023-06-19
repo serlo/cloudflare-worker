@@ -33,7 +33,7 @@
     "_prettier": "prettier ."
   },
   "dependencies": {
-    "fp-ts": "^2.13.1",
+    "fp-ts": "^2.16.0",
     "io-ts": "^2.2.20",
     "jose": "^4.13.1",
     "luxon": "^3.2.1",
