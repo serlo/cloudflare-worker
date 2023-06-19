@@ -47,7 +47,7 @@
     "@babel/core": "^7.22.5",
     "@cloudflare/workers-types": "^4.20230518.0",
     "@iarna/toml": "^2.2.5",
-    "@sentry/types": "^7.52.1",
+    "@sentry/types": "^7.55.2",
     "@storybook/preact": "^6.5.16",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/preact": "^3.2.3",
