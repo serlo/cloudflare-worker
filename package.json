@@ -36,7 +36,7 @@
     "fp-ts": "^2.16.0",
     "io-ts": "^2.2.20",
     "jose": "^4.14.4",
-    "luxon": "^3.2.1",
+    "luxon": "^3.3.0",
     "marked": "^4.2.12",
     "preact": "^10.13.0",
     "preact-render-to-string": "^5.2.6",
