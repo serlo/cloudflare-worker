@@ -52,7 +52,7 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/preact": "^3.2.3",
     "@types/iarna__toml": "^2.0.2",
-    "@types/jest": "^29.5.1",
+    "@types/jest": "^29.5.2",
     "@types/luxon": "^3.2.0",
     "@types/marked": "^4.0.8",
     "@types/sanitize-html": "^2.9.0",
