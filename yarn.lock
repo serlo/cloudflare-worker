@@ -1613,7 +1613,7 @@ __metadata:
     "@types/iarna__toml": ^2.0.2
     "@types/jest": ^29.5.2
     "@types/luxon": ^3.3.0
-    "@types/marked": ^4.0.8
+    "@types/marked": ^5.0.0
     "@types/sanitize-html": ^2.9.0
     "@typescript-eslint/eslint-plugin": ^5.59.11
     "@typescript-eslint/parser": ^5.59.11
@@ -2086,10 +2086,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/marked@npm:^4.0.8":
-  version: 4.0.8
-  resolution: "@types/marked@npm:4.0.8"
-  checksum: 68278fa7acaa5d920cdc239d675b5daf842e0ad4779e4848cd617d9baf2ac1afccb5a264c331e37d80031d647e1640cb983cd31e73d45b28552670b4853fad8e
+"@types/marked@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "@types/marked@npm:5.0.0"
+  checksum: 4828a51186074ac18bd04e2f84aff17e97ec72b227f9f4be0cedff6de6fe0fec016250bc22b2ae5d40d7cf0e6de1853df5d437f2dfe983cd96928763c75e6e47
   languageName: node
   linkType: hard
 
