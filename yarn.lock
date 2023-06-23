@@ -1656,7 +1656,7 @@ __metadata:
     nodemon: ^2.0.22
     npm-run-all: ^4.1.5
     preact: ^10.15.1
-    preact-render-to-string: ^5.2.6
+    preact-render-to-string: ^6.1.0
     prettier: ^2.8.8
     prettier-plugin-packagejson: ^2.4.3
     prettier-plugin-sh: ^0.12.8
@@ -6871,14 +6871,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"preact-render-to-string@npm:^5.2.6":
-  version: 5.2.6
-  resolution: "preact-render-to-string@npm:5.2.6"
+"preact-render-to-string@npm:^6.1.0":
+  version: 6.1.0
+  resolution: "preact-render-to-string@npm:6.1.0"
   dependencies:
     pretty-format: ^3.8.0
   peerDependencies:
     preact: ">=10"
-  checksum: be8d5d8fb502d422c503e68af7bcccb6facd942f3ae9a4d093ebe3f1d4f0b15c540624bdac434d53a2a8e8fb7afa4606383414e937c40933ca43445470a026ff
+  checksum: 2bf62e90d14b391bf20a16442ceaec252c94cf9dd22ec27e9aa7ce92ff4339c299a025ae804d5237867c398c6609aeee282bbc269a15ecf28be4923491fb9f55
   languageName: node
   linkType: hard
 
