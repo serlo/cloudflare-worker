@@ -37,7 +37,7 @@
     "io-ts": "^2.2.20",
     "jose": "^4.14.4",
     "luxon": "^3.3.0",
-    "marked": "^4.2.12",
+    "marked": "^5.1.0",
     "preact": "^10.15.1",
     "preact-render-to-string": "^5.2.6",
     "sanitize-html": "^2.10.0",
