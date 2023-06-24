@@ -28,8 +28,8 @@
     "wrangler:maintenance:kv:put": "wrangler kv:key put --binding=MAINTENANCE_KV",
     "wrangler:maintenance:kv:delete": "wrangler kv:key delete --binding=MAINTENANCE_KV",
     "maintenance": "ts-node scripts/maintenance.ts",
-    "show-unused-exports": "ts-unused-exports tsconfig.json --excludePathsFromReport=__stories__ --excludePathsFromReport=__tests__/__utils__/index.ts",
-    "_eslint": "eslint \"{{.storybook,__fixtures__,__stories__,__tests-pacts__,__tests__,scripts,src}/**/*,*}.{js,jsx,ts,tsx}\"",
+    "show-unused-exports": "ts-unused-exports tsconfig.json --excludePathsFromReport=__tests__/__utils__/index.ts",
+    "_eslint": "eslint \"{{__fixtures__,__tests-pacts__,__tests__,scripts,src}/**/*,*}.{js,jsx,ts,tsx}\"",
     "_prettier": "prettier ."
   },
   "dependencies": {
