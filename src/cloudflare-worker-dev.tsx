@@ -2,8 +2,8 @@ import { DateTime } from 'luxon'
 import { h, VNode } from 'preact'
 
 import { UnrevisedPage, RevisedPage, RevisionsOverview } from './legal-pages'
-import { Maintenance } from './maintenance/template'
 import { Template, NotFound } from './ui'
+import { Maintenance } from './ui/maintenance'
 import { createPreactResponse, Url, Instance } from './utils'
 
 const loremIpsum = `<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam

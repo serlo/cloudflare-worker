@@ -4,7 +4,6 @@ import { cloudflareWorkerDev } from './cloudflare-worker-dev'
 import { embed } from './embed'
 import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
 import { legalPages } from './legal-pages'
-import { maintenanceMode } from './maintenance'
 import { metadataApi } from './metadata-api'
 import { pdfProxy } from './pdf-proxy'
 import { quickbarProxy } from './quickbar-proxy'
@@ -28,7 +27,6 @@ export async function handleFetchEvent(event: FetchEvent): Promise<Response> {
     return (
       cloudflareWorkerDev(request) ||
       auth(request) ||
-      (await maintenanceMode(request)) ||
       (await enforceHttps(request)) ||
       (await legalPages(request)) ||
       (await quickbarProxy(request, sentryFactory)) ||
