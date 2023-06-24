@@ -20,7 +20,6 @@
     "lint:eslint": "yarn _eslint",
     "lint:prettier": "yarn _prettier --check",
     "lint:tsc": "tsc --noEmit",
-    "start": "start-storybook -p 6006",
     "test": "jest",
     "test:staging": "cross-env TEST_ENVIRONMENT=staging jest --runInBand",
     "test:production": "cross-env TEST_ENVIRONMENT=production jest --runInBand",
