@@ -40,6 +40,10 @@ chmod +x .git/hooks/pre-push
 
 You can use the flag `--no-verify` like in `git push --no-verify` to bypass the checks while pushing.
 
+### Show preview of components
+
+In order to show a preview of components you need run `yarn dev` and open `http://127.0.0.1:8787/___cloudflare_worker_dev`. When you want to add your own components for a preview you can add them at [`./src/cloudflare-worker-dev.tsx`](./src/cloudflare-worker-dev.tsx).
+
 ## Static pages
 
 Our cloudflare worker also serves some static pages (mostly our legal documents like the imprint or our privacy statement).
