@@ -1,4 +1,3 @@
-import { DateTime } from 'luxon'
 import { h, VNode } from 'preact'
 
 import { UnrevisedPage, RevisedPage, RevisionsOverview } from './legal-pages'
@@ -14,7 +13,6 @@ diam vitae, maximus nibh. Etiam ornar faucibus ante, eu rutrum mauris.</p>
 Vestibulum eu finibus metus. Morbi posuere, mi veq semper consequat, metus nibh
 tincidunt dui, at congue tellus nun sit amet felis. Mauris sodales euismod
 turpis sit amet tristi que.</p>`
-const end = DateTime.local().plus({ hour: 1 })
 const basePath = '/___cloudflare_worker_dev'
 const components: ComponentSpec[] = [
   {
@@ -35,12 +33,12 @@ const components: ComponentSpec[] = [
   {
     title: 'Maintenance Template (English; with end date)',
     subpath: 'maintenance-en-with-end-date',
-    component: <Maintenance lang="en" end={end} />,
+    component: <Maintenance lang="en" end={new Date()} />,
   },
   {
     title: 'Maintenance Template (German; with end date)',
     subpath: 'maintenance-de-with-end-date',
-    component: <Maintenance lang="de" end={end} />,
+    component: <Maintenance lang="de" end={new Date()} />,
   },
   {
     title: 'Unrevised page',
