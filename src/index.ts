@@ -1,5 +1,6 @@
 import { api } from './api'
 import { auth } from './auth'
+import { cloudflareWorkerDev } from './cloudflare-worker-dev'
 import { embed } from './embed'
 import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
 import { legalPages } from './legal-pages'
@@ -25,6 +26,7 @@ export async function handleFetchEvent(event: FetchEvent): Promise<Response> {
 
   try {
     return (
+      cloudflareWorkerDev(request) ||
       auth(request) ||
       (await maintenanceMode(request)) ||
       (await enforceHttps(request)) ||
