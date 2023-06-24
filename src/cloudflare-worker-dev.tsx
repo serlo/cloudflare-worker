@@ -1,8 +1,7 @@
 import { h, VNode } from 'preact'
 
 import { UnrevisedPage, RevisedPage, RevisionsOverview } from './legal-pages'
-import { Template, NotFound } from './ui'
-import { Maintenance } from './ui/maintenance'
+import { Template, NotFound, Maintenance } from './ui'
 import { createPreactResponse, Url, Instance } from './utils'
 
 const loremIpsum = `<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam
