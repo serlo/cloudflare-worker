@@ -24,7 +24,6 @@
     "test": "jest",
     "test:staging": "cross-env TEST_ENVIRONMENT=staging jest --runInBand",
     "test:production": "cross-env TEST_ENVIRONMENT=production jest --runInBand",
-    "maintenance": "ts-node scripts/maintenance.ts",
     "show-unused-exports": "ts-unused-exports tsconfig.json --excludePathsFromReport=__stories__ --excludePathsFromReport=__tests__/__utils__/index.ts",
     "_eslint": "eslint \"{{.storybook,__fixtures__,__stories__,__tests-pacts__,__tests__,scripts,src}/**/*,*}.{js,jsx,ts,tsx}\"",
     "_prettier": "prettier ."
