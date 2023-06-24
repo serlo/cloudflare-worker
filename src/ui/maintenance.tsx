@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import { h } from 'preact'
 
-import { Template, CenteredContent } from '../ui'
+import { Template, CenteredContent } from './template'
 
 export function Maintenance({
   lang,
