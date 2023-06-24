@@ -1,3 +1,6 @@
+# Local directory for `wrangler dev`
+/.wrangler/
+
 # Logs
 logs
 *.log
