@@ -167,7 +167,7 @@ export function sanitizeHtml(html: string): string {
 }
 
 export function markdownToHtml(markdown: string): string {
-  return marked.parse(markdown, { headerIds: false }).trim()
+  return marked.parse(markdown, { headerIds: false, mangle: false }).trim()
 }
 
 export function createPreactResponse(component: VNode, opt?: ResponseInit) {
