@@ -9,7 +9,7 @@
   "license": "Apache-2.0",
   "author": "Serlo Education e.V.",
   "scripts": {
-    "build": "wrangler publish --dry-run --outdir=dist",
+    "build": "wrangler deploy --dry-run --outdir=dist",
     "check:all": "scripts/run_all_checks.sh",
     "dev": "wrangler dev --env staging",
     "deploy": "wrangler publish",
