@@ -12,6 +12,5 @@ declare var ENABLE_BASIC_AUTH: 'true' | 'false'
 declare var FRONTEND_DOMAIN: string
 
 // KVs
-declare var MAINTENANCE_KV: KVNamespace<'enabled'>
 declare var PACKAGES_KV: KVNamespace<string>
 declare var PATH_INFO_KV: KVNamespace<import('./utils').CacheKey>
