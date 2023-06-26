@@ -1,3 +1,5 @@
+import { jest } from '@jest/globals'
+
 import {
   mockHttpGet,
   returnsText,
@@ -107,7 +109,9 @@ test('Resports to sentry when frontend responded with redirect', async () => {
 
 test('creates a copy of backend responses (otherwise there is an error in cloudflare)', async () => {
   const backendResponse = new Response('')
-  globalThis.fetch = jest.fn().mockResolvedValue(backendResponse)
+  globalThis.fetch = jest
+    .fn<() => Promise<typeof backendResponse>>()
+    .mockResolvedValue(backendResponse)
 
   // There is not type checking for the main page and thus we do not need
   // to mock the api request here
