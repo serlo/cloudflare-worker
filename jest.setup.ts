@@ -41,7 +41,6 @@ beforeEach(() => {
   globalThis.ENVIRONMENT = 'local'
   globalThis.FRONTEND_DOMAIN = 'frontend.serlo.localhost'
 
-  globalThis.MAINTENANCE_KV = createKV()
   globalThis.PATH_INFO_KV = createKV()
   globalThis.PACKAGES_KV = createKV()
 
