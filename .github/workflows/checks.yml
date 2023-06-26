@@ -1,6 +1,10 @@
 name: JavaScript
 on:
-  - push
+  push:
+    branches:
+      - main
+  pull_request:
+  merge_group:
 jobs:
   yarn:
     runs-on: ubuntu-latest
