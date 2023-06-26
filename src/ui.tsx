@@ -1,6 +1,6 @@
 import { h, ComponentChildren, Fragment } from 'preact'
 
-import { Instance } from '../utils'
+import { Instance } from './utils'
 
 export function NotFound() {
   return (
@@ -11,7 +11,35 @@ export function NotFound() {
   )
 }
 
-export function CenteredContent({ children }: { children: ComponentChildren }) {
+export function Maintenance({ lang, end }: { lang: 'de' | 'en'; end?: Date }) {
+  const { content, title } = getTranslations()
+  return (
+    <Template lang={lang} title={title}>
+      <CenteredContent>{content}</CenteredContent>
+    </Template>
+  )
+
+  function getTranslations() {
+    switch (lang) {
+      case 'de':
+        return {
+          title: 'Wartungsmodus',
+          content: `Wir führen gerade Wartungsarbeiten durch und sind ${
+            end ? `gegen ${end.toLocaleString('de')}` : 'in ein paar Stunden'
+          } wieder online.`,
+        }
+      case 'en':
+        return {
+          title: 'Maintenance mode',
+          content: `Serlo is currently down for maintenance. We expect to be back ${
+            end ? `by ${end.toLocaleString('en')}` : 'in a couple of hours.'
+          }`,
+        }
+    }
+  }
+}
+
+function CenteredContent({ children }: { children: ComponentChildren }) {
   return <div className="call">{children}</div>
 }
 
