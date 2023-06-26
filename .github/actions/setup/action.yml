@@ -6,3 +6,4 @@ runs:
       with:
         node-version: 18.x
     - run: yarn --immutable --immutable-cache --check-cache
+      shell: bash
