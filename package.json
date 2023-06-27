@@ -21,7 +21,7 @@
     "lint:eslint": "yarn _eslint",
     "lint:prettier": "yarn _prettier --check",
     "lint:tsc": "tsc --noEmit",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:staging": "cross-env TEST_ENVIRONMENT=staging jest --runInBand",
     "test:production": "cross-env TEST_ENVIRONMENT=production jest --runInBand",
     "show-unused-exports": "ts-unused-exports tsconfig.json --excludePathsFromReport=__tests__/__utils__/index.ts",
