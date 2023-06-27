@@ -1,0 +1,6 @@
+{
+  "preset": "ts-jest/presets/default-esm",
+  "testPathIgnorePatterns": ["/node_modules/", "/__tests__\\/__utils__/"],
+  "setupFilesAfterEnv": ["<rootDir>/jest.setup.ts"],
+  "workerIdleMemoryLimit": "1GB"
+}
