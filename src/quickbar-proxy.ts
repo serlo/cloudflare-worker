@@ -9,7 +9,7 @@ export async function quickbarProxy(
   if (!isInstance(url.subdomain)) return null
   if (url.pathname !== '/api/stats/quickbar.json') return null
 
-  const quickbarUrl = 'https://arrrg.de/serlo-stats/quickbar.json'
+  const quickbarUrl = 'https://serlo.github.io/quickbar-updater/quickbar.json'
   const response = await fetch(quickbarUrl, { cf: { cacheTtl: 24 * 60 * 60 } })
 
   if (response.ok) {
