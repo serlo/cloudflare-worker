@@ -24,7 +24,7 @@ describe('de.serlo.org/api/stats/quickbar.json', () => {
   function setupArrrg() {
     globalThis.server.use(
       rest.get(
-        'https://arrrg.de/serlo-stats/quickbar.json',
+        'https://serlo.github.io/quickbar-updater/quickbar.json',
         (_req, res, ctx) => {
           return res(
             ctx.set('content-type', 'application/json'),
