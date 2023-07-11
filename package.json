@@ -32,7 +32,7 @@
     "fp-ts": "^2.16.0",
     "io-ts": "^2.2.20",
     "jose": "^4.14.4",
-    "marked": "^5.1.0",
+    "marked": "^5.1.1",
     "preact": "^10.16.0",
     "preact-render-to-string": "^6.1.0",
     "sanitize-html": "^2.11.0",
