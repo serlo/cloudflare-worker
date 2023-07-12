@@ -1,6 +1,5 @@
 import TOML from '@iarna/toml'
 import fs from 'fs'
-import { FetchError } from 'node-fetch'
 import path from 'path'
 
 import { handleFetchEvent } from '../../src'
@@ -142,7 +141,7 @@ class RemoteEnvironment extends TestEnvironment {
       return fetch(request, { redirect: 'manual' })
     } catch (error) {
       if (
-        error instanceof FetchError &&
+        error instanceof Error &&
         /ECONNRESET/.test(error.message) &&
         retry < 3
       ) {

@@ -4,23 +4,18 @@ import { type Event as SentryEvent } from '@sentry/types'
 import * as cryptoNode from 'crypto'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
-import fetchNode, {
-  Response as NodeResponse,
-  Request as NodeRequest,
-} from 'node-fetch'
-import * as util from 'util'
 
 import {
   createKV,
-  givenApi,
-  defaultApiServer,
-  Uuid,
-  givenSerlo,
-  defaultSerloServer,
   currentTestEnvironment,
-  givenFrontend,
+  defaultApiServer,
   defaultFrontendServer,
+  defaultSerloServer,
+  givenApi,
+  givenFrontend,
+  givenSerlo,
   localTestEnvironment,
+  Uuid,
 } from './__tests__/__utils__'
 
 const timeout = currentTestEnvironment().getNeededTimeout()
@@ -66,9 +61,6 @@ afterAll(() => {
 })
 
 function addGlobalMocks() {
-  globalThis.fetch = fetchNode as unknown as typeof fetch
-  globalThis.Response = NodeResponse as unknown as typeof Response
-  globalThis.Request = NodeRequest as unknown as typeof Request
   globalThis.crypto = {
     subtle: {
       digest(encoding: string, message: Uint8Array) {
@@ -82,7 +74,6 @@ function addGlobalMocks() {
     },
     randomUUID: cryptoNode.randomUUID,
   } as unknown as typeof crypto
-  globalThis.TextEncoder = util.TextEncoder
 }
 
 function mockSentryServer() {
