@@ -93,15 +93,16 @@ async function fetchBackend({
   return new Response(response.body, response)
 
   function isLegacyRequestToBeReported() {
-    if (route.__typename != 'Legacy') return false
+    if (route.__typename != 'Legacy') {
+      return false
+    }
     if (
       request.method === 'GET' &&
       response.headers.get('Content-type') === 'text/html'
-    )
+    ) {
       return true
-    if (request.method === 'POST') return true
-
-    return false
+    }
+    return request.method === 'POST'
   }
 }
 
