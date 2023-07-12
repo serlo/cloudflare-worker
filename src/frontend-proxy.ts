@@ -73,9 +73,9 @@ async function fetchBackend({
   })
 
   if (sentry) {
-    if (route.__typename === 'Frontend' && response.redirected) {
+    if (route.__typename === 'Frontend' && response.status === 302) {
       sentry.setContext('backendUrl', backendUrl)
-      sentry.setContext('responseUrl', response.url)
+      sentry.setContext('location', response.headers.get('Location'))
       sentry.captureMessage('Frontend responded with a redirect', 'error')
     }
 

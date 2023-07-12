@@ -1,5 +1,3 @@
-import { jest } from '@jest/globals'
-
 import {
   mockHttpGet,
   returnsText,
@@ -86,14 +84,20 @@ describe('when request contains header X-From: legacy-serlo.org', () => {
   })
 })
 
-test('Resports to sentry when frontend responded with redirect', async () => {
+test('reports to sentry when frontend responded with redirect', async () => {
   givenFrontend(redirectsTo('https://frontend.serlo.org/'))
   mockHttpGet('https://frontend.serlo.org/', returnsText('Hello World'))
 
   const env = localTestEnvironment()
-  const response = await env.fetch({ subdomain: 'en', pathname: '/math' })
+  const redirectResponse = await env.fetch({
+    subdomain: 'en',
+    pathname: '/math',
+  })
 
-  expect(await response.text()).toBe('Hello World')
+  expect(redirectResponse.status).toEqual(302)
+  expect(redirectResponse.headers.get('Location')).toEqual(
+    'https://frontend.serlo.org/'
+  )
   expectSentryEvent({
     message: 'Frontend responded with a redirect',
     level: 'error',
@@ -102,15 +106,20 @@ test('Resports to sentry when frontend responded with redirect', async () => {
         subdomain: 'frontend',
         pathname: '/en/math',
       }),
-      responseUrl: 'https://frontend.serlo.org/',
+      location: 'https://frontend.serlo.org/',
     },
   })
+
+  const response = await fetch('https://frontend.serlo.org/')
+
+  expect(response.status).toEqual(200)
+  expect(await response.text()).toBe('Hello World')
 })
 
 test('creates a copy of backend responses (otherwise there is an error in cloudflare)', async () => {
   const backendResponse = new Response('')
 
-  // There is not type checking for the main page and thus we do not need
+  // There is no type checking for the main page, and thus we do not need
   // to mock the api request here
   const response = await localTestEnvironment().fetch({ subdomain: 'en' })
 
@@ -118,28 +127,28 @@ test('creates a copy of backend responses (otherwise there is an error in cloudf
 })
 
 describe('requests to /enable-frontend enable use of frontend', () => {
-  let ressponse: Response
+  let response: Response
 
   beforeEach(async () => {
-    ressponse = await currentTestEnvironment().fetch({
+    response = await currentTestEnvironment().fetch({
       subdomain: 'en',
       pathname: '/enable-frontend',
     })
   })
 
   test('shows message that frontend was enabled', async () => {
-    expect(ressponse.status).toBe(200)
-    expect(await ressponse.text()).toBe('Enabled: Use of new frontend')
+    expect(response.status).toBe(200)
+    expect(await response.text()).toBe('Enabled: Use of new frontend')
   })
 
   test('sets cookie so that new frontend will be used', () => {
-    expect(ressponse.headers.get('Set-Cookie')).toEqual(
+    expect(response.headers.get('Set-Cookie')).toEqual(
       expect.stringContaining('useLegacyFrontend=false;')
     )
   })
 
   test('main page will be loaded after 1 second', () => {
-    expect(ressponse.headers.get('Refresh')).toBe('1; url=/')
+    expect(response.headers.get('Refresh')).toBe('1; url=/')
   })
 })
 
@@ -173,7 +182,7 @@ async function expectLegacy(response: Response) {
   expect(await response.text()).toEqual(
     expect.stringContaining('<html class="fuelux"')
   )
-  // Tests that backend headers are transfered to client
+  // Tests that backend headers are transferred to client
   expect(response.headers.get('x-powered-by')).toEqual(
     expect.stringContaining('PHP')
   )
@@ -183,6 +192,6 @@ async function expectFrontend(response: Response) {
   expect(await response.text()).toEqual(
     expect.stringContaining('<script id="__NEXT_DATA__"')
   )
-  // Tests that backend headers are transfered to client
+  // Tests that backend headers are transferred to client
   expect(response.headers.get('x-vercel-cache')).toBeDefined()
 }

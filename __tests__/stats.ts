@@ -17,11 +17,7 @@ beforeEach(() => {
 test('Redirect of https://stats.serlo.org/ is not changed by CF worker', async () => {
   const response = await env.fetch({ subdomain: 'stats' })
 
-  expectToBeRedirectTo(
-    response,
-    env.createUrl({ subdomain: 'stats', pathname: '/login' }),
-    302
-  )
+  expectToBeRedirectTo(response, '/login', 302)
 })
 
 test('Response of https://stats.serlo.org/login is not changed by CF worker', async () => {
