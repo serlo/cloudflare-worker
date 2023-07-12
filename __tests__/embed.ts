@@ -276,7 +276,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           localTestEnvironment()
         )
 
-        expect(expectIsPlaceholderResponse(response))
+        expectIsPlaceholderResponse(response)
         expectSentryEvent({
           message: 'Vimeo CDN did not return an image',
           level: 'warning',
@@ -624,13 +624,13 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     test('when url parameter is empty', async () => {
       const response = await requestThumbnail('')
 
-      expect(expectIsPlaceholderResponse(response))
+      expectIsPlaceholderResponse(response)
     })
 
     test('when url is invalid', async () => {
       const response = await requestThumbnail('42')
 
-      expect(expectIsPlaceholderResponse(response))
+      expectIsPlaceholderResponse(response)
     })
 
     test('when url is unsupported', async () => {
@@ -638,7 +638,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         'https://www.twitch.tv/videos/824398155'
       )
 
-      expect(expectIsPlaceholderResponse(response))
+      expectIsPlaceholderResponse(response)
     })
 
     test('when path is not thumbnail', async () => {
@@ -647,7 +647,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         pathname: '/foo',
       })
 
-      expect(expectIsPlaceholderResponse(response))
+      expectIsPlaceholderResponse(response)
     })
 
     test('when url parameter is missing', async () => {
@@ -656,7 +656,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         pathname: '/thumbnail',
       })
 
-      expect(expectIsPlaceholderResponse(response))
+      expectIsPlaceholderResponse(response)
     })
   })
 })
