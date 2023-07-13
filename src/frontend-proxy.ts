@@ -73,9 +73,9 @@ async function fetchBackend({
   })
 
   if (sentry) {
-    if (route.__typename === 'Frontend' && response.redirected) {
+    if (route.__typename === 'Frontend' && response.status === 302) {
       sentry.setContext('backendUrl', backendUrl)
-      sentry.setContext('responseUrl', response.url)
+      sentry.setContext('location', response.headers.get('Location'))
       sentry.captureMessage('Frontend responded with a redirect', 'error')
     }
 
@@ -93,15 +93,16 @@ async function fetchBackend({
   return new Response(response.body, response)
 
   function isLegacyRequestToBeReported() {
-    if (route.__typename != 'Legacy') return false
+    if (route.__typename != 'Legacy') {
+      return false
+    }
     if (
       request.method === 'GET' &&
       response.headers.get('Content-type') === 'text/html'
-    )
+    ) {
       return true
-    if (request.method === 'POST') return true
-
-    return false
+    }
+    return request.method === 'POST'
   }
 }
 

@@ -11,7 +11,6 @@ import {
   returnsMalformedJson,
   returnsJson,
 } from './__utils__'
-import { Template } from '../src/ui'
 import {
   getCookieValue,
   sanitizeHtml,
@@ -23,6 +22,7 @@ import {
   getPathInfo,
   Instance,
   toCacheKey,
+  createEmptyBodyResponse,
 } from '../src/utils'
 
 describe('getCookieValue()', () => {
@@ -229,20 +229,12 @@ test('PreactResponse', async () => {
   expectContentTypeIsHtml(hello)
   await expectContainsText(hello, ['<h1>Hello</h1>'])
 
-  const template = (
-    <Template title="not modified" lang="en">
-      <p>Not Modified</p>
-    </Template>
-  )
-
-  const notModified = createPreactResponse(template, { status: 304 })
+  const notModified = createEmptyBodyResponse({ status: 304 })
 
   expect(notModified.status).toBe(304)
   expectContentTypeIsHtml(notModified)
-  await expectContainsText(notModified, [
-    '<p>Not Modified</p>',
-    '<title>Serlo - not modified</title>',
-  ])
+  expect(notModified).not.toBeNull()
+  expect(await notModified.text()).toEqual('')
 })
 
 test('JsonResponse', async () => {
