@@ -170,8 +170,18 @@ export function markdownToHtml(markdown: string): string {
   return marked.parse(markdown, { headerIds: false, mangle: false }).trim()
 }
 
-export function createPreactResponse(component: VNode, opt?: ResponseInit) {
-  return new Response(renderToString(component), {
+// The HTTP Status code 304 Not Modified must not contain a body.
+// https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/304
+export function createEmptyBodyResponse(opt: ResponseInit) {
+  return createPreactResponse(null, opt)
+}
+
+export function createPreactResponse(
+  component: VNode | null,
+  opt?: ResponseInit
+) {
+  const body = component ? renderToString(component) : null
+  return new Response(body, {
     ...opt,
     headers: {
       ...opt?.headers,
@@ -213,6 +223,5 @@ async function digestMessage(message: string): Promise<string> {
   const msgUint8 = new TextEncoder().encode(message)
   const hashBuffer = await crypto.subtle.digest('SHA-1', msgUint8)
   const hashArray = Array.from(new Uint8Array(hashBuffer))
-  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
-  return hashHex
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
 }
