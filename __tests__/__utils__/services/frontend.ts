@@ -2,6 +2,7 @@ import { rest } from 'msw'
 
 import { getUuid } from './database'
 import { createUrlRegex, RestResolver } from './utils'
+import { isInstance } from '../../../src/utils'
 
 export function givenFrontend(resolver: RestResolver) {
   globalThis.server.use(
@@ -45,7 +46,7 @@ export function defaultFrontendServer(): RestResolver {
     const instance = req.url.pathname.substring(1, 3)
     const pathname = req.url.pathname.substring(3)
 
-    let content
+    let content: string
 
     if (pathname === '/user/notifications' && instance === 'en') {
       content = 'Notifications'
@@ -76,12 +77,14 @@ export function defaultFrontendServer(): RestResolver {
       )
     ) {
       content = ''
-    } else {
+    } else if (isInstance(instance)) {
       const uuid = getUuid(instance, pathname.length > 0 ? pathname : '/')
 
       if (uuid == null) return res(ctx.status(404))
 
       content = uuid.content ?? ''
+    } else {
+      return res(ctx.status(404))
     }
 
     return res(
