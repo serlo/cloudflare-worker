@@ -170,12 +170,6 @@ export function markdownToHtml(markdown: string): string {
   return marked.parse(markdown, { headerIds: false, mangle: false }).trim()
 }
 
-// The HTTP Status code 304 Not Modified must not contain a body.
-// https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/304
-export function createEmptyBodyResponse(opt: ResponseInit) {
-  return createPreactResponse(null, opt)
-}
-
 export function createPreactResponse(
   component: VNode | null,
   opt?: ResponseInit,

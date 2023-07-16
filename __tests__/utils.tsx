@@ -22,7 +22,6 @@ import {
   getPathInfo,
   Instance,
   toCacheKey,
-  createEmptyBodyResponse,
 } from '../src/utils'
 
 describe('getCookieValue()', () => {
@@ -228,13 +227,6 @@ test('PreactResponse', async () => {
   expect(hello.status).toBe(200)
   expectContentTypeIsHtml(hello)
   await expectContainsText(hello, ['<h1>Hello</h1>'])
-
-  const notModified = createEmptyBodyResponse({ status: 304 })
-
-  expect(notModified.status).toBe(304)
-  expectContentTypeIsHtml(notModified)
-  expect(notModified).not.toBeNull()
-  expect(await notModified.text()).toEqual('')
 })
 
 test('JsonResponse', async () => {
