@@ -4,7 +4,7 @@ import { getUuid } from './database'
 import { RestResolver, createUrlRegex } from './utils'
 import { Instance } from '../../../src/utils'
 
-export function givenApi(resolver: ApiRestResolver) {
+export function givenApi(resolver: RestResolver) {
   globalThis.server.use(
     rest.post(
       createUrlRegex({ subdomains: ['api'], pathname: '/graphql' }),
@@ -13,20 +13,16 @@ export function givenApi(resolver: ApiRestResolver) {
   )
 }
 
-export function defaultApiServer(): ApiRestResolver {
-  return (req, res, ctx) => {
+export function defaultApiServer(): RestResolver {
+  return async (req, res, ctx) => {
     if (!req.headers.get('Authorization')?.match(/^Serlo Service=ey/))
       return res(ctx.status(401, 'No authorization header given'))
 
-    if (req.body === undefined)
-      return res(ctx.status(400, 'request body is missing'))
-    if (
-      req.headers.get('Content-Type') !== 'application/json' ||
-      typeof req.body === 'string'
-    )
+    if (req.headers.get('Content-Type') !== 'application/json')
       return res(ctx.status(400, 'Content-Type is not application/json'))
 
-    const { instance, path } = req.body.variables.alias
+    const body = await req.json<ApiRequestBody>()
+    const { instance, path } = body.variables.alias
 
     if (path == null || instance == null)
       return res(ctx.status(400, 'variable "alias" wrongly defined'))
@@ -49,6 +45,6 @@ export function defaultApiServer(): ApiRestResolver {
   }
 }
 
-type ApiRestResolver = RestResolver<{
+interface ApiRequestBody {
   variables: { alias: { instance: Instance; path: string } }
-}>
+}
