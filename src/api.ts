@@ -13,7 +13,7 @@ export async function api(request: Request) {
 
   response.headers.set(
     'Access-Control-Allow-Origin',
-    getAllowedOrigin(request.headers.get('Origin'))
+    getAllowedOrigin(request.headers.get('Origin')),
   )
 
   // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin#cors_and_caching

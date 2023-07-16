@@ -36,7 +36,7 @@ export async function redirects(request: Request) {
   if (url.subdomain === 'start') {
     return Response.redirect(
       'https://docs.google.com/document/d/1qsgkXWNwC-mcgroyfqrQPkZyYqn7m1aimw2gwtDTmpM/',
-      301
+      301,
     )
   }
 
@@ -66,12 +66,12 @@ export async function redirects(request: Request) {
     case '/ecec':
       return Response.redirect(
         'https://docs.google.com/document/d/1qSbyzDnW2RU58a7J3NHHBFo_MptaW-Ke0iT_c4KOhUA',
-        302
+        302,
       )
     case '/chancenwerk':
       return Response.redirect(
         'https://de.serlo.org/mathe/268835/chancenwerk',
-        302
+        302,
       )
   }
 
@@ -84,31 +84,31 @@ export async function redirects(request: Request) {
       case '/metadata-api':
         return Response.redirect(
           'https://nbviewer.org/github/serlo/lenabi/blob/20b946ff9f1205444f256995dfd776fd203b6c3c/src/Prototype%20of%20metadata%20API%20for%20serlo.org%20%28LENABI%29.ipynb',
-          302
+          302,
         )
       case '/data-wallet':
         return Response.redirect('https://lenabi.serlo-staging.dev/wallet', 302)
       case '/user-journey':
         return Response.redirect(
           'https://frontend-git-lenabi-mock-serlo.vercel.app/',
-          302
+          302,
         )
       case '/sso':
         return Response.redirect('https://lenabi.serlo-staging.dev/sso', 302)
       case '/status':
         return Response.redirect(
           'https://frontend-git-lenabi-flow-serlo.vercel.app/___lenabi_status',
-          302
+          302,
         )
       case '/docs':
         return Response.redirect(
           'https://github.com/serlo/lenabi-konzeptionsphase',
-          302
+          302,
         )
       case '/docs/sso':
         return Response.redirect(
           'https://github.com/serlo/lenabi-konzeptionsphase/wiki/Implementierung-der-Prototypen#sso',
-          302
+          302,
         )
     }
   }
@@ -143,7 +143,7 @@ export async function redirects(request: Request) {
   ) {
     return Response.redirect(
       'https://drive.google.com/file/d/1G3w2EIXlqvwuZ8LMzsYUjoMf9NbXoDIX/view',
-      302
+      302,
     )
   }
 
@@ -153,7 +153,7 @@ export async function redirects(request: Request) {
   ) {
     return Response.redirect(
       'https://docs.google.com/forms/d/e/1FAIpQLSdEoyCcDVP_G_-G_u642S768e_sxz6wO6rJ3tad4Hb9z7Slwg/viewform',
-      301
+      301,
     )
   }
 

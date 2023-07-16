@@ -29,7 +29,7 @@ const defaultLanguage = Instance.En
 export async function legalPages(
   request: Request,
   unrevisedConfig = defaultUnrevisedConfig,
-  revisedConfig = defaultRevisedConfig
+  revisedConfig = defaultRevisedConfig,
 ): Promise<Response | null> {
   const url = Url.fromRequest(request)
 
@@ -62,7 +62,7 @@ export async function legalPages(
 
     const archivedRegex = `^\\/${revisedType}\\/archive\\/(\\d{4}-\\d{2}-\\d{2})$`
     const archivedMatch = new RegExp(archivedRegex).exec(
-      url.pathnameWithoutTrailingSlash
+      url.pathnameWithoutTrailingSlash,
     )
 
     if (archivedMatch) {
@@ -294,7 +294,7 @@ export function RevisionsOverview({ revisions }: { revisions: RevisedPage[] }) {
 }
 
 async function fetchContent<A extends Page>(
-  page: A
+  page: A,
 ): Promise<WithContent<A> | null> {
   const response = await fetch(page.url, { cf: { cacheTtl: 60 * 60 * 24 } })
 
@@ -303,7 +303,7 @@ async function fetchContent<A extends Page>(
     const sanitizedContent = sanitizeHtml(rawContent)
     const content = sanitizedContent.replace(
       'JS-GOOGLE-ANALYTICS-DEACTIVATE',
-      'javascript:gaOptout();'
+      'javascript:gaOptout();',
     )
 
     return { ...page, content }
@@ -314,7 +314,7 @@ async function fetchContent<A extends Page>(
 
 function findRevisionById<A extends RevisedSpec>(
   revisions: A[],
-  id: string
+  id: string,
 ): A | null {
   return revisions.find((x) => x.revision === id) ?? null
 }
@@ -324,7 +324,7 @@ function getRevisions(
   lang: Instance,
   revisedType: RevisedType,
   getTitle: (revisedType: RevisedType) => string = (x) =>
-    titles[x][lang] || titles[x][Instance.En] || ''
+    titles[x][lang] || titles[x][Instance.En] || '',
 ): RevisedPage[] | null {
   const result = getSpecAndLanguage(config, lang, revisedType)
 
@@ -351,7 +351,7 @@ function getPage(
   lang: Instance,
   unrevisedType: UnrevisedType,
   getTitle: (unrevisedType: UnrevisedType) => string = (x) =>
-    titles[x][lang] || titles[x][Instance.En] || ''
+    titles[x][lang] || titles[x][Instance.En] || '',
 ): Page | null {
   const result = getSpecAndLanguage(config, lang, unrevisedType)
 
@@ -363,7 +363,7 @@ function getPage(
 function getSpecAndLanguage<A extends string, B>(
   config: Config<A, B>,
   lang: Instance,
-  kind: A
+  kind: A,
 ): { spec: B; lang: Instance } | null {
   // See https://stackoverflow.com/q/60400208 why the typecast is necessary
   const result = config[lang]?.[kind] as B | undefined

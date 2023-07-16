@@ -4,7 +4,7 @@ export function createKV<K extends string = string>(): KVNamespace<K> {
     get(key: K, options?: unknown) {
       if (options !== undefined) {
         throw new Error(
-          'get function for type ${options.type} not yet implemented'
+          'get function for type ${options.type} not yet implemented',
         )
       }
 
