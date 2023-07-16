@@ -27,7 +27,7 @@ export function getUuid(instance: string, path: string) {
   return globalThis.uuids.find(
     (u) =>
       u.instance === instance &&
-      [u.alias, u.oldAlias].includes(decodeURIComponent(path))
+      [u.alias, u.oldAlias].includes(decodeURIComponent(path)),
   )
 }
 

@@ -2,7 +2,7 @@ import { isInstance, Url, SentryFactory, responseToContext } from './utils'
 
 export async function quickbarProxy(
   request: Request,
-  sentryFactory: SentryFactory
+  sentryFactory: SentryFactory,
 ): Promise<Response | null> {
   const url = Url.fromRequest(request)
 
@@ -19,11 +19,11 @@ export async function quickbarProxy(
 
     sentry.setContext(
       'response',
-      responseToContext({ response, text: await response.text() })
+      responseToContext({ response, text: await response.text() }),
     )
     sentry.captureMessage(
       'Illegal response of quickbar server, arrrg',
-      'warning'
+      'warning',
     )
 
     return null

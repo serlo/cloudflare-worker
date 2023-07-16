@@ -9,7 +9,7 @@ import {
 
 export async function frontendSpecialPaths(
   request: Request,
-  sentryFactory: SentryFactory
+  sentryFactory: SentryFactory,
 ): Promise<Response | null> {
   const url = Url.fromRequest(request)
   const route = getRoute(request)
@@ -34,7 +34,7 @@ export async function frontendSpecialPaths(
 
 export async function frontendProxy(
   request: Request,
-  sentryFactory: SentryFactory
+  sentryFactory: SentryFactory,
 ): Promise<Response | null> {
   const sentry = sentryFactory.createReporter('frontend')
   const route = getRoute(request)
@@ -84,7 +84,7 @@ async function fetchBackend({
       sentry.setContext('method', request.method)
       sentry.setContext(
         'useLegacyFrontend',
-        getCookieValue('useLegacyFrontend', request.headers.get('Cookie'))
+        getCookieValue('useLegacyFrontend', request.headers.get('Cookie')),
       )
       sentry.captureMessage('Request to legacy system registered', 'info')
     }
@@ -151,7 +151,7 @@ function getRoute(request: Request): RouteConfig | null {
     url.pathname === '/consent' ||
     (subjectStartPages[url.subdomain] &&
       subjectStartPages[url.subdomain]?.includes(
-        url.pathnameWithoutTrailingSlash
+        url.pathnameWithoutTrailingSlash,
       ))
   ) {
     return {
@@ -207,7 +207,7 @@ function createConfigurationResponse({
     'Set-Cookie',
     `useLegacyFrontend=${useLegacyFrontend.toString()}; path=/; domain=.${
       globalThis.DOMAIN
-    }`
+    }`,
   )
   response.headers.set('Refresh', '1; url=/')
 

@@ -26,7 +26,7 @@ export function isInstance(code: unknown): code is Instance {
 
 export function getCookieValue(
   name: string,
-  cookieHeader: string | null
+  cookieHeader: string | null,
 ): string | null {
   return cookieHeader === null
     ? null
@@ -62,7 +62,7 @@ const ApiResult = t.type({
 
 export async function getPathInfo(
   lang: Instance,
-  path: string
+  path: string,
 ): Promise<PathInfo | null> {
   if (path === '/user/me' || path === '/user/public')
     return { typename: 'User', currentPath: path }
@@ -119,7 +119,7 @@ export async function getPathInfo(
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query, variables }),
-      })
+      }),
     )
     apiResponseBody = await apiResponse.json()
   } catch (e) {
@@ -178,7 +178,7 @@ export function createEmptyBodyResponse(opt: ResponseInit) {
 
 export function createPreactResponse(
   component: VNode | null,
-  opt?: ResponseInit
+  opt?: ResponseInit,
 ) {
   const body = component ? renderToString(component) : null
   return new Response(body, {
@@ -207,7 +207,7 @@ interface CacheKeyBrand {
 const CacheKey = t.brand(
   t.string,
   (text): text is t.Branded<string, CacheKeyBrand> => text.length <= 512,
-  'CacheKey'
+  'CacheKey',
 )
 type CacheKey = t.TypeOf<typeof CacheKey>
 

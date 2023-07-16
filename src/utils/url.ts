@@ -39,7 +39,7 @@ export class Url extends URL {
     const params = this.searchParams as URLSearchParams
 
     return Array.from(params.keys()).some((key) =>
-      contentApiParameters.includes(key)
+      contentApiParameters.includes(key),
     )
   }
 

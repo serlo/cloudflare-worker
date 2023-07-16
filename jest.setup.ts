@@ -68,7 +68,7 @@ function addGlobalMocks() {
           cryptoNode
             .createHash(encoding.toLowerCase().replace('-', ''))
             .update(message)
-            .digest()
+            .digest(),
         )
       },
     },
@@ -90,7 +90,7 @@ function mockSentryServer() {
       globalThis.sentryEvents.push(...events)
 
       return res(ctx.status(200))
-    })
+    }),
   )
 }
 

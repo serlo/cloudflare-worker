@@ -7,7 +7,7 @@ import {
 } from 'msw'
 
 export type RestResolver<
-  RequestBodyType extends DefaultBodyType = DefaultBodyType
+  RequestBodyType extends DefaultBodyType = DefaultBodyType,
 > = ResponseResolver<RestRequest<RequestBodyType>, typeof restContext>
 
 export function mockHttpGet(url: string, resolver: RestResolver) {
@@ -17,7 +17,7 @@ export function mockHttpGet(url: string, resolver: RestResolver) {
         return res(ctx.status(400, 'Bad Request: Query string does not match'))
 
       return resolver(req, res, ctx)
-    })
+    }),
   )
 }
 
@@ -54,7 +54,7 @@ export function createUrlRegex({
       '\\.' +
       // TODO: Remove "serlo.org"
       matchStrings([globalThis.DOMAIN, 'serlo.org']) +
-      (typeof pathname === 'string' ? escapeRegex(pathname) : pathname.source)
+      (typeof pathname === 'string' ? escapeRegex(pathname) : pathname.source),
   )
 }
 

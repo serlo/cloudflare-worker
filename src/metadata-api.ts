@@ -2,7 +2,7 @@ import { isInstance, SentryFactory, Url } from './utils'
 
 export async function metadataApi(
   request: Request,
-  sentryFactory: SentryFactory
+  sentryFactory: SentryFactory,
 ) {
   const url = Url.fromRequest(request)
 

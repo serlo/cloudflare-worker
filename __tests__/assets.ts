@@ -71,11 +71,11 @@ function givenAssets(assets: { [P in string]?: { contentLength: number } }) {
         ? res(
             ctx.set(
               'x-goog-stored-content-length',
-              asset.contentLength.toString()
-            )
+              asset.contentLength.toString(),
+            ),
           )
         : res(ctx.status(404))
-    })
+    }),
   )
 }
 
@@ -88,6 +88,6 @@ function expectAsset({
 }) {
   expect(response.status).toBe(200)
   expect(response.headers.get('x-goog-stored-content-length')).toBe(
-    expectedStoredContentLength.toString()
+    expectedStoredContentLength.toString(),
   )
 }

@@ -2,7 +2,7 @@ import { currentTestEnvironmentWhen } from './__utils__'
 
 test('Disallow robots in non-productive environments', async () => {
   const env = currentTestEnvironmentWhen(
-    (config) => config.ENVIRONMENT !== 'production'
+    (config) => config.ENVIRONMENT !== 'production',
   )
 
   const response = await env.fetch({ subdomain: 'de', pathname: '/robots.txt' })
@@ -13,7 +13,7 @@ test('Disallow robots in non-productive environments', async () => {
 test('Return explicit robots rules in production', async () => {
   globalThis.ENVIRONMENT = 'production'
   const env = currentTestEnvironmentWhen(
-    (config) => config.ENVIRONMENT === 'production'
+    (config) => config.ENVIRONMENT === 'production',
   )
 
   const request = new Request('https://de.serlo.org/robots.txt')
