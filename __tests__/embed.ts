@@ -564,15 +564,16 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       })
     })
 
-    function givenGeogebraApi(resolver: RestResolver<GeogebraApiBody>) {
+    function givenGeogebraApi(resolver: RestResolver) {
       globalThis.server.use(
         rest.post('https://www.geogebra.org/api/json.php', resolver),
       )
     }
 
-    function defaultGeogebraApi(): RestResolver<GeogebraApiBody> {
-      return (req, res, ctx) => {
-        const appletId = req.body.request.task.filters.field[0]['#text']
+    function defaultGeogebraApi(): RestResolver {
+      return async (req, res, ctx) => {
+        const body = await req.json<GeogebraApiBody>()
+        const appletId = body.request.task.filters.field[0]['#text']
 
         return res(
           ctx.json(

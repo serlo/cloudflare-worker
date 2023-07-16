@@ -6,9 +6,10 @@ import {
   RestRequest,
 } from 'msw'
 
-export type RestResolver<
-  RequestBodyType extends DefaultBodyType = DefaultBodyType,
-> = ResponseResolver<RestRequest<RequestBodyType>, typeof restContext>
+export type RestResolver = ResponseResolver<
+  RestRequest<DefaultBodyType>,
+  typeof restContext
+>
 
 export function mockHttpGet(url: string, resolver: RestResolver) {
   globalThis.server.use(
