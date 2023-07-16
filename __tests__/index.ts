@@ -34,7 +34,7 @@ describe('Enforce HTTPS', () => {
     const local = localTestEnvironment()
     mockHttpGet(
       local.createUrl({ subdomain: 'pacts', pathname: '/bar' }),
-      returnsText('content')
+      returnsText('content'),
     )
 
     const response = await local.fetch({ subdomain: 'pacts', pathname: '/bar' })

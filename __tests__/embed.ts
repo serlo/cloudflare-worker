@@ -43,7 +43,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
     test('returns sddefault.jpg thumbnail when it exists', async () => {
       const response = await requestThumbnail(
-        `https://www.youtube-nocookie.com/embed/${videos.highQuality.id}?autoplay=1&html5=1`
+        `https://www.youtube-nocookie.com/embed/${videos.highQuality.id}?autoplay=1&html5=1`,
       )
 
       expectImageResponseWithError({
@@ -55,7 +55,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
     test('returns hqdefault.jpg thumbnail when sddefault.jpg does not exist', async () => {
       const response = await requestThumbnail(
-        `https://www.youtube-nocookie.com/embed/${videos.lowQuality.id}?autoplay=1&html5=1`
+        `https://www.youtube-nocookie.com/embed/${videos.lowQuality.id}?autoplay=1&html5=1`,
       )
 
       expectImageResponseWithError({
@@ -68,7 +68,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     describe('returns placeholder', () => {
       test('when no image is available', async () => {
         const response = await requestThumbnail(
-          `https://www.youtube-nocookie.com/embed/AaaAaaAaaAa?autoplay=1&html5=1`
+          `https://www.youtube-nocookie.com/embed/AaaAaaAaaAa?autoplay=1&html5=1`,
         )
 
         expectIsPlaceholderResponse(response)
@@ -76,7 +76,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
       test('when video id is malformed', async () => {
         const response = await requestThumbnail(
-          `https://www.youtube-nocookie.com/embed/foo:pass@malware.com`
+          `https://www.youtube-nocookie.com/embed/foo:pass@malware.com`,
         )
 
         expectIsPlaceholderResponse(response)
@@ -87,7 +87,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           `https://www.youtube-nocookie.com/embed/${videos.highQuality.id}?autoplay=1&html5=1`,
-          localTestEnvironment()
+          localTestEnvironment(),
         )
 
         expectIsPlaceholderResponse(response)
@@ -96,7 +96,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
     function givenYoutube(resolver: RestResolver) {
       globalThis.server.use(
-        rest.get('https://i.ytimg.com/vi/:videoId/:format', resolver)
+        rest.get('https://i.ytimg.com/vi/:videoId/:format', resolver),
       )
     }
 
@@ -108,7 +108,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           if (videoId === spec.id && format === spec.format) {
             return res(
               ctx.set('content-type', 'image/jpeg'),
-              ctx.set('content-length', spec.contentLength.toString())
+              ctx.set('content-length', spec.contentLength.toString()),
             )
           }
         }
@@ -131,7 +131,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
     test('returns thumbnail of vimeo video', async () => {
       const response = await requestThumbnail(
-        `https://player.vimeo.com/video/${video.id}?autoplay=1`
+        `https://player.vimeo.com/video/${video.id}?autoplay=1`,
       )
 
       expectImageResponseWithError({
@@ -147,7 +147,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
       test('when video does not exist', async () => {
         const response = await requestThumbnail(
-          `https://player.vimeo.com/video/999999999?autoplay=1`
+          `https://player.vimeo.com/video/999999999?autoplay=1`,
         )
 
         expectIsPlaceholderResponse(response)
@@ -156,7 +156,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
       test('when video id is malformed', async () => {
         const response = await requestThumbnail(
-          `https://player.vimeo.com/video/foo:password@malware.com`
+          `https://player.vimeo.com/video/foo:password@malware.com`,
         )
 
         expectIsPlaceholderResponse(response)
@@ -168,7 +168,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           `https://player.vimeo.com/video/${video.id}?autoplay=1`,
-          localTestEnvironment()
+          localTestEnvironment(),
         )
 
         expectIsPlaceholderResponse(response)
@@ -189,7 +189,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           `https://player.vimeo.com/video/${video.id}?autoplay=1`,
-          localTestEnvironment()
+          localTestEnvironment(),
         )
 
         expectIsPlaceholderResponse(response)
@@ -215,7 +215,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
           const response = await requestThumbnail(
             thumbnailUrl,
-            localTestEnvironment()
+            localTestEnvironment(),
           )
 
           expectIsPlaceholderResponse(response)
@@ -237,7 +237,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           `https://player.vimeo.com/video/${video.id}?autoplay=1`,
-          localTestEnvironment()
+          localTestEnvironment(),
         )
 
         expectIsPlaceholderResponse(response)
@@ -255,7 +255,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           `https://player.vimeo.com/video/${video.id}?autoplay=1`,
-          localTestEnvironment()
+          localTestEnvironment(),
         )
 
         expectIsPlaceholderResponse(response)
@@ -273,7 +273,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           `https://player.vimeo.com/video/${video.id}?autoplay=1`,
-          localTestEnvironment()
+          localTestEnvironment(),
         )
 
         expectIsPlaceholderResponse(response)
@@ -291,8 +291,8 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       globalThis.server.use(
         rest.get<never, any, { thumbnailFilename: string }>(
           'https://i.vimeocdn.com/video/:thumbnailFilename',
-          resolver
-        )
+          resolver,
+        ),
       )
     }
 
@@ -301,7 +301,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         if (req.url.href === video.thumbnailUrl) {
           return res(
             ctx.set('content-type', 'image/jpeg'),
-            ctx.set('content-length', video.contentLength.toString())
+            ctx.set('content-length', video.contentLength.toString()),
           )
         }
         return res(ctx.status(404))
@@ -310,7 +310,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
     function givenVimeoApi(resolver: RestResolver) {
       globalThis.server.use(
-        rest.get('https://vimeo.com/api/oembed.json', resolver)
+        rest.get('https://vimeo.com/api/oembed.json', resolver),
       )
     }
 
@@ -322,7 +322,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         if (videoId === video.id) {
           return res(
-            ctx.json({ type: 'video', thumbnail_url: video.thumbnailUrl })
+            ctx.json({ type: 'video', thumbnail_url: video.thumbnailUrl }),
           )
         }
         return res(ctx.status(404))
@@ -348,7 +348,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       // set `env` to `currentTestEnvironment()`
       const response = await requestThumbnail(
         video.embedUrl,
-        localTestEnvironment()
+        localTestEnvironment(),
       )
 
       expectImageResponseWithError({
@@ -361,7 +361,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
     test('returns placeholder when video/thumbnail does not exist', async () => {
       const response = await requestThumbnail(
-        'https://upload.wikimedia.org/wikipedia/commons/2/55/must_see.webm'
+        'https://upload.wikimedia.org/wikipedia/commons/2/55/must_see.webm',
       )
 
       expectIsPlaceholderResponse(response)
@@ -373,7 +373,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
       const response = await requestThumbnail(
         video.embedUrl,
-        localTestEnvironment()
+        localTestEnvironment(),
       )
 
       expectIsPlaceholderResponse(response)
@@ -383,8 +383,8 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       globalThis.server.use(
         rest.get(
           'https://upload.wikimedia.org/wikipedia/commons/thumb/*',
-          resolver
-        )
+          resolver,
+        ),
       )
     }
 
@@ -393,7 +393,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         return req.url.toString() === video.thumbnailUrl
           ? res(
               ctx.set('content-type', 'image/jpeg'),
-              ctx.set('content-length', video.contentLength.toString())
+              ctx.set('content-length', video.contentLength.toString()),
             )
           : res(ctx.status(404))
       }
@@ -414,7 +414,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
     test('returns thumbnail of geogebra applet', async () => {
       const response = await requestThumbnail(
-        `https://www.geogebra.org/material/iframe/id/${applet.id}`
+        `https://www.geogebra.org/material/iframe/id/${applet.id}`,
       )
 
       expectImageResponseWithError({
@@ -430,7 +430,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
       test('when geogebra id contains non digit characters', async () => {
         const response = await requestThumbnail(
-          `https://www.geogebra.org/material/iframe/id/abc%@`
+          `https://www.geogebra.org/material/iframe/id/abc%@`,
         )
 
         expectIsPlaceholderResponse(response)
@@ -439,7 +439,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
       test('when geogebra file does not exist', async () => {
         const response = await requestThumbnail(
-          `https://www.geogebra.org/material/iframe/id/001`
+          `https://www.geogebra.org/material/iframe/id/001`,
         )
 
         expectIsPlaceholderResponse(response)
@@ -451,7 +451,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           thumbnailUrl,
-          localTestEnvironment()
+          localTestEnvironment(),
         )
 
         expectIsPlaceholderResponse(response)
@@ -472,7 +472,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           `https://www.geogebra.org/material/iframe/id/${applet.id}`,
-          localTestEnvironment()
+          localTestEnvironment(),
         )
 
         expectIsPlaceholderResponse(response)
@@ -493,7 +493,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           thumbnailUrl,
-          localTestEnvironment()
+          localTestEnvironment(),
         )
 
         expectIsPlaceholderResponse(response)
@@ -514,7 +514,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           thumbnailUrl,
-          localTestEnvironment()
+          localTestEnvironment(),
         )
 
         expectIsPlaceholderResponse(response)
@@ -532,7 +532,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           `https://www.geogebra.org/material/iframe/id/${applet.id}`,
-          localTestEnvironment()
+          localTestEnvironment(),
         )
 
         expectIsPlaceholderResponse(response)
@@ -550,7 +550,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
         const response = await requestThumbnail(
           `https://www.geogebra.org/material/iframe/id/${applet.id}`,
-          localTestEnvironment()
+          localTestEnvironment(),
         )
 
         expectIsPlaceholderResponse(response)
@@ -566,7 +566,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
     function givenGeogebraApi(resolver: RestResolver) {
       globalThis.server.use(
-        rest.post('https://www.geogebra.org/api/json.php', resolver)
+        rest.post('https://www.geogebra.org/api/json.php', resolver),
       )
     }
 
@@ -580,9 +580,9 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         return res(
           ctx.json(
             createPreviewUrlJSON(
-              appletId === applet.id ? applet.thumbnailUrl : undefined
-            )
-          )
+              appletId === applet.id ? applet.thumbnailUrl : undefined,
+            ),
+          ),
         )
       }
     }
@@ -610,7 +610,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       return (_req, res, ctx) => {
         return res(
           ctx.set('content-type', 'image/png'),
-          ctx.set('content-length', applet.contentLength.toString())
+          ctx.set('content-length', applet.contentLength.toString()),
         )
       }
     }
@@ -635,7 +635,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
     test('when url is unsupported', async () => {
       const response = await requestThumbnail(
-        'https://www.twitch.tv/videos/824398155'
+        'https://www.twitch.tv/videos/824398155',
       )
 
       expectIsPlaceholderResponse(response)
@@ -669,7 +669,7 @@ function expectIsPlaceholderResponse(response: Response) {
 
 async function requestThumbnail(
   url: string,
-  env = currentTestEnvironment()
+  env = currentTestEnvironment(),
 ): Promise<Response> {
   return await env.fetch({
     subdomain: 'embed',
@@ -693,6 +693,6 @@ function expectImageResponseWithError({
   const contentLength = parseInt(response.headers.get('content-length') ?? '')
 
   expect(
-    Math.abs(contentLength - expectedContentLength) / expectedContentLength
+    Math.abs(contentLength - expectedContentLength) / expectedContentLength,
   ).toBeLessThanOrEqual(maxRelativeError)
 }

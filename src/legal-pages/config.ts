@@ -135,12 +135,12 @@ type BaseConfig = {
 
 function toUnrevisedConfig(config: BaseConfig): UnrevisedConfig {
   return Object.fromEntries(
-    Object.values(Instance).map((lang) => [lang, config[lang]?.unrevised])
+    Object.values(Instance).map((lang) => [lang, config[lang]?.unrevised]),
   )
 }
 
 function toRevisedConfig(config: BaseConfig): RevisedConfig {
   return Object.fromEntries(
-    Object.values(Instance).map((lang) => [lang, config[lang]?.revised])
+    Object.values(Instance).map((lang) => [lang, config[lang]?.revised]),
   )
 }

@@ -19,7 +19,7 @@ export function currentTestEnvironment(): TestEnvironment {
 }
 
 export function currentTestEnvironmentWhen(
-  requirement: (config: Variables) => boolean
+  requirement: (config: Variables) => boolean,
 ): TestEnvironment {
   const current = currentTestEnvironment()
 

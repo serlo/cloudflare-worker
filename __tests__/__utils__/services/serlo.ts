@@ -7,7 +7,10 @@ import { Url, Instance } from '../../../src/utils'
 export function givenSerlo(resolver: RestResolver) {
   globalThis.server.use(
     rest.get(createUrlRegex({ subdomains: Object.values(Instance) }), resolver),
-    rest.post(createUrlRegex({ subdomains: Object.values(Instance) }), resolver)
+    rest.post(
+      createUrlRegex({ subdomains: Object.values(Instance) }),
+      resolver,
+    ),
   )
 }
 
@@ -45,7 +48,7 @@ export function defaultSerloServer(): RestResolver {
 
     return res(
       ctx.set('x-powered-by', 'PHP'),
-      ctx.body('<html class="fuelux"\n' + content)
+      ctx.body('<html class="fuelux"\n' + content),
     )
   }
 }

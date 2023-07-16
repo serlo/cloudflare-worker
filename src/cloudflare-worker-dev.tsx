@@ -140,7 +140,7 @@ export function cloudflareWorkerDev(request: Request) {
   }
 
   const componentSpec = components.find(
-    ({ subpath: componentSubpath }) => subpath === '/' + componentSubpath
+    ({ subpath: componentSubpath }) => subpath === '/' + componentSubpath,
   )
 
   return componentSpec != null
@@ -160,7 +160,7 @@ function createIndexHtml() {
   return createPreactResponse(
     <Template lang="en" title="Serlo Cloudflare Worker: Preview of components">
       <ul>{listHtml}</ul>
-    </Template>
+    </Template>,
   )
 }
 

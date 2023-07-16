@@ -4,7 +4,7 @@ import { SentryFactory, SentryReporter, responseToContext, Url } from './utils'
 
 export async function embed(
   request: Request,
-  sentryFactory: SentryFactory
+  sentryFactory: SentryFactory,
 ): Promise<Response | null> {
   // example url: embed.serlo.org/thumbnail?url=...
   const url = Url.fromRequest(request)
@@ -72,7 +72,7 @@ async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
 
   const apiResponse = await fetch(
     'https://vimeo.com/api/oembed.json?url=' +
-      encodeURIComponent(`https://vimeo.com/${videoId}`)
+      encodeURIComponent(`https://vimeo.com/${videoId}`),
   )
   const apiResponseText = await apiResponse.text()
 
@@ -80,11 +80,11 @@ async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
     if (apiResponse.status !== 404) {
       sentry.setContext(
         'apiResponse',
-        responseToContext({ response: apiResponse, text: apiResponseText })
+        responseToContext({ response: apiResponse, text: apiResponseText }),
       )
       sentry.captureMessage(
         'Request to Vimeo API was not successful',
-        'warning'
+        'warning',
       )
     }
     return getPlaceholder()
@@ -97,7 +97,7 @@ async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
   } catch (e) {
     sentry.setContext(
       'apiResponse',
-      responseToContext({ response: apiResponse, text: apiResponseText })
+      responseToContext({ response: apiResponse, text: apiResponseText }),
     )
     sentry.captureMessage('Vimeo API returns malformed JSON', 'warning')
     return getPlaceholder()
@@ -106,7 +106,7 @@ async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
   if (!VimeoApiResponse.is(apiResponseJson)) {
     sentry.setContext(
       'apiResponse',
-      responseToContext({ response: apiResponse, json: apiResponseJson })
+      responseToContext({ response: apiResponse, json: apiResponseJson }),
     )
     sentry.captureMessage('Vimeo API returns unsupported JSON', 'warning')
     return getPlaceholder()
@@ -115,7 +115,7 @@ async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
   let imgUrl: Url
   const vimeoThumbnailUrl = apiResponseJson.thumbnail_url.replace(
     /_[0-9|x]+/,
-    ''
+    '',
   )
   sentry.setContext('vimeoThumbnailUrl', vimeoThumbnailUrl)
 
@@ -124,11 +124,11 @@ async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
   } catch (e) {
     sentry.setContext(
       'apiResponse',
-      responseToContext({ response: apiResponse, json: apiResponseJson })
+      responseToContext({ response: apiResponse, json: apiResponseJson }),
     )
     sentry.captureMessage(
       'Returned thumbnail url of Vimeo API is malformed',
-      'warning'
+      'warning',
     )
     return getPlaceholder()
   }
@@ -138,7 +138,7 @@ async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
   if (!isImageResponse(imageResponse)) {
     sentry.setContext(
       'vimdeoCdnResponse',
-      responseToContext({ response: imageResponse })
+      responseToContext({ response: imageResponse }),
     )
     sentry.captureMessage('Vimeo CDN did not return an image', 'warning')
     return getPlaceholder()
@@ -185,11 +185,11 @@ async function getGeogebraThumbnail(url: URL, sentry: SentryReporter) {
   if (apiResponse.status !== 200) {
     sentry.setContext(
       'apiResponse',
-      responseToContext({ response: apiResponse, text: apiResponseText })
+      responseToContext({ response: apiResponse, text: apiResponseText }),
     )
     sentry.captureMessage(
       'Request to Geogebra API was not successful',
-      'warning'
+      'warning',
     )
     return getPlaceholder()
   }
@@ -201,7 +201,7 @@ async function getGeogebraThumbnail(url: URL, sentry: SentryReporter) {
   } catch (e) {
     sentry.setContext(
       'apiResponse',
-      responseToContext({ response: apiResponse, text: apiResponseText })
+      responseToContext({ response: apiResponse, text: apiResponseText }),
     )
     sentry.captureMessage('Geogebra API returned malformed JSON', 'warning')
     return getPlaceholder()
@@ -210,7 +210,7 @@ async function getGeogebraThumbnail(url: URL, sentry: SentryReporter) {
   if (!GeogebraApiResponse.is(apiResponseJson)) {
     sentry.setContext(
       'apiResponse',
-      responseToContext({ response: apiResponse, json: apiResponseJson })
+      responseToContext({ response: apiResponse, json: apiResponseJson }),
     )
     sentry.captureMessage('Geogebra API returned unsupported JSON', 'warning')
     return getPlaceholder()
@@ -230,11 +230,11 @@ async function getGeogebraThumbnail(url: URL, sentry: SentryReporter) {
   } catch (e) {
     sentry.setContext(
       'apiResponse',
-      responseToContext({ response: apiResponse, json: apiResponseJson })
+      responseToContext({ response: apiResponse, json: apiResponseJson }),
     )
     sentry.captureMessage(
       'Geogebra API returned malformed preview url',
-      'warning'
+      'warning',
     )
     return getPlaceholder()
   }
@@ -243,11 +243,11 @@ async function getGeogebraThumbnail(url: URL, sentry: SentryReporter) {
   if (!isImageResponse(imageResponse)) {
     sentry.setContext(
       'geogebraImageResponse',
-      responseToContext({ response: imageResponse })
+      responseToContext({ response: imageResponse }),
     )
     sentry.captureMessage(
       'Geogebra CDN does not respond with an image',
-      'warning'
+      'warning',
     )
     return getPlaceholder()
   }
@@ -258,7 +258,7 @@ async function getGeogebraThumbnail(url: URL, sentry: SentryReporter) {
 async function getWikimediaThumbnail(url: URL) {
   const filenameWithPath = url.pathname.replace('/wikipedia/commons/', '') // e.g. '1/15/filename.webm'
   const filename = filenameWithPath.substring(
-    filenameWithPath.lastIndexOf('/') + 1
+    filenameWithPath.lastIndexOf('/') + 1,
   )
   const previewImageUrl = `https://upload.wikimedia.org/wikipedia/commons/thumb/${filenameWithPath}/800px--${filename}.jpg`
 
@@ -276,7 +276,7 @@ function getPlaceholder() {
   const placeholderBase64 =
     'iVBORw0KGgoAAAANSUhEUgAAAwAAAAGwAQMAAAAkGpCRAAAAA1BMVEXv9/t0VvapAAAAP0lEQVR42u3BMQEAAADCIPuntsUuYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQOqOwAAHrgHqAAAAAAElFTkSuQmCC'
   const placeholder = Uint8Array.from(atob(placeholderBase64), (c) =>
-    c.charCodeAt(0)
+    c.charCodeAt(0),
   )
   return new Response(placeholder, {
     status: 200,

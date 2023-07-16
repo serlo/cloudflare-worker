@@ -7,7 +7,7 @@ beforeEach(async () => {
 
   await globalThis.PACKAGES_KV.put(
     'serlo-org-client@10',
-    'serlo-org-client@10.0.0'
+    'serlo-org-client@10.0.0',
   )
 })
 
@@ -40,6 +40,6 @@ function givenCssOnPackagesServer(pathname: string) {
       return req.url.pathname === pathname
         ? res(ctx.set('content-type', 'text/css'))
         : res(ctx.status(404))
-    })
+    }),
   )
 }

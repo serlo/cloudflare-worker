@@ -13,7 +13,10 @@ export class SentryReporter {
   private tags: Array<[string, string | number | boolean]>
   private toucan?: Toucan
 
-  constructor(private event: FetchEvent, private service: string) {
+  constructor(
+    private event: FetchEvent,
+    private service: string,
+  ) {
     this.context = {}
     this.tags = []
   }

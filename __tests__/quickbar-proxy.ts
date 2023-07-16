@@ -17,7 +17,7 @@ describe('de.serlo.org/api/stats/quickbar.json', () => {
     expect(response.headers.get('content-type')).toBe('application/json')
 
     expect(await response.text()).toEqual(
-      expect.stringContaining('"title":"Mathematik Startseite"')
+      expect.stringContaining('"title":"Mathematik Startseite"'),
     )
   })
 
@@ -29,11 +29,11 @@ describe('de.serlo.org/api/stats/quickbar.json', () => {
           return res(
             ctx.set('content-type', 'application/json'),
             ctx.body(
-              '[{"id":"100","title":"Mathematik Startseite","path":[],"isTax":false,"count":10000}]'
-            )
+              '[{"id":"100","title":"Mathematik Startseite","path":[],"isTax":false,"count":10000}]',
+            ),
           )
-        }
-      )
+        },
+      ),
     )
   }
 })

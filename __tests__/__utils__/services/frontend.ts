@@ -5,7 +5,7 @@ import { createUrlRegex, RestResolver } from './utils'
 
 export function givenFrontend(resolver: RestResolver) {
   globalThis.server.use(
-    rest.get(createUrlRegex({ subdomains: ['frontend'] }), resolver)
+    rest.get(createUrlRegex({ subdomains: ['frontend'] }), resolver),
   )
 }
 
@@ -14,7 +14,7 @@ export function defaultFrontendServer(): RestResolver {
     if (req.url.pathname.endsWith('/'))
       return res(
         ctx.status(302),
-        ctx.set('location', req.url.href.slice(0, -1))
+        ctx.set('location', req.url.href.slice(0, -1)),
       )
 
     if (req.url.pathname === '/_assets/favicon.ico')
@@ -33,8 +33,10 @@ export function defaultFrontendServer(): RestResolver {
         ctx.status(302),
         ctx.set(
           'location',
-          `https://hydra.serlo.localhost/?referer=${encodeURIComponent(origin)}`
-        )
+          `https://hydra.serlo.localhost/?referer=${encodeURIComponent(
+            origin,
+          )}`,
+        ),
       )
     }
 
@@ -70,7 +72,7 @@ export function defaultFrontendServer(): RestResolver {
       content = 'Article (no header)'
     } else if (
       ['/search', '/license/detail/1', '/taxonomy/term/create/10/10'].includes(
-        pathname
+        pathname,
       )
     ) {
       content = ''
@@ -87,8 +89,8 @@ export function defaultFrontendServer(): RestResolver {
       ctx.body(
         '<script id="__NEXT_DATA__"\n' +
           '<script src="/_next/static/chunks/main-717520089966e528.js"\n' +
-          content
-      )
+          content,
+      ),
     )
   }
 }
