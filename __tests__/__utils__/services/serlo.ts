@@ -2,7 +2,7 @@ import { rest } from 'msw'
 
 import { getUuid } from './database'
 import { RestResolver, createUrlRegex } from './utils'
-import { Url, Instance } from '../../../src/utils'
+import { Url, Instance, isInstance } from '../../../src/utils'
 
 export function givenSerlo(resolver: RestResolver) {
   globalThis.server.use(
@@ -21,7 +21,7 @@ export function defaultSerloServer(): RestResolver {
     if (url.pathname.startsWith('/auth/') || url.pathname === '/user/register')
       return res(ctx.body(''))
 
-    let content
+    let content: string
 
     if (url.pathname === '/spenden' && url.subdomain === 'de') {
       content = 'Spenden'
@@ -38,12 +38,14 @@ export function defaultSerloServer(): RestResolver {
     } else if (url.pathname.startsWith('/entity/repository/add-revision')) {
       // add-revision-old/… and add-revision/…
       content = ''
-    } else {
+    } else if (isInstance(url.subdomain)) {
       const uuid = getUuid(url.subdomain, url.pathname)
 
       if (uuid == null) return res(ctx.status(404))
 
       content = uuid.content ?? ''
+    } else {
+      return res(ctx.status(404))
     }
 
     return res(

@@ -6,9 +6,10 @@ import {
   RestRequest,
 } from 'msw'
 
-export type RestResolver<
-  RequestBodyType extends DefaultBodyType = DefaultBodyType,
-> = ResponseResolver<RestRequest<RequestBodyType>, typeof restContext>
+export type RestResolver = ResponseResolver<
+  RestRequest<DefaultBodyType>,
+  typeof restContext
+>
 
 export function mockHttpGet(url: string, resolver: RestResolver) {
   globalThis.server.use(
@@ -30,7 +31,7 @@ export function returnsMalformedJson(): RestResolver {
 }
 
 export function returnsJson(data: unknown): RestResolver {
-  return (_req, res, ctx) => res(ctx.json(data as any))
+  return (_req, res, ctx) => res(ctx.json(data))
 }
 
 export function hasInternalServerError(): RestResolver {

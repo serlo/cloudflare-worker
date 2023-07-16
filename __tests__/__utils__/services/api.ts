@@ -2,6 +2,7 @@ import { rest } from 'msw'
 
 import { getUuid } from './database'
 import { RestResolver, createUrlRegex } from './utils'
+import { Instance } from '../../../src/utils'
 
 export function givenApi(resolver: RestResolver) {
   globalThis.server.use(
@@ -12,24 +13,16 @@ export function givenApi(resolver: RestResolver) {
   )
 }
 
-export function defaultApiServer(): RestResolver<any> {
-  return (req, res, ctx) => {
+export function defaultApiServer(): RestResolver {
+  return async (req, res, ctx) => {
     if (!req.headers.get('Authorization')?.match(/^Serlo Service=ey/))
       return res(ctx.status(401, 'No authorization header given'))
 
-    if (req.body === undefined)
-      return res(ctx.status(400, 'request body is missing'))
-    if (
-      req.headers.get('Content-Type') !== 'application/json' ||
-      typeof req.body === 'string'
-    )
+    if (req.headers.get('Content-Type') !== 'application/json')
       return res(ctx.status(400, 'Content-Type is not application/json'))
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const { instance, path } = (req.body?.variables?.alias ?? {}) as {
-      instance: string
-      path: string
-    }
+    const body = await req.json<ApiRequestBody>()
+    const { instance, path } = body.variables.alias
 
     if (path == null || instance == null)
       return res(ctx.status(400, 'variable "alias" wrongly defined'))
@@ -50,4 +43,8 @@ export function defaultApiServer(): RestResolver<any> {
 
     return res(ctx.json({ data: { uuid: result } }))
   }
+}
+
+interface ApiRequestBody {
+  variables: { alias: { instance: Instance; path: string } }
 }
