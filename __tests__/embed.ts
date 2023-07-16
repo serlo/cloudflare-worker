@@ -289,7 +289,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
 
     function givenVimeoCdn(resolver: RestResolver) {
       globalThis.server.use(
-        rest.get<never, any, { thumbnailFilename: string }>(
+        rest.get<never, never, { thumbnailFilename: string }>(
           'https://i.vimeocdn.com/video/:thumbnailFilename',
           resolver,
         ),
@@ -564,18 +564,15 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       })
     })
 
-    function givenGeogebraApi(resolver: RestResolver) {
+    function givenGeogebraApi(resolver: RestResolver<GeogebraApiBody>) {
       globalThis.server.use(
         rest.post('https://www.geogebra.org/api/json.php', resolver),
       )
     }
 
-    function defaultGeogebraApi(): RestResolver<any> {
+    function defaultGeogebraApi(): RestResolver<GeogebraApiBody> {
       return (req, res, ctx) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const appletId = req.body?.request?.task?.filters?.field?.[0]?.[
-          '#text'
-        ] as string
+        const appletId = req.body.request.task.filters.field[0]['#text']
 
         return res(
           ctx.json(
@@ -585,6 +582,10 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           ),
         )
       }
+    }
+
+    interface GeogebraApiBody {
+      request: { task: { filters: { field: Array<{ '#text': string }> } } }
     }
 
     function returnsPreviewUrl(previewUrl?: string) {

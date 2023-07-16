@@ -9,7 +9,7 @@ export function givenUuid(uuid: Uuid) {
   globalThis.uuids.push(uuid)
 }
 
-export function getUuid(instance: string, path: string) {
+export function getUuid(instance: Instance, path: string) {
   const regexes = [
     new RegExp('^/(?<id>\\d+)$'),
     new RegExp('(?<subject>[^/]+/)?(?<id>\\d+)/(?<title>[^/]*)$'),

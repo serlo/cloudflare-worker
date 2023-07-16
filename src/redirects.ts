@@ -40,7 +40,7 @@ export async function redirects(request: Request) {
     )
   }
 
-  if (url.subdomain === Instance.De) {
+  if (isInstance(url.subdomain) && url.subdomain === Instance.De) {
     switch (url.pathname) {
       case '/datenschutz':
         return Response.redirect('https://de.serlo.org/privacy', 301)
@@ -56,7 +56,7 @@ export async function redirects(request: Request) {
   }
 
   if (
-    url.subdomain !== Instance.En &&
+    (!isInstance(url.subdomain) || url.subdomain !== Instance.En) &&
     url.pathnameWithoutTrailingSlash === '/editor'
   ) {
     return Response.redirect('https://en.serlo.org/editor', 301)
@@ -121,6 +121,7 @@ export async function redirects(request: Request) {
   }
 
   if (
+    isInstance(url.subdomain) &&
     url.subdomain === Instance.De &&
     url.pathnameWithoutTrailingSlash === '/labschool'
   ) {
@@ -130,6 +131,7 @@ export async function redirects(request: Request) {
   }
 
   if (
+    isInstance(url.subdomain) &&
     url.subdomain === Instance.De &&
     url.pathnameWithoutTrailingSlash === '/hochschule'
   ) {
@@ -138,6 +140,7 @@ export async function redirects(request: Request) {
   }
 
   if (
+    isInstance(url.subdomain) &&
     url.subdomain === Instance.De &&
     url.pathnameWithoutTrailingSlash === '/neuerechtsform'
   ) {
@@ -148,6 +151,7 @@ export async function redirects(request: Request) {
   }
 
   if (
+    isInstance(url.subdomain) &&
     url.subdomain === Instance.De &&
     url.pathnameWithoutTrailingSlash === '/beitreten'
   ) {
@@ -214,7 +218,8 @@ export async function redirects(request: Request) {
       const newUrl = new Url(url.href)
       const { currentPath, instance, hash } = pathInfo
 
-      if (instance && url.subdomain !== instance) newUrl.subdomain = instance
+      if (instance && isInstance(instance) && url.subdomain !== instance)
+        newUrl.subdomain = instance
       if (url.pathname !== currentPath) newUrl.pathname = currentPath
       if (hash !== undefined) newUrl.hash = hash
 

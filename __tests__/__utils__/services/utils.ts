@@ -30,7 +30,7 @@ export function returnsMalformedJson(): RestResolver {
 }
 
 export function returnsJson(data: unknown): RestResolver {
-  return (_req, res, ctx) => res(ctx.json(data as any))
+  return (_req, res, ctx) => res(ctx.json(data))
 }
 
 export function hasInternalServerError(): RestResolver {
