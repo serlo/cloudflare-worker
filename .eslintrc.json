@@ -15,7 +15,7 @@
   "parserOptions": {
     "project": ["tsconfig.json", "tsconfig.eslint.json"]
   },
-  "plugins": ["@typescript-eslint", "import", "react"],
+  "plugins": ["@typescript-eslint", "import", "react", "deprecation"],
   "rules": {
     "no-duplicate-imports": "error",
     "no-unused-vars": "off",
@@ -43,6 +43,7 @@
     ],
     "@typescript-eslint/no-useless-constructor": "error",
     "@typescript-eslint/prefer-ts-expect-error": "error",
+    "deprecation/deprecation": "warn",
     "import/export": "error",
     "import/extensions": [
       "error",
