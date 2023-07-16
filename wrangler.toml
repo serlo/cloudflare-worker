@@ -2,7 +2,7 @@ account_id = "3bfabc4463c2c3c340f7301d22ed18c0"
 main = "src/index.ts"
 name = "serlo-cloudflare-worker"
 send_metrics = false
-compatibility_date = "2022-11-30"
+compatibility_date = "2023-07-14"
 
 [env.staging]
 kv_namespaces = [
