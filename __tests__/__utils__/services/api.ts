@@ -7,8 +7,8 @@ export function givenApi(resolver: RestResolver) {
   globalThis.server.use(
     rest.post(
       createUrlRegex({ subdomains: ['api'], pathname: '/graphql' }),
-      resolver
-    )
+      resolver,
+    ),
   )
 }
 

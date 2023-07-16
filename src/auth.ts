@@ -9,7 +9,7 @@ export function auth(request: Request): Response | null {
 }
 
 function authFrontendSectorIdentifierUriValidation(
-  request: Request
+  request: Request,
 ): Response | null {
   const url = Url.fromRequest(request)
   if (

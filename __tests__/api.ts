@@ -38,7 +38,7 @@ describe('setting of response header `Access-Control-Allow-Origin`', () => {
     const response = await fetchApi()
 
     expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
-      currentDomain
+      currentDomain,
     )
   })
 
@@ -56,7 +56,7 @@ describe('setting of response header `Access-Control-Allow-Origin`', () => {
       })
 
       expect(response.headers.get('Access-Control-Allow-Origin')).toBe(origin)
-    }
+    },
   )
 
   describe('when `Origin` is from within the current serlo domain, the same value is returned as `Access-Control-Allow-Origin`', () => {
@@ -86,7 +86,7 @@ describe('setting of response header `Access-Control-Allow-Origin`', () => {
 
         const response = await fetchApi(
           { headers: { Origin: origin } },
-          currentTestEnvironmentWhen((conf) => conf.ENVIRONMENT === 'staging')
+          currentTestEnvironmentWhen((conf) => conf.ENVIRONMENT === 'staging'),
         )
 
         expect(response.headers.get('Access-Control-Allow-Origin')).toBe(origin)
@@ -97,13 +97,13 @@ describe('setting of response header `Access-Control-Allow-Origin`', () => {
       test.each(domains)('when `Origin` is `%s`', async (origin) => {
         globalThis.ENVIRONMENT = 'production'
         const env = currentTestEnvironmentWhen(
-          (conf) => conf.ENVIRONMENT === 'production'
+          (conf) => conf.ENVIRONMENT === 'production',
         )
 
         const response = await fetchApi({ headers: { Origin: origin } }, env)
 
         expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
-          `https://${env.getDomain()}`
+          `https://${env.getDomain()}`,
         )
       })
     })
@@ -121,7 +121,7 @@ describe('setting of response header `Access-Control-Allow-Origin`', () => {
       })
 
       expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
-        currentDomain
+        currentDomain,
       )
     })
   })
@@ -135,7 +135,7 @@ test('header `Vary` is set to `Origin` to avoid caching of requests', async () =
 
 function fetchApi(
   args?: { headers?: RequestInit['headers'] },
-  env = currentEnv
+  env = currentEnv,
 ) {
   const { headers = {} } = args ?? {}
   const query = `
@@ -159,6 +159,6 @@ function fetchApi(
         query,
         variables: { alias: { instance: 'de', path: '/23591' } },
       }),
-    }
+    },
   )
 }

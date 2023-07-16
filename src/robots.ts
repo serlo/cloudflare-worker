@@ -27,6 +27,6 @@ export function robotsTxt(request: Request) {
   return new Response(
     globalThis.ENVIRONMENT === 'production'
       ? robotsProduction
-      : 'User-agent: *\nDisallow: /\n'
+      : 'User-agent: *\nDisallow: /\n',
   )
 }

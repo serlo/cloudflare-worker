@@ -5,7 +5,7 @@ export async function expectContainsText(response: Response, texts: string[]) {
 
   const responseText = await response.text()
   texts.forEach((text) =>
-    expect(responseText).toEqual(expect.stringContaining(text))
+    expect(responseText).toEqual(expect.stringContaining(text)),
   )
 }
 
@@ -14,17 +14,17 @@ export function expectContentTypeIsHtml(response: Response): void {
 }
 
 export async function expectIsNotFoundResponse(
-  response: Response
+  response: Response,
 ): Promise<void> {
   expect(response.status).toBe(404)
   expect(await response.text()).toEqual(
-    expect.stringContaining('Page not found')
+    expect.stringContaining('Page not found'),
   )
 }
 
 export async function expectIsJsonResponse(
   response: Response,
-  targetJson: unknown
+  targetJson: unknown,
 ) {
   expect(response.status).toBe(200)
   expect(response.headers.get('Content-Type')).toBe('application/json')
@@ -34,7 +34,7 @@ export async function expectIsJsonResponse(
 export function expectToBeRedirectTo(
   response: Response,
   url: string,
-  status: number
+  status: number,
 ) {
   expect(response.status).toBe(status)
   expect(response.headers.get('Location')).toBe(url)
@@ -82,7 +82,7 @@ export function expectSentryEvent({
             }
           : {}),
       }),
-    ])
+    ]),
   )
 }
 

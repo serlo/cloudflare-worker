@@ -99,7 +99,7 @@ test.each(['/neuerechtsform', '/neuerechtsform/'])(
     const target =
       'https://drive.google.com/file/d/1G3w2EIXlqvwuZ8LMzsYUjoMf9NbXoDIX/view'
     expectToBeRedirectTo(response, target, 302)
-  }
+  },
 )
 
 test('start.serlo.org', async () => {
@@ -119,7 +119,7 @@ test('/entity/view/<id>/toc gets redirected to /<id>', async () => {
   expectToBeRedirectTo(
     response,
     env.createUrl({ subdomain: 'de', pathname: '/58362' }),
-    301
+    301,
   )
 })
 
@@ -131,9 +131,9 @@ test.each(['/labschool', '/labschool/'])(
     expectToBeRedirectTo(
       response,
       env.createUrl({ subdomain: 'labschool' }),
-      301
+      301,
     )
-  }
+  },
 )
 
 test.each(['/hochschule', '/hochschule/'])(
@@ -146,7 +146,7 @@ test.each(['/hochschule', '/hochschule/'])(
       pathname: '/mathe/universitaet/44323',
     })
     expectToBeRedirectTo(response, target, 301)
-  }
+  },
 )
 
 test.each(['/beitreten', '/beitreten/'])(
@@ -157,7 +157,7 @@ test.each(['/beitreten', '/beitreten/'])(
     const target =
       'https://docs.google.com/forms/d/e/1FAIpQLSdEoyCcDVP_G_-G_u642S768e_sxz6wO6rJ3tad4Hb9z7Slwg/viewform'
     expectToBeRedirectTo(response, target, 301)
-  }
+  },
 )
 
 test('serlo.org/* redirects to de.serlo.org/*', async () => {
@@ -200,7 +200,7 @@ test('/ref/:id redirects to /:id', async () => {
 describe('LENABI redirect links', () => {
   test('serlo.org/ecec', async () => {
     const response = await currentTestEnvironmentWhen((config) =>
-      ['production', 'local'].includes(config.ENVIRONMENT)
+      ['production', 'local'].includes(config.ENVIRONMENT),
     ).fetch({ subdomain: 'de', pathname: '/ecec' })
 
     expect(response.status).toBe(302)
@@ -216,7 +216,7 @@ describe('LENABI redirect links', () => {
     '/docs/sso',
   ])('%s', async (pathname) => {
     const response = await currentTestEnvironmentWhen((config) =>
-      ['production', 'local'].includes(config.ENVIRONMENT)
+      ['production', 'local'].includes(config.ENVIRONMENT),
     ).fetch({
       subdomain: 'lenabi',
       pathname,
@@ -267,7 +267,7 @@ describe('redirects to current path of an resource', () => {
   test('no redirect when current path is different than given path and XMLHttpRequest', async () => {
     const response = await env.fetch(
       { subdomain: 'en', pathname: '/sexed' },
-      { headers: { 'X-Requested-With': 'XMLHttpRequest' } }
+      { headers: { 'X-Requested-With': 'XMLHttpRequest' } },
     )
 
     await expectContainsText(response, ['Sex Education'])

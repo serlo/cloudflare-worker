@@ -22,7 +22,7 @@ describe('serlo.org/terms', () => {
     const response = await env.fetch({ subdomain: 'de', pathname: '/terms' })
 
     expect(await response.text()).toEqual(
-      expect.stringContaining('Informationen für Weiternutzer')
+      expect.stringContaining('Informationen für Weiternutzer'),
     )
   })
   test('is in English at en.serlo.org/terms', async () => {
@@ -31,7 +31,7 @@ describe('serlo.org/terms', () => {
     const response = await env.fetch({ subdomain: 'en', pathname: '/terms' })
 
     expect(await response.text()).toEqual(
-      expect.stringContaining('Terms of Use')
+      expect.stringContaining('Terms of Use'),
     )
   })
 })
@@ -65,7 +65,7 @@ describe('privacy policies', () => {
       })
 
       expect(await response.text()).toEqual(
-        expect.stringContaining('Datenschutzerklärung')
+        expect.stringContaining('Datenschutzerklärung'),
       )
     })
 
@@ -78,7 +78,7 @@ describe('privacy policies', () => {
       })
 
       expect(await response.text()).toEqual(
-        expect.stringContaining('Privacy Policy')
+        expect.stringContaining('Privacy Policy'),
       )
     })
 
@@ -91,7 +91,7 @@ describe('privacy policies', () => {
       })
 
       expect(await response.text()).toEqual(
-        expect.stringContaining('You can check and revoke your given consent')
+        expect.stringContaining('You can check and revoke your given consent'),
       )
     })
 
@@ -104,7 +104,7 @@ describe('privacy policies', () => {
       })
 
       expect(await response.text()).toEqual(
-        expect.stringContaining('<a href="/privacy/archive">Archiv</a>')
+        expect.stringContaining('<a href="/privacy/archive">Archiv</a>'),
       )
     })
   })
@@ -119,7 +119,7 @@ describe('privacy policies', () => {
       })
 
       expect(await response.text()).toEqual(
-        expect.stringContaining('Datenschutzerklärung')
+        expect.stringContaining('Datenschutzerklärung'),
       )
     })
 
@@ -135,8 +135,8 @@ describe('privacy policies', () => {
         expect.stringContaining(
           'Dies ist eine archivierte Version. Schaue Dir die ' +
             '<a href="/privacy">aktuelle Version</a> oder ' +
-            '<a href="/privacy/archive">frühere Versionen</a> an.'
-        )
+            '<a href="/privacy/archive">frühere Versionen</a> an.',
+        ),
       )
     })
 
@@ -149,7 +149,7 @@ describe('privacy policies', () => {
       })
 
       expect(await response.text()).toEqual(
-        expect.stringContaining('wirksam ab dem 10.2.2020')
+        expect.stringContaining('wirksam ab dem 10.2.2020'),
       )
     })
   })
@@ -157,7 +157,7 @@ describe('privacy policies', () => {
   test('supports deactivating of google analytics via JS-GOOGLE-ANALYTICS-DEACTIVATE', async () => {
     givenLegalPageWith(
       'de/privacy/2020-02-10.md',
-      '[Google Analytics deaktivieren](JS-GOOGLE-ANALYTICS-DEACTIVATE)'
+      '[Google Analytics deaktivieren](JS-GOOGLE-ANALYTICS-DEACTIVATE)',
     )
 
     const response = await env.fetch({
@@ -167,8 +167,8 @@ describe('privacy policies', () => {
 
     expect(await response.text()).toEqual(
       expect.stringContaining(
-        '<a href="javascript:gaOptout();">Google Analytics deaktivieren</a>'
-      )
+        '<a href="javascript:gaOptout();">Google Analytics deaktivieren</a>',
+      ),
     )
   })
 
@@ -189,7 +189,7 @@ describe('English version is the default version', () => {
     const response = await env.fetch({ subdomain: 'fr', pathname: '/terms' })
 
     expect(await response.text()).toEqual(
-      expect.stringContaining('Terms of Use')
+      expect.stringContaining('Terms of Use'),
     )
   })
 
@@ -207,7 +207,7 @@ describe('English version is the default version', () => {
     const response = await env.fetch({ subdomain: 'fr', pathname: '/privacy' })
 
     expect(await response.text()).toEqual(
-      expect.stringContaining('Privacy Policy')
+      expect.stringContaining('Privacy Policy'),
     )
   })
 })
@@ -219,7 +219,7 @@ describe('trailing slashes are allowed in accessing the legal pages', () => {
     const response = await env.fetch({ subdomain: 'en', pathname: '/terms/' })
 
     expect(await response.text()).toEqual(
-      expect.stringContaining('Terms of Use')
+      expect.stringContaining('Terms of Use'),
     )
   })
 
@@ -240,7 +240,7 @@ describe('trailing slashes are allowed in accessing the legal pages', () => {
     })
 
     expect(await response.text()).toEqual(
-      expect.stringContaining('Privacy Policy')
+      expect.stringContaining('Privacy Policy'),
     )
   })
 })
@@ -251,7 +251,7 @@ test('legal pages have a link to revoke consent', async () => {
   const response = await env.fetch({ subdomain: 'en', pathname: '/imprint' })
 
   expect(await response.text()).toEqual(
-    expect.stringContaining('<a href="/consent">Revoke consent</a>')
+    expect.stringContaining('<a href="/consent">Revoke consent</a>'),
   )
 })
 
@@ -283,7 +283,7 @@ describe('html of legal pages is sanitized', () => {
     })
 
     expect(await response.text()).not.toEqual(
-      expect.stringContaining(exampleCode)
+      expect.stringContaining(exampleCode),
     )
   })
 })
@@ -295,6 +295,6 @@ function givenLegalPageWith(path: string, text: string) {
 function givenLegalPage(path: string, resolver: RestResolver) {
   mockHttpGet(
     `https://raw.githubusercontent.com/serlo/serlo.org-legal/main/${path}`,
-    resolver
+    resolver,
   )
 }

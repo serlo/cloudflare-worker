@@ -2,7 +2,7 @@ import { isInstance, Url, SentryFactory, responseToContext } from './utils'
 
 export async function pdfProxy(
   request: Request,
-  sentryFactory: SentryFactory
+  sentryFactory: SentryFactory,
 ): Promise<Response | null> {
   const url = Url.fromRequest(request)
 
@@ -21,7 +21,7 @@ export async function pdfProxy(
     const sentry = sentryFactory.createReporter('pdf-proxy')
     sentry.setContext(
       'response',
-      responseToContext({ response, text: await response.text() })
+      responseToContext({ response, text: await response.text() }),
     )
     sentry.captureMessage('Illegal response of pdf.serlo.org', 'warning')
   }

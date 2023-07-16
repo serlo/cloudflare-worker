@@ -9,7 +9,7 @@ describe('Sends a report to sentry when a legacy route of the Metadata API is us
     const env = localTestEnvironment()
     await env.fetch(
       { subdomain: 'en', pathname },
-      { headers: { 'User-Agent': 'MyCrawler' } }
+      { headers: { 'User-Agent': 'MyCrawler' } },
     )
 
     expectSentryEvent({

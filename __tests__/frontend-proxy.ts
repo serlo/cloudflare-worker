@@ -12,7 +12,7 @@ import { Instance } from '../src/utils'
 
 test('Always choose new frontend as default route', async () => {
   await expectFrontend(
-    await currentTestEnvironment().fetch({ subdomain: 'en' })
+    await currentTestEnvironment().fetch({ subdomain: 'en' }),
   )
 })
 
@@ -69,7 +69,7 @@ describe('when request contains header X-From: legacy-serlo.org', () => {
         subdomain: 'en',
         pathname: '/',
       },
-      { headers: { 'X-From': 'legacy-serlo.org' } }
+      { headers: { 'X-From': 'legacy-serlo.org' } },
     )
   })
 
@@ -79,7 +79,7 @@ describe('when request contains header X-From: legacy-serlo.org', () => {
 
   test('does not set cookie with random number', () => {
     expect(response.headers.get('Set-Cookie')).not.toEqual(
-      expect.stringContaining('useFrontend')
+      expect.stringContaining('useFrontend'),
     )
   })
 })
@@ -96,7 +96,7 @@ test('reports to sentry when frontend responded with redirect', async () => {
 
   expect(redirectResponse.status).toEqual(302)
   expect(redirectResponse.headers.get('Location')).toEqual(
-    'https://frontend.serlo.org/'
+    'https://frontend.serlo.org/',
   )
   expectSentryEvent({
     message: 'Frontend responded with a redirect',
@@ -143,7 +143,7 @@ describe('requests to /enable-frontend enable use of frontend', () => {
 
   test('sets cookie so that new frontend will be used', () => {
     expect(response.headers.get('Set-Cookie')).toEqual(
-      expect.stringContaining('useLegacyFrontend=false;')
+      expect.stringContaining('useLegacyFrontend=false;'),
     )
   })
 
@@ -169,7 +169,7 @@ describe('requests to /disable-frontend disable use of frontend', () => {
 
   test('sets cookie to that legacy backend will be used', () => {
     expect(response.headers.get('Set-Cookie')).toEqual(
-      expect.stringContaining('useLegacyFrontend=true;')
+      expect.stringContaining('useLegacyFrontend=true;'),
     )
   })
 
@@ -180,17 +180,17 @@ describe('requests to /disable-frontend disable use of frontend', () => {
 
 async function expectLegacy(response: Response) {
   expect(await response.text()).toEqual(
-    expect.stringContaining('<html class="fuelux"')
+    expect.stringContaining('<html class="fuelux"'),
   )
   // Tests that backend headers are transferred to client
   expect(response.headers.get('x-powered-by')).toEqual(
-    expect.stringContaining('PHP')
+    expect.stringContaining('PHP'),
   )
 }
 
 async function expectFrontend(response: Response) {
   expect(await response.text()).toEqual(
-    expect.stringContaining('<script id="__NEXT_DATA__"')
+    expect.stringContaining('<script id="__NEXT_DATA__"'),
   )
   // Tests that backend headers are transferred to client
   expect(response.headers.get('x-vercel-cache')).toBeDefined()

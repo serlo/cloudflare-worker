@@ -24,7 +24,7 @@ test('Response of https://stats.serlo.org/login is not changed by CF worker', as
   const response = await env.fetch({ subdomain: 'stats', pathname: '/login' })
 
   expect(await response.text()).toEqual(
-    expect.stringContaining('<title>Grafana</title>')
+    expect.stringContaining('<title>Grafana</title>'),
   )
 })
 
@@ -34,6 +34,6 @@ function mockStatsServer() {
       return req.url.pathname !== '/login'
         ? res(ctx.status(302), ctx.set('location', '/login'))
         : res(ctx.body('<title>Grafana</title>'))
-    })
+    }),
   )
 }
