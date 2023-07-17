@@ -11,17 +11,18 @@ import { redirects } from './redirects'
 import { robotsTxt } from './robots'
 import { SentryFactory, Url } from './utils'
 
-if (typeof addEventListener === 'function') {
-  addEventListener('fetch', (event: Event) => {
-    const e = event as FetchEvent
-
-    e.respondWith(handleFetchEvent(e))
-  })
+// eslint-disable-next-line import/no-default-export
+export default {
+  fetch(request: Request, env: unknown, context: ExecutionContext) {
+    return handleFetchEvent(request, context)
+  },
 }
 
-export async function handleFetchEvent(event: FetchEvent): Promise<Response> {
-  const { request } = event
-  const sentryFactory = new SentryFactory(event)
+export async function handleFetchEvent(
+  request: Request,
+  context: ExecutionContext,
+): Promise<Response> {
+  const sentryFactory = new SentryFactory(context)
 
   try {
     return (

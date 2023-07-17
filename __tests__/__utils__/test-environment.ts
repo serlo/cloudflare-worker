@@ -80,12 +80,13 @@ class LocalEnvironment extends TestEnvironment {
     const request = new Request(originalRequest, { redirect: 'manual' })
     const waitForPromises: Promise<unknown>[] = []
 
-    const response = await handleFetchEvent({
-      request,
+    const response = await handleFetchEvent(request, {
       waitUntil(promise: Promise<unknown>) {
         waitForPromises.push(promise)
       },
-    } as unknown as FetchEvent)
+      // This is needed to match the shape of the ExecutionContext type.
+      passThroughOnException() {},
+    })
 
     await Promise.all(waitForPromises)
 
