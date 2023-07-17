@@ -1,10 +1,10 @@
 import { Toucan } from 'toucan-js'
 
 export class SentryFactory {
-  constructor(private event: FetchEvent) {}
+  constructor(private executionContext: ExecutionContext) {}
 
   createReporter(service: string) {
-    return new SentryReporter(this.event, service)
+    return new SentryReporter(this.executionContext, service)
   }
 }
 
@@ -14,7 +14,7 @@ export class SentryReporter {
   private toucan?: Toucan
 
   constructor(
-    private event: FetchEvent,
+    private executionContext: ExecutionContext,
     private service: string,
   ) {
     this.context = {}
@@ -40,7 +40,7 @@ export class SentryReporter {
   private getToucan() {
     this.toucan ??= new Toucan({
       dsn: globalThis.SENTRY_DSN,
-      context: this.event,
+      context: this.executionContext,
       environment: globalThis.ENVIRONMENT,
       normalizeDepth: 5,
     })
