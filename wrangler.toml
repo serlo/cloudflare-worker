@@ -10,7 +10,7 @@ kv_namespaces = [
   { binding = "PATH_INFO_KV", id = "839198b2f0a242b491e5723a8c59b7e2", preview_id = "839198b2f0a242b491e5723a8c59b7e2" },
 ]
 name = "serlo-staging"
-route = "*serlo-staging.dev/*"
+route = { pattern = "*serlo-staging.dev/*", zone_id = "0067b08b108fbcf88ddaeaae4ac3d6ac" }
 
 [env.staging.vars]
 ALLOW_AUTH_FROM_LOCALHOST = "true"
@@ -26,7 +26,7 @@ kv_namespaces = [
   { binding = "PATH_INFO_KV", id = "c3412114bdb04cfd8a367ec5bad46173" },
 ]
 name = "serlo-production"
-route = "*serlo.org/*"
+route = { pattern = "*serlo.org/*", zone_id = "1a4afa776acb2e40c3c8a135248328ae" }
 
 [env.production.vars]
 ALLOW_AUTH_FROM_LOCALHOST = "false"
