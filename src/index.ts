@@ -13,41 +13,34 @@ import { SentryFactory, Url } from './utils'
 
 // eslint-disable-next-line import/no-default-export
 export default {
-  fetch(request: Request, env: unknown, context: ExecutionContext) {
-    return handleFetchEvent(request, context)
+  async fetch(request: Request, _env: unknown, context: ExecutionContext) {
+    const sentryFactory = new SentryFactory(context)
+
+    try {
+      return (
+        cloudflareWorkerDev(request) ||
+        auth(request) ||
+        (await enforceHttps(request)) ||
+        (await legalPages(request)) ||
+        (await quickbarProxy(request, sentryFactory)) ||
+        (await pdfProxy(request, sentryFactory)) ||
+        robotsTxt(request) ||
+        (await frontendSpecialPaths(request, sentryFactory)) ||
+        sentryHelloWorld(request, sentryFactory) ||
+        (await redirects(request)) ||
+        (await embed(request, sentryFactory)) ||
+        (await semanticFileNames(request)) ||
+        (await packages(request)) ||
+        (await api(request)) ||
+        (await frontendProxy(request, sentryFactory)) ||
+        (await metadataApi(request, sentryFactory)) ||
+        (await fetch(request))
+      )
+    } catch (e) {
+      sentryFactory.createReporter('handle-fetch-event').captureException(e)
+      throw e
+    }
   },
-}
-
-export async function handleFetchEvent(
-  request: Request,
-  context: ExecutionContext,
-): Promise<Response> {
-  const sentryFactory = new SentryFactory(context)
-
-  try {
-    return (
-      cloudflareWorkerDev(request) ||
-      auth(request) ||
-      (await enforceHttps(request)) ||
-      (await legalPages(request)) ||
-      (await quickbarProxy(request, sentryFactory)) ||
-      (await pdfProxy(request, sentryFactory)) ||
-      robotsTxt(request) ||
-      (await frontendSpecialPaths(request, sentryFactory)) ||
-      sentryHelloWorld(request, sentryFactory) ||
-      (await redirects(request)) ||
-      (await embed(request, sentryFactory)) ||
-      (await semanticFileNames(request)) ||
-      (await packages(request)) ||
-      (await api(request)) ||
-      (await frontendProxy(request, sentryFactory)) ||
-      (await metadataApi(request, sentryFactory)) ||
-      (await fetch(request))
-    )
-  } catch (e) {
-    sentryFactory.createReporter('handle-fetch-event').captureException(e)
-    throw e
-  }
 }
 
 function sentryHelloWorld(request: Request, sentryFactory: SentryFactory) {
