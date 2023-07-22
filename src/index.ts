@@ -13,12 +13,12 @@ import { SentryFactory, Url } from './utils'
 
 // eslint-disable-next-line import/no-default-export
 export default {
-  fetch(request: Request, env: unknown, context: ExecutionContext) {
+  fetch(request: Request, _env: unknown, context: ExecutionContext) {
     return handleFetchEvent(request, context)
   },
 }
 
-export async function handleFetchEvent(
+async function handleFetchEvent(
   request: Request,
   context: ExecutionContext,
 ): Promise<Response> {
