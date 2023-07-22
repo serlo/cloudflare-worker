@@ -2,7 +2,7 @@ import TOML from '@iarna/toml'
 import fs from 'fs'
 import path from 'path'
 
-import { handleFetchEvent } from '../../src'
+import cloudflareWorker from '../../src'
 import { isInstance } from '../../src/utils'
 
 declare global {
@@ -80,7 +80,7 @@ class LocalEnvironment extends TestEnvironment {
     const request = new Request(originalRequest, { redirect: 'manual' })
     const waitForPromises: Promise<unknown>[] = []
 
-    const response = await handleFetchEvent(request, {
+    const response = await cloudflareWorker.fetch(request, undefined, {
       waitUntil(promise: Promise<unknown>) {
         waitForPromises.push(promise)
       },
