@@ -159,7 +159,6 @@ function createIndexHtml() {
 
   return createPreactResponse(
     <Template lang="en" title="Serlo Cloudflare Worker: Preview of components">
-      <b>Hello World to test a new deployment</b>
       <ul>{listHtml}</ul>
     </Template>,
   )
