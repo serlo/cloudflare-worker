@@ -10,7 +10,9 @@ import {
   hasInternalServerError,
   returnsMalformedJson,
   returnsJson,
+  getDefaultCFEnvironment,
 } from './__utils__'
+import { CFEnvironment } from '../src/cf-environment'
 import {
   getCookieValue,
   sanitizeHtml,
@@ -63,17 +65,23 @@ describe('getCookieValue()', () => {
 })
 
 describe('getPathInfo()', () => {
+  let cfEnv: CFEnvironment
+
+  beforeEach(() => {
+    cfEnv = getDefaultCFEnvironment()
+  })
+
   describe('returns null', () => {
     test('when there was an error with the api call', async () => {
       givenApi(hasInternalServerError())
 
-      expect(await getPathInfo(Instance.En, '/path')).toBeNull()
+      expect(await getPathInfo(Instance.En, '/path', cfEnv)).toBeNull()
     })
 
     test('when api response is malformed JSON', async () => {
       givenApi(returnsMalformedJson())
 
-      expect(await getPathInfo(Instance.En, '/path')).toBeNull()
+      expect(await getPathInfo(Instance.En, '/path', cfEnv)).toBeNull()
     })
 
     describe('when the response is not valid', () => {
@@ -82,7 +90,7 @@ describe('getPathInfo()', () => {
         async (invalidResponse) => {
           givenApi(returnsJson(invalidResponse))
 
-          expect(await getPathInfo(Instance.En, '/path')).toBeNull()
+          expect(await getPathInfo(Instance.En, '/path', cfEnv)).toBeNull()
         },
       )
     })
@@ -91,12 +99,12 @@ describe('getPathInfo()', () => {
   describe('uses PATH_INFO_KV as a cache', () => {
     test('use value in cache', async () => {
       const cacheValue = { typename: 'Article', currentPath: '/current-path' }
-      await globalThis.PATH_INFO_KV.put(
+      await cfEnv.PATH_INFO_KV.put(
         await toCacheKey('/en/path'),
         JSON.stringify(cacheValue),
       )
 
-      const pathInfo = await getPathInfo(Instance.En, '/path')
+      const pathInfo = await getPathInfo(Instance.En, '/path', cfEnv)
 
       expect(pathInfo).toEqual({
         typename: 'Article',
@@ -111,11 +119,9 @@ describe('getPathInfo()', () => {
         id: 42,
       })
 
-      await getPathInfo(Instance.En, '/42')
+      await getPathInfo(Instance.En, '/42', cfEnv)
 
-      expect(
-        await globalThis.PATH_INFO_KV.get(await toCacheKey('/en/42')),
-      ).toEqual(
+      expect(await cfEnv.PATH_INFO_KV.get(await toCacheKey('/en/42'))).toEqual(
         JSON.stringify({ typename: 'Article', currentPath: '/current-path' }),
       )
     })
@@ -137,7 +143,7 @@ describe('getPathInfo()', () => {
         instance: Instance.Ta,
       })
 
-      const pathInfo = await getPathInfo(Instance.Ta, longTamilPath)
+      const pathInfo = await getPathInfo(Instance.Ta, longTamilPath, cfEnv)
 
       expect(pathInfo).toEqual({
         typename: 'Article',
@@ -158,31 +164,35 @@ describe('getPathInfo()', () => {
       })
 
       test('when cached value is malformed JSON', async () => {
-        await globalThis.PATH_INFO_KV.put(
+        await cfEnv.PATH_INFO_KV.put(
           await toCacheKey('/en/42'),
           'malformed json',
         )
 
-        const pathInfo = await getPathInfo(Instance.En, '/42')
+        const pathInfo = await getPathInfo(Instance.En, '/42', cfEnv)
 
         expect(pathInfo).toEqual(target)
         expect(
-          await globalThis.PATH_INFO_KV.get(await toCacheKey('/en/42')),
+          await cfEnv.PATH_INFO_KV.get(await toCacheKey('/en/42')),
         ).toEqual(JSON.stringify(target))
       })
 
       test('when cached value is no PathInfo', async () => {
         const malformedPathInfo = JSON.stringify({ typename: 'Course' })
-        await globalThis.PATH_INFO_KV.put(
+        await cfEnv.PATH_INFO_KV.put(
           await toCacheKey('/en/42'),
           malformedPathInfo,
         )
 
-        const pathInfo = await getPathInfo(Instance.En, await toCacheKey('/42'))
+        const pathInfo = await getPathInfo(
+          Instance.En,
+          await toCacheKey('/42'),
+          cfEnv,
+        )
 
         expect(pathInfo).toEqual(target)
         expect(
-          await globalThis.PATH_INFO_KV.get(await toCacheKey('/en/42')),
+          await cfEnv.PATH_INFO_KV.get(await toCacheKey('/en/42')),
         ).toEqual(JSON.stringify(target))
       })
     })

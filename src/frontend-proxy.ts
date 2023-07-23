@@ -1,3 +1,4 @@
+import { CFEnvironment } from './cf-environment'
 import {
   getCookieValue,
   isInstance,
@@ -10,6 +11,7 @@ import {
 export async function frontendSpecialPaths(
   request: Request,
   sentryFactory: SentryFactory,
+  env: CFEnvironment,
 ): Promise<Response | null> {
   const url = Url.fromRequest(request)
   const route = getRoute(request)
@@ -19,28 +21,31 @@ export async function frontendSpecialPaths(
     return createConfigurationResponse({
       message: 'Enabled: Use of new frontend',
       useLegacyFrontend: false,
+      env,
     })
 
   if (url.pathname === '/disable-frontend')
     return createConfigurationResponse({
       message: 'Disabled: Use of new frontend',
       useLegacyFrontend: true,
+      env,
     })
 
   return route !== null && route.__typename === 'BeforeRedirectsRoute'
-    ? fetchBackend({ request, sentry, route: route.route })
+    ? fetchBackend({ request, sentry, route: route.route, env })
     : null
 }
 
 export async function frontendProxy(
   request: Request,
   sentryFactory: SentryFactory,
+  env: CFEnvironment,
 ): Promise<Response | null> {
   const sentry = sentryFactory.createReporter('frontend')
   const route = getRoute(request)
 
   return route !== null && route.__typename !== 'BeforeRedirectsRoute'
-    ? fetchBackend({ request, sentry, route })
+    ? fetchBackend({ request, sentry, route, env })
     : null
 }
 
@@ -48,10 +53,12 @@ async function fetchBackend({
   request,
   sentry,
   route,
+  env,
 }: {
   request: Request
   sentry: SentryReporter
   route: LegacyRoute | FrontendRoute
+  env: CFEnvironment
 }) {
   const backendUrl = Url.fromRequest(request)
 
@@ -64,7 +71,7 @@ async function fetchBackend({
       backendUrl.pathname = `/${backendUrl.subdomain}${backendUrl.pathname}`
     }
 
-    backendUrl.hostname = globalThis.FRONTEND_DOMAIN
+    backendUrl.hostname = env.FRONTEND_DOMAIN
     backendUrl.pathname = backendUrl.pathnameWithoutTrailingSlash
   }
 
@@ -197,16 +204,18 @@ function getRoute(request: Request): RouteConfig | null {
 function createConfigurationResponse({
   message,
   useLegacyFrontend,
+  env,
 }: {
   message: string
   useLegacyFrontend: boolean
+  env: CFEnvironment
 }) {
   const response = new Response(message)
 
   response.headers.append(
     'Set-Cookie',
     `useLegacyFrontend=${useLegacyFrontend.toString()}; path=/; domain=.${
-      globalThis.DOMAIN
+      env.DOMAIN
     }`,
   )
   response.headers.set('Refresh', '1; url=/')

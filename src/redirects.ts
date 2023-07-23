@@ -1,3 +1,4 @@
+import { CFEnvironment } from './cf-environment'
 import {
   createNotFoundResponse,
   getPathInfo,
@@ -30,7 +31,7 @@ const meetRedirects: Record<string, string | undefined> = {
   '/6': 'sui-yuwv-suh',
 }
 
-export async function redirects(request: Request) {
+export async function redirects(request: Request, env: CFEnvironment) {
   const url = Url.fromRequest(request)
 
   if (url.subdomain === 'start') {
@@ -78,7 +79,7 @@ export async function redirects(request: Request) {
   // To avoid cycles, add redirects to lenabi.serlo.org only.
   if (
     url.subdomain === 'lenabi' &&
-    ['production', 'local'].includes(globalThis.ENVIRONMENT)
+    ['production', 'local'].includes(env.ENVIRONMENT)
   ) {
     switch (url.pathnameWithoutTrailingSlash) {
       case '/metadata-api':
@@ -212,7 +213,7 @@ export async function redirects(request: Request) {
     isInstance(url.subdomain) &&
     request.headers.get('X-Requested-With') !== 'XMLHttpRequest'
   ) {
-    const pathInfo = await getPathInfo(url.subdomain, url.pathname)
+    const pathInfo = await getPathInfo(url.subdomain, url.pathname, env)
 
     if (pathInfo !== null) {
       const newUrl = new Url(url.href)

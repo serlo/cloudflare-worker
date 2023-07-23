@@ -20,6 +20,7 @@
     "no-duplicate-imports": "error",
     "no-unused-vars": "off",
     "no-console": "error",
+    "@typescript-eslint/no-unsafe-argument": "error",
     "@typescript-eslint/ban-ts-comment": "warn",
     "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
     "@typescript-eslint/explicit-function-return-type": "off",

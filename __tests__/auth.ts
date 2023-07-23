@@ -5,10 +5,10 @@ import {
 } from './__utils__'
 
 test('Frontend Sector Identifier URI Validation (block localhost)', async () => {
-  globalThis.ALLOW_AUTH_FROM_LOCALHOST = 'false'
   const env = currentTestEnvironmentWhen(
     (config) => config.ALLOW_AUTH_FROM_LOCALHOST === 'false',
   )
+  env.cfEnv.ALLOW_AUTH_FROM_LOCALHOST = 'false'
 
   const response = await env.fetch({
     pathname: '/auth/frontend-redirect-uris.json',
@@ -31,10 +31,10 @@ test('Frontend Sector Identifier URI Validation (block localhost)', async () => 
 })
 
 test('Frontend Sector Identifier URI Validation (allow localhost)', async () => {
-  globalThis.ALLOW_AUTH_FROM_LOCALHOST = 'true'
   const env = currentTestEnvironmentWhen(
     (config) => config.ALLOW_AUTH_FROM_LOCALHOST === 'true',
   )
+  env.cfEnv.ALLOW_AUTH_FROM_LOCALHOST = 'true'
 
   const response = await env.fetch({
     pathname: '/auth/frontend-redirect-uris.json',
