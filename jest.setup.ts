@@ -1,5 +1,6 @@
 // eslint-disable-next-line import/no-unassigned-import
 import '@testing-library/jest-dom'
+import { jest } from '@jest/globals'
 import { type Event as SentryEvent } from '@sentry/types'
 import * as cryptoNode from 'crypto'
 import { rest } from 'msw'
