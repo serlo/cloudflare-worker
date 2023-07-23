@@ -1,10 +1,15 @@
 import { Toucan } from 'toucan-js'
 
+import { CFEnvironment } from '../cf-environment'
+
 export class SentryFactory {
-  constructor(private executionContext: ExecutionContext) {}
+  constructor(
+    private env: CFEnvironment,
+    private executionContext: ExecutionContext,
+  ) {}
 
   createReporter(service: string) {
-    return new SentryReporter(this.executionContext, service)
+    return new SentryReporter(this.env, this.executionContext, service)
   }
 }
 
@@ -14,6 +19,7 @@ export class SentryReporter {
   private toucan?: Toucan
 
   constructor(
+    private env: CFEnvironment,
     private executionContext: ExecutionContext,
     private service: string,
   ) {
@@ -39,9 +45,9 @@ export class SentryReporter {
 
   private getToucan() {
     this.toucan ??= new Toucan({
-      dsn: globalThis.SENTRY_DSN,
+      dsn: this.env.SENTRY_DSN,
       context: this.executionContext,
-      environment: globalThis.ENVIRONMENT,
+      environment: this.env.ENVIRONMENT,
       normalizeDepth: 5,
     })
 
