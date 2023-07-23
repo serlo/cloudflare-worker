@@ -82,12 +82,12 @@ describe('setting of response header `Access-Control-Allow-Origin`', () => {
 
     describe('when we are in the staging environment, the same value is sent back in `Access-Control-Allow-Origin`', () => {
       test.each(domains)('when `Origin` is `%s`', async (origin) => {
-        globalThis.ENVIRONMENT = 'staging'
-
-        const response = await fetchApi(
-          { headers: { Origin: origin } },
-          currentTestEnvironmentWhen((conf) => conf.ENVIRONMENT === 'staging'),
+        const env = currentTestEnvironmentWhen(
+          (conf) => conf.ENVIRONMENT === 'staging',
         )
+        env.cfEnv.ENVIRONMENT = 'staging'
+
+        const response = await fetchApi({ headers: { Origin: origin } }, env)
 
         expect(response.headers.get('Access-Control-Allow-Origin')).toBe(origin)
       })
@@ -95,10 +95,10 @@ describe('setting of response header `Access-Control-Allow-Origin`', () => {
 
     describe('when we are in the production environment, the current domain is sent back in `Access-Control-Allow-Origin`', () => {
       test.each(domains)('when `Origin` is `%s`', async (origin) => {
-        globalThis.ENVIRONMENT = 'production'
         const env = currentTestEnvironmentWhen(
           (conf) => conf.ENVIRONMENT === 'production',
         )
+        env.cfEnv.ENVIRONMENT = 'production'
 
         const response = await fetchApi({ headers: { Origin: origin } }, env)
 

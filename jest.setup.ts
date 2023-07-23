@@ -6,15 +6,14 @@ import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 
 import {
-  createKV,
   currentTestEnvironment,
   defaultApiServer,
   defaultFrontendServer,
   defaultSerloServer,
+  getDefaultCFEnvironment,
   givenApi,
   givenFrontend,
   givenSerlo,
-  localTestEnvironment,
   Uuid,
 } from './__tests__/__utils__'
 
@@ -25,27 +24,17 @@ if (timeout) {
 }
 
 beforeAll(() => {
-  globalThis.API_ENDPOINT = 'https://api.serlo.org/graphql'
   globalThis.server = setupServer()
   globalThis.server.listen({ onUnhandledRequest: 'error' })
 })
 
 beforeEach(() => {
-  globalThis.API_SECRET = 'secret'
-  globalThis.DOMAIN = localTestEnvironment().getDomain()
-  globalThis.ENVIRONMENT = 'local'
-  globalThis.FRONTEND_DOMAIN = 'frontend.serlo.localhost'
-
-  globalThis.PATH_INFO_KV = createKV()
-  globalThis.PACKAGES_KV = createKV()
-
   globalThis.uuids = new Array<Uuid>()
 
   givenApi(defaultApiServer())
   givenFrontend(defaultFrontendServer())
   givenSerlo(defaultSerloServer())
 
-  globalThis.SENTRY_DSN = 'https://public@127.0.0.1/0'
   globalThis.sentryEvents = []
   mockSentryServer()
 
@@ -77,7 +66,7 @@ function addGlobalMocks() {
 }
 
 function mockSentryServer() {
-  const { hostname, pathname } = new URL(globalThis.SENTRY_DSN)
+  const { hostname, pathname } = new URL(getDefaultCFEnvironment().SENTRY_DSN)
   const sentryUrl = `https://${hostname}/api${pathname}/envelope/`
 
   globalThis.server.use(

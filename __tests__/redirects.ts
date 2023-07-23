@@ -440,14 +440,14 @@ describe('redirects to current path of an resource', () => {
 
   test('redirects to error when comment is deleted', async () => {
     givenUuid({
-      id: 65395,
+      id: 65398,
       __typename: 'Comment',
-      alias: '/mathe/65395/65395',
+      alias: '/mathe/65398/65398',
       trashed: true,
       legacyObject: { alias: '/mathe/1573/vektor' },
     })
 
-    const response = await env.fetch({ subdomain: 'de', pathname: '/65395' })
+    const response = await env.fetch({ subdomain: 'de', pathname: '/65398' })
 
     const target = env.createUrl({
       subdomain: 'de',
