@@ -2,12 +2,30 @@ import TOML from '@iarna/toml'
 import fs from 'fs'
 import path from 'path'
 
+import { createKV } from './kv'
 import cloudflareWorker from '../../src'
+import { CFEnvironment, CFVariables } from '../../src/cf-environment'
 import { isInstance } from '../../src/utils'
 
 declare global {
   // eslint-disable-next-line no-var
   var server: ReturnType<typeof import('msw/node').setupServer>
+}
+
+export function getDefaultCFEnvironment(): CFEnvironment {
+  return {
+    API_ENDPOINT: 'https://api.serlo.org/graphql',
+    ALLOW_AUTH_FROM_LOCALHOST: 'true',
+    ENABLE_BASIC_AUTH: 'true',
+    API_SECRET: 'secret',
+    DOMAIN: 'serlo.localhost',
+    ENVIRONMENT: 'local',
+    FRONTEND_DOMAIN: 'frontend.serlo.localhost',
+    SENTRY_DSN: 'https://public@127.0.0.1/0',
+
+    PATH_INFO_KV: createKV(),
+    PACKAGES_KV: createKV(),
+  }
 }
 
 export function currentTestEnvironment(): TestEnvironment {
@@ -19,14 +37,11 @@ export function currentTestEnvironment(): TestEnvironment {
 }
 
 export function currentTestEnvironmentWhen(
-  requirement: (config: Variables) => boolean,
+  requirement: (config: CFVariables) => boolean,
 ): TestEnvironment {
   const current = currentTestEnvironment()
 
-  if (
-    current instanceof RemoteEnvironment &&
-    requirement(current.getConfig())
-  ) {
+  if (current instanceof RemoteEnvironment && current.fulfills(requirement)) {
     return current
   }
 
@@ -38,6 +53,8 @@ export function localTestEnvironment() {
 }
 
 export abstract class TestEnvironment {
+  public cfEnv = getDefaultCFEnvironment()
+
   public fetch(spec: UrlSpec, init?: RequestInit) {
     return this.fetchRequest(this.createRequest(spec, init))
   }
@@ -72,7 +89,7 @@ export abstract class TestEnvironment {
 
 class LocalEnvironment extends TestEnvironment {
   public getDomain() {
-    return 'serlo.localhost'
+    return this.cfEnv.DOMAIN
   }
 
   public async fetchRequest(originalRequest: Request): Promise<Response> {
@@ -80,7 +97,7 @@ class LocalEnvironment extends TestEnvironment {
     const request = new Request(originalRequest, { redirect: 'manual' })
     const waitForPromises: Promise<unknown>[] = []
 
-    const response = await cloudflareWorker.fetch(request, undefined, {
+    const response = await cloudflareWorker.fetch(request, this.cfEnv, {
       waitUntil(promise: Promise<unknown>) {
         waitForPromises.push(promise)
       },
@@ -105,7 +122,11 @@ class RemoteEnvironment extends TestEnvironment {
     return this.getConfig().DOMAIN
   }
 
-  public getConfig(): Variables {
+  public fulfills(predicate: (config: CFVariables) => boolean): boolean {
+    return predicate(this.getConfig())
+  }
+
+  protected getConfig(): CFVariables {
     RemoteEnvironment.config =
       RemoteEnvironment.config ?? RemoteEnvironment.loadConfig()
 
@@ -159,17 +180,12 @@ class RemoteEnvironment extends TestEnvironment {
 interface Config {
   env: {
     [Environment in RemoteEnvironmentName]: {
-      vars: Variables
+      vars: CFVariables
     }
   }
 }
 
-type Variables = Pick<
-  typeof global,
-  'ENVIRONMENT' | 'ALLOW_AUTH_FROM_LOCALHOST' | 'DOMAIN'
->
-
-type RemoteEnvironmentName = Exclude<typeof ENVIRONMENT, 'local'>
+type RemoteEnvironmentName = Exclude<CFVariables['ENVIRONMENT'], 'local'>
 
 function isRemoteEnvironmentName(env: string): env is RemoteEnvironmentName {
   return env === 'staging' || env === 'production'

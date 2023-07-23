@@ -11,10 +11,10 @@ test('Disallow robots in non-productive environments', async () => {
 })
 
 test('Return explicit robots rules in production', async () => {
-  globalThis.ENVIRONMENT = 'production'
   const env = currentTestEnvironmentWhen(
     (config) => config.ENVIRONMENT === 'production',
   )
+  env.cfEnv.ENVIRONMENT = 'production'
 
   const request = new Request('https://de.serlo.org/robots.txt')
   const response = await env.fetchRequest(request)

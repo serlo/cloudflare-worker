@@ -6,6 +6,8 @@ import {
   RestRequest,
 } from 'msw'
 
+import { localTestEnvironment } from '../test-environment'
+
 export type RestResolver = ResponseResolver<
   RestRequest<DefaultBodyType>,
   typeof restContext
@@ -54,7 +56,7 @@ export function createUrlRegex({
       matchStrings(subdomains) +
       '\\.' +
       // TODO: Remove "serlo.org"
-      matchStrings([globalThis.DOMAIN, 'serlo.org']) +
+      matchStrings([localTestEnvironment().getDomain(), 'serlo.org']) +
       (typeof pathname === 'string' ? escapeRegex(pathname) : pathname.source),
   )
 }
