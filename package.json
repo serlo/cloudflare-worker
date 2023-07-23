@@ -25,8 +25,8 @@
     "lint:tsc": "tsc --noEmit",
     "show-unused-exports": "ts-unused-exports tsconfig.json --excludePathsFromReport=__tests__/__utils__/index.ts",
     "test": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "test:production": "cross-env TEST_ENVIRONMENT=production jest --runInBand",
-    "test:staging": "cross-env TEST_ENVIRONMENT=staging jest --runInBand"
+    "test:production": "cross-env TEST_ENVIRONMENT=production yarn test --runInBand",
+    "test:staging": "cross-env TEST_ENVIRONMENT=staging yarn test --runInBand"
   },
   "dependencies": {
     "fp-ts": "^2.16.0",
