@@ -1,3 +1,4 @@
+import { CFEnvironment } from './cf-environment'
 import { Url } from './utils'
 
 const robotsProduction = `User-agent: *
@@ -20,12 +21,12 @@ Disallow: /index.php/
 Disallow: /index.php
 Disallow: /*/entity/trash-bin`
 
-export function robotsTxt(request: Request) {
+export function robotsTxt(request: Request, env: CFEnvironment) {
   const url = Url.fromRequest(request)
   if (url.pathname !== '/robots.txt') return null
 
   return new Response(
-    globalThis.ENVIRONMENT === 'production'
+    env.ENVIRONMENT === 'production'
       ? robotsProduction
       : 'User-agent: *\nDisallow: /\n',
   )

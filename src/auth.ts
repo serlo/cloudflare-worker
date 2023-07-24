@@ -1,8 +1,9 @@
+import { CFEnvironment } from './cf-environment'
 import { Instance, createJsonResponse, Url } from './utils'
 
-export function auth(request: Request): Response | null {
+export function auth(request: Request, env: CFEnvironment): Response | null {
   return (
-    authFrontendSectorIdentifierUriValidation(request) ||
+    authFrontendSectorIdentifierUriValidation(request, env) ||
     authKratosIdentitySchema(request) ||
     authKratosGithubJsonnet(request)
   )
@@ -10,6 +11,7 @@ export function auth(request: Request): Response | null {
 
 function authFrontendSectorIdentifierUriValidation(
   request: Request,
+  env: CFEnvironment,
 ): Response | null {
   const url = Url.fromRequest(request)
   if (
@@ -20,12 +22,12 @@ function authFrontendSectorIdentifierUriValidation(
   }
   const redirectUris = [
     ...Object.values(Instance).map((instance) => {
-      return `https://${instance}.${globalThis.DOMAIN}/api/auth/callback`
+      return `https://${instance}.${env.DOMAIN}/api/auth/callback`
     }),
     ...Object.values(Instance).map((instance) => {
-      return `https://${instance}.${globalThis.DOMAIN}/api/auth/callback/hydra`
+      return `https://${instance}.${env.DOMAIN}/api/auth/callback/hydra`
     }),
-    ...(globalThis.ALLOW_AUTH_FROM_LOCALHOST === 'true'
+    ...(env.ALLOW_AUTH_FROM_LOCALHOST === 'true'
       ? [
           'http://localhost:3000/api/auth/callback',
           'http://localhost:3000/api/auth/callback/hydra',

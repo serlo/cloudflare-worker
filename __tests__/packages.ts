@@ -2,17 +2,19 @@ import { rest } from 'msw'
 
 import { createUrlRegex, currentTestEnvironment } from './__utils__'
 
+const env = currentTestEnvironment()
+
 beforeEach(async () => {
   givenCssOnPackagesServer('/serlo-org-client@10.0.0/main.css')
 
-  await globalThis.PACKAGES_KV.put(
+  await env.cfEnv.PACKAGES_KV.put(
     'serlo-org-client@10',
     'serlo-org-client@10.0.0',
   )
 })
 
 test('resolves to specific package version when package name is in PACKAGES_KV', async () => {
-  const response = await currentTestEnvironment().fetch({
+  const response = await env.fetch({
     subdomain: 'packages',
     pathname: '/serlo-org-client@10/main.css',
   })
@@ -21,7 +23,7 @@ test('resolves to specific package version when package name is in PACKAGES_KV',
 })
 
 test('forwards request when package name is not in PACKAGES_KV', async () => {
-  const response = await currentTestEnvironment().fetch({
+  const response = await env.fetch({
     subdomain: 'packages',
     pathname: '/serlo-org-client@10.0.0/main.css',
   })
