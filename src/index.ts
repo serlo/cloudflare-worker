@@ -1,5 +1,6 @@
 import { api } from './api'
 import { auth } from './auth'
+import { CFEnvironment } from './cf-environment'
 import { cloudflareWorkerDev } from './cloudflare-worker-dev'
 import { embed } from './embed'
 import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
@@ -13,26 +14,26 @@ import { SentryFactory, Url } from './utils'
 
 // eslint-disable-next-line import/no-default-export
 export default {
-  async fetch(request: Request, _env: unknown, context: ExecutionContext) {
-    const sentryFactory = new SentryFactory(context)
+  async fetch(request: Request, env: CFEnvironment, context: ExecutionContext) {
+    const sentryFactory = new SentryFactory(env, context)
 
     try {
       return (
         cloudflareWorkerDev(request) ||
-        auth(request) ||
+        auth(request, env) ||
         (await enforceHttps(request)) ||
         (await legalPages(request)) ||
         (await quickbarProxy(request, sentryFactory)) ||
         (await pdfProxy(request, sentryFactory)) ||
-        robotsTxt(request) ||
-        (await frontendSpecialPaths(request, sentryFactory)) ||
+        robotsTxt(request, env) ||
+        (await frontendSpecialPaths(request, sentryFactory, env)) ||
         sentryHelloWorld(request, sentryFactory) ||
-        (await redirects(request)) ||
+        (await redirects(request, env)) ||
         (await embed(request, sentryFactory)) ||
         (await semanticFileNames(request)) ||
-        (await packages(request)) ||
-        (await api(request)) ||
-        (await frontendProxy(request, sentryFactory)) ||
+        (await packages(request, env)) ||
+        (await api(request, env)) ||
+        (await frontendProxy(request, sentryFactory, env)) ||
         (await metadataApi(request, sentryFactory)) ||
         (await fetch(request))
       )
@@ -83,7 +84,7 @@ async function semanticFileNames(request: Request) {
   return await fetch(url.href, request)
 }
 
-async function packages(request: Request) {
+async function packages(request: Request, env: CFEnvironment) {
   const url = Url.fromRequest(request)
 
   if (url.subdomain !== 'packages') return null
@@ -92,7 +93,7 @@ async function packages(request: Request) {
 
   const paths = url.pathname.split('/')
   const resolvedPackage =
-    paths.length >= 2 ? await globalThis.PACKAGES_KV.get(paths[1]) : null
+    paths.length >= 2 ? await env.PACKAGES_KV.get(paths[1]) : null
 
   if (resolvedPackage) {
     paths[1] = resolvedPackage

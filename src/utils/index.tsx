@@ -6,6 +6,7 @@ import renderToString from 'preact-render-to-string'
 import sanitize from 'sanitize-html'
 
 import { fetchApi } from '../api'
+import { CFEnvironment } from '../cf-environment'
 import { NotFound } from '../ui'
 
 export * from './sentry'
@@ -63,12 +64,13 @@ const ApiResult = t.type({
 export async function getPathInfo(
   lang: Instance,
   path: string,
+  env: CFEnvironment,
 ): Promise<PathInfo | null> {
   if (path === '/user/me' || path === '/user/public')
     return { typename: 'User', currentPath: path }
 
   const cacheKey = await toCacheKey(`/${lang}${path}`)
-  const cachedValue = await globalThis.PATH_INFO_KV.get(cacheKey)
+  const cachedValue = await env.PATH_INFO_KV.get(cacheKey)
 
   if (cachedValue !== null) {
     try {
@@ -115,11 +117,12 @@ export async function getPathInfo(
 
   try {
     const apiResponse = await fetchApi(
-      new Request(globalThis.API_ENDPOINT, {
+      new Request(env.API_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query, variables }),
       }),
+      env,
     )
     apiResponseBody = await apiResponse.json()
   } catch (e) {
@@ -151,7 +154,7 @@ export async function getPathInfo(
       : {}),
   }
 
-  await globalThis.PATH_INFO_KV.put(cacheKey, JSON.stringify(result), {
+  await env.PATH_INFO_KV.put(cacheKey, JSON.stringify(result), {
     expirationTtl: 60 * 60,
   })
 
@@ -203,7 +206,7 @@ const CacheKey = t.brand(
   (text): text is t.Branded<string, CacheKeyBrand> => text.length <= 512,
   'CacheKey',
 )
-type CacheKey = t.TypeOf<typeof CacheKey>
+export type CacheKey = t.TypeOf<typeof CacheKey>
 
 export async function toCacheKey(key: string): Promise<CacheKey> {
   const shortenKey = key.length > 512 ? await digestMessage(key) : key
