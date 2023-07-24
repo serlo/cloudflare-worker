@@ -16,8 +16,7 @@ test('Return explicit robots rules in production', async () => {
   )
   env.cfEnv.ENVIRONMENT = 'production'
 
-  const request = new Request('https://de.serlo.org/robots.txt')
-  const response = await env.fetchRequest(request)
+  const response = await env.fetch({ subdomain: 'de', pathname: '/robots.txt' })
   const text = await response.text()
 
   expect(text).toContain('User-agent: *')
