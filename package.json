@@ -42,7 +42,7 @@
     "@cloudflare/workers-types": "^4.20230801.0",
     "@iarna/toml": "^2.2.5",
     "@jest/globals": "^29.6.2",
-    "@sentry/types": "^7.61.0",
+    "@sentry/types": "^7.61.1",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/preact": "^3.2.3",
     "@types/iarna__toml": "^2.0.2",
