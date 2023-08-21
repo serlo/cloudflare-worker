@@ -36,7 +36,7 @@
     "preact": "^10.17.0",
     "preact-render-to-string": "^6.2.1",
     "sanitize-html": "^2.11.0",
-    "toucan-js": "^3.2.1"
+    "toucan-js": "^3.2.2"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230807.0",
