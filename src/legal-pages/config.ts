@@ -44,6 +44,10 @@ const config: BaseConfig = {
     revised: {
       privacy: [
         {
+          revision: '2023-08-23',
+          url: `${legalRepo}/en/privacy/current.md`,
+        },
+        {
           revision: '2023-05-17',
           url: `${legalRepo}/en/privacy/current.md`,
         },
@@ -73,6 +77,10 @@ const config: BaseConfig = {
     },
     revised: {
       privacy: [
+        {
+          revision: '2023-08-23',
+          url: `${legalRepo}/de/privacy/current.md`,
+        },
         {
           revision: '2023-05-17',
           url: `${legalRepo}/de/privacy/current.md`,
