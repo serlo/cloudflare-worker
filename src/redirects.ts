@@ -83,10 +83,7 @@ export async function redirects(request: Request, env: CFEnvironment) {
   ) {
     switch (url.pathnameWithoutTrailingSlash) {
       case '/metadata-api':
-        return Response.redirect(
-          'https://nbviewer.org/github/serlo/lenabi/blob/20b946ff9f1205444f256995dfd776fd203b6c3c/src/Prototype%20of%20metadata%20API%20for%20serlo.org%20%28LENABI%29.ipynb',
-          302,
-        )
+        return Response.redirect('https://de.serlo.org/metadata', 302)
       case '/data-wallet':
         return Response.redirect('https://lenabi.serlo-staging.dev/wallet', 302)
       case '/user-journey':
