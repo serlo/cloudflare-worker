@@ -14,7 +14,9 @@ describe('de.serlo.org/api/stats/quickbar.json', () => {
       pathname: '/api/stats/quickbar.json',
     })
     expect(response.status).toBe(200)
-    expect(response.headers.get('content-type')).toBe('application/json')
+    expect(response.headers.get('content-type')).toBe(
+      'application/json; charset=utf-8',
+    )
 
     expect(await response.text()).toEqual(
       expect.stringContaining('"title":"Mathematik Startseite"'),
@@ -27,7 +29,7 @@ describe('de.serlo.org/api/stats/quickbar.json', () => {
         'https://serlo.github.io/quickbar-updater/quickbar.json',
         (_req, res, ctx) => {
           return res(
-            ctx.set('content-type', 'application/json'),
+            ctx.set('content-type', 'application/json; charset=utf-8'),
             ctx.body(
               '[{"id":"100","title":"Mathematik Startseite","path":[],"isTax":false,"count":10000}]',
             ),
