@@ -170,7 +170,7 @@ export function sanitizeHtml(html: string): string {
 }
 
 export function markdownToHtml(markdown: string): string {
-  return marked.parse(markdown, { headerIds: false, mangle: false }).trim()
+  return marked.parse(markdown).trim()
 }
 
 export function createPreactResponse(
