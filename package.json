@@ -31,7 +31,7 @@
   "dependencies": {
     "fp-ts": "^2.16.1",
     "io-ts": "^2.2.20",
-    "jose": "^4.14.5",
+    "jose": "^4.14.6",
     "marked": "^8.0.0",
     "preact": "^10.17.1",
     "preact-render-to-string": "^6.2.1",
