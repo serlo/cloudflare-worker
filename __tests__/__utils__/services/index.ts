@@ -1,5 +1,4 @@
 export * from './api'
 export * from './database'
 export * from './frontend'
-export * from './serlo'
 export * from './utils'
