@@ -5,5 +5,4 @@ export * from './test-environment'
 
 export enum Backend {
   Frontend = 'frontend',
-  Legacy = 'legacy',
 }
