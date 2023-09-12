@@ -12,7 +12,7 @@ import { Instance } from '../src/utils'
 
 test('Always choose new frontend as default route', async () => {
   await expectFrontend(
-    await currentTestEnvironment().fetch({ subdomain: 'en' }),
+    await currentTestEnvironment().fetch({ subdomain: 'en' })
   )
 })
 
@@ -33,13 +33,13 @@ test('No redirect for subjects', async () => {
   await expectFrontend(response)
 })
 
-test('Uses legacy frontend when cookie "useLegacyFrontend" is "true"', async () => {
+test('Uses new frontend even when cookie "useLegacyFrontend" is "true"', async () => {
   const env = currentTestEnvironment()
   const request = env.createRequest({ subdomain: 'en' })
 
   request.headers.append('Cookie', 'useLegacyFrontend=true;')
 
-  await expectLegacy(await env.fetchRequest(request))
+  await expectFrontend(await env.fetchRequest(request))
 })
 
 test('chooses frontend when request contains content api parameter', async () => {
@@ -61,26 +61,17 @@ describe('when request contains header X-From: legacy-serlo.org', () => {
   let response: Response
 
   beforeEach(async () => {
-    // TODO: Delete
-    // setupProbabilityFor(Backend.Frontend)
-
     response = await currentTestEnvironment().fetch(
       {
         subdomain: 'en',
         pathname: '/',
       },
-      { headers: { 'X-From': 'legacy-serlo.org' } },
+      { headers: { 'X-From': 'legacy-serlo.org' } }
     )
   })
 
-  test('chooses legacy backend', async () => {
-    await expectLegacy(response)
-  })
-
-  test('does not set cookie with random number', () => {
-    expect(response.headers.get('Set-Cookie')).not.toEqual(
-      expect.stringContaining('useFrontend'),
-    )
+  test('still chooses new frontend', async () => {
+    await expectFrontend(response)
   })
 })
 
@@ -96,7 +87,7 @@ test('reports to sentry when frontend responded with redirect', async () => {
 
   expect(redirectResponse.status).toEqual(302)
   expect(redirectResponse.headers.get('Location')).toEqual(
-    'https://frontend.serlo.org/',
+    'https://frontend.serlo.org/'
   )
   expectSentryEvent({
     message: 'Frontend responded with a redirect',
@@ -143,7 +134,7 @@ describe('requests to /enable-frontend enable use of frontend', () => {
 
   test('sets cookie so that new frontend will be used', () => {
     expect(response.headers.get('Set-Cookie')).toEqual(
-      expect.stringContaining('useLegacyFrontend=false;'),
+      expect.stringContaining('useLegacyFrontend=false;')
     )
   })
 
@@ -169,7 +160,7 @@ describe('requests to /disable-frontend disable use of frontend', () => {
 
   test('sets cookie to that legacy backend will be used', () => {
     expect(response.headers.get('Set-Cookie')).toEqual(
-      expect.stringContaining('useLegacyFrontend=true;'),
+      expect.stringContaining('useLegacyFrontend=true;')
     )
   })
 
@@ -180,17 +171,17 @@ describe('requests to /disable-frontend disable use of frontend', () => {
 
 async function expectLegacy(response: Response) {
   expect(await response.text()).toEqual(
-    expect.stringContaining('<html class="fuelux"'),
+    expect.stringContaining('<html class="fuelux"')
   )
   // Tests that backend headers are transferred to client
   expect(response.headers.get('x-powered-by')).toEqual(
-    expect.stringContaining('PHP'),
+    expect.stringContaining('PHP')
   )
 }
 
 async function expectFrontend(response: Response) {
   expect(await response.text()).toEqual(
-    expect.stringContaining('<script id="__NEXT_DATA__"'),
+    expect.stringContaining('<script id="__NEXT_DATA__"')
   )
   // Tests that backend headers are transferred to client
   expect(response.headers.get('x-vercel-cache')).toBeDefined()
