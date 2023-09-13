@@ -33,15 +33,6 @@ test('No redirect for subjects', async () => {
   await expectFrontend(response)
 })
 
-test('Uses new frontend even when cookie "useLegacyFrontend" is "true"', async () => {
-  const env = currentTestEnvironment()
-  const request = env.createRequest({ subdomain: 'en' })
-
-  request.headers.append('Cookie', 'useLegacyFrontend=true;')
-
-  await expectFrontend(await env.fetchRequest(request))
-})
-
 test('chooses frontend when request contains content api parameter', async () => {
   givenUuid({
     id: 1555,
@@ -55,24 +46,6 @@ test('chooses frontend when request contains content api parameter', async () =>
   })
 
   await expectFrontend(response)
-})
-
-describe('when request contains header X-From: legacy-serlo.org', () => {
-  let response: Response
-
-  beforeEach(async () => {
-    response = await currentTestEnvironment().fetch(
-      {
-        subdomain: 'en',
-        pathname: '/',
-      },
-      { headers: { 'X-From': 'legacy-serlo.org' } },
-    )
-  })
-
-  test('still chooses new frontend', async () => {
-    await expectFrontend(response)
-  })
 })
 
 test('reports to sentry when frontend responded with redirect', async () => {
@@ -115,48 +88,6 @@ test('creates a copy of backend responses (otherwise there is an error in cloudf
   const response = await localTestEnvironment().fetch({ subdomain: 'en' })
 
   expect(response).not.toBe(backendResponse)
-})
-
-describe('requests to /enable-frontend result in 404', () => {
-  let response: Response
-
-  beforeEach(async () => {
-    response = await currentTestEnvironment().fetch({
-      subdomain: 'en',
-      pathname: '/enable-frontend',
-    })
-  })
-
-  test('does not set cookie so that new frontend will be used', () => {
-    expect(response.headers.get('Set-Cookie')).toEqual(
-      expect.not.stringContaining('useLegacyFrontend=false;'),
-    )
-  })
-
-  test('page responds with 404', () => {
-    expect(response.status).toBe(404)
-  })
-})
-
-describe('requests to /disable-frontend disable use of frontend', () => {
-  let response: Response
-
-  beforeEach(async () => {
-    response = await currentTestEnvironment().fetch({
-      subdomain: 'en',
-      pathname: '/disable-frontend',
-    })
-  })
-
-  test('does not set cookie so that new frontend will be used', () => {
-    expect(response.headers.get('Set-Cookie')).toEqual(
-      expect.not.stringContaining('useLegacyFrontend=false;'),
-    )
-  })
-
-  test('page responds with 404', () => {
-    expect(response.status).toBe(404)
-  })
 })
 
 async function expectFrontend(response: Response) {
