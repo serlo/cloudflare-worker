@@ -127,12 +127,6 @@ function getRoute(request: Request): RouteConfig | null {
     }
   }
 
-  if (
-    url.pathname.startsWith('/entity/api/rss/') ||
-    url.pathname.startsWith('/entity/api/json/')
-  )
-    return null
-
   return {
     __typename: 'Frontend',
     redirect: 'follow',
