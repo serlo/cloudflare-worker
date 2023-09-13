@@ -33,13 +33,13 @@ test('No redirect for subjects', async () => {
   await expectFrontend(response)
 })
 
-test('Uses legacy frontend when cookie "useLegacyFrontend" is "true"', async () => {
+test('Uses new frontend even when cookie "useLegacyFrontend" is "true"', async () => {
   const env = currentTestEnvironment()
   const request = env.createRequest({ subdomain: 'en' })
 
   request.headers.append('Cookie', 'useLegacyFrontend=true;')
 
-  await expectLegacy(await env.fetchRequest(request))
+  await expectFrontend(await env.fetchRequest(request))
 })
 
 test('chooses frontend when request contains content api parameter', async () => {
@@ -61,9 +61,6 @@ describe('when request contains header X-From: legacy-serlo.org', () => {
   let response: Response
 
   beforeEach(async () => {
-    // TODO: Delete
-    // setupProbabilityFor(Backend.Frontend)
-
     response = await currentTestEnvironment().fetch(
       {
         subdomain: 'en',
@@ -73,14 +70,8 @@ describe('when request contains header X-From: legacy-serlo.org', () => {
     )
   })
 
-  test('chooses legacy backend', async () => {
-    await expectLegacy(response)
-  })
-
-  test('does not set cookie with random number', () => {
-    expect(response.headers.get('Set-Cookie')).not.toEqual(
-      expect.stringContaining('useFrontend'),
-    )
+  test('still chooses new frontend', async () => {
+    await expectFrontend(response)
   })
 })
 
@@ -126,7 +117,7 @@ test('creates a copy of backend responses (otherwise there is an error in cloudf
   expect(response).not.toBe(backendResponse)
 })
 
-describe('requests to /enable-frontend enable use of frontend', () => {
+describe('requests to /enable-frontend result in 404', () => {
   let response: Response
 
   beforeEach(async () => {
@@ -136,19 +127,14 @@ describe('requests to /enable-frontend enable use of frontend', () => {
     })
   })
 
-  test('shows message that frontend was enabled', async () => {
-    expect(response.status).toBe(200)
-    expect(await response.text()).toBe('Enabled: Use of new frontend')
-  })
-
-  test('sets cookie so that new frontend will be used', () => {
+  test('does not set cookie so that new frontend will be used', () => {
     expect(response.headers.get('Set-Cookie')).toEqual(
-      expect.stringContaining('useLegacyFrontend=false;'),
+      expect.not.stringContaining('useLegacyFrontend=false;'),
     )
   })
 
-  test('main page will be loaded after 1 second', () => {
-    expect(response.headers.get('Refresh')).toBe('1; url=/')
+  test('page responds with 404', () => {
+    expect(response.status).toBe(404)
   })
 })
 
@@ -162,31 +148,16 @@ describe('requests to /disable-frontend disable use of frontend', () => {
     })
   })
 
-  test('shows message that frontend use is disabled', async () => {
-    expect(response.status).toBe(200)
-    expect(await response.text()).toBe('Disabled: Use of new frontend')
-  })
-
-  test('sets cookie to that legacy backend will be used', () => {
+  test('does not set cookie so that new frontend will be used', () => {
     expect(response.headers.get('Set-Cookie')).toEqual(
-      expect.stringContaining('useLegacyFrontend=true;'),
+      expect.not.stringContaining('useLegacyFrontend=false;'),
     )
   })
 
-  test('main page will be loaded after 1 second', () => {
-    expect(response.headers.get('Refresh')).toBe('1; url=/')
+  test('page responds with 404', () => {
+    expect(response.status).toBe(404)
   })
 })
-
-async function expectLegacy(response: Response) {
-  expect(await response.text()).toEqual(
-    expect.stringContaining('<html class="fuelux"'),
-  )
-  // Tests that backend headers are transferred to client
-  expect(response.headers.get('x-powered-by')).toEqual(
-    expect.stringContaining('PHP'),
-  )
-}
 
 async function expectFrontend(response: Response) {
   expect(await response.text()).toEqual(

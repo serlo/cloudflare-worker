@@ -58,21 +58,6 @@ In this case the url / file must end with the extension `.md`.
 Without this file extension it is assumed that the returned file contains the page's body in HTML format.
 
 The content of the static pages are automatically sanitized (e.g. potentially malicious JavaScript content is automatically removed).
-In case you need a link which deactivates Google Analytics use the string `JS-GOOGLE-ANALYTICS-DEACTIVATE` as the `href` attribute:
-
-```html
-<a href="JS-GOOGLE-ANALYTICS-DEACTIVATE">
-  Click here to deactivate Google Analytics
-</a>
-```
-
-To include an iframe where the user can opt out from Matomo use the string `MATOMO-OPT-OUT-FORM`:
-
-```markdown
-Use the following form to opt out from Matomo:
-
-MATOMO-OPT-OUT-FORM
-```
 
 ## Preview Images
 
