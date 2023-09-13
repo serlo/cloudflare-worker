@@ -17,8 +17,6 @@ Disallow: /navigation/
 Disallow: /authorization/
 Disallow: /pages
 Disallow: /uuid/recycle-bin
-Disallow: /index.php/
-Disallow: /index.php
 Disallow: /*/entity/trash-bin`
 
 export function robotsTxt(request: Request, env: CFEnvironment) {
