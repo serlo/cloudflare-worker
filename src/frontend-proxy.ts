@@ -1,6 +1,5 @@
 import { CFEnvironment } from './cf-environment'
 import {
-  getCookieValue,
   isInstance,
   SentryFactory,
   SentryReporter,
@@ -13,23 +12,8 @@ export async function frontendSpecialPaths(
   sentryFactory: SentryFactory,
   env: CFEnvironment,
 ): Promise<Response | null> {
-  const url = Url.fromRequest(request)
   const route = getRoute(request)
   const sentry = sentryFactory.createReporter('frontend-special-paths')
-
-  if (url.pathname === '/enable-frontend')
-    return createConfigurationResponse({
-      message: 'Enabled: Use of new frontend',
-      useLegacyFrontend: false,
-      env,
-    })
-
-  if (url.pathname === '/disable-frontend')
-    return createConfigurationResponse({
-      message: 'Disabled: Use of new frontend',
-      useLegacyFrontend: true,
-      env,
-    })
 
   return route !== null && route.__typename === 'BeforeRedirectsRoute'
     ? fetchBackend({ request, sentry, route: route.route, env })
@@ -57,7 +41,7 @@ async function fetchBackend({
 }: {
   request: Request
   sentry: SentryReporter
-  route: LegacyRoute | FrontendRoute
+  route: FrontendRoute
   env: CFEnvironment
 }) {
   const backendUrl = Url.fromRequest(request)
@@ -85,43 +69,15 @@ async function fetchBackend({
       sentry.setContext('location', response.headers.get('Location'))
       sentry.captureMessage('Frontend responded with a redirect', 'error')
     }
-
-    if (isLegacyRequestToBeReported()) {
-      sentry.setContext('legacyUrl', backendUrl)
-      sentry.setContext('method', request.method)
-      sentry.setContext(
-        'useLegacyFrontend',
-        getCookieValue('useLegacyFrontend', request.headers.get('Cookie')),
-      )
-      sentry.captureMessage('Request to legacy system registered', 'info')
-    }
   }
 
   return new Response(response.body, response)
-
-  function isLegacyRequestToBeReported() {
-    if (route.__typename != 'Legacy') {
-      return false
-    }
-    if (
-      request.method === 'GET' &&
-      response.headers.get('Content-type') === 'text/html'
-    ) {
-      return true
-    }
-    return request.method === 'POST'
-  }
 }
 
 function getRoute(request: Request): RouteConfig | null {
   const url = Url.fromRequest(request)
-  const cookies = request.headers.get('Cookie')
 
   if (!isInstance(url.subdomain)) return null
-
-  if (getCookieValue('useLegacyFrontend', cookies) === 'true') {
-    return { __typename: 'Legacy' }
-  }
 
   if (
     url.pathname.startsWith('/api/auth/') ||
@@ -177,23 +133,6 @@ function getRoute(request: Request): RouteConfig | null {
   )
     return null
 
-  if (
-    request.headers.get('X-From') === 'legacy-serlo.org' ||
-    url.pathname.startsWith('/taxonomy/term/organize/') ||
-    url.pathname.startsWith('/notification/') ||
-    url.pathname.startsWith('/entity/repository/add-revision-old/') ||
-    (url.pathname.startsWith('/entity/repository/add-revision/') &&
-      (request.method === 'POST' ||
-        getCookieValue('useLegacyEditor', cookies) === '1'))
-  ) {
-    return {
-      __typename: 'BeforeRedirectsRoute',
-      route: {
-        __typename: 'Legacy',
-      },
-    }
-  }
-
   return {
     __typename: 'Frontend',
     redirect: 'follow',
@@ -201,41 +140,15 @@ function getRoute(request: Request): RouteConfig | null {
   }
 }
 
-function createConfigurationResponse({
-  message,
-  useLegacyFrontend,
-  env,
-}: {
-  message: string
-  useLegacyFrontend: boolean
-  env: CFEnvironment
-}) {
-  const response = new Response(message)
-
-  response.headers.append(
-    'Set-Cookie',
-    `useLegacyFrontend=${useLegacyFrontend.toString()}; path=/; domain=.${
-      env.DOMAIN
-    }`,
-  )
-  response.headers.set('Refresh', '1; url=/')
-
-  return response
-}
-
-type RouteConfig = LegacyRoute | FrontendRoute | BeforeRedirectsRoute
+type RouteConfig = FrontendRoute | BeforeRedirectsRoute
 
 interface BeforeRedirectsRoute {
   __typename: 'BeforeRedirectsRoute'
-  route: LegacyRoute | FrontendRoute
+  route: FrontendRoute
 }
 
 interface FrontendRoute {
   __typename: 'Frontend'
   redirect: 'manual' | 'follow'
   appendSubdomainToPath: boolean
-}
-
-interface LegacyRoute {
-  __typename: 'Legacy'
 }
