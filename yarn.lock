@@ -1199,7 +1199,7 @@ __metadata:
     "@types/node": ^18.17.17
     "@types/sanitize-html": ^2.9.0
     "@typescript-eslint/eslint-plugin": ^6.7.2
-    "@typescript-eslint/parser": ^6.7.0
+    "@typescript-eslint/parser": ^6.7.2
     cross-env: ^7.0.3
     eslint: ^8.49.0
     eslint-config-prettier: ^9.0.0
@@ -1557,21 +1557,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/parser@npm:^6.7.0":
-  version: 6.7.0
-  resolution: "@typescript-eslint/parser@npm:6.7.0"
+"@typescript-eslint/parser@npm:^6.7.2":
+  version: 6.7.2
+  resolution: "@typescript-eslint/parser@npm:6.7.2"
   dependencies:
-    "@typescript-eslint/scope-manager": 6.7.0
-    "@typescript-eslint/types": 6.7.0
-    "@typescript-eslint/typescript-estree": 6.7.0
-    "@typescript-eslint/visitor-keys": 6.7.0
+    "@typescript-eslint/scope-manager": 6.7.2
+    "@typescript-eslint/types": 6.7.2
+    "@typescript-eslint/typescript-estree": 6.7.2
+    "@typescript-eslint/visitor-keys": 6.7.2
     debug: ^4.3.4
   peerDependencies:
     eslint: ^7.0.0 || ^8.0.0
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 21d52a49abf78a3b037261c01f1f4d2d550919ddc906ebb058db3410a706457ac3a7d082716328ce98a6741d4e77c945b71ff386d9047c5a2e5beef23e14ab45
+  checksum: 9e93d3eb432ed5457a852e25a31782d07518f728966cd477620175ae64db9be04f5d8e605f3561dbfe9a365f209a83b2a3788efb9b3cf33669c8bca17f1bcf6f
   languageName: node
   linkType: hard
 
