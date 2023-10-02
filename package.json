@@ -32,7 +32,7 @@
   "dependencies": {
     "fp-ts": "^2.16.1",
     "io-ts": "^2.2.20",
-    "jose": "^4.14.6",
+    "jose": "^4.15.1",
     "marked": "^9.0.3",
     "preact": "^10.18.0",
     "preact-render-to-string": "^6.2.1",
