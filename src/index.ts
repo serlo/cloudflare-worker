@@ -5,7 +5,6 @@ import { cloudflareWorkerDev } from './cloudflare-worker-dev'
 import { embed } from './embed'
 import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
 import { legalPages } from './legal-pages'
-import { metadataApi } from './metadata-api'
 import { pdfProxy } from './pdf-proxy'
 import { quickbarProxy } from './quickbar-proxy'
 import { redirects } from './redirects'
@@ -34,7 +33,6 @@ export default {
         (await packages(request, env)) ||
         (await api(request, env)) ||
         (await frontendProxy(request, sentryFactory, env)) ||
-        (await metadataApi(request, sentryFactory)) ||
         (await fetch(request))
       )
     } catch (e) {

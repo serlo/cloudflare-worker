@@ -10,11 +10,9 @@ import {
   currentTestEnvironment,
   defaultApiServer,
   defaultFrontendServer,
-  defaultSerloServer,
   getDefaultCFEnvironment,
   givenApi,
   givenFrontend,
-  givenSerlo,
   Uuid,
 } from './__tests__/__utils__'
 
@@ -34,7 +32,6 @@ beforeEach(() => {
 
   givenApi(defaultApiServer())
   givenFrontend(defaultFrontendServer())
-  givenSerlo(defaultSerloServer())
 
   globalThis.sentryEvents = []
   mockSentryServer()
