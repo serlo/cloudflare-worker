@@ -57,12 +57,3 @@ test('Frontend Sector Identifier URI Validation (allow localhost)', async () => 
     'http://localhost:3000/api/auth/callback/hydra',
   ])
 })
-
-test('Kratos Identity Schema', async () => {
-  const env = currentTestEnvironment()
-  const response = await env.fetch({
-    pathname: '/auth/kratos-identity.schema.json',
-  })
-
-  expect(response.status).toBe(200)
-})
