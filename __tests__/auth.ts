@@ -1,8 +1,4 @@
-import {
-  currentTestEnvironment,
-  currentTestEnvironmentWhen,
-  expectIsJsonResponse,
-} from './__utils__'
+import { currentTestEnvironmentWhen, expectIsJsonResponse } from './__utils__'
 
 test('Frontend Sector Identifier URI Validation (block localhost)', async () => {
   const env = currentTestEnvironmentWhen(
