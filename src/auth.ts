@@ -99,4 +99,3 @@ function authKratosIdentitySchema(request: Request): Response | null {
 
   return createJsonResponse(schema)
 }
-
