@@ -52,7 +52,6 @@ const ApiResult = t.type({
         alias: t.string,
         instance: t.string,
         pages: t.array(t.type({ alias: t.string })),
-        exercise: t.type({ alias: t.string }),
         legacyObject: t.type({ alias: t.string }),
         id: t.number,
         trashed: t.boolean,
@@ -135,8 +134,6 @@ export async function getPathInfo(
     ? `error/deleted/${uuid.__typename}`
     : uuid.legacyObject !== undefined
     ? uuid.legacyObject.alias
-    : uuid.exercise !== undefined
-    ? uuid.exercise.alias
     : uuid.pages !== undefined && uuid.pages.length > 0
     ? uuid.pages[0].alias
     : uuid.alias ?? path
