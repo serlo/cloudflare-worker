@@ -97,11 +97,6 @@ export async function getPathInfo(
             alias
           }
         }
-        ... on Solution {
-          exercise {
-            alias
-          }
-        }
         ... on Comment {
           id
           trashed
