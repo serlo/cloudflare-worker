@@ -31,13 +31,10 @@ export function getUuid(instance: Instance, path: string) {
   )
 }
 
-export type Uuid = GenericUuid | Course | Solution
+export type Uuid = GenericUuid | Course
 
 interface Course extends AbstractUuid<'Course'> {
   pages?: { alias: string }[]
-}
-interface Solution extends AbstractUuid<'Solution'> {
-  exercise?: { alias: string }
 }
 
 interface GenericUuid extends AbstractUuid<GenericTypenames> {}
