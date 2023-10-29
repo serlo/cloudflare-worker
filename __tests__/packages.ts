@@ -1,6 +1,7 @@
-import { rest } from 'msw'
+import { http } from 'msw'
 
 import { createUrlRegex, currentTestEnvironment } from './__utils__'
+import { createNotFoundResponse } from '../src/utils'
 
 const env = currentTestEnvironment()
 
@@ -38,10 +39,11 @@ function expectCssResponse(response: Response) {
 
 function givenCssOnPackagesServer(pathname: string) {
   globalThis.server.use(
-    rest.get(createUrlRegex({ subdomains: ['packages'] }), (req, res, ctx) => {
-      return req.url.pathname === pathname
-        ? res(ctx.set('content-type', 'text/css'))
-        : res(ctx.status(404))
+    http.get(createUrlRegex({ subdomains: ['packages'] }), ({ request }) => {
+      const url = new URL(request.url)
+      return url.pathname === pathname
+        ? new Response('', { headers: { 'content-type': 'text/css' } })
+        : createNotFoundResponse()
     }),
   )
 }
