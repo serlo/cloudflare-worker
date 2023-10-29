@@ -3,7 +3,7 @@ import '@testing-library/jest-dom'
 import { jest } from '@jest/globals'
 import { type Event as SentryEvent } from '@sentry/types'
 import * as cryptoNode from 'crypto'
-import { rest } from 'msw'
+import { http } from 'msw'
 import { setupServer } from 'msw/node'
 
 import {
@@ -68,15 +68,15 @@ function mockSentryServer() {
   const sentryUrl = `https://${hostname}/api${pathname}/envelope/`
 
   globalThis.server.use(
-    rest.post<SentryEvent>(sentryUrl, async (req, res, ctx) => {
-      const reqText = await req.text()
+    http.post(sentryUrl, async ({ request }) => {
+      const reqText = await request.text()
       const events = reqText
         .split('\n')
         .map((x) => JSON.parse(x) as SentryEvent)
 
       globalThis.sentryEvents.push(...events)
 
-      return res(ctx.status(200))
+      return new Response()
     }),
   )
 }
