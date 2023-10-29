@@ -1,8 +1,9 @@
+import { ResponseResolver } from 'msw'
+
 import {
   expectIsJsonResponse,
   mockHttpGet,
   returnsText,
-  RestResolver,
   hasInternalServerError,
   expectIsNotFoundResponse,
   currentTestEnvironment,
@@ -292,7 +293,7 @@ function givenLegalPageWith(path: string, text: string) {
   givenLegalPage(path, returnsText(text))
 }
 
-function givenLegalPage(path: string, resolver: RestResolver) {
+function givenLegalPage(path: string, resolver: ResponseResolver) {
   mockHttpGet(
     `https://raw.githubusercontent.com/serlo/serlo.org-legal/main/${path}`,
     resolver,
