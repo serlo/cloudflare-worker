@@ -27,7 +27,6 @@ export function getDefaultCFEnvironment(): CFEnvironment {
     SENTRY_DSN: 'https://public@127.0.0.1/0',
 
     PATH_INFO_KV: createKV(),
-    PACKAGES_KV: createKV(),
   }
 }
 
