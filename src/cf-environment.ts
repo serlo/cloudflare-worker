@@ -6,7 +6,6 @@ export interface CFEnvironment extends CFVariables {
   SENTRY_DSN: string
 
   // KVs
-  PACKAGES_KV: KVNamespace<string>
   PATH_INFO_KV: KVNamespace<CacheKey>
 }
 
