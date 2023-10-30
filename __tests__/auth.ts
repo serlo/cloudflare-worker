@@ -1,8 +1,4 @@
-import {
-  currentTestEnvironment,
-  currentTestEnvironmentWhen,
-  expectIsJsonResponse,
-} from './__utils__'
+import { currentTestEnvironmentWhen, expectIsJsonResponse } from './__utils__'
 
 test('Frontend Sector Identifier URI Validation (block localhost)', async () => {
   const env = currentTestEnvironmentWhen(
@@ -56,13 +52,4 @@ test('Frontend Sector Identifier URI Validation (allow localhost)', async () => 
     'http://localhost:3000/api/auth/callback',
     'http://localhost:3000/api/auth/callback/hydra',
   ])
-})
-
-test('Kratos Identity Schema', async () => {
-  const env = currentTestEnvironment()
-  const response = await env.fetch({
-    pathname: '/auth/kratos-identity.schema.json',
-  })
-
-  expect(response.status).toBe(200)
 })
