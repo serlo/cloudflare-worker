@@ -1,8 +1,7 @@
-import { rest } from 'msw'
+import { ResponseResolver, http } from 'msw'
 
 import {
   hasInternalServerError,
-  RestResolver,
   returnsMalformedJson,
   returnsJson,
   mockHttpGet,
@@ -12,6 +11,7 @@ import {
   expectSentryEvent,
   expectNoSentryError,
 } from './__utils__'
+import { createJsonResponse, createNotFoundResponse } from '../src/utils'
 
 describe('embed.serlo.org/thumbnail?url=...', () => {
   beforeEach(() => {
@@ -94,28 +94,29 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       })
     })
 
-    function givenYoutube(resolver: RestResolver) {
+    function givenYoutube(resolver: YoutubeServer) {
       globalThis.server.use(
-        rest.get('https://i.ytimg.com/vi/:videoId/:format', resolver),
+        http.get('https://i.ytimg.com/vi/:videoId/:format', resolver),
       )
     }
 
-    function defaultYoutubeServer(): RestResolver {
-      return (req, res, ctx) => {
-        const { videoId, format } = req.params
+    function defaultYoutubeServer(): YoutubeServer {
+      return ({ params }) => {
+        const { videoId, format } = params
 
         for (const spec of Object.values(videos)) {
           if (videoId === spec.id && format === spec.format) {
-            return res(
-              ctx.set('content-type', 'image/jpeg'),
-              ctx.set('content-length', spec.contentLength.toString()),
-            )
+            return imageResponse('image/jpeg', spec.contentLength)
           }
         }
 
-        return res(ctx.status(404))
+        return createNotFoundResponse()
       }
     }
+
+    type YoutubeServer = ResponseResolver<{
+      params: Record<string, string>
+    }>
   })
 
   describe('Vimeo', () => {
@@ -287,45 +288,41 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       })
     })
 
-    function givenVimeoCdn(resolver: RestResolver) {
+    function givenVimeoCdn(resolver: ResponseResolver) {
       globalThis.server.use(
-        rest.get<never, never, { thumbnailFilename: string }>(
-          'https://i.vimeocdn.com/video/:thumbnailFilename',
-          resolver,
-        ),
+        http.get('https://i.vimeocdn.com/video/:thumbnailFilename', resolver),
       )
     }
 
-    function defaultVimeoCdn(): RestResolver {
-      return (req, res, ctx) => {
-        if (req.url.href === video.thumbnailUrl) {
-          return res(
-            ctx.set('content-type', 'image/jpeg'),
-            ctx.set('content-length', video.contentLength.toString()),
-          )
+    function defaultVimeoCdn(): ResponseResolver {
+      return ({ request }) => {
+        if (request.url === video.thumbnailUrl) {
+          return imageResponse('image/jpeg', video.contentLength)
         }
-        return res(ctx.status(404))
+        return createNotFoundResponse()
       }
     }
 
-    function givenVimeoApi(resolver: RestResolver) {
+    function givenVimeoApi(resolver: ResponseResolver) {
       globalThis.server.use(
-        rest.get('https://vimeo.com/api/oembed.json', resolver),
+        http.get('https://vimeo.com/api/oembed.json', resolver),
       )
     }
 
-    function defaultVimeoApi(): RestResolver {
-      return (req, res, ctx) => {
+    function defaultVimeoApi(): ResponseResolver {
+      return ({ request }) => {
+        const url = new URL(request.url)
+
         const videoId =
-          req.url.searchParams?.get('url')?.replace('https://vimeo.com/', '') ??
-          ''
+          url.searchParams?.get('url')?.replace('https://vimeo.com/', '') ?? ''
 
         if (videoId === video.id) {
-          return res(
-            ctx.json({ type: 'video', thumbnail_url: video.thumbnailUrl }),
-          )
+          return createJsonResponse({
+            type: 'video',
+            thumbnail_url: video.thumbnailUrl,
+          })
         }
-        return res(ctx.status(404))
+        return createNotFoundResponse()
       }
     }
   })
@@ -379,23 +376,20 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       expectIsPlaceholderResponse(response)
     })
 
-    function givenWikimedia(resolver: RestResolver) {
+    function givenWikimedia(resolver: ResponseResolver) {
       globalThis.server.use(
-        rest.get(
+        http.get(
           'https://upload.wikimedia.org/wikipedia/commons/thumb/*',
           resolver,
         ),
       )
     }
 
-    function defaultWikimediaServer(): RestResolver {
-      return (req, res, ctx) => {
-        return req.url.toString() === video.thumbnailUrl
-          ? res(
-              ctx.set('content-type', 'image/jpeg'),
-              ctx.set('content-length', video.contentLength.toString()),
-            )
-          : res(ctx.status(404))
+    function defaultWikimediaServer(): ResponseResolver {
+      return ({ request }) => {
+        return request.url === video.thumbnailUrl
+          ? imageResponse('image/jpeg', video.contentLength)
+          : createNotFoundResponse()
       }
     }
   })
@@ -564,22 +558,20 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       })
     })
 
-    function givenGeogebraApi(resolver: RestResolver) {
+    function givenGeogebraApi(resolver: ResponseResolver) {
       globalThis.server.use(
-        rest.post('https://www.geogebra.org/api/json.php', resolver),
+        http.post('https://www.geogebra.org/api/json.php', resolver),
       )
     }
 
-    function defaultGeogebraApi(): RestResolver {
-      return async (req, res, ctx) => {
-        const body = await req.json<GeogebraApiBody>()
+    function defaultGeogebraApi(): ResponseResolver {
+      return async ({ request }) => {
+        const body = (await request.json()) as GeogebraApiBody
         const appletId = body.request.task.filters.field[0]['#text']
 
-        return res(
-          ctx.json(
-            createPreviewUrlJSON(
-              appletId === applet.id ? applet.thumbnailUrl : undefined,
-            ),
+        return createJsonResponse(
+          createPreviewUrlJSON(
+            appletId === applet.id ? applet.thumbnailUrl : undefined,
           ),
         )
       }
@@ -604,17 +596,12 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       }
     }
 
-    function givenGeogebraFile(resolver: RestResolver) {
-      globalThis.server.use(rest.get(applet.thumbnailUrl, resolver))
+    function givenGeogebraFile(resolver: ResponseResolver) {
+      globalThis.server.use(http.get(applet.thumbnailUrl, resolver))
     }
 
-    function defaultGeogebraFile(): RestResolver {
-      return (_req, res, ctx) => {
-        return res(
-          ctx.set('content-type', 'image/png'),
-          ctx.set('content-length', applet.contentLength.toString()),
-        )
-      }
+    function defaultGeogebraFile(): ResponseResolver {
+      return () => imageResponse('image/png', applet.contentLength)
     }
   })
 
@@ -697,4 +684,16 @@ function expectImageResponseWithError({
   expect(
     Math.abs(contentLength - expectedContentLength) / expectedContentLength,
   ).toBeLessThanOrEqual(maxRelativeError)
+}
+
+function imageResponse(
+  contentType: 'image/jpeg' | 'image/png',
+  contentLength: number,
+) {
+  const response = new Response()
+
+  response.headers.set('content-type', contentType)
+  response.headers.set('content-length', contentLength.toString())
+
+  return response
 }

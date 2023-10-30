@@ -30,7 +30,6 @@ export default {
         (await redirects(request, env)) ||
         (await embed(request, sentryFactory)) ||
         (await semanticFileNames(request)) ||
-        (await packages(request, env)) ||
         (await api(request, env)) ||
         (await frontendProxy(request, sentryFactory, env)) ||
         (await fetch(request))
@@ -80,30 +79,4 @@ async function semanticFileNames(request: Request) {
     url.pathname = `${prefix}${hash}.${extension}`
   }
   return await fetch(url.href, request)
-}
-
-async function packages(request: Request, env: CFEnvironment) {
-  const url = Url.fromRequest(request)
-
-  if (url.subdomain !== 'packages') return null
-
-  url.host = 'packages.serlo.org'
-
-  const paths = url.pathname.split('/')
-  const resolvedPackage =
-    paths.length >= 2 ? await env.PACKAGES_KV.get(paths[1]) : null
-
-  if (resolvedPackage) {
-    paths[1] = resolvedPackage
-    url.pathname = paths.join('/')
-  }
-
-  let response = await fetch(url.href, request)
-
-  if (resolvedPackage) {
-    response = new Response(response.body, response)
-    response.headers.set('x-package', resolvedPackage)
-  }
-
-  return response
 }
