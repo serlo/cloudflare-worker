@@ -46,7 +46,7 @@
     "@sentry/types": "^7.76.0",
     "@testing-library/jest-dom": "^6.1.4",
     "@types/iarna__toml": "^2.0.4",
-    "@types/jest": "^29.5.6",
+    "@types/jest": "^29.5.7",
     "@types/marked": "^6.0.0",
     "@types/node": "^18.18.7",
     "@types/sanitize-html": "^2.9.3",
