@@ -82,7 +82,7 @@ export function Template({
         <title>Serlo - {title}</title>
         <link href={favicon} rel="icon" type="image/x-icon" />
         <link
-          href="https://packages.serlo.org/serlo-org-client@8/main.css"
+          href="https://packages.serlo.org/athene2-assets@4.1.3/main.css"
           rel="stylesheet"
         />
         <style>{css}</style>
