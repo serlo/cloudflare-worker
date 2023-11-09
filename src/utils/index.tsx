@@ -123,10 +123,8 @@ export async function getPathInfo(
     return null
   }
 
-  const apiResult = ApiResult.decode(apiResponseBody)
-
-  if (E.isLeft(apiResult)) return null
-  const uuid = apiResult.right.data.uuid
+  if (!ApiResult.is(apiResponseBody)) return null
+  const uuid = apiResponseBody.data.uuid
 
   const isTrashedComment = uuid.__typename === 'Comment' && uuid.trashed
 
