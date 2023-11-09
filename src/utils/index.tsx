@@ -52,7 +52,6 @@ const ApiResult = t.type({
         alias: t.string,
         instance: t.string,
         pages: t.array(t.type({ alias: t.string })),
-        exercise: t.type({ alias: t.string }),
         legacyObject: t.type({ alias: t.string }),
         id: t.number,
         trashed: t.boolean,
@@ -97,11 +96,6 @@ export async function getPathInfo(
             alias
           }
         }
-        ... on Solution {
-          exercise {
-            alias
-          }
-        }
         ... on Comment {
           id
           trashed
@@ -129,10 +123,8 @@ export async function getPathInfo(
     return null
   }
 
-  const apiResult = ApiResult.decode(apiResponseBody)
-
-  if (E.isLeft(apiResult)) return null
-  const uuid = apiResult.right.data.uuid
+  if (!ApiResult.is(apiResponseBody)) return null
+  const uuid = apiResponseBody.data.uuid
 
   const isTrashedComment = uuid.__typename === 'Comment' && uuid.trashed
 
@@ -140,8 +132,6 @@ export async function getPathInfo(
     ? `error/deleted/${uuid.__typename}`
     : uuid.legacyObject !== undefined
     ? uuid.legacyObject.alias
-    : uuid.exercise !== undefined
-    ? uuid.exercise.alias
     : uuid.pages !== undefined && uuid.pages.length > 0
     ? uuid.pages[0].alias
     : uuid.alias ?? path
