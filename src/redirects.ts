@@ -48,6 +48,8 @@ export async function redirects(request: Request, env: CFEnvironment) {
       case '/impressum':
         return Response.redirect('https://de.serlo.org/imprint', 301)
       case '/nutzungsbedingungen':
+      case '/21654':
+      case '/21654/nutzungsbedingungen-und-urheberrecht':
         return Response.redirect('https://de.serlo.org/terms', 301)
     }
   }
