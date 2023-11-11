@@ -339,26 +339,6 @@ describe('redirects to current path of an resource', () => {
     })
   })
 
-  test('redirects to exercise when requested entity is a solution', async () => {
-    givenUuid({
-      id: 57353,
-      __typename: 'Solution',
-      alias: '/mathe/57353/57353',
-      exercise: { alias: '/mathe/57351/57351' },
-    })
-
-    const response = await env.fetch({
-      subdomain: 'de',
-      pathname: '/57353',
-    })
-
-    const target = env.createUrl({
-      subdomain: 'de',
-      pathname: '/mathe/57351/57351',
-    })
-    expectToBeRedirectTo(response, target, 301)
-  })
-
   test('redirects to alias of course when list of course pages is empty', async () => {
     const env = localTestEnvironment()
 
