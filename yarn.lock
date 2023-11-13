@@ -1258,7 +1258,7 @@ __metadata:
     marked: ^9.1.6
     msw: ^2.0.5
     npm-run-all: ^4.1.5
-    preact: ^10.19.0
+    preact: ^10.19.1
     preact-render-to-string: ^6.3.0
     prettier: ^3.0.3
     prettier-plugin-packagejson: ^2.4.6
@@ -6432,10 +6432,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"preact@npm:^10.19.0":
-  version: 10.19.0
-  resolution: "preact@npm:10.19.0"
-  checksum: e832a3ea67a80fe23ec4097a9e9a2c00a36c8d03b4252aded141c66a628ead83de1fe4124dd3275400d92e7ed247f33bf9594a29a17b7bb44bd16311665b7ced
+"preact@npm:^10.19.1":
+  version: 10.19.1
+  resolution: "preact@npm:10.19.1"
+  checksum: e27f786ca3c7426fb475dd312dce4b6a99b1d6dd448543d8508a25c2eca89149d345e7c8685001527872a6299c8605c06e789a55952f297a9722ec55c2d2b669
   languageName: node
   linkType: hard
 

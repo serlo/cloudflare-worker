@@ -34,7 +34,7 @@
     "io-ts": "^2.2.20",
     "jose": "^5.1.0",
     "marked": "^9.1.6",
-    "preact": "^10.19.0",
+    "preact": "^10.19.1",
     "preact-render-to-string": "^6.3.0",
     "sanitize-html": "^2.11.0",
     "toucan-js": "^3.3.1"
