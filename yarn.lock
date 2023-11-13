@@ -1256,7 +1256,7 @@ __metadata:
     jest: ^29.7.0
     jose: ^5.1.0
     marked: ^9.1.6
-    msw: ^2.0.5
+    msw: ^2.0.6
     npm-run-all: ^4.1.5
     preact: ^10.19.0
     preact-render-to-string: ^6.3.0
@@ -5771,9 +5771,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"msw@npm:^2.0.5":
-  version: 2.0.5
-  resolution: "msw@npm:2.0.5"
+"msw@npm:^2.0.6":
+  version: 2.0.6
+  resolution: "msw@npm:2.0.6"
   dependencies:
     "@bundled-es-modules/cookie": ^2.0.0
     "@bundled-es-modules/js-levenshtein": ^2.0.1
@@ -5804,7 +5804,7 @@ __metadata:
       optional: true
   bin:
     msw: cli/index.js
-  checksum: ac8d3c6d129496bcd128022853e541a3b7231d8ed477323b3e2cf2e597d3b8778df2c6103d0cd644bc77d4e2e2e4e341a0b7750c48171667c01dc5bcb6ee677c
+  checksum: 5171e9522d2ac6d5989010dfefc1e15e1f8c6ec2b7dc9df8aff1596a4a0508190ce130749a17865181b04790f90ff03bc0b901dfaa1fc00281aac6453ef817a1
   languageName: node
   linkType: hard
 
