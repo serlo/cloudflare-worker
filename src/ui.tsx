@@ -128,7 +128,7 @@ export function Template({
   )
 
   function getFooter() {
-    switch (lang) {
+    switch (lang as Instance) {
       case Instance.De:
         return (
           <Fragment>
