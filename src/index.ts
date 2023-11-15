@@ -56,7 +56,7 @@ async function enforceHttps(request: Request) {
   if (url.subdomain === 'pacts') return null
   if (url.protocol !== 'http:') return null
   url.protocol = 'https:'
-  return Promise.resolve(url.toRedirect())
+  return Promise.resolve(url.toRedirect(301))
 }
 
 async function semanticFileNames(request: Request) {
@@ -76,5 +76,5 @@ async function semanticFileNames(request: Request) {
 
     url.pathname = `${prefix}${hash}.${extension}`
   }
-  return await fetch(url.href, request)
+  return await fetch(url.href, { headers: request.headers })
 }

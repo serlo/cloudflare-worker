@@ -51,7 +51,7 @@ export async function redirects(request: Request, env: CFEnvironment) {
   }
 
   if (url.pathnameWithoutTrailingSlash === '/organization') {
-    return Response.redirect('https://de.serlo.org/serlo')
+    return Response.redirect('https://de.serlo.org/serlo', 301)
   }
 
   if (
@@ -115,6 +115,7 @@ export async function redirects(request: Request, env: CFEnvironment) {
       meetRedirect
         ? `https://meet.google.com/${meetRedirect}`
         : 'https://serlo.org/___cf_not_found',
+      302,
     )
   }
 
@@ -161,7 +162,7 @@ export async function redirects(request: Request, env: CFEnvironment) {
 
   if (isInstance(url.subdomain) && url.pathname === '/user/public') {
     url.pathname = '/user/me'
-    return url.toRedirect()
+    return url.toRedirect(301)
   }
 
   if (url.subdomain === 'www' || url.subdomain === '') {
@@ -171,7 +172,7 @@ export async function redirects(request: Request, env: CFEnvironment) {
     }
 
     url.subdomain = Instance.De
-    return url.toRedirect()
+    return url.toRedirect(301)
   }
 
   if (isInstance(url.subdomain)) {

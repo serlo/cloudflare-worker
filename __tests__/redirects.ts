@@ -95,7 +95,7 @@ test('*.serlo.org/user/public -> *serlo.org/user/me', async () => {
   })
 
   const target = env.createUrl({ subdomain: 'hi', pathname: '/user/me' })
-  expectToBeRedirectTo(response, target, 302)
+  expectToBeRedirectTo(response, target, 301)
 })
 
 test.each(['/neuerechtsform', '/neuerechtsform/'])(
@@ -174,7 +174,7 @@ test('serlo.org/* redirects to de.serlo.org/*', async () => {
   const response = await env.fetch({ pathname: '/foo' })
 
   const target = env.createUrl({ subdomain: 'de', pathname: '/foo' })
-  expectToBeRedirectTo(response, target, 302)
+  expectToBeRedirectTo(response, target, 301)
 })
 
 test('www.serlo.org/* redirects to de.serlo.org/*', async () => {
@@ -184,7 +184,7 @@ test('www.serlo.org/* redirects to de.serlo.org/*', async () => {
   })
 
   const target = env.createUrl({ subdomain: 'de', pathname: '/foo' })
-  expectToBeRedirectTo(response, target, 302)
+  expectToBeRedirectTo(response, target, 301)
 })
 
 test('/page/view/:id redirects to /:id', async () => {
