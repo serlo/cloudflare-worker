@@ -46,7 +46,9 @@ export async function redirects(request: Request, env: CFEnvironment) {
       case '/datenschutz':
         return Response.redirect('https://de.serlo.org/privacy', 301)
       case '/impressum':
-        return Response.redirect('https://de.serlo.org/imprint', 301)
+        return Response.redirect('https://de.serlo.org/legal', 301)
+      case '/imprint':
+        return Response.redirect('https://de.serlo.org/legal', 301)
       case '/nutzungsbedingungen':
       case '/21654':
       case '/21654/nutzungsbedingungen-und-urheberrecht':
