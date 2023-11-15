@@ -43,7 +43,7 @@ export class Url extends URL {
     )
   }
 
-  public toRedirect(status?: number) {
+  public toRedirect(status: 301 | 302) {
     return Response.redirect(this.toString(), status)
   }
 
