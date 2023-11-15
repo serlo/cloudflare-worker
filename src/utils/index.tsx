@@ -127,10 +127,10 @@ export async function getPathInfo(
   const currentPath = isTrashedComment
     ? `error/deleted/${uuid.__typename}`
     : uuid.legacyObject !== undefined
-    ? uuid.legacyObject.alias
-    : uuid.pages !== undefined && uuid.pages.length > 0
-    ? uuid.pages[0].alias
-    : uuid.alias ?? path
+      ? uuid.legacyObject.alias
+      : uuid.pages !== undefined && uuid.pages.length > 0
+        ? uuid.pages[0].alias
+        : uuid.alias ?? path
   const result = {
     typename: uuid.__typename,
     currentPath,
