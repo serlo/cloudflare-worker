@@ -64,6 +64,7 @@ export abstract class TestEnvironment {
   public abstract fetchRequest(request: Request): Promise<Response>
 
   public createRequest(spec: UrlSpec, init?: RequestInit) {
+    // @ts-expect-error not sure why 🤷
     return new Request(this.createUrl(spec), init)
   }
 
