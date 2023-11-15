@@ -59,9 +59,12 @@ async function fetchBackend({
     backendUrl.pathname = backendUrl.pathnameWithoutTrailingSlash
   }
 
-  const response = await fetch(new Request(backendUrl.toString(), request), {
-    redirect: route.__typename === 'Frontend' ? route.redirect : 'manual',
-  })
+  const response = await fetch(
+    new Request(backendUrl.toString(), { headers: request.headers }),
+    {
+      redirect: route.__typename === 'Frontend' ? route.redirect : 'manual',
+    },
+  )
 
   if (sentry) {
     if (route.__typename === 'Frontend' && response.status === 302) {
