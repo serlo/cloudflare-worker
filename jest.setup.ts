@@ -48,6 +48,7 @@ afterAll(() => {
 })
 
 function addGlobalMocks() {
+  // @ts-expect-error not sure why 🤷
   globalThis.crypto = {
     subtle: {
       digest(encoding: string, message: Uint8Array) {
