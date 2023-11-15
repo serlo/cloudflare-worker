@@ -182,7 +182,7 @@ export function Template({
                   <a href="/consent">Revoke consent</a>
                 </li>
                 <li>
-                  <a href="/imprint">Imprint</a>
+                  <a href="/legal">Legal Notice</a>
                 </li>
               </ul>
             </nav>
