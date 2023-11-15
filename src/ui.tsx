@@ -152,7 +152,7 @@ export function Template({
                   <a href="/consent">Einwilligungen widerrufen</a>
                 </li>
                 <li>
-                  <a href="/imprint">Impressum</a>
+                  <a href="/legal">Impressum</a>
                 </li>
               </ul>
             </nav>
