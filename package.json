@@ -10,7 +10,7 @@
   "author": "Serlo Education e.V.",
   "type": "module",
   "scripts": {
-    "_eslint": "eslint \"{{__fixtures__,__tests-pacts__,__tests__,scripts,src}/**/*,*}.{js,jsx,ts,tsx}\"",
+    "_eslint": "eslint \"{{__tests__,scripts,src}/**/*,*}.{js,jsx,ts,tsx}\"",
     "_prettier": "prettier .",
     "build": "wrangler deploy --dry-run --outdir=dist",
     "check:all": "scripts/run_all_checks.sh",
