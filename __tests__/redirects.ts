@@ -1,5 +1,4 @@
 import {
-  expectIsNotFoundResponse,
   expectToBeRedirectTo,
   givenApi,
   givenUuid,
@@ -37,7 +36,8 @@ describe('meet.serlo.org', () => {
       pathname: '/foo',
     })
 
-    await expectIsNotFoundResponse(response)
+    const target = `https://serlo.org/___cf_not_found`
+    expectToBeRedirectTo(response, target, 302)
   })
 })
 

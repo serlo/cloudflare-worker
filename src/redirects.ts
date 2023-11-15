@@ -1,11 +1,5 @@
 import { CFEnvironment } from './cf-environment'
-import {
-  createNotFoundResponse,
-  getPathInfo,
-  Instance,
-  isInstance,
-  Url,
-} from './utils'
+import { getPathInfo, Instance, isInstance, Url } from './utils'
 
 const meetRedirects: Record<string, string | undefined> = {
   '/': 'vtk-ncrc-rdp',
@@ -117,9 +111,11 @@ export async function redirects(request: Request, env: CFEnvironment) {
 
   if (url.subdomain === 'meet') {
     const meetRedirect = meetRedirects[url.pathname]
-    return meetRedirect == null
-      ? createNotFoundResponse()
-      : Response.redirect(`https://meet.google.com/${meetRedirect}`)
+    return Response.redirect(
+      meetRedirect
+        ? `https://meet.google.com/${meetRedirect}`
+        : 'https://serlo.org/___cf_not_found',
+    )
   }
 
   if (
