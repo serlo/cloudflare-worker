@@ -1,5 +1,3 @@
-import { h } from 'preact'
-
 import {
   expectContainsText,
   expectContentTypeIsHtml,
@@ -15,10 +13,8 @@ import {
 import { CFEnvironment } from '../src/cf-environment'
 import {
   getCookieValue,
-  sanitizeHtml,
-  markdownToHtml,
   isInstance,
-  createPreactResponse,
+  createHtmlResponse,
   createJsonResponse,
   createNotFoundResponse,
   getPathInfo,
@@ -208,31 +204,8 @@ describe('isInstance()', () => {
   expect(isInstance('')).toBe(false)
 })
 
-describe('sanitizeHtml()', () => {
-  test.each([
-    ['<p>Hello</p>\n\n<script>42;</script>\n', '<p>Hello</p>'],
-    [
-      '<h1 id="test":>Hello</h1><iframe src="https://google.de/" />',
-      '<h1>Hello</h1>',
-    ],
-    ['console.log(42)\n   ', 'console.log(42)'],
-  ])('HTML-Code %p', (html, sanitizedHtml) => {
-    expect(sanitizeHtml(html)).toBe(sanitizedHtml)
-  })
-})
-
-describe('markdownToHtml()', () => {
-  test.each([
-    ['# Hello', '<h1>Hello</h1>'],
-    ['* 1\n* 2', '<ul>\n<li>1</li>\n<li>2</li>\n</ul>'],
-    ['', ''],
-  ])('Markdown: %p', (markdown, html) => {
-    expect(markdownToHtml(markdown)).toBe(html)
-  })
-})
-
-test('PreactResponse', async () => {
-  const hello = createPreactResponse(<h1>Hello</h1>)
+test('HtmlResponse', async () => {
+  const hello = createHtmlResponse(`<h1>Hello</h1>`)
 
   expect(hello.status).toBe(200)
   expectContentTypeIsHtml(hello)
