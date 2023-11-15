@@ -1,7 +1,8 @@
 {
-  "include": ["src"],
-  "exclude": ["node_modules", "__tests__"],
+  "include": ["*.js", "*.ts", "__tests__", "scripts", "src"],
+  "exclude": ["node_modules"],
   "compilerOptions": {
+    "checkJs": true,
     "incremental": true,
     "outDir": "dist",
     "noEmit": true,
