@@ -1,6 +1,7 @@
 import TOML from '@iarna/toml'
 import fs from 'fs'
 import path from 'path'
+import type { RequestInit } from 'undici-types'
 import { fileURLToPath } from 'url'
 
 import { createKV } from './kv'
@@ -64,7 +65,6 @@ export abstract class TestEnvironment {
   public abstract fetchRequest(request: Request): Promise<Response>
 
   public createRequest(spec: UrlSpec, init?: RequestInit) {
-    // @ts-expect-error not sure why 🤷
     return new Request(this.createUrl(spec), init)
   }
 
