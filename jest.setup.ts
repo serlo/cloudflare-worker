@@ -48,20 +48,14 @@ afterAll(() => {
 })
 
 function addGlobalMocks() {
-  // @ts-expect-error not sure why 🤷
-  globalThis.crypto = {
-    subtle: {
-      digest(encoding: string, message: Uint8Array) {
-        return Promise.resolve(
-          cryptoNode
-            .createHash(encoding.toLowerCase().replace('-', ''))
-            .update(message)
-            .digest(),
-        )
-      },
-    },
-    randomUUID: cryptoNode.randomUUID,
-  } as unknown as typeof crypto
+  globalThis.cryptoDigest = (encoding: string, message: Uint8Array) => {
+    return Promise.resolve(
+      cryptoNode
+        .createHash(encoding.toLowerCase().replace('-', ''))
+        .update(message)
+        .digest(),
+    )
+  }
 }
 
 function mockSentryServer() {
@@ -89,4 +83,6 @@ declare global {
   var server: ReturnType<typeof import('msw/node').setupServer>
   // eslint-disable-next-line no-var
   var sentryEvents: SentryEvent[]
+  // eslint-disable-next-line no-var
+  var cryptoDigest: (encoding: string, message: Uint8Array) => Promise<Buffer>
 }
