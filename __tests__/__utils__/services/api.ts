@@ -1,8 +1,8 @@
-import { http, ResponseResolver } from 'msw'
+import { http, HttpResponse, ResponseResolver } from 'msw'
 
 import { getUuid } from './database'
 import { badRequest, createUrlRegex } from './utils'
-import { createJsonResponse, Instance } from '../../../src/utils'
+import { Instance } from '../../../src/utils'
 
 export function givenApi(resolver: ResponseResolver) {
   globalThis.server.use(
@@ -39,7 +39,7 @@ export function defaultApiServer(): ResponseResolver {
     if (result.alias !== undefined)
       result.alias = encodeURIComponent(result.alias).replace(/%2F/g, '/')
 
-    return createJsonResponse({ data: { uuid: result } })
+    return HttpResponse.json({ data: { uuid: result } })
   }
 }
 
