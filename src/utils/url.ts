@@ -47,7 +47,12 @@ export class Url extends URL {
     return Response.redirect(this.toString(), status)
   }
 
-  public static fromRequest(request: Request): Url {
+  // This avoids type errors in the case there are differen incompatible type
+  // definitions for `Request` (we only need the `url` parameter of the
+  // `request` object anyways).
+  //
+  // See also https://github.com/cloudflare/workerd/issues/1298
+  public static fromRequest(request: { url: string }): Url {
     return new Url(request.url)
   }
 }

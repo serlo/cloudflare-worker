@@ -76,5 +76,5 @@ async function semanticFileNames(request: Request) {
 
     url.pathname = `${prefix}${hash}.${extension}`
   }
-  return await fetch(url.href, { headers: request.headers })
+  return await fetch(url.href, request)
 }
