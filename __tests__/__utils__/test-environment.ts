@@ -1,6 +1,7 @@
 import { CfProperties } from '@cloudflare/workers-types'
 import TOML from '@iarna/toml'
 import fs from 'fs'
+import { bypass } from 'msw'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -8,7 +9,6 @@ import { createKV } from './kv'
 import cloudflareWorker from '../../src'
 import { CFEnvironment, CFVariables } from '../../src/cf-environment'
 import { isInstance } from '../../src/utils'
-import { bypass } from 'msw'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
