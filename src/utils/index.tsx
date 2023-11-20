@@ -1,13 +1,9 @@
 import { either as E } from 'fp-ts'
 import * as t from 'io-ts'
-import { marked } from 'marked'
-import { h, VNode } from 'preact'
-import renderToString from 'preact-render-to-string'
-import sanitize from 'sanitize-html'
 
 import { fetchApi } from '../api'
 import { CFEnvironment } from '../cf-environment'
-import { NotFound } from '../ui'
+import { getNotFoundHtml } from '../ui'
 
 export * from './sentry'
 export * from './url'
@@ -151,24 +147,8 @@ export async function getPathInfo(
   return result
 }
 
-export function sanitizeHtml(html: string): string {
-  return sanitize(html, {
-    allowedTags: sanitize.defaults.allowedTags
-      .filter((x) => x !== 'iframe')
-      .concat(['h1', 'h2']),
-  }).trim()
-}
-
-export function markdownToHtml(markdown: string): string {
-  return marked.parse(markdown).trim()
-}
-
-export function createPreactResponse(
-  component: VNode | null,
-  opt?: ResponseInit,
-) {
-  const body = component ? renderToString(component) : null
-  return new Response(body, {
+export function createHtmlResponse(html: string, opt?: ResponseInit) {
+  return new Response(html, {
     ...opt,
     headers: {
       ...opt?.headers,
@@ -184,7 +164,7 @@ export function createJsonResponse(json: unknown) {
 }
 
 export function createNotFoundResponse() {
-  return createPreactResponse(<NotFound />, { status: 404 })
+  return createHtmlResponse(getNotFoundHtml(), { status: 404 })
 }
 
 interface CacheKeyBrand {

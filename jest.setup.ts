@@ -48,6 +48,13 @@ afterAll(() => {
 })
 
 function addGlobalMocks() {
+  // `@cloudflare/workers-types` defines `crypto` to be on the
+  // [self](https://developer.mozilla.org/en-US/docs/Web/API/Window/self)
+  // property which makes sense for a workers environment. However when we run
+  // the tests via node `self` is not defined and we need to set global variables
+  // via `global` or `globalThis`.
+  //
+  // @ts-expect-error When running node `self` is not defined but `globalThis` is
   globalThis.crypto = {
     subtle: {
       digest(encoding: string, message: Uint8Array) {
