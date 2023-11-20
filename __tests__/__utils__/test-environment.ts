@@ -1,6 +1,7 @@
 import { CfProperties } from '@cloudflare/workers-types'
 import TOML from '@iarna/toml'
 import fs from 'fs'
+import { bypass } from 'msw'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -149,10 +150,7 @@ class RemoteEnvironment extends TestEnvironment {
   }
 
   public createRequest(spec: UrlSpec, init?: RequestInit) {
-    const request = super.createRequest(spec, init)
-
-    // See https://github.com/mswjs/msw/blob/master/src/context/fetch.ts
-    request.headers.set('x-msw-bypass', 'true')
+    const request = super.createRequest(spec, { ...init, redirect: 'manual' })
 
     if (this.name === 'staging' && isInstance(spec.subdomain)) {
       request.headers.set('Authorization', 'Basic c2VybG90ZWFtOnNlcmxvdGVhbQ==')
@@ -163,7 +161,7 @@ class RemoteEnvironment extends TestEnvironment {
 
   public async fetchRequest(request: Request, retry = 0): Promise<Response> {
     try {
-      return fetch(request, { redirect: 'manual' })
+      return fetch(bypass(request))
     } catch (error) {
       if (
         error instanceof Error &&
