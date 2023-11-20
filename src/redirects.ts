@@ -40,7 +40,6 @@ export async function redirects(request: Request, env: CFEnvironment) {
       case '/datenschutz':
         return Response.redirect('https://de.serlo.org/privacy', 301)
       case '/impressum':
-        return Response.redirect('https://de.serlo.org/legal', 301)
       case '/imprint':
         return Response.redirect('https://de.serlo.org/legal', 301)
       case '/nutzungsbedingungen':
@@ -111,12 +110,10 @@ export async function redirects(request: Request, env: CFEnvironment) {
 
   if (url.subdomain === 'meet') {
     const meetRedirect = meetRedirects[url.pathname]
-    return Response.redirect(
-      meetRedirect
-        ? `https://meet.google.com/${meetRedirect}`
-        : 'https://serlo.org/___cf_not_found',
-      302,
-    )
+    const redirectUrl = meetRedirect
+      ? `https://meet.google.com/${meetRedirect}`
+      : 'https://serlo.org/___cf_not_found'
+    return Response.redirect(redirectUrl, 302)
   }
 
   if (
