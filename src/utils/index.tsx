@@ -188,7 +188,7 @@ export async function toCacheKey(key: string): Promise<CacheKey> {
 
 async function digestMessage(message: string): Promise<string> {
   const msgUint8 = new TextEncoder().encode(message)
-  const hashBuffer = await cryptoDigest('SHA-1', msgUint8)
+  const hashBuffer = await crypto.subtle.digest('SHA-1', msgUint8)
   const hashArray = Array.from(new Uint8Array(hashBuffer))
   return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
 }
