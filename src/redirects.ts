@@ -1,11 +1,5 @@
 import { CFEnvironment } from './cf-environment'
-import {
-  createNotFoundResponse,
-  getPathInfo,
-  Instance,
-  isInstance,
-  Url,
-} from './utils'
+import { getPathInfo, Instance, isInstance, Url } from './utils'
 
 const meetRedirects: Record<string, string | undefined> = {
   '/': 'vtk-ncrc-rdp',
@@ -46,7 +40,8 @@ export async function redirects(request: Request, env: CFEnvironment) {
       case '/datenschutz':
         return Response.redirect('https://de.serlo.org/privacy', 301)
       case '/impressum':
-        return Response.redirect('https://de.serlo.org/imprint', 301)
+      case '/imprint':
+        return Response.redirect('https://de.serlo.org/legal', 301)
       case '/nutzungsbedingungen':
       case '/21654':
       case '/21654/nutzungsbedingungen-und-urheberrecht':
@@ -55,7 +50,7 @@ export async function redirects(request: Request, env: CFEnvironment) {
   }
 
   if (url.pathnameWithoutTrailingSlash === '/organization') {
-    return Response.redirect('https://de.serlo.org/serlo')
+    return Response.redirect('https://de.serlo.org/serlo', 301)
   }
 
   if (
@@ -115,9 +110,10 @@ export async function redirects(request: Request, env: CFEnvironment) {
 
   if (url.subdomain === 'meet') {
     const meetRedirect = meetRedirects[url.pathname]
-    return meetRedirect == null
-      ? createNotFoundResponse()
-      : Response.redirect(`https://meet.google.com/${meetRedirect}`)
+    const redirectUrl = meetRedirect
+      ? `https://meet.google.com/${meetRedirect}`
+      : 'https://serlo.org/___cf_not_found'
+    return Response.redirect(redirectUrl, 302)
   }
 
   if (
@@ -163,7 +159,7 @@ export async function redirects(request: Request, env: CFEnvironment) {
 
   if (isInstance(url.subdomain) && url.pathname === '/user/public') {
     url.pathname = '/user/me'
-    return url.toRedirect()
+    return url.toRedirect(301)
   }
 
   if (url.subdomain === 'www' || url.subdomain === '') {
@@ -173,7 +169,7 @@ export async function redirects(request: Request, env: CFEnvironment) {
     }
 
     url.subdomain = Instance.De
-    return url.toRedirect()
+    return url.toRedirect(301)
   }
 
   if (isInstance(url.subdomain)) {

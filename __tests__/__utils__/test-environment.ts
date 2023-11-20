@@ -1,3 +1,4 @@
+import { CfProperties } from '@cloudflare/workers-types'
 import TOML from '@iarna/toml'
 import fs from 'fs'
 import path from 'path'
@@ -63,8 +64,8 @@ export abstract class TestEnvironment {
 
   public abstract fetchRequest(request: Request): Promise<Response>
 
-  public createRequest(spec: UrlSpec, init?: RequestInit) {
-    return new Request(this.createUrl(spec), init)
+  public createRequest(spec: UrlSpec, init?: RequestInit<CfProperties>) {
+    return new Request<unknown, CfProperties>(this.createUrl(spec), init)
   }
 
   public createUrl({
