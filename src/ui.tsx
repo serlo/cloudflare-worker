@@ -1,11 +1,11 @@
 import { faviconBase64, logoBase64 } from './assets/logos'
 
 export function getNotFoundHtml() {
-  return wrapInTemplate(
-    `<p>The page you have requested does not exist.</p>`,
-    'en',
-    'Page Not Found',
-  )
+  return wrapInTemplate({
+    title: 'Page Not Found',
+    lang: 'en',
+    content: `<p>The page you have requested does not exist.</p>`,
+  })
 }
 
 export function getMaintenanceHtml({
@@ -17,7 +17,7 @@ export function getMaintenanceHtml({
 }) {
   const { content, title } = getTranslations()
 
-  return wrapInTemplate(content, lang, title)
+  return wrapInTemplate({ content, lang, title })
 
   function getTranslations() {
     switch (lang) {
@@ -39,7 +39,15 @@ export function getMaintenanceHtml({
   }
 }
 
-export function wrapInTemplate(html: string, lang: 'de' | 'en', title: string) {
+export function wrapInTemplate({
+  content,
+  lang,
+  title,
+}: {
+  content: string
+  lang: 'de' | 'en'
+  title: string
+}) {
   const isDe = lang === 'de'
   return `
   <html lang="${lang}">
@@ -91,7 +99,7 @@ export function wrapInTemplate(html: string, lang: 'de' | 'en', title: string) {
         </header>
         <main>
           <h1>${title}</h1>
-          ${html}
+          ${content}
         </main>
 
         <footer>

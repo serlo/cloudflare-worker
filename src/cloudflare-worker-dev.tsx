@@ -58,10 +58,10 @@ function createIndexHtml() {
     .join('')
 
   return createHtmlResponse(
-    wrapInTemplate(
-      `<ul>${listHtml}</ul>`,
-      'en',
-      'Serlo Cloudflare Worker: Preview of components',
-    ),
+    wrapInTemplate({
+      title: 'Serlo Cloudflare Worker: Preview of components',
+      lang: 'en',
+      content: `<ul>${listHtml}</ul>`,
+    }),
   )
 }
