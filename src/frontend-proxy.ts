@@ -59,7 +59,7 @@ async function fetchBackend({
     backendUrl.pathname = backendUrl.pathnameWithoutTrailingSlash
   }
 
-  const response = await fetch(backendUrl.toString(), {
+  const response = await fetch(new Request(backendUrl.toString(), request), {
     redirect: route.__typename === 'Frontend' ? route.redirect : 'manual',
   })
 
