@@ -15,7 +15,7 @@
     "build": "wrangler deploy --dry-run --outdir=dist",
     "check:all": "scripts/run_all_checks.sh",
     "check:unused-dependencies": "depcheck",
-    "check:unused-exports": "ts-unused-exports tsconfig.json --excludePathsFromReport=__tests__/__utils__/index.ts",
+    "check:unused-exports": "ts-unused-exports tsconfig.json --ignoreTestFiles",
     "deploy": "wrangler deploy",
     "dev": "wrangler dev --env staging",
     "format": "run-s --continue-on-error \"format:*\"",
