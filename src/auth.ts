@@ -1,5 +1,5 @@
 import { CFEnvironment } from './cf-environment'
-import { Instance, createJsonResponse, Url } from './utils'
+import { Instance, Url } from './utils'
 
 export function auth(request: Request, env: CFEnvironment): Response | null {
   return authFrontendSectorIdentifierUriValidation(request, env)
@@ -32,5 +32,5 @@ function authFrontendSectorIdentifierUriValidation(
       : []),
   ]
 
-  return createJsonResponse(redirectUris)
+  return Response.json(redirectUris)
 }
