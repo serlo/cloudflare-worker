@@ -430,14 +430,14 @@ describe('redirects to current path of an resource', () => {
 
   test('redirects to error when comment is deleted', async () => {
     givenUuid({
-      id: 65398,
+      id: 57989,
       __typename: 'Comment',
-      alias: '/mathe/65398/65398',
+      alias: '/mathe/57989/tabellen-der-binomialverteilung',
       trashed: true,
-      legacyObject: { alias: '/mathe/1573/vektor' },
+      legacyObject: { alias: '"/mathe/2015/bernoulli-kette' },
     })
 
-    const response = await env.fetch({ subdomain: 'de', pathname: '/65398' })
+    const response = await env.fetch({ subdomain: 'de', pathname: '/57989' })
 
     const target = env.createUrl({
       subdomain: 'de',
