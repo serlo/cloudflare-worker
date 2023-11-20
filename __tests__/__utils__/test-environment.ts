@@ -1,7 +1,6 @@
 import TOML from '@iarna/toml'
 import fs from 'fs'
 import path from 'path'
-import type { RequestInit } from 'undici-types'
 import { fileURLToPath } from 'url'
 
 import { createKV } from './kv'
@@ -179,6 +178,11 @@ class RemoteEnvironment extends TestEnvironment {
     }
   }
 }
+
+// There seem to be conflicting type definitions of `RequestInit` in `node`,
+// `cloudflare-worker` and `undici-types`. With the following code the always
+// use the `RequestInit` definition coresponding to the `Request` class.
+type RequestInit = ConstructorParameters<typeof Request>[1]
 
 interface Config {
   env: {
