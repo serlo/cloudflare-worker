@@ -53,11 +53,7 @@ export function cloudflareWorkerDev(request: Request) {
 function createIndexHtml() {
   const listHtml = components
     .map(({ title, subpath }) => {
-      return `
-      <li>
-        <a href="${basePath}/${subpath}">${title}</a>
-      </li>
-    `
+      return `<li><a href="${basePath}/${subpath}">${title}</a></li>`
     })
     .join('')
 
