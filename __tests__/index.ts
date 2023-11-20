@@ -14,7 +14,7 @@ describe('Enforce HTTPS', () => {
   test('HTTP URL', async () => {
     const response = await env.fetch({ subdomain: 'en', protocol: 'http' })
 
-    expectToBeRedirectTo(response, env.createUrl({ subdomain: 'en' }), 302)
+    expectToBeRedirectTo(response, env.createUrl({ subdomain: 'en' }), 301)
   })
 
   test('HTTPS URL', async () => {

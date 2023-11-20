@@ -4,7 +4,6 @@ import { CFEnvironment } from './cf-environment'
 import { cloudflareWorkerDev } from './cloudflare-worker-dev'
 import { embed } from './embed'
 import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
-import { legalPages } from './legal-pages'
 import { pdfProxy } from './pdf-proxy'
 import { quickbarProxy } from './quickbar-proxy'
 import { redirects } from './redirects'
@@ -21,7 +20,6 @@ export default {
         cloudflareWorkerDev(request) ||
         auth(request, env) ||
         (await enforceHttps(request)) ||
-        (await legalPages(request)) ||
         (await quickbarProxy(request, sentryFactory)) ||
         (await pdfProxy(request, sentryFactory)) ||
         robotsTxt(request, env) ||
@@ -58,7 +56,7 @@ async function enforceHttps(request: Request) {
   if (url.subdomain === 'pacts') return null
   if (url.protocol !== 'http:') return null
   url.protocol = 'https:'
-  return Promise.resolve(url.toRedirect())
+  return Promise.resolve(url.toRedirect(301))
 }
 
 async function semanticFileNames(request: Request) {
