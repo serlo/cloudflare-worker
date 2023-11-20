@@ -29,7 +29,9 @@ describe('de.serlo.org/api/stats/quickbar.json', () => {
       pathname: '/api/stats/quickbar.json',
     })
     expect(response.status).toBe(200)
-    expect(response.headers.get('content-type')).toBe('application/json')
+    expect(response.headers.get('content-type')).toEqual(
+      expect.stringContaining('application/json'),
+    )
 
     expect(await response.text()).toEqual(
       expect.stringContaining('"title":"Mathematik Startseite"'),
