@@ -48,14 +48,26 @@ afterAll(() => {
 })
 
 function addGlobalMocks() {
-  globalThis.cryptoDigest = (encoding: string, message: Uint8Array) => {
-    return Promise.resolve(
-      cryptoNode
-        .createHash(encoding.toLowerCase().replace('-', ''))
-        .update(message)
-        .digest(),
-    )
-  }
+  // `@cloudflare/workers-types` defines `crypto` to be on the
+  // [self](https://developer.mozilla.org/en-US/docs/Web/API/Window/self)
+  // property which makes sense for a workers environment. However when we run
+  // the tests via node `self` is not defined and we need to set global variables
+  // via `global` or `globalThis`.
+  //
+  // @ts-expect-error When running node `self` is not defined but `globalThis` is
+  globalThis.crypto = {
+    subtle: {
+      digest(encoding: string, message: Uint8Array) {
+        return Promise.resolve(
+          cryptoNode
+            .createHash(encoding.toLowerCase().replace('-', ''))
+            .update(message)
+            .digest(),
+        )
+      },
+    },
+    randomUUID: cryptoNode.randomUUID,
+  } as unknown as typeof crypto
 }
 
 function mockSentryServer() {
@@ -83,6 +95,4 @@ declare global {
   var server: ReturnType<typeof import('msw/node').setupServer>
   // eslint-disable-next-line no-var
   var sentryEvents: SentryEvent[]
-  // eslint-disable-next-line no-var
-  var cryptoDigest: (encoding: string, message: Uint8Array) => Promise<Buffer>
 }
