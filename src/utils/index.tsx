@@ -3,7 +3,6 @@ import * as t from 'io-ts'
 
 import { fetchApi } from '../api'
 import { CFEnvironment } from '../cf-environment'
-import { getNotFoundHtml } from '../ui'
 
 export * from './sentry'
 export * from './url'
@@ -161,10 +160,6 @@ export function createJsonResponse(json: unknown) {
   return new Response(JSON.stringify(json), {
     headers: { 'Content-Type': 'application/json' },
   })
-}
-
-export function createNotFoundResponse() {
-  return createHtmlResponse(getNotFoundHtml(), { status: 404 })
 }
 
 interface CacheKeyBrand {
