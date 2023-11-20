@@ -13,13 +13,6 @@ export function expectContentTypeIsHtml(response: Response): void {
   expect(response.headers.get('Content-Type')).toBe('text/html;charset=utf-8')
 }
 
-export async function expectIsNotFoundResponse(
-  response: Response,
-): Promise<void> {
-  expect(response.status).toBe(404)
-  await expectContainsText(response, ['Page Not Found'])
-}
-
 export async function expectIsJsonResponse(
   response: Response,
   targetJson: unknown,

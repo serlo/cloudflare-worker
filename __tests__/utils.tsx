@@ -2,7 +2,6 @@ import {
   expectContainsText,
   expectContentTypeIsHtml,
   expectIsJsonResponse,
-  expectIsNotFoundResponse,
   givenApi,
   givenUuid,
   hasInternalServerError,
@@ -16,7 +15,6 @@ import {
   isInstance,
   createHtmlResponse,
   createJsonResponse,
-  createNotFoundResponse,
   getPathInfo,
   Instance,
   toCacheKey,
@@ -215,8 +213,4 @@ test('HtmlResponse', async () => {
 test('JsonResponse', async () => {
   const response = createJsonResponse({ foo: [1, 2, 3] })
   await expectIsJsonResponse(response, { foo: [1, 2, 3] })
-})
-
-test('NotFoundResponse', async () => {
-  await expectIsNotFoundResponse(createNotFoundResponse())
 })
