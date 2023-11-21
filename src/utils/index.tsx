@@ -156,12 +156,6 @@ export function createHtmlResponse(html: string, opt?: ResponseInit) {
   })
 }
 
-export function createJsonResponse(json: unknown) {
-  return new Response(JSON.stringify(json), {
-    headers: { 'Content-Type': 'application/json' },
-  })
-}
-
 interface CacheKeyBrand {
   readonly CacheKey: unique symbol
 }

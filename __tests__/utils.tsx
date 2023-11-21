@@ -1,7 +1,6 @@
 import {
   expectContainsText,
   expectContentTypeIsHtml,
-  expectIsJsonResponse,
   givenApi,
   givenUuid,
   hasInternalServerError,
@@ -14,7 +13,6 @@ import {
   getCookieValue,
   isInstance,
   createHtmlResponse,
-  createJsonResponse,
   getPathInfo,
   Instance,
   toCacheKey,
@@ -208,9 +206,4 @@ test('HtmlResponse', async () => {
   expect(hello.status).toBe(200)
   expectContentTypeIsHtml(hello)
   await expectContainsText(hello, ['<h1>Hello</h1>'])
-})
-
-test('JsonResponse', async () => {
-  const response = createJsonResponse({ foo: [1, 2, 3] })
-  await expectIsJsonResponse(response, { foo: [1, 2, 3] })
 })

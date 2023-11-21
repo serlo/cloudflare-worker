@@ -1,7 +1,6 @@
 import { http } from 'msw'
 
-import { currentTestEnvironment } from './__utils__'
-import { createJsonResponse } from '../src/utils'
+import { currentTestEnvironment, returnsJson } from './__utils__'
 
 const quickbarData = [
   {
@@ -17,9 +16,7 @@ describe('de.serlo.org/api/stats/quickbar.json', () => {
   beforeEach(() => {
     const url = 'https://serlo.github.io/quickbar-updater/quickbar.json'
 
-    globalThis.server.use(
-      http.get(url, (_) => createJsonResponse(quickbarData)),
-    )
+    globalThis.server.use(http.get(url, returnsJson(quickbarData)))
   })
 
   test('returns json file', async () => {
