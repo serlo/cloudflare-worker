@@ -11,7 +11,6 @@ import {
   expectSentryEvent,
   expectNoSentryError,
 } from './__utils__'
-import { createJsonResponse } from '../src/utils'
 
 describe('embed.serlo.org/thumbnail?url=...', () => {
   beforeEach(() => {
@@ -318,7 +317,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           url.searchParams?.get('url')?.replace('https://vimeo.com/', '') ?? ''
 
         if (videoId === video.id) {
-          return createJsonResponse({
+          return HttpResponse.json({
             type: 'video',
             thumbnail_url: video.thumbnailUrl,
           })
@@ -571,7 +570,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         const body = (await request.json()) as GeogebraApiBody
         const appletId = body.request.task.filters.field[0]['#text']
 
-        return createJsonResponse(
+        return HttpResponse.json(
           createPreviewUrlJSON(
             appletId === applet.id ? applet.thumbnailUrl : undefined,
           ),

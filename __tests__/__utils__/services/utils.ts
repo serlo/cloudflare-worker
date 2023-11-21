@@ -1,6 +1,5 @@
-import { http, ResponseResolver } from 'msw'
+import { http, HttpResponse, JsonBodyType, ResponseResolver } from 'msw'
 
-import { createJsonResponse } from '../../../src/utils'
 import { localTestEnvironment } from '../test-environment'
 
 export function mockHttpGet(url: string, resolver: ResponseResolver) {
@@ -25,8 +24,8 @@ export function returnsMalformedJson(): ResponseResolver {
   return (_) => new Response('malformed json')
 }
 
-export function returnsJson(data: unknown): ResponseResolver {
-  return (_) => createJsonResponse(data)
+export function returnsJson(data: JsonBodyType): ResponseResolver {
+  return (_) => HttpResponse.json(data)
 }
 
 export function hasInternalServerError(): ResponseResolver {
