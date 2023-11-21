@@ -21,19 +21,6 @@ export function isInstance(code: unknown): code is Instance {
   return Object.values(Instance).some((x) => x === code)
 }
 
-export function getCookieValue(
-  name: string,
-  cookieHeader: string | null,
-): string | null {
-  return cookieHeader === null
-    ? null
-    : cookieHeader
-        .split(';')
-        .map((c) => c.trim())
-        .filter((c) => c.startsWith(`${name}=`))
-        .map((c) => c.substring(name.length + 1))[0] ?? null
-}
-
 const PathInfo = t.intersection([
   t.type({ typename: t.string, currentPath: t.string }),
   t.partial({ instance: t.string, hash: t.string }),
