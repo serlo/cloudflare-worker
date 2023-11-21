@@ -1,13 +1,8 @@
-import { getNotFoundHtml, getMaintenanceHtml, wrapInTemplate } from './ui'
+import { getMaintenanceHtml, wrapInTemplate } from './ui'
 import { createHtmlResponse, Url } from './utils'
 
 const basePath = '/___cloudflare_worker_dev'
 const components = [
-  {
-    title: '404 Page',
-    subpath: '404',
-    component: getNotFoundHtml(),
-  },
   {
     title: 'Maintenance Template (English)',
     subpath: 'maintenance-en',

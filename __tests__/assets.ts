@@ -1,11 +1,10 @@
-import { http } from 'msw'
+import { http, HttpResponse } from 'msw'
 
 import {
   createUrlRegex,
   currentTestEnvironment,
   TestEnvironment,
 } from './__utils__'
-import { createNotFoundResponse } from '../src/utils'
 
 let env: TestEnvironment
 
@@ -69,12 +68,12 @@ function givenAssets(assets: { [P in string]?: { contentLength: number } }) {
       const asset = assets[new URL(request.url).pathname]
 
       return asset !== undefined
-        ? new Response('', {
+        ? new HttpResponse('', {
             headers: {
               'x-goog-stored-content-length': asset.contentLength.toString(),
             },
           })
-        : createNotFoundResponse()
+        : new HttpResponse(null, { status: 404 })
     }),
   )
 }

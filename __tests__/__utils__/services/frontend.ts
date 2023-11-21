@@ -2,7 +2,7 @@ import { http, HttpResponse, ResponseResolver } from 'msw'
 
 import { getUuid } from './database'
 import { createUrlRegex, responseWithContentType } from './utils'
-import { createNotFoundResponse, isInstance, Url } from '../../../src/utils'
+import { isInstance, Url } from '../../../src/utils'
 
 export function givenFrontend(resolver: ResponseResolver) {
   globalThis.server.use(
@@ -73,11 +73,11 @@ export function defaultFrontendServer(): ResponseResolver {
     } else if (isInstance(instance)) {
       const uuid = getUuid(instance, pathname.length > 0 ? pathname : '/')
 
-      if (uuid == null) return createNotFoundResponse()
+      if (uuid == null) return new HttpResponse(null, { status: 404 })
 
       content = uuid.content ?? ''
     } else {
-      return createNotFoundResponse()
+      return new HttpResponse(null, { status: 404 })
     }
 
     const body =
