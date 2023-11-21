@@ -11,7 +11,6 @@ import {
 } from './__utils__'
 import { CFEnvironment } from '../src/cf-environment'
 import {
-  getCookieValue,
   isInstance,
   createHtmlResponse,
   createNotFoundResponse,
@@ -19,44 +18,6 @@ import {
   Instance,
   toCacheKey,
 } from '../src/utils'
-
-describe('getCookieValue()', () => {
-  describe('returns the cookie value of a given cookie header', () => {
-    test('one cookie without semicolon in the end', () => {
-      expect(getCookieValue('foo', 'foo=123')).toBe('123')
-    })
-
-    test('one cookie with semicolon in the end', () => {
-      expect(getCookieValue('foo', 'foo=123;')).toBe('123')
-    })
-
-    test('multiple cookies', () => {
-      expect(getCookieValue('foo', 'bar=1; foo=123; hey=a')).toBe('123')
-    })
-
-    test('cookie with empty definition', () => {
-      expect(getCookieValue('foo', 'foo=; bar=1;')).toBe('')
-    })
-  })
-
-  describe('return null if cookie was not defined in cookie header string', () => {
-    test('multiple cookies without the cookie we are looking for', () => {
-      expect(getCookieValue('foo', 'bar=1; hey=2;')).toBeNull()
-    })
-
-    test('cookie name is suffix of other cookie', () => {
-      expect(getCookieValue('foo', 'foofoo=1;')).toBeNull()
-    })
-
-    test('empty cookie header string is given', () => {
-      expect(getCookieValue('foo', '')).toBeNull()
-    })
-  })
-
-  test('return null if cookie header string is null', () => {
-    expect(getCookieValue('foo', null)).toBeNull()
-  })
-})
 
 describe('getPathInfo()', () => {
   let cfEnv: CFEnvironment
