@@ -1,7 +1,6 @@
 import {
   expectContainsText,
   expectContentTypeIsHtml,
-  expectIsNotFoundResponse,
   givenApi,
   givenUuid,
   hasInternalServerError,
@@ -13,7 +12,6 @@ import { CFEnvironment } from '../src/cf-environment'
 import {
   isInstance,
   createHtmlResponse,
-  createNotFoundResponse,
   getPathInfo,
   Instance,
   toCacheKey,
@@ -169,8 +167,4 @@ test('HtmlResponse', async () => {
   expect(hello.status).toBe(200)
   expectContentTypeIsHtml(hello)
   await expectContainsText(hello, ['<h1>Hello</h1>'])
-})
-
-test('NotFoundResponse', async () => {
-  await expectIsNotFoundResponse(createNotFoundResponse())
 })

@@ -11,7 +11,6 @@ import {
   expectSentryEvent,
   expectNoSentryError,
 } from './__utils__'
-import { createNotFoundResponse } from '../src/utils'
 
 describe('embed.serlo.org/thumbnail?url=...', () => {
   beforeEach(() => {
@@ -110,7 +109,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
           }
         }
 
-        return createNotFoundResponse()
+        return new HttpResponse(null, { status: 404 })
       }
     }
 
@@ -299,7 +298,8 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
         if (request.url === video.thumbnailUrl) {
           return imageResponse('image/jpeg', video.contentLength)
         }
-        return createNotFoundResponse()
+
+        return new HttpResponse(null, { status: 404 })
       }
     }
 
@@ -322,7 +322,8 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
             thumbnail_url: video.thumbnailUrl,
           })
         }
-        return createNotFoundResponse()
+
+        return new HttpResponse(null, { status: 404 })
       }
     }
   })
@@ -389,7 +390,7 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
       return ({ request }) => {
         return request.url === video.thumbnailUrl
           ? imageResponse('image/jpeg', video.contentLength)
-          : createNotFoundResponse()
+          : new HttpResponse(null, { status: 404 })
       }
     }
   })
