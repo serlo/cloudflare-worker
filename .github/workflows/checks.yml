@@ -7,6 +7,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-node
+      - run: yarn --check-cache
 
   test:
     runs-on: ubuntu-latest
