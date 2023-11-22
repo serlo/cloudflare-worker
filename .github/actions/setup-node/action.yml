@@ -5,6 +5,5 @@ runs:
     - uses: actions/setup-node@v3
       with:
         node-version-file: .tool-versions
-        cache: yarn
-    - run: yarn --immutable --immutable-cache --check-cache
+    - run: yarn --immutable --immutable-cache
       shell: bash
