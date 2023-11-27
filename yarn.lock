@@ -1251,7 +1251,7 @@ __metadata:
     fp-ts: ^2.16.1
     io-ts: ^2.2.20
     jest: ^29.7.0
-    jose: ^5.1.1
+    jose: ^5.1.2
     msw: ^2.0.9
     npm-run-all: ^4.1.5
     prettier: ^3.1.0
@@ -5112,10 +5112,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jose@npm:^5.1.1":
-  version: 5.1.1
-  resolution: "jose@npm:5.1.1"
-  checksum: 3a18d85dd1ed0e7746c67cba65a95ee972f20b363ceb99a9d75b870beb34942089cfca6249c4a50a79bc854c5a052f1be39e814c42b0f00f9358e902ce706e8d
+"jose@npm:^5.1.2":
+  version: 5.1.2
+  resolution: "jose@npm:5.1.2"
+  checksum: 035aff9c3413c2dbcb4fe240f14249e59c91225575063c1e27a0944e6b78a24b20b61f3b687ccff2012ff430b335c002f4af7e3599e284475b451752866041a0
   languageName: node
   linkType: hard
 
