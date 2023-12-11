@@ -1,14 +1,17 @@
 import { api } from './api'
+import { semanticFileNames } from './assets'
 import { auth } from './auth'
 import { CFEnvironment } from './cf-environment'
 import { cloudflareWorkerDev } from './cloudflare-worker-dev'
 import { embed } from './embed'
 import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
+import { enforceHttps } from './http-to-https'
 import { pdfProxy } from './pdf-proxy'
 import { quickbarProxy } from './quickbar-proxy'
 import { redirects } from './redirects'
 import { robotsTxt } from './robots'
-import { SentryFactory, Url } from './utils'
+import { sentryHelloWorld } from './sentry'
+import { SentryFactory } from './utils'
 
 // eslint-disable-next-line import/no-default-export
 export default {
@@ -37,44 +40,4 @@ export default {
       throw e
     }
   },
-}
-
-function sentryHelloWorld(request: Request, sentryFactory: SentryFactory) {
-  const url = Url.fromRequest(request)
-
-  if (url.subdomain !== '') return null
-  if (url.pathname !== '/sentry-report-hello-world') return null
-
-  const sentry = sentryFactory.createReporter('sentry-hello-world')
-  sentry.captureMessage('Hello World!', 'info')
-
-  return new Response('Hello-World message send to sentry')
-}
-
-async function enforceHttps(request: Request) {
-  const url = Url.fromRequest(request)
-  if (url.subdomain === 'pacts') return null
-  if (url.protocol !== 'http:') return null
-  url.protocol = 'https:'
-  return Promise.resolve(url.toRedirect(301))
-}
-
-async function semanticFileNames(request: Request) {
-  const url = Url.fromRequest(request)
-
-  if (url.subdomain !== 'assets') return null
-
-  url.host = 'assets.serlo.org'
-
-  const re = /^\/(legacy\/|)((?!legacy)[\w-]+)\/([\w\-+]+)\.(\w+)$/
-  const match = re.exec(url.pathname)
-
-  if (!url.pathname.startsWith('/meta') && match) {
-    const prefix = match[1]
-    const hash = match[2]
-    const extension = match[4]
-
-    url.pathname = `${prefix}${hash}.${extension}`
-  }
-  return await fetch(url.href, request)
 }
