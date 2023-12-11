@@ -3,7 +3,6 @@ import * as t from 'io-ts'
 
 import { fetchApi } from '../api'
 import { CFEnvironment } from '../cf-environment'
-import { getNotFoundHtml } from '../ui'
 
 export * from './sentry'
 export * from './url'
@@ -19,19 +18,6 @@ export enum Instance {
 
 export function isInstance(code: unknown): code is Instance {
   return Object.values(Instance).some((x) => x === code)
-}
-
-export function getCookieValue(
-  name: string,
-  cookieHeader: string | null,
-): string | null {
-  return cookieHeader === null
-    ? null
-    : cookieHeader
-        .split(';')
-        .map((c) => c.trim())
-        .filter((c) => c.startsWith(`${name}=`))
-        .map((c) => c.substring(name.length + 1))[0] ?? null
 }
 
 const PathInfo = t.intersection([
@@ -155,16 +141,6 @@ export function createHtmlResponse(html: string, opt?: ResponseInit) {
       'Content-Type': 'text/html;charset=utf-8',
     },
   })
-}
-
-export function createJsonResponse(json: unknown) {
-  return new Response(JSON.stringify(json), {
-    headers: { 'Content-Type': 'application/json' },
-  })
-}
-
-export function createNotFoundResponse() {
-  return createHtmlResponse(getNotFoundHtml(), { status: 404 })
 }
 
 interface CacheKeyBrand {

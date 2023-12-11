@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/serlo/frontend/staging/public/_assets/img/serlo-logo-gh.svg" alt="Serlo Logo" title="Serlo" align="right" height="75" />
+<img src="https://raw.githubusercontent.com/serlo/frontend/staging/apps/web/public/_assets/img/serlo-logo-gh.svg" alt="Serlo Logo" title="Serlo" align="right" height="75" />
 
 # serlo.org – Cloudflare Worker
 
@@ -43,21 +43,6 @@ You can use the flag `--no-verify` like in `git push --no-verify` to bypass the 
 ### Show preview of components
 
 In order to show a preview of components you need run `yarn dev` and open `http://127.0.0.1:8787/___cloudflare_worker_dev`. When you want to add your own components for a preview you can add them at [`./src/cloudflare-worker-dev.tsx`](./src/cloudflare-worker-dev.tsx).
-
-## Static pages
-
-Our cloudflare worker also serves some static pages (mostly our legal documents like the imprint or our privacy statement).
-The legal documents and other static pages are stored in the repository [https://github.com/serlo/serlo.org-legal](https://github.com/serlo/serlo.org-legal).
-Which version is shown can be configured in the file [`src/legal-pages/config.ts`](./src/legal-pages/config.ts).
-
-There the url is specified for each static page type and each language version under which the content of the static page can be accessed.
-For revised static pages a list of revisions is specified which is ordered in a way that the current revision is the first one.
-
-The content can also be formatted in the Markdown format.
-In this case the url / file must end with the extension `.md`.
-Without this file extension it is assumed that the returned file contains the page's body in HTML format.
-
-The content of the static pages are automatically sanitized (e.g. potentially malicious JavaScript content is automatically removed).
 
 ## Preview Images
 
