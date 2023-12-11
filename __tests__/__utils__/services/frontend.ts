@@ -1,13 +1,8 @@
-import { http, ResponseResolver } from 'msw'
+import { http, HttpResponse, ResponseResolver } from 'msw'
 
 import { getUuid } from './database'
 import { createUrlRegex, responseWithContentType } from './utils'
-import {
-  createJsonResponse,
-  createNotFoundResponse,
-  isInstance,
-  Url,
-} from '../../../src/utils'
+import { isInstance, Url } from '../../../src/utils'
 
 export function givenFrontend(resolver: ResponseResolver) {
   globalThis.server.use(
@@ -29,7 +24,7 @@ export function defaultFrontendServer(): ResponseResolver {
       return responseWithContentType('application/javascript')
 
     if (url.pathname === '/api/frontend/privacy')
-      return createJsonResponse(['2020-02-10'])
+      return HttpResponse.json(['2020-02-10'])
 
     if (url.pathname === '/api/auth/login') {
       const { origin } = new URL(request.headers.get('referer') ?? '')
@@ -78,11 +73,11 @@ export function defaultFrontendServer(): ResponseResolver {
     } else if (isInstance(instance)) {
       const uuid = getUuid(instance, pathname.length > 0 ? pathname : '/')
 
-      if (uuid == null) return createNotFoundResponse()
+      if (uuid == null) return new HttpResponse(null, { status: 404 })
 
       content = uuid.content ?? ''
     } else {
-      return createNotFoundResponse()
+      return new HttpResponse(null, { status: 404 })
     }
 
     const body =

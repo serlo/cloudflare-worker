@@ -1,13 +1,5 @@
 import { faviconBase64, logoBase64 } from './assets/logos'
 
-export function getNotFoundHtml() {
-  return wrapInTemplate({
-    title: 'Page Not Found',
-    lang: 'en',
-    content: `<p>The page you have requested does not exist.</p>`,
-  })
-}
-
 export function getMaintenanceHtml({
   lang,
   end,
