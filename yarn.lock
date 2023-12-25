@@ -1287,7 +1287,7 @@ __metadata:
     ts-jest: ^29.1.1
     ts-unused-exports: ^10.0.1
     typescript: ^5.3.3
-    wrangler: ^3.21.0
+    wrangler: ^3.22.1
   languageName: unknown
   linkType: soft
 
@@ -7891,9 +7891,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wrangler@npm:^3.21.0":
-  version: 3.21.0
-  resolution: "wrangler@npm:3.21.0"
+"wrangler@npm:^3.22.1":
+  version: 3.22.1
+  resolution: "wrangler@npm:3.22.1"
   dependencies:
     "@cloudflare/kv-asset-handler": ^0.2.0
     "@cspotcode/source-map-support": 0.8.1
@@ -7916,7 +7916,7 @@ __metadata:
   bin:
     wrangler: bin/wrangler.js
     wrangler2: bin/wrangler.js
-  checksum: 5f2834bd8cb128696f55815b5648071a7f84f6c90ba49588a5756d9f5f9e61c73539607d1e9069a15b7153e16d943c651bb4260ff705a34d4291624da28e1135
+  checksum: 8bb27187108b73d5311c54f25ba4789f47f7add7707142f2267edda667e3fda8700fe0824b50e090244cf7bdb3f9e02307b4bf2573a2b4f8828672075ba5d3f2
   languageName: node
   linkType: hard
 
