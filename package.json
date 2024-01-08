@@ -43,7 +43,7 @@
     "@testing-library/jest-dom": "^6.2.0",
     "@types/iarna__toml": "^2.0.5",
     "@types/jest": "^29.5.11",
-    "@typescript-eslint/eslint-plugin": "^6.17.0",
+    "@typescript-eslint/eslint-plugin": "^6.18.0",
     "@typescript-eslint/parser": "^6.17.0",
     "cross-env": "^7.0.3",
     "depcheck": "^1.4.7",
