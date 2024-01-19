@@ -133,18 +133,25 @@ test('/entity/view/<id>/toc gets redirected to /<id>', async () => {
   )
 })
 
+const labschoolTarget = env.createUrl({
+  subdomain: 'de',
+  pathname: '/75578/serlo-in-der-schule',
+})
+
 test.each(['/labschool', '/labschool/'])(
-  'de.serlo.org%s redirects to labschool homepage',
+  'de.serlo.org%s redirects to meta page',
   async (pathname) => {
     const response = await env.fetch({ subdomain: 'de', pathname })
 
-    expectToBeRedirectTo(
-      response,
-      env.createUrl({ subdomain: 'labschool' }),
-      301,
-    )
+    expectToBeRedirectTo(response, labschoolTarget, 301)
   },
 )
+
+test('labschool.serlo.org', async () => {
+  const response = await env.fetch({ subdomain: 'labschool' })
+
+  expectToBeRedirectTo(response, labschoolTarget, 301)
+})
 
 test.each(['/hochschule', '/hochschule/'])(
   'de.serlo.org%s redirects to taxonomy term of higher education',
