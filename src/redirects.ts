@@ -116,13 +116,18 @@ export async function redirects(request: Request, env: CFEnvironment) {
     return Response.redirect(redirectUrl, 302)
   }
 
+  if (url.subdomain === 'labschool') {
+    url.subdomain = 'de'
+    url.pathname = '/75578/serlo-in-der-schule'
+    return url.toRedirect(301)
+  }
+
   if (
     isInstance(url.subdomain) &&
     url.subdomain === Instance.De &&
     url.pathnameWithoutTrailingSlash === '/labschool'
   ) {
-    url.subdomain = 'labschool'
-    url.pathname = '/'
+    url.pathname = '/75578/serlo-in-der-schule'
     return url.toRedirect(301)
   }
 
