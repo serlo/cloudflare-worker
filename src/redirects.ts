@@ -209,10 +209,7 @@ export async function redirects(request: Request, env: CFEnvironment) {
     }
   }
 
-  if (
-    isInstance(url.subdomain) &&
-    request.headers.get('X-Requested-With') !== 'XMLHttpRequest'
-  ) {
+  if (isInstance(url.subdomain)) {
     const pathInfo = await getPathInfo(url.subdomain, url.pathname, env)
 
     if (pathInfo !== null) {
