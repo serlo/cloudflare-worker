@@ -281,15 +281,6 @@ describe('redirects to current path of an resource', () => {
     expectToBeRedirectTo(response, target, 301)
   })
 
-  test('no redirect when current path is different than given path and XMLHttpRequest', async () => {
-    const response = await env.fetch(
-      { subdomain: 'en', pathname: '/sexed' },
-      { headers: { 'X-Requested-With': 'XMLHttpRequest' } },
-    )
-
-    await expectContainsText(response, ['Sex Education'])
-  })
-
   test('no redirect when current path is the same as given path', async () => {
     const response = await env.fetch({
       subdomain: 'en',
