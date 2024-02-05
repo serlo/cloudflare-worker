@@ -35,6 +35,7 @@ const ApiResult = t.type({
         instance: t.string,
         pages: t.array(t.type({ alias: t.string })),
         legacyObject: t.type({ alias: t.string }),
+        exerciseGroup: t.type({ alias: t.string }),
         id: t.number,
         trashed: t.boolean,
       }),
@@ -85,6 +86,11 @@ export async function getPathInfo(
             alias
           }
         }
+        ... on GroupedExercise {
+          exerciseGroup {
+            alias
+          }
+        }
       }
     }`
   const variables = { alias: { instance: lang, path } }
@@ -114,9 +120,12 @@ export async function getPathInfo(
     ? `error/deleted/${uuid.__typename}`
     : uuid.legacyObject !== undefined
       ? uuid.legacyObject.alias
-      : uuid.pages !== undefined && uuid.pages.length > 0
-        ? uuid.pages[0].alias
-        : uuid.alias ?? path
+      : uuid.exerciseGroup !== undefined
+        ? uuid.exerciseGroup.alias
+        : uuid.pages !== undefined && uuid.pages.length > 0
+          ? uuid.pages[0].alias
+          : uuid.alias ?? path
+
   const result = {
     typename: uuid.__typename,
     currentPath,
