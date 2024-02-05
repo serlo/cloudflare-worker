@@ -452,4 +452,23 @@ describe('redirects to current path of an resource', () => {
     })
     expectToBeRedirectTo(response, target, 301)
   })
+
+  test('redirects to group exercise when a subexercise (i.e. `GroupedExercise`) is requested', async () => {
+    givenUuid({
+      id: 53209,
+      __typename: 'GroupedExercise',
+      alias: '/mathe/53209/53209',
+      exerciseGroup: {
+        alias: '/mathe/53205/53205',
+      },
+    })
+
+    const response = await env.fetch({ subdomain: 'de', pathname: '/53209' })
+
+    const target = env.createUrl({
+      subdomain: 'de',
+      pathname: '/mathe/53205/53205',
+    })
+    expectToBeRedirectTo(response, target, 301)
+  })
 })
