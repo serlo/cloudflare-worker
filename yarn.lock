@@ -1271,7 +1271,7 @@ __metadata:
     ts-jest: ^29.1.2
     ts-unused-exports: ^10.0.1
     typescript: ^5.3.3
-    wrangler: ^3.26.0
+    wrangler: ^3.28.1
   languageName: unknown
   linkType: soft
 
@@ -5436,9 +5436,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"miniflare@npm:3.20240129.0":
-  version: 3.20240129.0
-  resolution: "miniflare@npm:3.20240129.0"
+"miniflare@npm:3.20240129.1":
+  version: 3.20240129.1
+  resolution: "miniflare@npm:3.20240129.1"
   dependencies:
     "@cspotcode/source-map-support": 0.8.1
     acorn: ^8.8.0
@@ -5454,7 +5454,7 @@ __metadata:
     zod: ^3.20.6
   bin:
     miniflare: bootstrap.js
-  checksum: fed64eba8790a4cc2ddadfbbdfdc80254e999b08faeba9cf46f24e8f3182f2cceb04e857ca2e66ba0d3706cac6e1f25c440f83f3151bbd73549e768db2d19146
+  checksum: 5d9ca65f1838c79f936f596293ad8f23a5d6a2f872b7090ea83068b0596e3179462f3507cf55733ec96854c33214fbaee868cdead7b05e7954ada09b98c93163
   languageName: node
   linkType: hard
 
@@ -7644,9 +7644,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wrangler@npm:^3.26.0":
-  version: 3.26.0
-  resolution: "wrangler@npm:3.26.0"
+"wrangler@npm:^3.28.1":
+  version: 3.28.1
+  resolution: "wrangler@npm:3.28.1"
   dependencies:
     "@cloudflare/kv-asset-handler": ^0.2.0
     "@esbuild-plugins/node-globals-polyfill": ^0.2.3
@@ -7655,7 +7655,7 @@ __metadata:
     chokidar: ^3.5.3
     esbuild: 0.17.19
     fsevents: ~2.3.2
-    miniflare: 3.20240129.0
+    miniflare: 3.20240129.1
     nanoid: ^3.3.3
     path-to-regexp: ^6.2.0
     resolve: ^1.22.8
@@ -7663,13 +7663,18 @@ __metadata:
     selfsigned: ^2.0.1
     source-map: 0.6.1
     xxhash-wasm: ^1.0.1
+  peerDependencies:
+    "@cloudflare/workers-types": ^4.20230914.0
   dependenciesMeta:
     fsevents:
+      optional: true
+  peerDependenciesMeta:
+    "@cloudflare/workers-types":
       optional: true
   bin:
     wrangler: bin/wrangler.js
     wrangler2: bin/wrangler.js
-  checksum: 1b6fb74cc0ae369d842f56a66214616b077fb7619d24f2f5a2a6c932615971e02a82ea40e7f0d79ea27f12ed09a9a4700fc9edd022aaac027cdd6796e92e8682
+  checksum: 7d836f0d6980d27743ef8755a55541fabc9ddc9d0ec6d28bb03c6699f748d2af39ab196aea6169a891dd7130b1173ad3673e18733261506573ea4f9db2861e53
   languageName: node
   linkType: hard
 
