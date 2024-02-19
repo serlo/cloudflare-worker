@@ -39,7 +39,7 @@
     "@cloudflare/workers-types": "^4.20240129.0",
     "@iarna/toml": "^2.2.5",
     "@jest/globals": "^29.7.0",
-    "@sentry/types": "^7.100.1",
+    "@sentry/types": "^7.101.1",
     "@testing-library/jest-dom": "^6.4.2",
     "@types/iarna__toml": "^2.0.5",
     "@types/jest": "^29.5.12",
