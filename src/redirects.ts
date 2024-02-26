@@ -224,4 +224,15 @@ export async function redirects(request: Request, env: CFEnvironment) {
       if (newUrl.href !== url.href) return newUrl.toRedirect(301)
     }
   }
+
+  if (
+    isInstance(url.subdomain) &&
+    url.subdomain === Instance.De &&
+    url.pathnameWithoutTrailingSlash === '/pruefungen'
+  ) {
+    const regionSlug =
+      request.cf?.regionCode === 'NI' ? 'niedersachsen' : 'bayern'
+    url.pathname = `/pruefungen/${regionSlug}`
+    return url.toRedirect(302)
+  }
 }
