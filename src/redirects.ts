@@ -228,11 +228,11 @@ export async function redirects(request: Request, env: CFEnvironment) {
   if (
     isInstance(url.subdomain) &&
     url.subdomain === Instance.De &&
-    url.pathnameWithoutTrailingSlash === '/pruefungen'
+    url.pathnameWithoutTrailingSlash === '/mathe-pruefungen'
   ) {
     const regionSlug =
       request.cf?.regionCode === 'NI' ? 'niedersachsen' : 'bayern'
-    url.pathname = `/pruefungen/${regionSlug}`
+    url.pathname = `/mathe-pruefungen/${regionSlug}`
     return url.toRedirect(302)
   }
 }
