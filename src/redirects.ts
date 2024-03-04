@@ -209,10 +209,7 @@ export async function redirects(request: Request, env: CFEnvironment) {
     }
   }
 
-  if (
-    isInstance(url.subdomain) &&
-    request.headers.get('X-Requested-With') !== 'XMLHttpRequest'
-  ) {
+  if (isInstance(url.subdomain)) {
     const pathInfo = await getPathInfo(url.subdomain, url.pathname, env)
 
     if (pathInfo !== null) {
@@ -226,5 +223,16 @@ export async function redirects(request: Request, env: CFEnvironment) {
 
       if (newUrl.href !== url.href) return newUrl.toRedirect(301)
     }
+  }
+
+  if (
+    isInstance(url.subdomain) &&
+    url.subdomain === Instance.De &&
+    url.pathnameWithoutTrailingSlash === '/mathe-pruefungen'
+  ) {
+    const regionSlug =
+      request.cf?.regionCode === 'NI' ? 'niedersachsen' : 'bayern'
+    url.pathname = `/mathe-pruefungen/${regionSlug}`
+    return url.toRedirect(302)
   }
 }

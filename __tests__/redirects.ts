@@ -281,15 +281,6 @@ describe('redirects to current path of an resource', () => {
     expectToBeRedirectTo(response, target, 301)
   })
 
-  test('no redirect when current path is different than given path and XMLHttpRequest', async () => {
-    const response = await env.fetch(
-      { subdomain: 'en', pathname: '/sexed' },
-      { headers: { 'X-Requested-With': 'XMLHttpRequest' } },
-    )
-
-    await expectContainsText(response, ['Sex Education'])
-  })
-
   test('no redirect when current path is the same as given path', async () => {
     const response = await env.fetch({
       subdomain: 'en',
@@ -471,4 +462,52 @@ describe('redirects to current path of an resource', () => {
     })
     expectToBeRedirectTo(response, target, 301)
   })
+})
+
+test('redirects to default exams landing page when no region is defined', async () => {
+  const response = await env.fetch({
+    subdomain: 'de',
+    pathname: '/mathe-pruefungen',
+  })
+
+  const target = env.createUrl({
+    subdomain: 'de',
+    pathname: '/mathe-pruefungen/bayern',
+  })
+
+  expectToBeRedirectTo(response, target, 302)
+})
+
+test('redirects to exams landing page bayern when bayern region is provided', async () => {
+  const response = await env.fetch(
+    {
+      subdomain: 'de',
+      pathname: '/mathe-pruefungen',
+    },
+    { cf: { regionCode: 'BY' } },
+  )
+
+  const target = env.createUrl({
+    subdomain: 'de',
+    pathname: '/mathe-pruefungen/bayern',
+  })
+
+  expectToBeRedirectTo(response, target, 302)
+})
+
+test('redirects to exams landing page niedersachsen when niedersachsen region is provided', async () => {
+  const response = await env.fetch(
+    {
+      subdomain: 'de',
+      pathname: '/mathe-pruefungen',
+    },
+    { cf: { regionCode: 'NI' } },
+  )
+
+  const target = env.createUrl({
+    subdomain: 'de',
+    pathname: '/mathe-pruefungen/niedersachsen',
+  })
+
+  expectToBeRedirectTo(response, target, 302)
 })
