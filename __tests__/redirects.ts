@@ -467,12 +467,12 @@ describe('redirects to current path of an resource', () => {
 test('redirects to default exams landing page when no region is defined', async () => {
   const response = await env.fetch({
     subdomain: 'de',
-    pathname: '/pruefungen',
+    pathname: '/mathe-pruefungen',
   })
 
   const target = env.createUrl({
     subdomain: 'de',
-    pathname: '/pruefungen/bayern',
+    pathname: '/mathe-pruefungen/bayern',
   })
 
   expectToBeRedirectTo(response, target, 302)
@@ -482,14 +482,14 @@ test('redirects to exams landing page bayern when bayern region is provided', as
   const response = await env.fetch(
     {
       subdomain: 'de',
-      pathname: '/pruefungen',
+      pathname: '/mathe-pruefungen',
     },
     { cf: { regionCode: 'BY' } },
   )
 
   const target = env.createUrl({
     subdomain: 'de',
-    pathname: '/pruefungen/bayern',
+    pathname: '/mathe-pruefungen/bayern',
   })
 
   expectToBeRedirectTo(response, target, 302)
@@ -499,14 +499,14 @@ test('redirects to exams landing page niedersachsen when niedersachsen region is
   const response = await env.fetch(
     {
       subdomain: 'de',
-      pathname: '/pruefungen',
+      pathname: '/mathe-pruefungen',
     },
     { cf: { regionCode: 'NI' } },
   )
 
   const target = env.createUrl({
     subdomain: 'de',
-    pathname: '/pruefungen/niedersachsen',
+    pathname: '/mathe-pruefungen/niedersachsen',
   })
 
   expectToBeRedirectTo(response, target, 302)
