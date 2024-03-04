@@ -66,7 +66,18 @@ export abstract class TestEnvironment {
   public abstract fetchRequest(request: Request): Promise<Response>
 
   public createRequest(spec: UrlSpec, init?: RequestInit<CfProperties>) {
-    return new Request<unknown, CfProperties>(this.createUrl(spec), init)
+    const request = new Request<unknown, CfProperties>(
+      this.createUrl(spec),
+      // CF worker has redirect set to "manual" as default value
+      { redirect: 'manual', ...init },
+    )
+
+    if (init?.cf != null) {
+      // @ts-expect-error We want to override `cf` here since setting it via `init` does not work
+      request.cf = { ...init.cf }
+    }
+
+    return request
   }
 
   public createUrl({
@@ -96,9 +107,7 @@ class LocalEnvironment extends TestEnvironment {
     return this.cfEnv.DOMAIN
   }
 
-  public async fetchRequest(originalRequest: Request): Promise<Response> {
-    // CF worker has redirect set to "manual" as default value
-    const request = new Request(originalRequest, { redirect: 'manual' })
+  public async fetchRequest(request: Request): Promise<Response> {
     const waitForPromises: Promise<unknown>[] = []
 
     const response = await cloudflareWorker.fetch(request, this.cfEnv, {
