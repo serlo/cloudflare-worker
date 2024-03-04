@@ -209,6 +209,16 @@ export async function redirects(request: Request, env: CFEnvironment) {
     }
   }
 
+  // redirect for browsers that have the old redirect target of `/mathe-pruefungen`
+  // cached indefinitely because it was a 301 redirect
+  if (
+    isInstance(url.subdomain) &&
+    url.pathname === '/83249/mathematik-pr%C3%BCfungen'
+  ) {
+    url.pathname = '/mathe-pruefungen'
+    return url.toRedirect(302)
+  }
+
   if (isInstance(url.subdomain)) {
     const pathInfo = await getPathInfo(url.subdomain, url.pathname, env)
 
