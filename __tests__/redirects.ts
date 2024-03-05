@@ -511,3 +511,17 @@ test('redirects to exams landing page niedersachsen when niedersachsen region is
 
   expectToBeRedirectTo(response, target, 302)
 })
+
+test('redirects to exams landing page when old alias target is called', async () => {
+  const response = await env.fetch({
+    subdomain: 'de',
+    pathname: '/83249/mathematik-prüfungen',
+  })
+
+  const target = env.createUrl({
+    subdomain: 'de',
+    pathname: '/mathe-pruefungen',
+  })
+
+  expectToBeRedirectTo(response, target, 302)
+})

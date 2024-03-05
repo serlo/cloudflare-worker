@@ -36,10 +36,10 @@
     "toucan-js": "^3.3.1"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240208.0",
+    "@cloudflare/workers-types": "^4.20240222.0",
     "@iarna/toml": "^2.2.5",
     "@jest/globals": "^29.7.0",
-    "@sentry/types": "^7.102.1",
+    "@sentry/types": "^7.105.0",
     "@testing-library/jest-dom": "^6.4.2",
     "@types/iarna__toml": "^2.0.5",
     "@types/jest": "^29.5.12",
@@ -47,13 +47,13 @@
     "@typescript-eslint/parser": "^7.0.2",
     "cross-env": "^7.0.3",
     "depcheck": "^1.4.7",
-    "eslint": "^8.56.0",
+    "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-deprecation": "^2.0.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-react": "^7.33.2",
     "jest": "^29.7.0",
-    "msw": "^2.2.1",
+    "msw": "^2.2.2",
     "npm-run-all": "^4.1.5",
     "prettier": "^3.2.5",
     "prettier-plugin-packagejson": "^2.4.12",
@@ -61,7 +61,7 @@
     "ts-jest": "^29.1.2",
     "ts-unused-exports": "^10.0.1",
     "typescript": "^5.3.3",
-    "wrangler": "^3.29.0"
+    "wrangler": "^3.30.1"
   },
   "packageManager": "yarn@3.6.0",
   "engines": {
