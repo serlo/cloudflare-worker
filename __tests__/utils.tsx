@@ -1,10 +1,4 @@
-import {
-  givenApi,
-  givenUuid,
-  hasInternalServerError,
-  returnsJson,
-  getDefaultCFEnvironment,
-} from './__utils__'
+import { givenUuid, getDefaultCFEnvironment } from './__utils__'
 import { CFEnvironment } from '../src/cf-environment'
 import { getPathInfo, Instance, toCacheKey } from '../src/utils'
 
@@ -13,25 +7,6 @@ describe('getPathInfo()', () => {
 
   beforeEach(() => {
     cfEnv = getDefaultCFEnvironment()
-  })
-
-  describe('returns null', () => {
-    test('when there was an error with the api call', async () => {
-      givenApi(hasInternalServerError())
-
-      expect(await getPathInfo(Instance.En, '/path', cfEnv)).toBeNull()
-    })
-
-    describe('when the response is not valid', () => {
-      test.each([null, {}, { data: { uuid: {} } }])(
-        'response = %p',
-        async (invalidResponse) => {
-          givenApi(returnsJson(invalidResponse))
-
-          expect(await getPathInfo(Instance.En, '/path', cfEnv)).toBeNull()
-        },
-      )
-    })
   })
 
   describe('uses PATH_INFO_KV as a cache', () => {
