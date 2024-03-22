@@ -142,26 +142,26 @@ describe('no redirect', () => {
   test('when API has internal server error', async () => {
     givenApi(hasInternalServerError())
 
-    const response = await env.fetch({ subdomain: 'en', pathname: '/path' })
-
-    await expectContainsText(response, ['article content'])
+    await expectNoRedirect()
   })
 
   test('when API responds with malformed JSON', async () => {
     givenApi(returnsMalformedJson())
 
-    const response = await env.fetch({ subdomain: 'en', pathname: '/path' })
-
-    await expectContainsText(response, ['article content'])
+    await expectNoRedirect()
   })
 
   test('when API responds with illegal JSON', async () => {
     givenApi(returnsJson({ data: { uuid: {} } }))
 
+    await expectNoRedirect()
+  })
+
+  async function expectNoRedirect() {
     const response = await env.fetch({ subdomain: 'en', pathname: '/path' })
 
     await expectContainsText(response, ['article content'])
-  })
+  }
 })
 
 test('handles URL encodings correctly', async () => {
