@@ -6,6 +6,8 @@ import {
   expectContainsText,
   localTestEnvironment,
   currentTestEnvironment,
+  hasInternalServerError,
+  returnsJson,
 } from './__utils__'
 import { Instance } from '../src/utils'
 
@@ -125,20 +127,41 @@ test('redirects to alias of course when list of course pages is empty', async ()
   expectToBeRedirectTo(response, target, 301)
 })
 
-test('no redirect when current path cannot be requested', async () => {
+describe('no redirect', () => {
   const env = localTestEnvironment()
 
-  givenApi(returnsMalformedJson())
-  givenUuid({
-    __typename: 'Article',
-    alias: '/path',
-    content: 'article content',
-    instance: Instance.En,
+  beforeEach(() => {
+    givenUuid({
+      __typename: 'Article',
+      alias: '/path',
+      content: 'article content',
+      instance: Instance.En,
+    })
   })
 
-  const response = await env.fetch({ subdomain: 'en', pathname: '/path' })
+  test('when API has internal server error', async () => {
+    givenApi(hasInternalServerError())
 
-  await expectContainsText(response, ['article content'])
+    const response = await env.fetch({ subdomain: 'en', pathname: '/path' })
+
+    await expectContainsText(response, ['article content'])
+  })
+
+  test('when API responds with malformed JSON', async () => {
+    givenApi(returnsMalformedJson())
+
+    const response = await env.fetch({ subdomain: 'en', pathname: '/path' })
+
+    await expectContainsText(response, ['article content'])
+  })
+
+  test('when API responds with illegal JSON', async () => {
+    givenApi(returnsJson({ data: { uuid: {} } }))
+
+    const response = await env.fetch({ subdomain: 'en', pathname: '/path' })
+
+    await expectContainsText(response, ['article content'])
+  })
 })
 
 test('handles URL encodings correctly', async () => {
