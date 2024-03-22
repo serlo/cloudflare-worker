@@ -1,6 +1,4 @@
 import {
-  expectContainsText,
-  expectContentTypeIsHtml,
   givenApi,
   givenUuid,
   hasInternalServerError,
@@ -9,13 +7,7 @@ import {
   getDefaultCFEnvironment,
 } from './__utils__'
 import { CFEnvironment } from '../src/cf-environment'
-import {
-  isInstance,
-  createHtmlResponse,
-  getPathInfo,
-  Instance,
-  toCacheKey,
-} from '../src/utils'
+import { getPathInfo, Instance, toCacheKey } from '../src/utils'
 
 describe('getPathInfo()', () => {
   let cfEnv: CFEnvironment
@@ -150,21 +142,4 @@ describe('getPathInfo()', () => {
       })
     })
   })
-})
-
-describe('isInstance()', () => {
-  expect(isInstance('de')).toBe(true)
-  expect(isInstance('fr')).toBe(true)
-
-  expect(isInstance('serlo')).toBe(false)
-  expect(isInstance('EN_EN')).toBe(false)
-  expect(isInstance('')).toBe(false)
-})
-
-test('HtmlResponse', async () => {
-  const hello = createHtmlResponse(`<h1>Hello</h1>`)
-
-  expect(hello.status).toBe(200)
-  expectContentTypeIsHtml(hello)
-  await expectContainsText(hello, ['<h1>Hello</h1>'])
 })
