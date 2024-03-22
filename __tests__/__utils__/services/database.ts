@@ -39,12 +39,7 @@ interface Course extends AbstractUuid<'Course'> {
 
 interface GenericUuid extends AbstractUuid<GenericTypenames> {}
 
-type GenericTypenames =
-  | 'Page'
-  | 'Article'
-  | 'TaxonomyTerm'
-  | 'Comment'
-  | 'GroupedExercise'
+type GenericTypenames = 'Page' | 'Article' | 'TaxonomyTerm' | 'Comment'
 
 interface AbstractUuid<Typename extends string> {
   __typename: Typename
@@ -54,6 +49,5 @@ interface AbstractUuid<Typename extends string> {
   instance?: Instance
   content?: string
   legacyObject?: { alias: string }
-  exerciseGroup?: { alias: string }
   trashed?: boolean
 }
