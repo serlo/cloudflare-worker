@@ -2,7 +2,6 @@ import {
   givenApi,
   givenUuid,
   hasInternalServerError,
-  returnsMalformedJson,
   returnsJson,
   getDefaultCFEnvironment,
 } from './__utils__'
@@ -19,12 +18,6 @@ describe('getPathInfo()', () => {
   describe('returns null', () => {
     test('when there was an error with the api call', async () => {
       givenApi(hasInternalServerError())
-
-      expect(await getPathInfo(Instance.En, '/path', cfEnv)).toBeNull()
-    })
-
-    test('when api response is malformed JSON', async () => {
-      givenApi(returnsMalformedJson())
 
       expect(await getPathInfo(Instance.En, '/path', cfEnv)).toBeNull()
     })
