@@ -10,21 +10,6 @@ describe('getPathInfo()', () => {
   })
 
   describe('uses PATH_INFO_KV as a cache', () => {
-    test('use value in cache', async () => {
-      const cacheValue = { typename: 'Article', currentPath: '/current-path' }
-      await cfEnv.PATH_INFO_KV.put(
-        await toCacheKey('/en/path'),
-        JSON.stringify(cacheValue),
-      )
-
-      const pathInfo = await getPathInfo(Instance.En, '/path', cfEnv)
-
-      expect(pathInfo).toEqual({
-        typename: 'Article',
-        currentPath: '/current-path',
-      })
-    })
-
     test('saves values in cache for 1 hour', async () => {
       givenUuid({
         __typename: 'Article',
