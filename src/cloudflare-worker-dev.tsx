@@ -1,5 +1,4 @@
-import { getMaintenanceHtml, wrapInTemplate } from './ui'
-import { Url } from './utils'
+import { getMaintenanceHtml, wrapInTemplate, Url } from './utils'
 
 const basePath = '/___cloudflare_worker_dev'
 const components = [
