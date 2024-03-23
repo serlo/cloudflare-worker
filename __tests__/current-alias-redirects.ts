@@ -9,7 +9,7 @@ import {
   hasInternalServerError,
   returnsJson,
 } from './__utils__'
-import { Instance } from '../src/utils'
+import { Instance, toCacheKey } from '../src/utils'
 
 const env = currentTestEnvironment()
 
@@ -244,6 +244,23 @@ describe('cache', () => {
 
     const secondResponse = await env.fetch({ subdomain: 'de', pathname: '/42' })
     expectToBeRedirectTo(secondResponse, target, 301)
+  })
+
+  test('ignores malformed json in cache', async () => {
+    await env.cfEnv.PATH_INFO_KV.put(await toCacheKey('/42'), 'malformed json')
+
+    const response = await env.fetch({ subdomain: 'de', pathname: '/42' })
+    const target = env.createUrl({ subdomain: 'de', pathname: '/path' })
+    expectToBeRedirectTo(response, target, 301)
+  })
+
+  test('ignores cache values with wrong shema', async () => {
+    const malformedPathInfo = JSON.stringify({ typename: 'Course' })
+    await env.cfEnv.PATH_INFO_KV.put(await toCacheKey('/42'), malformedPathInfo)
+
+    const response = await env.fetch({ subdomain: 'de', pathname: '/42' })
+    const target = env.createUrl({ subdomain: 'de', pathname: '/path' })
+    expectToBeRedirectTo(response, target, 301)
   })
 
   test('can handle long paths', async () => {
