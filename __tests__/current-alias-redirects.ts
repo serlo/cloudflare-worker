@@ -245,4 +245,26 @@ describe('cache', () => {
     const secondResponse = await env.fetch({ subdomain: 'de', pathname: '/42' })
     expectToBeRedirectTo(secondResponse, target, 301)
   })
+
+  test('can handle long paths', async () => {
+    const longTamilPath =
+      '/%E0%AE%87%E0%AE%B2%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AE%A3%E0' +
+      '%AE%AE%E0%AF%8D/%E0%AE%85%E0%AE%9F%E0%AE%BF%E0%AE%AA%E0%AF%8D%E0' +
+      '%AE%AA%E0%AE%9F%E0%AF%88-%E0%AE%87%E0%AE%B2%E0%AE%95%E0%AF%8D%E0' +
+      '%AE%95%E0%AE%A3%E0%AE%AE%E0%AF%8D/%E0%AE%AE%E0%AF%8A%E0%AE%B4%E0' +
+      '%AE%BF%E0%AE%AF%E0%AE%BF%E0%AE%A9%E0%AF%8D-%E0%AE%9A%E0%AF%8A%E0' +
+      '%AE%B1%E0%AF%8D%E0%AE%AA%E0%AE%BE%E0%AE%95%E0%AF%81%E0%AE%AA%E0' +
+      '%AE%BE%E0%AE%9F%E0%AF%81-%E0%AE%87%E0%AE%B2%E0%AE%95%E0%AF%8D%E0' +
+      '%AE%95%E0%AE%BF%E0%AE%AF-%E0%AE%B5%E0%AE%95%E0%AF%88%E0%AE%95%E0' +
+      '%AE%B3%E0%AF%8D'
+    givenUuid({
+      __typename: 'Article',
+      id: 4,
+      alias: decodeURIComponent(longTamilPath),
+    })
+
+    const response = await env.fetch({ subdomain: 'ta', pathname: '/4' })
+    const target = env.createUrl({ subdomain: 'ta', pathname: longTamilPath })
+    expectToBeRedirectTo(response, target, 301)
+  })
 })
