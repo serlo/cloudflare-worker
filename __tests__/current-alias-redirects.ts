@@ -227,3 +227,22 @@ test('redirects to error when comment is deleted', async () => {
   })
   expectToBeRedirectTo(response, target, 301)
 })
+
+describe('cache', () => {
+  const env = localTestEnvironment()
+
+  beforeEach(() => {
+    givenUuid({ __typename: 'Article', id: 42, alias: '/path' })
+  })
+
+  test('uses cache to retrieve current path', async () => {
+    const response = await env.fetch({ subdomain: 'de', pathname: '/42' })
+    const target = env.createUrl({ subdomain: 'de', pathname: '/path' })
+    expectToBeRedirectTo(response, target, 301)
+
+    givenUuid({ __typename: 'Article', id: 42, alias: '/new-path' })
+
+    const secondResponse = await env.fetch({ subdomain: 'de', pathname: '/42' })
+    expectToBeRedirectTo(secondResponse, target, 301)
+  })
+})
