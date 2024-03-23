@@ -1,5 +1,4 @@
-import { CFEnvironment } from './cf-environment'
-import { getPathInfo, Instance, isInstance, Url } from './utils'
+import { getPathInfo, Instance, isInstance, Url, CFEnvironment } from './utils'
 
 const meetRedirects: Record<string, string | undefined> = {
   '/': 'vtk-ncrc-rdp',

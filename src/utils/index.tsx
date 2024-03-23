@@ -1,12 +1,13 @@
 import { either as E } from 'fp-ts'
 import * as t from 'io-ts'
 
+import { CFEnvironment } from './cf-environment'
 import { Instance } from './instance'
 import { fetchApi } from '../api'
-import { CFEnvironment } from '../cf-environment'
 
-export * from './sentry'
 export * from './instance'
+export * from './sentry'
+export * from './cf-environment'
 export * from './url'
 
 const PathInfo = t.intersection([

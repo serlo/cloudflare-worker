@@ -1,5 +1,4 @@
-import { CFEnvironment } from './cf-environment'
-import { Instance, Url } from './utils'
+import { Instance, Url, CFEnvironment } from './utils'
 
 export function auth(request: Request, env: CFEnvironment): Response | null {
   return authFrontendSectorIdentifierUriValidation(request, env)
