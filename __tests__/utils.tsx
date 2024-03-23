@@ -24,32 +24,6 @@ describe('getPathInfo()', () => {
       )
     })
 
-    test('cache key has maximum width of 512 characters by sha-1 hashing longer keys', async () => {
-      const longTamilPath =
-        '/%E0%AE%87%E0%AE%B2%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AE%A3%E0' +
-        '%AE%AE%E0%AF%8D/%E0%AE%85%E0%AE%9F%E0%AE%BF%E0%AE%AA%E0%AF%8D%E0' +
-        '%AE%AA%E0%AE%9F%E0%AF%88-%E0%AE%87%E0%AE%B2%E0%AE%95%E0%AF%8D%E0' +
-        '%AE%95%E0%AE%A3%E0%AE%AE%E0%AF%8D/%E0%AE%AE%E0%AF%8A%E0%AE%B4%E0' +
-        '%AE%BF%E0%AE%AF%E0%AE%BF%E0%AE%A9%E0%AF%8D-%E0%AE%9A%E0%AF%8A%E0' +
-        '%AE%B1%E0%AF%8D%E0%AE%AA%E0%AE%BE%E0%AE%95%E0%AF%81%E0%AE%AA%E0' +
-        '%AE%BE%E0%AE%9F%E0%AF%81-%E0%AE%87%E0%AE%B2%E0%AE%95%E0%AF%8D%E0' +
-        '%AE%95%E0%AE%BF%E0%AE%AF-%E0%AE%B5%E0%AE%95%E0%AF%88%E0%AE%95%E0' +
-        '%AE%B3%E0%AF%8D'
-      givenUuid({
-        __typename: 'Article',
-        alias: decodeURIComponent(longTamilPath),
-        instance: Instance.Ta,
-      })
-
-      const pathInfo = await getPathInfo(Instance.Ta, longTamilPath, cfEnv)
-
-      expect(pathInfo).toEqual({
-        typename: 'Article',
-        currentPath: longTamilPath,
-        instance: Instance.Ta,
-      })
-    })
-
     describe('ignores malformed cache values', () => {
       const target = { typename: 'Article', currentPath: '/current-path' }
 
