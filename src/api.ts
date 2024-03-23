@@ -1,7 +1,6 @@
 import { SignJWT } from 'jose'
 
-import { CFEnvironment } from './cf-environment'
-import { Url } from './utils'
+import { Url, CFEnvironment } from './utils'
 
 export async function api(request: Request, env: CFEnvironment) {
   const url = Url.fromRequest(request)

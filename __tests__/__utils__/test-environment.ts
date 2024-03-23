@@ -7,8 +7,7 @@ import { fileURLToPath } from 'url'
 
 import { createKV } from './kv'
 import cloudflareWorker from '../../src'
-import { CFEnvironment, CFVariables } from '../../src/cf-environment'
-import { isInstance } from '../../src/utils'
+import { CFEnvironment, CFVariables, isInstance } from '../../src/utils'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 

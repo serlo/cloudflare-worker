@@ -1,5 +1,4 @@
-import { CFEnvironment } from './cf-environment'
-import { Url } from './utils'
+import { Url, CFEnvironment } from './utils'
 
 const robotsProduction = `User-agent: *
 Disallow: /page/revision/revisions/

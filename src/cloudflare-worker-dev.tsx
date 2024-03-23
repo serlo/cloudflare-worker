@@ -1,5 +1,4 @@
-import { getMaintenanceHtml, wrapInTemplate } from './ui'
-import { createHtmlResponse, Url } from './utils'
+import { getMaintenanceHtml, wrapInTemplate, Url } from './utils'
 
 const basePath = '/___cloudflare_worker_dev'
 const components = [
@@ -59,4 +58,14 @@ function createIndexHtml() {
       content: `<ul>${listHtml}</ul>`,
     }),
   )
+}
+
+function createHtmlResponse(html: string, opt?: ResponseInit) {
+  return new Response(html, {
+    ...opt,
+    headers: {
+      ...opt?.headers,
+      'Content-Type': 'text/html;charset=utf-8',
+    },
+  })
 }
