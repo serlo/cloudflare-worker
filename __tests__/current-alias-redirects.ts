@@ -244,14 +244,20 @@ describe('cache', () => {
   })
 
   test('ignores malformed json in cache', async () => {
-    await env.cfEnv.PATH_INFO_KV.put(await toCacheKey('/42'), 'malformed json')
+    await env.cfEnv.PATH_INFO_KV.put(
+      await toCacheKey('/de/42'),
+      'malformed json',
+    )
 
     await expectCorrectRedirect()
   })
 
   test('ignores cache values with wrong shema', async () => {
     const malformedPathInfo = JSON.stringify({ typename: 'Course' })
-    await env.cfEnv.PATH_INFO_KV.put(await toCacheKey('/42'), malformedPathInfo)
+    await env.cfEnv.PATH_INFO_KV.put(
+      await toCacheKey('/de/42'),
+      malformedPathInfo,
+    )
 
     await expectCorrectRedirect()
   })
