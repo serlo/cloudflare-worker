@@ -243,6 +243,17 @@ describe('cache', () => {
     await expectCorrectRedirect()
   })
 
+  test('stores path for max 1 hour', async () => {
+    await expectCorrectRedirect()
+
+    givenUuid({ __typename: 'Article', id: 42, alias: '/new-path' })
+    env.cfEnv.waitForSeconds(60 * 60 + 1)
+
+    const response = await env.fetch({ subdomain: 'de', pathname: '/42' })
+    const target = env.createUrl({ subdomain: 'de', pathname: '/new-path' })
+    expectToBeRedirectTo(response, target, 301)
+  })
+
   test('ignores malformed json in cache', async () => {
     await env.cfEnv.PATH_INFO_KV.put(
       await toCacheKey('/de/42'),
