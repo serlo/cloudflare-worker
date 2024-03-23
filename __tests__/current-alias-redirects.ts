@@ -236,31 +236,24 @@ describe('cache', () => {
   })
 
   test('uses cache to retrieve current path', async () => {
-    const response = await env.fetch({ subdomain: 'de', pathname: '/42' })
-    const target = env.createUrl({ subdomain: 'de', pathname: '/path' })
-    expectToBeRedirectTo(response, target, 301)
+    await expectCorrectRedirect()
 
     givenUuid({ __typename: 'Article', id: 42, alias: '/new-path' })
 
-    const secondResponse = await env.fetch({ subdomain: 'de', pathname: '/42' })
-    expectToBeRedirectTo(secondResponse, target, 301)
+    await expectCorrectRedirect()
   })
 
   test('ignores malformed json in cache', async () => {
     await env.cfEnv.PATH_INFO_KV.put(await toCacheKey('/42'), 'malformed json')
 
-    const response = await env.fetch({ subdomain: 'de', pathname: '/42' })
-    const target = env.createUrl({ subdomain: 'de', pathname: '/path' })
-    expectToBeRedirectTo(response, target, 301)
+    await expectCorrectRedirect()
   })
 
   test('ignores cache values with wrong shema', async () => {
     const malformedPathInfo = JSON.stringify({ typename: 'Course' })
     await env.cfEnv.PATH_INFO_KV.put(await toCacheKey('/42'), malformedPathInfo)
 
-    const response = await env.fetch({ subdomain: 'de', pathname: '/42' })
-    const target = env.createUrl({ subdomain: 'de', pathname: '/path' })
-    expectToBeRedirectTo(response, target, 301)
+    await expectCorrectRedirect()
   })
 
   test('can handle long paths', async () => {
@@ -284,4 +277,10 @@ describe('cache', () => {
     const target = env.createUrl({ subdomain: 'ta', pathname: longTamilPath })
     expectToBeRedirectTo(response, target, 301)
   })
+
+  async function expectCorrectRedirect() {
+    const response = await env.fetch({ subdomain: 'de', pathname: '/42' })
+    const target = env.createUrl({ subdomain: 'de', pathname: '/path' })
+    expectToBeRedirectTo(response, target, 301)
+  }
 })
