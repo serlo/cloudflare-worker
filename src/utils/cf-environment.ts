@@ -1,4 +1,4 @@
-import type { CacheKey } from '.'
+import type { CacheKey } from './cache'
 
 export interface CFEnvironment extends CFVariables {
   // secrets
