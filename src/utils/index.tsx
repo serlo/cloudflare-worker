@@ -1,24 +1,13 @@
 import { either as E } from 'fp-ts'
 import * as t from 'io-ts'
 
+import { Instance } from './instance'
 import { fetchApi } from '../api'
 import { CFEnvironment } from '../cf-environment'
 
 export * from './sentry'
+export * from './instance'
 export * from './url'
-
-export enum Instance {
-  De = 'de',
-  En = 'en',
-  Es = 'es',
-  Fr = 'fr',
-  Hi = 'hi',
-  Ta = 'ta',
-}
-
-export function isInstance(code: unknown): code is Instance {
-  return Object.values(Instance).some((x) => x === code)
-}
 
 const PathInfo = t.intersection([
   t.type({ typename: t.string, currentPath: t.string }),
