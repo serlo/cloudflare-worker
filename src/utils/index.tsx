@@ -134,16 +134,6 @@ export async function getPathInfo(
   return result
 }
 
-export function createHtmlResponse(html: string, opt?: ResponseInit) {
-  return new Response(html, {
-    ...opt,
-    headers: {
-      ...opt?.headers,
-      'Content-Type': 'text/html;charset=utf-8',
-    },
-  })
-}
-
 interface CacheKeyBrand {
   readonly CacheKey: unique symbol
 }
