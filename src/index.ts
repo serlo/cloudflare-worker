@@ -1,7 +1,6 @@
 import { api } from './api'
 import { semanticFileNames } from './assets'
 import { auth } from './auth'
-import { CFEnvironment } from './cf-environment'
 import { cloudflareWorkerDev } from './cloudflare-worker-dev'
 import { embed } from './embed'
 import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
@@ -11,7 +10,7 @@ import { quickbarProxy } from './quickbar-proxy'
 import { redirects } from './redirects'
 import { robotsTxt } from './robots'
 import { sentryHelloWorld } from './sentry'
-import { SentryFactory } from './utils'
+import { SentryFactory, CFEnvironment } from './utils'
 
 // eslint-disable-next-line import/no-default-export
 export default {
