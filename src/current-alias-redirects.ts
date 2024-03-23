@@ -28,7 +28,7 @@ export async function redirectToCurrentAlias(
 }
 
 const PathInfo = t.intersection([
-  t.type({ typename: t.string, currentPath: t.string }),
+  t.type({ currentPath: t.string }),
   t.partial({ instance: t.string, hash: t.string }),
 ])
 type PathInfo = t.TypeOf<typeof PathInfo>
@@ -55,7 +55,7 @@ async function getPathInfo(
   env: CFEnvironment,
 ): Promise<PathInfo | null> {
   if (path === '/user/me' || path === '/user/public')
-    return { typename: 'User', currentPath: path }
+    return { currentPath: path }
 
   const cacheKey = await toCacheKey(`/${lang}${path}`)
   const cachedValue = await env.PATH_INFO_KV.get(cacheKey)
@@ -126,7 +126,6 @@ async function getPathInfo(
         : uuid.alias ?? path
 
   const result = {
-    typename: uuid.__typename,
     currentPath,
     instance: uuid.instance,
     ...(uuid.legacyObject !== undefined && !isTrashedComment
