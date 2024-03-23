@@ -6,7 +6,7 @@ declare global {
 }
 
 export function givenUuid(uuid: Uuid) {
-  globalThis.uuids.push(uuid)
+  globalThis.uuids.unshift(uuid)
 }
 
 export function getUuid(instance: Instance, path: string) {
