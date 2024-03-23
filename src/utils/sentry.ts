@@ -1,6 +1,6 @@
 import { Toucan } from 'toucan-js'
 
-import { CFEnvironment } from '../cf-environment'
+import { CFEnvironment } from './cf-environment'
 
 export class SentryFactory {
   constructor(
