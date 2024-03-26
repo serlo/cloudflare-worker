@@ -496,10 +496,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cloudflare/workers-types@npm:^4.20240222.0":
-  version: 4.20240222.0
-  resolution: "@cloudflare/workers-types@npm:4.20240222.0"
-  checksum: 7e681e08ac108e7fc5b08945ae4f13da5b8dbad0507a58f277fb3f76c7c02317b9380ba2c48cff7cf2dbf3c84693944b80cd4096e9a761567ab0928823bd0c16
+"@cloudflare/workers-types@npm:^4.20240320.1":
+  version: 4.20240320.1
+  resolution: "@cloudflare/workers-types@npm:4.20240320.1"
+  checksum: 25ef70649c353ce53598bdf18ca09d45c514ad2855733b1c14a630df89e0a6cf5cff11b7f4d2fbd65bed195b63e9bf32bfcf5a0f63be9aae8145e28df943160c
   languageName: node
   linkType: hard
 
@@ -1281,7 +1281,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@serlo/serlo.org-cloudflare-worker@workspace:."
   dependencies:
-    "@cloudflare/workers-types": ^4.20240222.0
+    "@cloudflare/workers-types": ^4.20240320.1
     "@iarna/toml": ^2.2.5
     "@jest/globals": ^29.7.0
     "@sentry/types": ^7.107.0
