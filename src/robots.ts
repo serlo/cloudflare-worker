@@ -22,12 +22,15 @@ export function robotsTxt(request: Request, env: CFEnvironment) {
   const url = Url.fromRequest(request)
   if (url.pathname !== '/robots.txt') return null
 
-  const sitemap = isInstance(url.subdomain) && url.subdomain === Instance.De ? `
-  Sitemap: https://de.serlo.org/sitemap.xml` : ''
+  const sitemap =
+    isInstance(url.subdomain) && url.subdomain === Instance.De
+      ? `
+  Sitemap: https://de.serlo.org/sitemap.xml`
+      : ''
 
   return new Response(
     env.ENVIRONMENT === 'production'
-      ? robotsProduction+sitemap
+      ? robotsProduction + sitemap
       : 'User-agent: *\nDisallow: /\n',
   )
 }
