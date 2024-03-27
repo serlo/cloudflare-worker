@@ -1,4 +1,4 @@
-import { Url, CFEnvironment } from './utils'
+import { Url, CFEnvironment, isInstance, Instance } from './utils'
 
 const robotsProduction = `User-agent: *
 Disallow: /page/revision/revisions/
@@ -22,9 +22,12 @@ export function robotsTxt(request: Request, env: CFEnvironment) {
   const url = Url.fromRequest(request)
   if (url.pathname !== '/robots.txt') return null
 
+  const sitemap = isInstance(url.subdomain) && url.subdomain === Instance.De ? `
+  Sitemap: https://de.serlo.org/sitemap.xml` : ''
+
   return new Response(
     env.ENVIRONMENT === 'production'
-      ? robotsProduction
+      ? robotsProduction+sitemap
       : 'User-agent: *\nDisallow: /\n',
   )
 }
