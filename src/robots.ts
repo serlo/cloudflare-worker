@@ -18,15 +18,17 @@ Disallow: /pages
 Disallow: /uuid/recycle-bin
 Disallow: /*/entity/trash-bin`
 
+const sitemapLine = `
+Sitemap: https://de.serlo.org/sitemap.xml`
+
 export function robotsTxt(request: Request, env: CFEnvironment) {
   const url = Url.fromRequest(request)
   if (url.pathname !== '/robots.txt') return null
 
-  const sitemap =
+  const isDeInstance =
     isInstance(url.subdomain) && url.subdomain === Instance.De
-      ? `
-  Sitemap: https://de.serlo.org/sitemap.xml`
-      : ''
+
+  const sitemap = isDeInstance ? sitemapLine : ''
 
   return new Response(
     env.ENVIRONMENT === 'production'
