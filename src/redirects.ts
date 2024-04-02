@@ -34,7 +34,10 @@ export function redirects(request: Request, env: CFEnvironment) {
     )
   }
 
-  if (isInstance(url.subdomain) && url.subdomain === Instance.De) {
+  const isDeInstance =
+    isInstance(url.subdomain) && url.subdomain === Instance.De
+
+  if (isDeInstance) {
     switch (url.pathname) {
       case '/datenschutz':
         return Response.redirect('https://de.serlo.org/privacy', 301)
