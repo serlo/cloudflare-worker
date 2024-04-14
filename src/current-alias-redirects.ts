@@ -70,8 +70,8 @@ async function getPathInfo(
     }
   }
 
-  const query = `
-    query TypenameAndCurrentPath($alias: AliasInput) {
+  const query = gql`
+    query ($alias: AliasInput) {
       uuid(alias: $alias) {
         __typename
         ... on AbstractUuid {
@@ -93,7 +93,8 @@ async function getPathInfo(
           }
         }
       }
-    }`
+    }
+  `
   const variables = { alias: { instance: lang, path } }
 
   let apiResponseBody: unknown
@@ -138,4 +139,8 @@ async function getPathInfo(
   })
 
   return result
+}
+
+function gql(strings: TemplateStringsArray): string {
+  return strings[0]
 }
