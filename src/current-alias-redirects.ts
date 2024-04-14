@@ -141,6 +141,10 @@ async function getPathInfo(
   return result
 }
 
+/**
+ * This marker is used by https://github.com/serlo/unused-graphql-properties
+ * to detect graphql statements.
+ */
 function gql(strings: TemplateStringsArray): string {
   return strings[0]
 }
