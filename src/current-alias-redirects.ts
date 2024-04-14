@@ -71,7 +71,7 @@ async function getPathInfo(
   }
 
   const query = gql`
-    query TypenameAndCurrentPath($alias: AliasInput) {
+    query ($alias: AliasInput) {
       uuid(alias: $alias) {
         __typename
         ... on AbstractUuid {
