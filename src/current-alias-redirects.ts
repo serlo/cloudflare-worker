@@ -70,7 +70,7 @@ async function getPathInfo(
     }
   }
 
-  const query = `
+  const query = gql`
     query TypenameAndCurrentPath($alias: AliasInput) {
       uuid(alias: $alias) {
         __typename
@@ -93,7 +93,8 @@ async function getPathInfo(
           }
         }
       }
-    }`
+    }
+  `
   const variables = { alias: { instance: lang, path } }
 
   let apiResponseBody: unknown
@@ -138,4 +139,8 @@ async function getPathInfo(
   })
 
   return result
+}
+
+function gql(strings: TemplateStringsArray): string {
+  return strings[0]
 }
