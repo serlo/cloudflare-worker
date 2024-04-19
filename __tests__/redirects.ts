@@ -251,6 +251,23 @@ test('redirects to default exams landing page when no region is defined', async 
   expectToBeRedirectTo(response, target, 302)
 })
 
+test('redirects to default exams landing page when unsupported region is defined', async () => {
+  const response = await env.fetch(
+    {
+      subdomain: 'de',
+      pathname: '/mathe-pruefungen',
+    },
+    { cf: { regionCode: 'TX' } },
+  )
+
+  const target = env.createUrl({
+    subdomain: 'de',
+    pathname: '/mathe-pruefungen/bayern',
+  })
+
+  expectToBeRedirectTo(response, target, 302)
+})
+
 test('redirects to exams landing page bayern when bayern region is provided', async () => {
   const response = await env.fetch(
     {
