@@ -1,8 +1,8 @@
 import { api } from './api'
 import { semanticFileNames } from './assets'
 import { auth } from './auth'
-import { CFEnvironment } from './cf-environment'
 import { cloudflareWorkerDev } from './cloudflare-worker-dev'
+import { redirectToCurrentAlias } from './current-alias-redirects'
 import { embed } from './embed'
 import { frontendProxy, frontendSpecialPaths } from './frontend-proxy'
 import { enforceHttps } from './http-to-https'
@@ -11,11 +11,15 @@ import { quickbarProxy } from './quickbar-proxy'
 import { redirects } from './redirects'
 import { robotsTxt } from './robots'
 import { sentryHelloWorld } from './sentry'
-import { SentryFactory } from './utils'
+import { SentryFactory, CFEnvironment } from './utils'
 
 // eslint-disable-next-line import/no-default-export
 export default {
-  async fetch(request: Request, env: CFEnvironment, context: ExecutionContext) {
+  async fetch(
+    request: Request,
+    env: CFEnvironment,
+    context: ExecutionContext,
+  ): Promise<Response> {
     const sentryFactory = new SentryFactory(env, context)
 
     try {
@@ -28,7 +32,8 @@ export default {
         robotsTxt(request, env) ||
         (await frontendSpecialPaths(request, sentryFactory, env)) ||
         sentryHelloWorld(request, sentryFactory) ||
-        (await redirects(request, env)) ||
+        redirects(request, env) ||
+        (await redirectToCurrentAlias(request, env)) ||
         (await embed(request, sentryFactory)) ||
         (await semanticFileNames(request)) ||
         (await api(request, env)) ||
