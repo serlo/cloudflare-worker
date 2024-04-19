@@ -1,10 +1,10 @@
-import { CFEnvironment } from './cf-environment'
 import {
   isInstance,
   SentryFactory,
   SentryReporter,
   Url,
   Instance,
+  CFEnvironment,
 } from './utils'
 
 export async function frontendSpecialPaths(

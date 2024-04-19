@@ -7,8 +7,7 @@ import { fileURLToPath } from 'url'
 
 import { createKV } from './kv'
 import cloudflareWorker from '../../src'
-import { CFEnvironment, CFVariables } from '../../src/cf-environment'
-import { isInstance } from '../../src/utils'
+import { CFEnvironment, CFVariables, isInstance } from '../../src/utils'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -17,7 +16,11 @@ declare global {
   var server: ReturnType<typeof import('msw/node').setupServer>
 }
 
-export function getDefaultCFEnvironment(): CFEnvironment {
+export function getDefaultCFEnvironment(): CFEnvironment & {
+  waitForSeconds: (seconds: number) => void
+} {
+  let currentTime = 0
+
   return {
     API_ENDPOINT: 'https://api.serlo.org/graphql',
     ALLOW_AUTH_FROM_LOCALHOST: 'true',
@@ -28,7 +31,10 @@ export function getDefaultCFEnvironment(): CFEnvironment {
     FRONTEND_DOMAIN: 'frontend.serlo.localhost',
     SENTRY_DSN: 'https://public@127.0.0.1/0',
 
-    PATH_INFO_KV: createKV(),
+    PATH_INFO_KV: createKV(() => currentTime),
+    waitForSeconds(seconds) {
+      currentTime += seconds
+    },
   }
 }
 
