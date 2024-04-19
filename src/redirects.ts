@@ -24,6 +24,14 @@ const meetRedirects: Record<string, string | undefined> = {
   '/6': 'sui-yuwv-suh',
 }
 
+export const supportedRegions = {
+  BY: 'bayern',
+  BE: 'berlin',
+  BB: 'brandenburg',
+  NI: 'niedersachsen',
+  NW: 'nrw',
+} as const
+
 export function redirects(request: Request, env: CFEnvironment) {
   const url = Url.fromRequest(request)
 
@@ -227,7 +235,10 @@ export function redirects(request: Request, env: CFEnvironment) {
     url.pathnameWithoutTrailingSlash === '/mathe-pruefungen'
   ) {
     const regionSlug =
-      request.cf?.regionCode === 'NI' ? 'niedersachsen' : 'bayern'
+      supportedRegions[
+        (request.cf?.regionCode as keyof typeof supportedRegions) ?? 'BY'
+      ] ?? 'bayern'
+
     url.pathname = `/mathe-pruefungen/${regionSlug}`
     return url.toRedirect(302)
   }
