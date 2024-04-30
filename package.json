@@ -33,7 +33,7 @@
     "fp-ts": "^2.16.5",
     "io-ts": "^2.2.21",
     "jose": "^5.2.4",
-    "toucan-js": "^3.3.1"
+    "toucan-js": "^3.4.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240423.0",
