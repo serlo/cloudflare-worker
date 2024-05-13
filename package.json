@@ -36,7 +36,7 @@
     "toucan-js": "^3.4.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240502.0",
+    "@cloudflare/workers-types": "^4.20240512.0",
     "@iarna/toml": "^2.2.5",
     "@jest/globals": "^29.7.0",
     "@sentry/types": "^7.114.0",
