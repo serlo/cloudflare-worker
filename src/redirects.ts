@@ -242,4 +242,27 @@ export function redirects(request: Request, env: CFEnvironment) {
     url.pathname = `/mathe-pruefungen/${regionSlug}`
     return url.toRedirect(302)
   }
+
+  // redirect moved exams content, permanent redirect but this will be removed after 1-2 months
+  if (
+    url.pathnameWithoutTrailingSlash ===
+    '/mathe/305761/zentrale-pr%C3%BCfung-zp-10-msa-mathematik-2023'
+  ) {
+    url.pathname = '/mathe/307337/zentrale-prüfung-zp-10-msa-mathematik-2023'
+    return url.toRedirect(301)
+  }
+  if (
+    url.pathnameWithoutTrailingSlash ===
+    '/mathe/305762/zentrale-pr%C3%BCfung-zp-10-msa-mathematik-2022'
+  ) {
+    url.pathname = '/mathe/307339/zentrale-prüfung-zp-10-msa-mathematik-2022'
+    return url.toRedirect(301)
+  }
+  if (
+    url.pathnameWithoutTrailingSlash ===
+    '/mathe/305763/zentrale-pr%C3%BCfung-zp-10-msa-mathematik-2021'
+  ) {
+    url.pathname = '/mathe/307340/zentrale-prüfung-zp-10-msa-mathematik-2021'
+    return url.toRedirect(301)
+  }
 }
