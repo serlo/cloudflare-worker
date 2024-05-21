@@ -1,8 +1,12 @@
+import { ResponseResolver, http } from 'msw'
+
 import {
   givenUuid,
   currentTestEnvironment,
   currentTestEnvironmentWhen,
+  givenApi,
 } from './__utils__'
+import { hashIpAddress } from '../src/api'
 
 const currentEnv = currentTestEnvironment()
 
@@ -28,6 +32,16 @@ test('calls to API are signed', async () => {
       },
     },
   })
+})
+
+test('Ip hash function works as expected', async () => {
+  const clientIp = '192.168.0.1'
+
+  const hashedIp = await hashIpAddress(clientIp)
+  expect(hashedIp).not.toBe(clientIp)
+
+  const secondHash = await hashIpAddress(clientIp)
+  expect(secondHash).toBe(hashedIp)
 })
 
 describe('setting of response header `Access-Control-Allow-Origin`', () => {
