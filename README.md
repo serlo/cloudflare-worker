@@ -25,13 +25,11 @@ It is also possible to run tests against other environments (the default environ
 
 At [`__test__/__utils__`](./__tests__/__utils__) there are utility functions for writing tests:
 
-- [`fetch-helper.ts`](./__tests__/__utils__/fetch-helper.ts):
-  - `fetchSerlo()` - does an request at the current testing environment. For example when `TEST_ENVIRONMENT=staging` it makes a request at `*.serlo-staging.dev`. Use this function whenever possible. By setting `{ environment: TestEnvironment.Locally }` you can always test against the local environment.
-- [`epxect-helper.ts`](./__tests__/__utils__/expect-helper.ts): Various assertation helper you can use.
+- [`expect-helper.ts`](./__tests__/__utils__/expect-helper.ts): Various assertion helpers you can use.
 
 ### Run automatically all checks before pushing
 
-You can use [git hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) to automatically check your codebase before you push. In order to archieve this run the following commands in the root directory:
+You can use [git hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) to automatically check your codebase before you push. To do so, run the following commands in the root directory:
 
 ```sh
 echo 'yarn check:all --no-uncommitted-changes' > .git/hooks/pre-push
