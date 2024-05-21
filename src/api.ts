@@ -26,6 +26,15 @@ export async function api(request: Request, env: CFEnvironment) {
 export async function fetchApi(request: Request, env: CFEnvironment) {
   request = new Request(request)
 
+  // Hash the IP address for the rate limiting feature and include hashed IP in
+  // the headers
+  const clientIp = request.headers.get('CF-Connecting-IP')
+
+  if (clientIp) {
+    const hashedIp = await hashIpAddress(clientIp)
+    request.headers.set('X-Hashed-Client-IP', hashedIp)
+  }
+
   request.headers.set(
     'Authorization',
     await getAuthorizationHeader(request, env),
@@ -72,4 +81,11 @@ function getAllowedOrigin(requestOrigin: string | null, env: CFEnvironment) {
     // return default value
   }
   return `https://${env.DOMAIN}`
+}
+
+export async function hashIpAddress(ip: string): Promise<string> {
+  const msgUint8 = new TextEncoder().encode(ip)
+  const hashBuffer = await crypto.subtle.digest('SHA-1', msgUint8)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
 }
