@@ -1268,10 +1268,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/types@npm:^8.0.0":
-  version: 8.0.0
-  resolution: "@sentry/types@npm:8.0.0"
-  checksum: 7e66b26230104ffdd6962c1dda19ea0ff2c546173f292c6811e533cd2d962157f1666df496a6008aa465d87c5fcf719d565fe93c492eb2d0e953ea62531aa561
+"@sentry/types@npm:^8.2.1":
+  version: 8.2.1
+  resolution: "@sentry/types@npm:8.2.1"
+  checksum: 2cc9af995577dbfbc00dde63ea1548d697ac6663b6e4ad19eacf37c179559e975d9434b1f1e8d24c4ac38336873264576d7287ad85f4c8b7300076d536394e38
   languageName: node
   linkType: hard
 
@@ -1291,7 +1291,7 @@ __metadata:
     "@cloudflare/workers-types": ^4.20240512.0
     "@iarna/toml": ^2.2.5
     "@jest/globals": ^29.7.0
-    "@sentry/types": ^8.0.0
+    "@sentry/types": ^8.2.1
     "@testing-library/jest-dom": ^6.4.5
     "@types/iarna__toml": ^2.0.5
     "@types/jest": ^29.5.12
