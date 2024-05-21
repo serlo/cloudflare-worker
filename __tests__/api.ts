@@ -1,10 +1,7 @@
-import { ResponseResolver, http } from 'msw'
-
 import {
   givenUuid,
   currentTestEnvironment,
   currentTestEnvironmentWhen,
-  givenApi,
 } from './__utils__'
 import { hashIpAddress } from '../src/api'
 
