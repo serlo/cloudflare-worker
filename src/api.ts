@@ -62,7 +62,8 @@ function getAllowedOrigin(requestOrigin: string | null, env: CFEnvironment) {
       if (
         url.domain === env.DOMAIN ||
         (env.ENVIRONMENT !== 'production' &&
-          ((url.domain === 'localhost' && (url.port === '3000' || url.port === '3001')) ||
+          ((url.domain === 'localhost' &&
+            (url.port === '3000' || url.port === '3001')) ||
             url.hostname.includes('-serlo.vercel.app')))
       ) {
         return requestOrigin
