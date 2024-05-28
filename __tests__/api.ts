@@ -77,6 +77,7 @@ describe('setting of response header `Access-Control-Allow-Origin`', () => {
   describe('when CORS is sent from the local frontend development or preview deployment', () => {
     const domains = [
       'http://localhost:3000',
+      'http://localhost:3001',
       'https://frontend-7md9ymhyw-serlo.vercel.app',
     ]
 
