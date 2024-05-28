@@ -1315,7 +1315,7 @@ __metadata:
     prettier-plugin-sh: ^0.14.0
     toucan-js: ^3.4.0
     ts-jest: ^29.1.2
-    ts-unused-exports: ^10.0.1
+    ts-unused-exports: ^10.1.0
     typescript: ^5.4.5
     wrangler: ^3.57.0
   languageName: unknown
@@ -7646,9 +7646,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-unused-exports@npm:^10.0.1":
-  version: 10.0.1
-  resolution: "ts-unused-exports@npm:10.0.1"
+"ts-unused-exports@npm:^10.1.0":
+  version: 10.1.0
+  resolution: "ts-unused-exports@npm:10.1.0"
   dependencies:
     chalk: ^4.0.0
     tsconfig-paths: ^3.9.0
@@ -7659,7 +7659,7 @@ __metadata:
       optional: false
   bin:
     ts-unused-exports: bin/ts-unused-exports
-  checksum: d5248b4c1c3b970b594db4955582dbdc1c56852a61f69fd18e680e87bad4df879a052c84c0ca6e1d1ea4f63eab39c1a9beff23e8e38e4fcdefc5c03e83487256
+  checksum: 16e80adb0c9b998f9639833089a7806d299d0dc463955e229c6383c9482a42978a529f0fc5cf2426dc2222dc6fcbf216e4bc7a3fa9824ea6b04ec3ab5b5a3b79
   languageName: node
   linkType: hard
 
