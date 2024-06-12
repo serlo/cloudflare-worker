@@ -40,7 +40,6 @@ const ApiResult = t.type({
       t.partial({
         alias: t.string,
         instance: t.string,
-        pages: t.array(t.type({ alias: t.string })),
         legacyObject: t.type({ alias: t.string }),
         id: t.number,
         trashed: t.boolean,
@@ -80,11 +79,6 @@ async function getPathInfo(
         ... on InstanceAware {
           instance
         }
-        ... on Course {
-          pages(trashed: false, hasCurrentRevision: true) {
-            alias
-          }
-        }
         ... on Comment {
           id
           trashed
@@ -122,9 +116,7 @@ async function getPathInfo(
     ? `error/deleted/${uuid.__typename}`
     : uuid.legacyObject !== undefined
       ? uuid.legacyObject.alias
-      : uuid.pages !== undefined && uuid.pages.length > 0
-        ? uuid.pages[0].alias
-        : uuid.alias ?? path
+      : uuid.alias ?? path
 
   const result = {
     currentPath,

@@ -68,65 +68,6 @@ test('no redirect when requested entity has no alias', async () => {
   await expectContainsText(response, ['Applets vertauscht'])
 })
 
-describe('redirects to first course page when requested entity is a course', () => {
-  test('when no course page is trashed', async () => {
-    givenUuid({
-      id: 61682,
-      __typename: 'Course',
-      alias: 'course-alias',
-      pages: [
-        { alias: '/mathe/61911/%C3%BCbersicht' },
-        { alias: '/mathe/61686/negative-zahlen-im-alltag' },
-      ],
-    })
-
-    const response = await env.fetch({
-      subdomain: 'de',
-      pathname: '/61682',
-    })
-
-    const target = env.createUrl({
-      subdomain: 'de',
-      pathname: '/mathe/61911/%C3%BCbersicht',
-    })
-    expectToBeRedirectTo(response, target, 301)
-  })
-
-  test('when first course pages are trashed or have no current revision', async () => {
-    givenUuid({
-      id: 19479,
-      __typename: 'Course',
-      alias: 'course-alias',
-      pages: [{ alias: '/mathe/20368/%C3%BCberblick' }],
-    })
-
-    const response = await env.fetch({ subdomain: 'de', pathname: '/19479' })
-
-    const target = env.createUrl({
-      subdomain: 'de',
-      pathname: '/mathe/20368/%C3%BCberblick',
-    })
-    expectToBeRedirectTo(response, target, 301)
-  })
-})
-
-test('redirects to alias of course when list of course pages is empty', async () => {
-  const env = localTestEnvironment()
-
-  // TODO: Find an empty course at serlo.org
-  givenUuid({
-    id: 42,
-    __typename: 'Course',
-    alias: '/course',
-    pages: [],
-  })
-
-  const response = await env.fetch({ subdomain: 'en', pathname: '/42' })
-
-  const target = env.createUrl({ subdomain: 'en', pathname: '/course' })
-  expectToBeRedirectTo(response, target, 301)
-})
-
 describe('no redirect', () => {
   const env = localTestEnvironment()
 
