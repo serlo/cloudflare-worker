@@ -145,11 +145,11 @@ async function getPathInfo(
 
       if (!CourseContent.is(courseContent)) return null
 
-      if (courseContent.state.pages.at(0)?.id === coursePageId) {
+      if (courseContent.state.pages.at(0)?.id?.startsWith(coursePageId)) {
         currentPath = uuid.alias
       } else {
-        const coursePage = courseContent.state.pages.find(
-          (page) => page.id === coursePageId,
+        const coursePage = courseContent.state.pages.find((page) =>
+          page.id.startsWith(coursePageId),
         )
 
         if (coursePage === undefined) {
