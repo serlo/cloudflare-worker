@@ -68,6 +68,52 @@ test('no redirect when requested entity has no alias', async () => {
   await expectContainsText(response, ['Applets vertauscht'])
 })
 
+describe('redirects for course pages', () => {
+  beforeEach(() => {
+    givenUuid({
+      id: 42,
+      __typename: 'Course',
+      alias: '/math/42/a-course',
+      currentRevision: {
+        content: JSON.stringify({
+          state: {
+            pages: [
+              { id: 'page1', title: 'Foo' },
+              { id: 'page2', title: 'Bar' },
+            ],
+          },
+        }),
+      },
+    })
+  })
+
+  test('redirect first course page to course alias', async () => {
+    const response = await localTestEnvironment().fetch({
+      subdomain: 'en',
+      pathname: '/math/42/page1/xyz',
+    })
+
+    const target = env.createUrl({
+      subdomain: 'en',
+      pathname: '/math/42/a-course',
+    })
+    expectToBeRedirectTo(response, target, 301)
+  })
+
+  test('redirect course page url when title was changed', async () => {
+    const response = await localTestEnvironment().fetch({
+      subdomain: 'en',
+      pathname: '/math/42/page2/xyz',
+    })
+
+    const target = env.createUrl({
+      subdomain: 'en',
+      pathname: '/math/42/page2/bar',
+    })
+    expectToBeRedirectTo(response, target, 301)
+  })
+})
+
 describe('no redirect', () => {
   const env = localTestEnvironment()
 
