@@ -130,7 +130,7 @@ async function getPathInfo(
   const uuid = apiResponseBody.data.uuid
 
   const coursePageMatch = path.match(
-    /^\/(?<instance>[a-z]{2}\/)?(?<subject>[a-z]+\/)?(?<id>\d+)\/(?<coursePageId>[a-z0-9-]+)\/(?<title>[^/]*)$/,
+    /^\/(?<instance>[a-z]{2}\/)?(?<subject>[a-z]+\/)?(?<id>\d+)\/(?<coursePageId>[0-9a-f]+)\/(?<title>[^/]*)$/,
   )
   const coursePageId = coursePageMatch?.groups?.coursePageId ?? null
 
