@@ -78,8 +78,8 @@ describe('redirects for course pages', () => {
         content: JSON.stringify({
           state: {
             pages: [
-              { id: 'page1', title: 'Foo' },
-              { id: 'page2', title: 'Bar' },
+              { id: '527bcd55-977c-489d-a3c8-9fd0feaf51a6', title: 'Foo' },
+              { id: 'a47077ca-a9f9-4ab9-bf22-6c26fb3490d8', title: 'Bar' },
             ],
           },
         }),
@@ -90,7 +90,7 @@ describe('redirects for course pages', () => {
   test('redirect first course page to course alias', async () => {
     const response = await localTestEnvironment().fetch({
       subdomain: 'en',
-      pathname: '/math/42/page1/xyz',
+      pathname: '/math/42/527bcd55/xyz',
     })
 
     const target = env.createUrl({
@@ -103,12 +103,12 @@ describe('redirects for course pages', () => {
   test('redirect course page url when title was changed', async () => {
     const response = await localTestEnvironment().fetch({
       subdomain: 'en',
-      pathname: '/math/42/page2/xyz',
+      pathname: '/math/42/a47077ca/xyz',
     })
 
     const target = env.createUrl({
       subdomain: 'en',
-      pathname: '/math/42/page2/bar',
+      pathname: '/math/42/a47077ca/bar',
     })
     expectToBeRedirectTo(response, target, 301)
   })
