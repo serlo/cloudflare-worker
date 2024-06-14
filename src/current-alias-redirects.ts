@@ -159,7 +159,7 @@ async function getPathInfo(
           const subject = uuid.alias.split('/').at(1) ?? 'serlo'
           const slugTitle = toSlug(coursePage.title)
 
-          currentPath = `/${subject}/${uuid.id}/${coursePage.id}/${slugTitle}`
+          currentPath = `/${subject}/${uuid.id}/${coursePage.id.slice(0, 8)}/${slugTitle}`
         }
       }
     } catch (e) {
