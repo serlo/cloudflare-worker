@@ -13,7 +13,7 @@ export function getUuid(instance: Instance, path: string) {
   const regexes = [
     new RegExp('^/(?<id>\\d+)$'),
     new RegExp(
-      '(?<subject>[^/]+/)?(?<id>\\d+)(?<coursePageId>/[a-z0-9-]+)?/(?<title>[^/]*)$',
+      '(?<subject>[^/]+/)?(?<id>\\d+)(?<coursePageId>/[0-9a-f]+)?/(?<title>[^/]*)$',
     ),
   ]
 
