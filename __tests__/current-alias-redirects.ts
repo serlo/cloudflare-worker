@@ -68,63 +68,50 @@ test('no redirect when requested entity has no alias', async () => {
   await expectContainsText(response, ['Applets vertauscht'])
 })
 
-describe('redirects to first course page when requested entity is a course', () => {
-  test('when no course page is trashed', async () => {
+describe('redirects for course pages', () => {
+  beforeEach(() => {
     givenUuid({
-      id: 61682,
+      id: 42,
       __typename: 'Course',
-      alias: 'course-alias',
-      pages: [
-        { alias: '/mathe/61911/%C3%BCbersicht' },
-        { alias: '/mathe/61686/negative-zahlen-im-alltag' },
-      ],
+      alias: '/math/42/a-course',
+      currentRevision: {
+        content: JSON.stringify({
+          state: {
+            pages: [
+              { id: '527bcd55-977c-489d-a3c8-9fd0feaf51a6', title: 'Foo' },
+              { id: 'a47077ca-a9f9-4ab9-bf22-6c26fb3490d8', title: 'Bar' },
+            ],
+          },
+        }),
+      },
     })
+  })
 
-    const response = await env.fetch({
-      subdomain: 'de',
-      pathname: '/61682',
+  test('redirect first course page to course alias', async () => {
+    const response = await localTestEnvironment().fetch({
+      subdomain: 'en',
+      pathname: '/math/42/527bcd55/xyz',
     })
 
     const target = env.createUrl({
-      subdomain: 'de',
-      pathname: '/mathe/61911/%C3%BCbersicht',
+      subdomain: 'en',
+      pathname: '/math/42/a-course',
     })
     expectToBeRedirectTo(response, target, 301)
   })
 
-  test('when first course pages are trashed or have no current revision', async () => {
-    givenUuid({
-      id: 19479,
-      __typename: 'Course',
-      alias: 'course-alias',
-      pages: [{ alias: '/mathe/20368/%C3%BCberblick' }],
+  test('redirect course page url when title was changed', async () => {
+    const response = await localTestEnvironment().fetch({
+      subdomain: 'en',
+      pathname: '/math/42/a47077ca/xyz',
     })
 
-    const response = await env.fetch({ subdomain: 'de', pathname: '/19479' })
-
     const target = env.createUrl({
-      subdomain: 'de',
-      pathname: '/mathe/20368/%C3%BCberblick',
+      subdomain: 'en',
+      pathname: '/math/42/a47077ca/bar',
     })
     expectToBeRedirectTo(response, target, 301)
   })
-})
-
-test('redirects to alias of course when list of course pages is empty', async () => {
-  const env = localTestEnvironment()
-
-  // TODO: Find an empty course at serlo.org
-  givenUuid({
-    id: 42,
-    __typename: 'Course',
-    alias: '/course',
-    pages: [],
-  })
-
-  const response = await env.fetch({ subdomain: 'en', pathname: '/42' })
-
-  const target = env.createUrl({ subdomain: 'en', pathname: '/course' })
-  expectToBeRedirectTo(response, target, 301)
 })
 
 describe('no redirect', () => {
