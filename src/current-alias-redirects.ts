@@ -158,8 +158,12 @@ async function getPathInfo(
         } else {
           const subject = uuid.alias.split('/').at(1) ?? 'serlo'
           const slugTitle = toSlug(coursePage.title)
-
-          currentPath = `/${subject}/${uuid.id}/${coursePage.id.slice(0, 8)}/${slugTitle}`
+          const shortPageId = coursePage.id.split('-').at(0)
+          if (!shortPageId) {
+            currentPath = uuid.alias
+          } else {
+            currentPath = `/${subject}/${uuid.id}/${shortPageId}/${slugTitle}`
+          }
         }
       }
     } catch (e) {
