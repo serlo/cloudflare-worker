@@ -452,12 +452,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cloudflare/kv-asset-handler@npm:0.3.2":
-  version: 0.3.2
-  resolution: "@cloudflare/kv-asset-handler@npm:0.3.2"
+"@cloudflare/kv-asset-handler@npm:0.3.3":
+  version: 0.3.3
+  resolution: "@cloudflare/kv-asset-handler@npm:0.3.3"
   dependencies:
     mime: ^3.0.0
-  checksum: 374801a08bf5627c9748af9695b861d78b699c412d6c2ee3257f502a2f4d94c720c92d90e5b25f78a87052b8cea14f0f46fb30fd2ebc1821b7bf149e146aaace
+  checksum: 51464bc06ba4642a9f376b9f5e2c4e0701e01ccb03d3a125e969fa2562aa8e815d4a6f2699114e12906cdb1214b0d2b997a4f2e081eb64d04a44e63f91075969
   languageName: node
   linkType: hard
 
@@ -1317,7 +1317,7 @@ __metadata:
     ts-jest: ^29.1.4
     ts-unused-exports: ^10.1.0
     typescript: ^5.4.5
-    wrangler: ^3.60.3
+    wrangler: ^3.61.0
   languageName: unknown
   linkType: soft
 
@@ -5785,9 +5785,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"miniflare@npm:3.20240610.0":
-  version: 3.20240610.0
-  resolution: "miniflare@npm:3.20240610.0"
+"miniflare@npm:3.20240610.1":
+  version: 3.20240610.1
+  resolution: "miniflare@npm:3.20240610.1"
   dependencies:
     "@cspotcode/source-map-support": 0.8.1
     acorn: ^8.8.0
@@ -5796,14 +5796,14 @@ __metadata:
     exit-hook: ^2.2.1
     glob-to-regexp: ^0.4.1
     stoppable: ^1.1.0
-    undici: ^5.28.2
+    undici: ^5.28.4
     workerd: 1.20240610.1
-    ws: ^8.11.0
+    ws: ^8.14.2
     youch: ^3.2.2
-    zod: ^3.20.6
+    zod: ^3.22.3
   bin:
     miniflare: bootstrap.js
-  checksum: 681df75e668d764440fb4c0b1db2a5fd2d79ab703542d5b10972c037bd96797a3295e448e237a9b8753160395bd638f0619efec755fc495f73b564a585860d37
+  checksum: cd88315827cc1e6485611b50b72e5490a19331f3ce4b4e59bd8637ab811eb27d8c685955a953c12b77760108557403ad95ee8bfe41ad03a2ef953f1205d65fba
   languageName: node
   linkType: hard
 
@@ -7305,7 +7305,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"source-map@npm:0.6.1, source-map@npm:^0.6.0, source-map@npm:^0.6.1":
+"source-map@npm:^0.6.0, source-map@npm:^0.6.1":
   version: 0.6.1
   resolution: "source-map@npm:0.6.1"
   checksum: 59ce8640cf3f3124f64ac289012c2b8bd377c238e316fb323ea22fbfe83da07d81e000071d7242cad7a23cd91c7de98e4df8830ec3f133cb6133a5f6e9f67bc2
@@ -8024,7 +8024,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^5.28.2":
+"undici@npm:^5.28.4":
   version: 5.28.4
   resolution: "undici@npm:5.28.4"
   dependencies:
@@ -8253,24 +8253,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wrangler@npm:^3.60.3":
-  version: 3.60.3
-  resolution: "wrangler@npm:3.60.3"
+"wrangler@npm:^3.61.0":
+  version: 3.61.0
+  resolution: "wrangler@npm:3.61.0"
   dependencies:
-    "@cloudflare/kv-asset-handler": 0.3.2
+    "@cloudflare/kv-asset-handler": 0.3.3
     "@esbuild-plugins/node-globals-polyfill": ^0.2.3
     "@esbuild-plugins/node-modules-polyfill": ^0.2.2
     blake3-wasm: ^2.1.5
     chokidar: ^3.5.3
     esbuild: 0.17.19
     fsevents: ~2.3.2
-    miniflare: 3.20240610.0
+    miniflare: 3.20240610.1
     nanoid: ^3.3.3
     path-to-regexp: ^6.2.0
     resolve: ^1.22.8
     resolve.exports: ^2.0.2
     selfsigned: ^2.0.1
-    source-map: 0.6.1
+    source-map: ^0.6.1
     unenv: "npm:unenv-nightly@1.10.0-1717606461.a117952"
     xxhash-wasm: ^1.0.1
   peerDependencies:
@@ -8284,7 +8284,7 @@ __metadata:
   bin:
     wrangler: bin/wrangler.js
     wrangler2: bin/wrangler.js
-  checksum: dfac575bfc37d0dc9556fb93f7a958b9546481c2a3672f909974932359b2f0fb0c613910de068a089be7f45a97552be0b0e53c4e1639ec6958c2b5860e5d95b7
+  checksum: f5b6e999613c191c930695aea80fff0737e04d54901bf47bf099f800f05e8ca09ec479bc3aef6ec1f61c794d6c269c6529fe8b03c8422e817e27b39bfc4b562a
   languageName: node
   linkType: hard
 
@@ -8338,7 +8338,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:^8.11.0":
+"ws@npm:^8.14.2":
   version: 8.17.1
   resolution: "ws@npm:8.17.1"
   peerDependencies:
@@ -8450,9 +8450,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:^3.20.6":
-  version: 3.22.4
-  resolution: "zod@npm:3.22.4"
-  checksum: 80bfd7f8039b24fddeb0718a2ec7c02aa9856e4838d6aa4864335a047b6b37a3273b191ef335bf0b2002e5c514ef261ffcda5a589fb084a48c336ffc4cdbab7f
+"zod@npm:^3.22.3":
+  version: 3.23.8
+  resolution: "zod@npm:3.23.8"
+  checksum: 15949ff82118f59c893dacd9d3c766d02b6fa2e71cf474d5aa888570c469dbf5446ac5ad562bb035bf7ac9650da94f290655c194f4a6de3e766f43febd432c5c
   languageName: node
   linkType: hard
