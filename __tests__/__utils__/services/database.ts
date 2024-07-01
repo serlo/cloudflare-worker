@@ -12,7 +12,9 @@ export function givenUuid(uuid: Uuid) {
 export function getUuid(instance: Instance, path: string) {
   const regexes = [
     new RegExp('^/(?<id>\\d+)$'),
-    new RegExp('(?<subject>[^/]+/)?(?<id>\\d+)/(?<title>[^/]*)$'),
+    new RegExp(
+      '(?<subject>[^/]+/)?(?<id>\\d+)(?<coursePageId>/[0-9a-f]+)?/(?<title>[^/]*)$',
+    ),
   ]
 
   for (const regex of regexes) {
@@ -50,4 +52,5 @@ interface AbstractUuid<Typename extends string> {
   content?: string
   legacyObject?: { alias: string }
   trashed?: boolean
+  currentRevision?: { content: string }
 }
