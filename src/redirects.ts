@@ -1,11 +1,4 @@
-import { CFEnvironment } from './cf-environment'
-import {
-  createNotFoundResponse,
-  getPathInfo,
-  Instance,
-  isInstance,
-  Url,
-} from './utils'
+import { Instance, isInstance, Url, CFEnvironment } from './utils'
 
 const meetRedirects: Record<string, string | undefined> = {
   '/': 'vtk-ncrc-rdp',
@@ -14,7 +7,7 @@ const meetRedirects: Record<string, string | undefined> = {
   '/einbindung': 'qzv-ojgk-xqw',
   '/begleitung': 'kon-wdmt-yhb',
   '/reviewing': 'kon-wdmt-yhb',
-  '/klausurtagung22': 'fnm-apbe-iqp',
+  '/klausurtagung': 'bwn-wrqe-qtm',
   '/labschool': 'cvd-pame-zod',
   '/lenabi': 'hfe-apbh-apq',
   '/fundraising': 'uus-vjgu-ttr',
@@ -31,7 +24,15 @@ const meetRedirects: Record<string, string | undefined> = {
   '/6': 'sui-yuwv-suh',
 }
 
-export async function redirects(request: Request, env: CFEnvironment) {
+export const supportedRegions = {
+  BY: 'bayern',
+  BE: 'berlin',
+  BB: 'brandenburg',
+  NI: 'niedersachsen',
+  NW: 'nrw',
+} as const
+
+export function redirects(request: Request, env: CFEnvironment) {
   const url = Url.fromRequest(request)
 
   if (url.subdomain === 'start') {
@@ -41,19 +42,25 @@ export async function redirects(request: Request, env: CFEnvironment) {
     )
   }
 
-  if (isInstance(url.subdomain) && url.subdomain === Instance.De) {
+  const isDeInstance =
+    isInstance(url.subdomain) && url.subdomain === Instance.De
+
+  if (isDeInstance) {
     switch (url.pathname) {
       case '/datenschutz':
         return Response.redirect('https://de.serlo.org/privacy', 301)
       case '/impressum':
-        return Response.redirect('https://de.serlo.org/imprint', 301)
+      case '/imprint':
+        return Response.redirect('https://de.serlo.org/legal', 301)
       case '/nutzungsbedingungen':
+      case '/21654':
+      case '/21654/nutzungsbedingungen-und-urheberrecht':
         return Response.redirect('https://de.serlo.org/terms', 301)
     }
   }
 
   if (url.pathnameWithoutTrailingSlash === '/organization') {
-    return Response.redirect('https://de.serlo.org/serlo')
+    return Response.redirect('https://de.serlo.org/serlo', 301)
   }
 
   if (
@@ -113,9 +120,16 @@ export async function redirects(request: Request, env: CFEnvironment) {
 
   if (url.subdomain === 'meet') {
     const meetRedirect = meetRedirects[url.pathname]
-    return meetRedirect == null
-      ? createNotFoundResponse()
-      : Response.redirect(`https://meet.google.com/${meetRedirect}`)
+    const redirectUrl = meetRedirect
+      ? `https://meet.google.com/${meetRedirect}`
+      : 'https://serlo.org/___cf_not_found'
+    return Response.redirect(redirectUrl, 302)
+  }
+
+  if (url.subdomain === 'labschool') {
+    url.subdomain = 'de'
+    url.pathname = '/75578/serlo-in-der-schule'
+    return url.toRedirect(301)
   }
 
   if (
@@ -123,8 +137,7 @@ export async function redirects(request: Request, env: CFEnvironment) {
     url.subdomain === Instance.De &&
     url.pathnameWithoutTrailingSlash === '/labschool'
   ) {
-    url.subdomain = 'labschool'
-    url.pathname = '/'
+    url.pathname = '/75578/serlo-in-der-schule'
     return url.toRedirect(301)
   }
 
@@ -161,7 +174,7 @@ export async function redirects(request: Request, env: CFEnvironment) {
 
   if (isInstance(url.subdomain) && url.pathname === '/user/public') {
     url.pathname = '/user/me'
-    return url.toRedirect()
+    return url.toRedirect(301)
   }
 
   if (url.subdomain === 'www' || url.subdomain === '') {
@@ -171,7 +184,7 @@ export async function redirects(request: Request, env: CFEnvironment) {
     }
 
     url.subdomain = Instance.De
-    return url.toRedirect()
+    return url.toRedirect(301)
   }
 
   if (isInstance(url.subdomain)) {
@@ -206,22 +219,50 @@ export async function redirects(request: Request, env: CFEnvironment) {
     }
   }
 
+  // redirect for browsers that have the old redirect target of `/mathe-pruefungen`
+  // cached indefinitely because it was a 301 redirect
   if (
     isInstance(url.subdomain) &&
-    request.headers.get('X-Requested-With') !== 'XMLHttpRequest'
+    url.pathname === '/83249/mathematik-pr%C3%BCfungen'
   ) {
-    const pathInfo = await getPathInfo(url.subdomain, url.pathname, env)
+    url.pathname = '/mathe-pruefungen'
+    return url.toRedirect(302)
+  }
 
-    if (pathInfo !== null) {
-      const newUrl = new Url(url.href)
-      const { currentPath, instance, hash } = pathInfo
+  if (
+    isInstance(url.subdomain) &&
+    url.subdomain === Instance.De &&
+    url.pathnameWithoutTrailingSlash === '/mathe-pruefungen'
+  ) {
+    const regionSlug =
+      supportedRegions[
+        (request.cf?.regionCode as keyof typeof supportedRegions) ?? 'BY'
+      ] ?? 'bayern'
 
-      if (instance && isInstance(instance) && url.subdomain !== instance)
-        newUrl.subdomain = instance
-      if (url.pathname !== currentPath) newUrl.pathname = currentPath
-      if (hash !== undefined) newUrl.hash = hash
+    url.pathname = `/mathe-pruefungen/${regionSlug}`
+    return url.toRedirect(302)
+  }
 
-      if (newUrl.href !== url.href) return newUrl.toRedirect(301)
-    }
+  // redirect moved exams content, permanent redirect but this will be removed after 1-2 months
+  if (
+    url.pathnameWithoutTrailingSlash ===
+    '/mathe/305761/zentrale-pr%C3%BCfung-zp-10-msa-mathematik-2023'
+  ) {
+    url.pathname = '/mathe/307337/zentrale-prüfung-zp-10-msa-mathematik-2023'
+    return url.toRedirect(301)
+  }
+  if (
+    url.pathnameWithoutTrailingSlash ===
+    '/mathe/305762/zentrale-pr%C3%BCfung-zp-10-msa-mathematik-2022'
+  ) {
+    url.pathname = '/mathe/307339/zentrale-prüfung-zp-10-msa-mathematik-2022'
+    return url.toRedirect(301)
+  }
+  if (
+    url.pathnameWithoutTrailingSlash ===
+    '/mathe/305763/zentrale-pr%C3%BCfung-zp-10-msa-mathematik-2021'
+  ) {
+    url.pathname = '/mathe/307340/zentrale-prüfung-zp-10-msa-mathematik-2021'
+    return url.toRedirect(301)
   }
 }

@@ -1,4 +1,4 @@
-import { rest } from 'msw'
+import { http, HttpResponse } from 'msw'
 
 import {
   createUrlRegex,
@@ -64,17 +64,16 @@ test('assets.serlo.org/legacy/<hash>/<fileName>.<ext>', async () => {
 
 function givenAssets(assets: { [P in string]?: { contentLength: number } }) {
   globalThis.server.use(
-    rest.get(createUrlRegex({ subdomains: ['assets'] }), (req, res, ctx) => {
-      const asset = assets[req.url.pathname]
+    http.get(createUrlRegex({ subdomains: ['assets'] }), ({ request }) => {
+      const asset = assets[new URL(request.url).pathname]
 
       return asset !== undefined
-        ? res(
-            ctx.set(
-              'x-goog-stored-content-length',
-              asset.contentLength.toString(),
-            ),
-          )
-        : res(ctx.status(404))
+        ? new HttpResponse('', {
+            headers: {
+              'x-goog-stored-content-length': asset.contentLength.toString(),
+            },
+          })
+        : new HttpResponse(null, { status: 404 })
     }),
   )
 }

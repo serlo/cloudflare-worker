@@ -3,18 +3,16 @@ import '@testing-library/jest-dom'
 import { jest } from '@jest/globals'
 import { type Event as SentryEvent } from '@sentry/types'
 import * as cryptoNode from 'crypto'
-import { rest } from 'msw'
+import { http } from 'msw'
 import { setupServer } from 'msw/node'
 
 import {
   currentTestEnvironment,
   defaultApiServer,
   defaultFrontendServer,
-  defaultSerloServer,
   getDefaultCFEnvironment,
   givenApi,
   givenFrontend,
-  givenSerlo,
   Uuid,
 } from './__tests__/__utils__'
 
@@ -34,7 +32,6 @@ beforeEach(() => {
 
   givenApi(defaultApiServer())
   givenFrontend(defaultFrontendServer())
-  givenSerlo(defaultSerloServer())
 
   globalThis.sentryEvents = []
   mockSentryServer()
@@ -51,6 +48,13 @@ afterAll(() => {
 })
 
 function addGlobalMocks() {
+  // `@cloudflare/workers-types` defines `crypto` to be on the
+  // [self](https://developer.mozilla.org/en-US/docs/Web/API/Window/self)
+  // property which makes sense for a workers environment. However when we run
+  // the tests via node `self` is not defined and we need to set global variables
+  // via `global` or `globalThis`.
+  //
+  // @ts-expect-error When running node `self` is not defined but `globalThis` is
   globalThis.crypto = {
     subtle: {
       digest(encoding: string, message: Uint8Array) {
@@ -71,15 +75,15 @@ function mockSentryServer() {
   const sentryUrl = `https://${hostname}/api${pathname}/envelope/`
 
   globalThis.server.use(
-    rest.post<SentryEvent>(sentryUrl, async (req, res, ctx) => {
-      const reqText = await req.text()
+    http.post(sentryUrl, async ({ request }) => {
+      const reqText = await request.text()
       const events = reqText
         .split('\n')
         .map((x) => JSON.parse(x) as SentryEvent)
 
       globalThis.sentryEvents.push(...events)
 
-      return res(ctx.status(200))
+      return new Response()
     }),
   )
 }

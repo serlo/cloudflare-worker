@@ -1,47 +1,47 @@
-import {
-  rest,
-  ResponseResolver,
-  restContext,
-  DefaultBodyType,
-  RestRequest,
-} from 'msw'
+import { http, HttpResponse, JsonBodyType, ResponseResolver } from 'msw'
 
 import { localTestEnvironment } from '../test-environment'
 
-export type RestResolver = ResponseResolver<
-  RestRequest<DefaultBodyType>,
-  typeof restContext
->
-
-export function mockHttpGet(url: string, resolver: RestResolver) {
+export function mockHttpGet(url: string, resolver: ResponseResolver) {
   globalThis.server.use(
-    rest.get(url, (req, res, ctx) => {
-      if (req.url.toString() !== url)
-        return res(ctx.status(400, 'Bad Request: Query string does not match'))
+    http.get(url, (info) => {
+      if (info.request.url.toString() !== url) {
+        return new Response('Bad Request: Query string does not match', {
+          status: 400,
+        })
+      }
 
-      return resolver(req, res, ctx)
+      return resolver(info)
     }),
   )
 }
 
-export function returnsText(body: string): RestResolver {
-  return (_req, res, ctx) => res.once(ctx.body(body))
+export function returnsText(body: string): ResponseResolver {
+  return (_) => new Response(body)
 }
 
-export function returnsMalformedJson(): RestResolver {
-  return (_req, res, ctx) => res(ctx.body('malformed json'))
+export function returnsMalformedJson(): ResponseResolver {
+  return (_) => new Response('malformed json')
 }
 
-export function returnsJson(data: unknown): RestResolver {
-  return (_req, res, ctx) => res(ctx.json(data))
+export function returnsJson(data: JsonBodyType): ResponseResolver {
+  return (_) => HttpResponse.json(data)
 }
 
-export function hasInternalServerError(): RestResolver {
-  return (_req, res, ctx) => res(ctx.status(500))
+export function hasInternalServerError(): ResponseResolver {
+  return (_) => new Response('', { status: 500 })
 }
 
-export function redirectsTo(location: string): RestResolver {
-  return (_req, res, ctx) => res(ctx.set('Location', location), ctx.status(302))
+export function redirectsTo(location: string): ResponseResolver {
+  return (_) => Response.redirect(location, 302)
+}
+
+export function badRequest(body: string) {
+  return new Response(body, { status: 400 })
+}
+
+export function responseWithContentType(contentType: string) {
+  new Response('', { headers: { 'content-type': contentType } })
 }
 
 export function createUrlRegex({

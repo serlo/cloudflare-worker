@@ -1,12 +1,13 @@
+import { CfProperties } from '@cloudflare/workers-types'
 import TOML from '@iarna/toml'
 import fs from 'fs'
+import { bypass } from 'msw'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { createKV } from './kv'
 import cloudflareWorker from '../../src'
-import { CFEnvironment, CFVariables } from '../../src/cf-environment'
-import { isInstance } from '../../src/utils'
+import { CFEnvironment, CFVariables, isInstance } from '../../src/utils'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -15,7 +16,11 @@ declare global {
   var server: ReturnType<typeof import('msw/node').setupServer>
 }
 
-export function getDefaultCFEnvironment(): CFEnvironment {
+export function getDefaultCFEnvironment(): CFEnvironment & {
+  waitForSeconds: (seconds: number) => void
+} {
+  let currentTime = 0
+
   return {
     API_ENDPOINT: 'https://api.serlo.org/graphql',
     ALLOW_AUTH_FROM_LOCALHOST: 'true',
@@ -26,8 +31,10 @@ export function getDefaultCFEnvironment(): CFEnvironment {
     FRONTEND_DOMAIN: 'frontend.serlo.localhost',
     SENTRY_DSN: 'https://public@127.0.0.1/0',
 
-    PATH_INFO_KV: createKV(),
-    PACKAGES_KV: createKV(),
+    PATH_INFO_KV: createKV(() => currentTime),
+    waitForSeconds(seconds) {
+      currentTime += seconds
+    },
   }
 }
 
@@ -64,8 +71,19 @@ export abstract class TestEnvironment {
 
   public abstract fetchRequest(request: Request): Promise<Response>
 
-  public createRequest(spec: UrlSpec, init?: RequestInit) {
-    return new Request(this.createUrl(spec), init)
+  public createRequest(spec: UrlSpec, init?: RequestInit<CfProperties>) {
+    const request = new Request<unknown, CfProperties>(
+      this.createUrl(spec),
+      // CF worker has redirect set to "manual" as default value
+      { redirect: 'manual', ...init },
+    )
+
+    if (init?.cf != null) {
+      // @ts-expect-error We want to override `cf` here since setting it via `init` does not work
+      request.cf = { ...init.cf }
+    }
+
+    return request
   }
 
   public createUrl({
@@ -95,9 +113,7 @@ class LocalEnvironment extends TestEnvironment {
     return this.cfEnv.DOMAIN
   }
 
-  public async fetchRequest(originalRequest: Request): Promise<Response> {
-    // CF worker has redirect set to "manual" as default value
-    const request = new Request(originalRequest, { redirect: 'manual' })
+  public async fetchRequest(request: Request): Promise<Response> {
     const waitForPromises: Promise<unknown>[] = []
 
     const response = await cloudflareWorker.fetch(request, this.cfEnv, {
@@ -149,10 +165,7 @@ class RemoteEnvironment extends TestEnvironment {
   }
 
   public createRequest(spec: UrlSpec, init?: RequestInit) {
-    const request = super.createRequest(spec, init)
-
-    // See https://github.com/mswjs/msw/blob/master/src/context/fetch.ts
-    request.headers.set('x-msw-bypass', 'true')
+    const request = super.createRequest(spec, { ...init, redirect: 'manual' })
 
     if (this.name === 'staging' && isInstance(spec.subdomain)) {
       request.headers.set('Authorization', 'Basic c2VybG90ZWFtOnNlcmxvdGVhbQ==')
@@ -163,7 +176,7 @@ class RemoteEnvironment extends TestEnvironment {
 
   public async fetchRequest(request: Request, retry = 0): Promise<Response> {
     try {
-      return fetch(request, { redirect: 'manual' })
+      return fetch(bypass(request))
     } catch (error) {
       if (
         error instanceof Error &&

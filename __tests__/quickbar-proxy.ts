@@ -1,10 +1,22 @@
-import { rest } from 'msw'
+import { http } from 'msw'
 
-import { currentTestEnvironment } from './__utils__'
+import { currentTestEnvironment, returnsJson } from './__utils__'
+
+const quickbarData = [
+  {
+    id: '100',
+    title: 'Mathematik Startseite',
+    path: [],
+    isTax: false,
+    count: 10000,
+  },
+]
 
 describe('de.serlo.org/api/stats/quickbar.json', () => {
   beforeEach(() => {
-    setupArrrg()
+    const url = 'https://serlo.github.io/quickbar-updater/quickbar.json'
+
+    globalThis.server.use(http.get(url, returnsJson(quickbarData)))
   })
 
   test('returns json file', async () => {
@@ -14,28 +26,12 @@ describe('de.serlo.org/api/stats/quickbar.json', () => {
       pathname: '/api/stats/quickbar.json',
     })
     expect(response.status).toBe(200)
-    expect(response.headers.get('content-type')).toBe(
-      'application/json; charset=utf-8',
+    expect(response.headers.get('content-type')).toEqual(
+      expect.stringContaining('application/json'),
     )
 
     expect(await response.text()).toEqual(
       expect.stringContaining('"title":"Mathematik Startseite"'),
     )
   })
-
-  function setupArrrg() {
-    globalThis.server.use(
-      rest.get(
-        'https://serlo.github.io/quickbar-updater/quickbar.json',
-        (_req, res, ctx) => {
-          return res(
-            ctx.set('content-type', 'application/json; charset=utf-8'),
-            ctx.body(
-              '[{"id":"100","title":"Mathematik Startseite","path":[],"isTax":false,"count":10000}]',
-            ),
-          )
-        },
-      ),
-    )
-  }
 })

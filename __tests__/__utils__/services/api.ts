@@ -1,38 +1,36 @@
-import { rest } from 'msw'
+import { http, HttpResponse, ResponseResolver } from 'msw'
 
 import { getUuid } from './database'
-import { RestResolver, createUrlRegex } from './utils'
+import { badRequest, createUrlRegex } from './utils'
 import { Instance } from '../../../src/utils'
 
-export function givenApi(resolver: RestResolver) {
+export function givenApi(resolver: ResponseResolver) {
   globalThis.server.use(
-    rest.post(
+    http.post(
       createUrlRegex({ subdomains: ['api'], pathname: '/graphql' }),
       resolver,
     ),
   )
 }
 
-export function defaultApiServer(): RestResolver {
-  return async (req, res, ctx) => {
-    if (!req.headers.get('Authorization')?.match(/^Serlo Service=ey/))
-      return res(ctx.status(401, 'No authorization header given'))
+export function defaultApiServer(): ResponseResolver {
+  return async ({ request }) => {
+    if (!request.headers.get('Authorization')?.match(/^Serlo Service=ey/))
+      return badRequest('No authorization header given')
 
-    if (req.headers.get('Content-Type') !== 'application/json')
-      return res(ctx.status(400, 'Content-Type is not application/json'))
+    if (request.headers.get('Content-Type') !== 'application/json')
+      return badRequest('Content-Type is not application/json')
 
-    const body = await req.json<ApiRequestBody>()
+    const body = (await request.json()) as ApiRequestBody
     const { instance, path } = body.variables.alias
 
     if (path == null || instance == null)
-      return res(ctx.status(400, 'variable "alias" wrongly defined'))
+      return badRequest('variable "alias" wrongly defined')
 
     const uuid = getUuid(instance, path)
 
     if (uuid === undefined) {
-      const statusText = `Nothing found for "${path}"`
-
-      return res(ctx.status(404, statusText))
+      return badRequest(`Nothing found for "${path}"`)
     }
 
     const result = { ...uuid }
@@ -41,7 +39,7 @@ export function defaultApiServer(): RestResolver {
     if (result.alias !== undefined)
       result.alias = encodeURIComponent(result.alias).replace(/%2F/g, '/')
 
-    return res(ctx.json({ data: { uuid: result } }))
+    return HttpResponse.json({ data: { uuid: result } })
   }
 }
 

@@ -6,7 +6,6 @@ compatibility_date = "2023-07-14"
 
 [env.staging]
 kv_namespaces = [
-  { binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be", preview_id = "19f90dc8e6ff49cd8bc42f51346409be" },
   { binding = "PATH_INFO_KV", id = "839198b2f0a242b491e5723a8c59b7e2", preview_id = "839198b2f0a242b491e5723a8c59b7e2" },
 ]
 name = "serlo-staging"
@@ -22,7 +21,6 @@ FRONTEND_DOMAIN = "frontend-git-staging-serlo.vercel.app"
 
 [env.production]
 kv_namespaces = [
-  { binding = "PACKAGES_KV", id = "19f90dc8e6ff49cd8bc42f51346409be" },
   { binding = "PATH_INFO_KV", id = "c3412114bdb04cfd8a367ec5bad46173" },
 ]
 name = "serlo-production"
