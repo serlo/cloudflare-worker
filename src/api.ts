@@ -65,7 +65,7 @@ function getAllowedOrigin(requestOrigin: string | null, env: CFEnvironment) {
           ((url.domain === 'localhost' &&
             (url.port === '3000' || url.port === '3001')) ||
             url.hostname.includes('-serlo.vercel.app'))) ||
-        url.domain === 'moodle-domain'
+        url.hostname.includes('.adornis.de')
       ) {
         return requestOrigin
       }
