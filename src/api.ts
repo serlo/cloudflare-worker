@@ -68,7 +68,10 @@ function getAllowedOrigin(requestOrigin: string | null, env: CFEnvironment) {
         url.domain === env.DOMAIN ||
         (env.ENVIRONMENT !== 'production' &&
           ((url.domain === 'localhost' &&
-            (url.port === '3000' || url.port === '3001')) ||
+            (url.port === '3000' ||
+              url.port === '3001' ||
+              url.port === '8000' ||
+              url.port === '8080')) ||
             url.hostname.includes('-serlo.vercel.app'))) ||
         url.hostname.includes('.adornis.de')
       ) {
