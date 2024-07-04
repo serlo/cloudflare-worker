@@ -20,6 +20,11 @@ export async function api(request: Request, env: CFEnvironment) {
   // for an explanation why this header is needed to be set
   response.headers.set('Vary', 'Origin')
 
+  response.headers.set(
+    'Access-Control-Allow-Headers',
+    'Content-Type, x-serlo-editor-testing',
+  )
+
   return response
 }
 
