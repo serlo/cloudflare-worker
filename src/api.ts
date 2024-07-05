@@ -20,6 +20,11 @@ export async function api(request: Request, env: CFEnvironment) {
   // for an explanation why this header is needed to be set
   response.headers.set('Vary', 'Origin')
 
+  response.headers.set(
+    'Access-Control-Allow-Headers',
+    'Content-Type, x-serlo-editor-testing',
+  )
+
   return response
 }
 
@@ -63,8 +68,12 @@ function getAllowedOrigin(requestOrigin: string | null, env: CFEnvironment) {
         url.domain === env.DOMAIN ||
         (env.ENVIRONMENT !== 'production' &&
           ((url.domain === 'localhost' &&
-            (url.port === '3000' || url.port === '3001')) ||
-            url.hostname.includes('-serlo.vercel.app')))
+            (url.port === '3000' ||
+              url.port === '3001' ||
+              url.port === '8000' ||
+              url.port === '8080')) ||
+            url.hostname.includes('-serlo.vercel.app'))) ||
+        url.hostname.includes('.adornis.de')
       ) {
         return requestOrigin
       }

@@ -30,21 +30,21 @@
     "test:staging": "cross-env TEST_ENVIRONMENT=staging yarn test --runInBand"
   },
   "dependencies": {
-    "fp-ts": "^2.16.6",
+    "fp-ts": "^2.16.7",
     "io-ts": "^2.2.21",
     "jose": "^5.4.1",
     "toucan-js": "^3.4.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240614.0",
+    "@cloudflare/workers-types": "^4.20240620.0",
     "@iarna/toml": "^2.2.5",
     "@jest/globals": "^29.7.0",
-    "@sentry/types": "^8.9.2",
+    "@sentry/types": "^8.13.0",
     "@testing-library/jest-dom": "^6.4.6",
     "@types/iarna__toml": "^2.0.5",
     "@types/jest": "^29.5.12",
     "@typescript-eslint/eslint-plugin": "^7.13.1",
-    "@typescript-eslint/parser": "^7.13.1",
+    "@typescript-eslint/parser": "^7.15.0",
     "cross-env": "^7.0.3",
     "depcheck": "^1.4.7",
     "eslint": "^8.57.0",
@@ -60,7 +60,7 @@
     "prettier-plugin-sh": "^0.14.0",
     "ts-jest": "^29.1.5",
     "ts-unused-exports": "^10.1.0",
-    "typescript": "^5.5.2",
+    "typescript": "^5.5.3",
     "wrangler": "^3.61.0"
   },
   "packageManager": "yarn@3.6.0",
