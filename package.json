@@ -58,7 +58,7 @@
     "prettier": "^3.3.2",
     "prettier-plugin-packagejson": "^2.5.0",
     "prettier-plugin-sh": "^0.14.0",
-    "ts-jest": "^29.1.5",
+    "ts-jest": "^29.2.2",
     "ts-unused-exports": "^10.1.0",
     "typescript": "^5.5.3",
     "wrangler": "^3.61.0"
