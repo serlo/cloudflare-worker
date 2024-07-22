@@ -1280,7 +1280,7 @@ __metadata:
     "@iarna/toml": ^2.2.5
     "@jest/globals": ^29.7.0
     "@sentry/types": ^8.17.0
-    "@testing-library/jest-dom": ^6.4.6
+    "@testing-library/jest-dom": ^6.4.7
     "@types/iarna__toml": ^2.0.5
     "@types/jest": ^29.5.12
     "@typescript-eslint/eslint-plugin": ^7.16.0
@@ -1334,9 +1334,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/jest-dom@npm:^6.4.6":
-  version: 6.4.6
-  resolution: "@testing-library/jest-dom@npm:6.4.6"
+"@testing-library/jest-dom@npm:^6.4.7":
+  version: 6.4.7
+  resolution: "@testing-library/jest-dom@npm:6.4.7"
   dependencies:
     "@adobe/css-tools": ^4.4.0
     "@babel/runtime": ^7.9.2
@@ -1363,7 +1363,7 @@ __metadata:
       optional: true
     vitest:
       optional: true
-  checksum: d70acbfc5d842065292dc1b4113ac2b4c2a2b83f9868e454d7f24d97ee92fddf7852e0e079b6eecaf21154bfe6e9ad03eb32e72f16854f64d7ce1ff42288828b
+  checksum: 53cfe29a7d753c478cf1ca4c5c05cd12acf1ef917a5a843e68b5f48ae586a5f890864a5d0d69180c1d076445032098dd33db1de87a19e0d2f28e6d31edc4e12d
   languageName: node
   linkType: hard
 
