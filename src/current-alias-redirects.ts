@@ -174,7 +174,7 @@ async function getPathInfo(
       ? `error/deleted/${uuid.__typename}`
       : uuid.legacyObject !== undefined
         ? uuid.legacyObject.alias
-        : uuid.alias ?? path
+        : (uuid.alias ?? path)
   }
 
   const result = {
