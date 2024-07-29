@@ -1280,7 +1280,7 @@ __metadata:
     "@iarna/toml": ^2.2.5
     "@jest/globals": ^29.7.0
     "@sentry/types": ^8.17.0
-    "@testing-library/jest-dom": ^6.4.7
+    "@testing-library/jest-dom": ^6.4.8
     "@types/iarna__toml": ^2.0.5
     "@types/jest": ^29.5.12
     "@typescript-eslint/eslint-plugin": ^7.18.0
@@ -1334,9 +1334,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/jest-dom@npm:^6.4.7":
-  version: 6.4.7
-  resolution: "@testing-library/jest-dom@npm:6.4.7"
+"@testing-library/jest-dom@npm:^6.4.8":
+  version: 6.4.8
+  resolution: "@testing-library/jest-dom@npm:6.4.8"
   dependencies:
     "@adobe/css-tools": ^4.4.0
     "@babel/runtime": ^7.9.2
@@ -1346,24 +1346,7 @@ __metadata:
     dom-accessibility-api: ^0.6.3
     lodash: ^4.17.21
     redent: ^3.0.0
-  peerDependencies:
-    "@jest/globals": ">= 28"
-    "@types/bun": "*"
-    "@types/jest": ">= 28"
-    jest: ">= 28"
-    vitest: ">= 0.32"
-  peerDependenciesMeta:
-    "@jest/globals":
-      optional: true
-    "@types/bun":
-      optional: true
-    "@types/jest":
-      optional: true
-    jest:
-      optional: true
-    vitest:
-      optional: true
-  checksum: 53cfe29a7d753c478cf1ca4c5c05cd12acf1ef917a5a843e68b5f48ae586a5f890864a5d0d69180c1d076445032098dd33db1de87a19e0d2f28e6d31edc4e12d
+  checksum: b601688950e522557c2c6bbc0f026ae31a10583577c8a557814b0eb33648fe82afc06299f3cdb79ff0c5076fd1a6106f3d76e2ca0dde6f7ee0555e63008fbd72
   languageName: node
   linkType: hard
 
