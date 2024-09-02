@@ -32,7 +32,7 @@
   "dependencies": {
     "fp-ts": "^2.16.9",
     "io-ts": "^2.2.21",
-    "jose": "^5.6.3",
+    "jose": "^5.8.0",
     "toucan-js": "^4.0.0"
   },
   "devDependencies": {
