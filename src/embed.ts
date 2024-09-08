@@ -31,7 +31,7 @@ export async function embed(
       case 'wikimedia.org':
         return await getWikimediaThumbnail(videoUrl)
     }
-  } catch (e) {
+  } catch {
     //Invalid URL
   }
 
@@ -94,7 +94,7 @@ async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
 
   try {
     apiResponseJson = JSON.parse(apiResponseText) as unknown
-  } catch (e) {
+  } catch {
     sentry.setContext(
       'apiResponse',
       responseToContext({ response: apiResponse, text: apiResponseText }),
@@ -121,7 +121,7 @@ async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
 
   try {
     imgUrl = new Url(vimeoThumbnailUrl)
-  } catch (e) {
+  } catch {
     sentry.setContext(
       'apiResponse',
       responseToContext({ response: apiResponse, json: apiResponseJson }),
@@ -198,7 +198,7 @@ async function getGeogebraThumbnail(url: URL, sentry: SentryReporter) {
 
   try {
     apiResponseJson = JSON.parse(apiResponseText)
-  } catch (e) {
+  } catch {
     sentry.setContext(
       'apiResponse',
       responseToContext({ response: apiResponse, text: apiResponseText }),
@@ -227,7 +227,7 @@ async function getGeogebraThumbnail(url: URL, sentry: SentryReporter) {
 
   try {
     previewUrl = new Url(item.previewUrl)
-  } catch (e) {
+  } catch {
     sentry.setContext(
       'apiResponse',
       responseToContext({ response: apiResponse, json: apiResponseJson }),
