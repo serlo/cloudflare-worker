@@ -76,7 +76,7 @@ async function getPathInfo(
       const result = PathInfo.decode(JSON.parse(cachedValue))
 
       if (E.isRight(result)) return result.right
-    } catch (e) {
+    } catch {
       // ignore
     }
   }
@@ -122,7 +122,7 @@ async function getPathInfo(
       env,
     )
     apiResponseBody = await apiResponse.json()
-  } catch (e) {
+  } catch {
     return null
   }
 
@@ -166,7 +166,7 @@ async function getPathInfo(
           }
         }
       }
-    } catch (e) {
+    } catch {
       return null
     }
   } else {
@@ -174,7 +174,7 @@ async function getPathInfo(
       ? `error/deleted/${uuid.__typename}`
       : uuid.legacyObject !== undefined
         ? uuid.legacyObject.alias
-        : uuid.alias ?? path
+        : (uuid.alias ?? path)
   }
 
   const result = {
