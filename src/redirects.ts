@@ -94,10 +94,7 @@ export function redirects(request: Request, env: CFEnvironment) {
       case '/data-wallet':
         return Response.redirect('https://lenabi.serlo-staging.dev/wallet', 302)
       case '/user-journey':
-        return Response.redirect(
-          'https://frontend-git-lenabi-mock-serlo.vercel.app/',
-          302,
-        )
+        return Response.redirect('https://de.serlo-staging.dev/willkommen', 302)
       case '/sso':
         return Response.redirect('https://lenabi.serlo-staging.dev/sso', 302)
       case '/status':
