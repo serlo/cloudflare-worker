@@ -39,7 +39,7 @@ interface Course extends AbstractUuid<'Course'> {
   pages?: { alias: string }[]
 }
 
-interface GenericUuid extends AbstractUuid<GenericTypenames> {}
+type GenericUuid = AbstractUuid<GenericTypenames>
 
 type GenericTypenames = 'Page' | 'Article' | 'TaxonomyTerm' | 'Comment'
 
