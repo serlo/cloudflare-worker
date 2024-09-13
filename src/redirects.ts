@@ -64,8 +64,9 @@ export function redirects(request: Request, env: CFEnvironment) {
   }
 
   if (
-    (!isInstance(url.subdomain) || url.subdomain !== Instance.En) &&
-    url.pathnameWithoutTrailingSlash === '/editor'
+    url.pathnameWithoutTrailingSlash === '/editor' &&
+    (!isInstance(url.subdomain) ||
+      ![Instance.En, Instance.De].includes(url.subdomain))
   ) {
     return Response.redirect('https://en.serlo.org/editor', 301)
   }
