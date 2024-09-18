@@ -43,8 +43,8 @@
     "@testing-library/jest-dom": "^6.5.0",
     "@types/iarna__toml": "^2.0.5",
     "@types/jest": "^29.5.12",
-    "@typescript-eslint/eslint-plugin": "^8.5.0",
-    "@typescript-eslint/parser": "^8.5.0",
+    "@typescript-eslint/eslint-plugin": "^8.6.0",
+    "@typescript-eslint/parser": "^8.6.0",
     "cross-env": "^7.0.3",
     "depcheck": "^1.4.7",
     "eslint": "^8.57.0",
@@ -61,7 +61,7 @@
     "ts-jest": "^29.2.5",
     "ts-unused-exports": "^10.1.0",
     "typescript": "^5.5.4",
-    "wrangler": "^3.75.0"
+    "wrangler": "^3.76.0"
   },
   "packageManager": "yarn@3.6.0",
   "engines": {
