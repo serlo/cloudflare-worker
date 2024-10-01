@@ -60,7 +60,7 @@
     "prettier-plugin-sh": "^0.14.0",
     "ts-jest": "^29.2.5",
     "ts-unused-exports": "^10.1.0",
-    "typescript": "^5.5.4",
+    "typescript": "^5.6.2",
     "wrangler": "^3.76.0"
   },
   "packageManager": "yarn@3.6.0",
