@@ -42,7 +42,7 @@
     "@sentry/types": "^8.34.0",
     "@testing-library/jest-dom": "^6.5.0",
     "@types/iarna__toml": "^2.0.5",
-    "@types/jest": "^29.5.12",
+    "@types/jest": "^29.5.13",
     "@typescript-eslint/eslint-plugin": "^8.9.0",
     "@typescript-eslint/parser": "^8.8.1",
     "cross-env": "^7.0.3",
