@@ -39,7 +39,7 @@ export default {
         (await semanticFileNames(request)) ||
         (await api(request, env)) ||
         (await frontendProxy(request, sentryFactory, env)) ||
-        (await assetProxy(request, sentryFactory)) ||
+        (await assetProxy(request)) ||
         (await fetch(request))
       )
     } catch (e) {
