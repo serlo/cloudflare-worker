@@ -9,11 +9,11 @@ export async function assetProxy(
   if (url.subdomain !== 'asset-proxy') return null
   if (url.pathname !== '/src') return null
 
-  const assetUrl = url.searchParams.get('url')
+  const urlParam = url.searchParams.get('url')
 
-  if (!assetUrl) throw new Error('Missing url for the asset')
+  if (!urlParam) throw new Error('Missing url for the asset')
 
-  const response = await fetch(assetUrl, { cf: { cacheTtl: 24 * 60 * 60 } })
+  const assetUrl = new Url(urlParam)
 
   // Maybe add other validations?
   if (response.ok) {
