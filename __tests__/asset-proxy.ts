@@ -28,7 +28,7 @@ test('request to https://asset-proxy.serlo.org/src?url=* gets asset from url que
   const env = currentTestEnvironment()
   const response = await env.fetch({
     subdomain: 'asset-proxy',
-    pathname: `/src?url=${encodeURIComponent('https://whatever.org/image')}`,
+    pathname: '/src?url=https://whatever.org/image',
   })
   expect(response.status).toBe(200)
   expect(response.headers.get('content-type')).toBe('image/png')
