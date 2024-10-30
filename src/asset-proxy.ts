@@ -15,17 +15,19 @@ export async function assetProxy(
 
   const assetUrl = new Url(urlParam)
 
-  // Maybe add other validations?
-  if (response.ok) {
-    response.headers.delete('Set-Cookie')
+  const originalResponse = await fetch(assetUrl, { cf: { cacheTtl: 24 * 60 * 60 } })
+
+  if (originalResponse.ok) {
+    const response = new Response(originalResponse.body, originalResponse)
+    response.headers.delete('set-cookie')
     return response
   } else {
     const sentry = sentryFactory.createReporter('asset-proxy')
     sentry.setContext(
       'response',
-      responseToContext({ response, text: await response.text() }),
+      responseToContext({ response: originalResponse, text: await originalResponse.text() }),
     )
-    sentry.captureMessage(`Illegal response of ${assetUrl}`, 'warning')
+    sentry.captureMessage(`Illegal response of ${assetUrl.toString()}`, 'warning')
   }
 
   return null
