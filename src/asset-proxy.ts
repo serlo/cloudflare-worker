@@ -1,4 +1,10 @@
-import { SentryFactory, responseToContext, Url } from './utils'
+import {
+  SentryFactory,
+  responseToContext,
+  Url,
+  getPlaceholder,
+  isImageResponse,
+} from './utils'
 
 export async function assetProxy(
   request: Request,
@@ -11,24 +17,25 @@ export async function assetProxy(
 
   const urlParam = url.searchParams.get('url')
 
-  if (!urlParam) throw new Error('Missing url for the asset')
+  if (!urlParam) return getPlaceholder()
 
-  const assetUrl = new Url(urlParam)
+  let assetUrl: Url
 
-  const originalResponse = await fetch(assetUrl, { cf: { cacheTtl: 24 * 60 * 60 } })
+  try {
+    assetUrl = new Url(urlParam)
+  } catch {
+    return getPlaceholder()
+  }
 
-  if (originalResponse.ok) {
+  const originalResponse = await fetch(assetUrl, {
+    cf: { cacheTtl: 24 * 60 * 60 },
+  })
+
+  if (originalResponse.ok && isImageResponse(originalResponse)) {
     const response = new Response(originalResponse.body, originalResponse)
     response.headers.delete('set-cookie')
     return response
-  } else {
-    const sentry = sentryFactory.createReporter('asset-proxy')
-    sentry.setContext(
-      'response',
-      responseToContext({ response: originalResponse, text: await originalResponse.text() }),
-    )
-    sentry.captureMessage(`Illegal response of ${assetUrl.toString()}`, 'warning')
   }
 
-  return null
+  return getPlaceholder()
 }
