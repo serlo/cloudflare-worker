@@ -24,11 +24,11 @@ beforeEach(() => {
   )
 })
 
-test('request to https://asset-proxy.serlo.org/src?url=* gets asset from url query parameter', async () => {
+test('request to https://asset-proxy.serlo.org/image?url=* gets asset from url query parameter', async () => {
   const env = currentTestEnvironment()
   const response = await env.fetch({
     subdomain: 'asset-proxy',
-    pathname: '/src?url=https://whatever.org/image',
+    pathname: '/image?url=https://whatever.org/image',
   })
   expect(response.status).toBe(200)
   expect(response.headers.get('content-type')).toBe('image/png')
@@ -51,7 +51,7 @@ describe('returns placeholder', () => {
   test('when url query parameter is missing', async () => {
     const response = await currentTestEnvironment().fetch({
       subdomain: 'asset-proxy',
-      pathname: '/src',
+      pathname: '/image',
     })
 
     expectIsPlaceholderResponse(response)
@@ -70,6 +70,6 @@ async function requestAsset(
 ): Promise<Response> {
   return await env.fetch({
     subdomain: 'asset-proxy',
-    pathname: '/src?url=' + encodeURIComponent(url),
+    pathname: '/image?url=' + encodeURIComponent(url),
   })
 }
