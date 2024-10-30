@@ -1,15 +1,6 @@
-import {
-  SentryFactory,
-  responseToContext,
-  Url,
-  getPlaceholder,
-  isImageResponse,
-} from './utils'
+import { Url, getPlaceholder, isImageResponse } from './utils'
 
-export async function assetProxy(
-  request: Request,
-  sentryFactory: SentryFactory,
-): Promise<Response | null> {
+export async function assetProxy(request: Request): Promise<Response | null> {
   const url = Url.fromRequest(request)
 
   if (url.subdomain !== 'asset-proxy') return null
