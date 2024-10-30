@@ -15,7 +15,9 @@ export async function assetProxy(
 
   const response = await fetch(assetUrl, { cf: { cacheTtl: 24 * 60 * 60 } })
 
+  // Maybe add other validations?
   if (response.ok) {
+    response.headers.delete('Set-Cookie')
     return response
   } else {
     const sentry = sentryFactory.createReporter('asset-proxy')
