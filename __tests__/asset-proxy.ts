@@ -6,7 +6,11 @@ beforeEach(() => {
   globalThis.server.use(
     http.get('https://whatever.org/image', () => {
       return new Response('', {
-        headers: { 'content-type': 'image/png' },
+        headers: {
+          'content-type': 'image/png',
+          'Set-Cookie':
+            'sessionId=abc123; Expires=Wed, 09 Nov 2024 07:28:00 GMT; Path=/; Domain=whatever.org; Secure; HttpOnly; SameSite=None',
+        },
       })
     }),
   )
@@ -20,6 +24,5 @@ test('request to https://asset-proxy.serlo.org/src?url=* gets asset from url que
   })
   expect(response.status).toBe(200)
   expect(response.headers.get('content-type')).toBe('image/png')
+  expect(response.headers.get('Set-Cookie')).toBeNull()
 })
-
-// TODO: be sure the user IP is not sent
