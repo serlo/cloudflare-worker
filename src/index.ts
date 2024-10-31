@@ -1,4 +1,5 @@
 import { api } from './api'
+import { assetProxy } from './asset-proxy'
 import { semanticFileNames } from './assets'
 import { auth } from './auth'
 import { cloudflareWorkerDev } from './cloudflare-worker-dev'
@@ -38,6 +39,7 @@ export default {
         (await semanticFileNames(request)) ||
         (await api(request, env)) ||
         (await frontendProxy(request, sentryFactory, env)) ||
+        (await assetProxy(request)) ||
         (await fetch(request))
       )
     } catch (e) {
