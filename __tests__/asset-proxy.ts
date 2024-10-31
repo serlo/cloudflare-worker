@@ -33,6 +33,9 @@ test('request to https://asset-proxy.serlo.org/image?url=* gets asset from url q
   expect(response.status).toBe(200)
   expect(response.headers.get('content-type')).toBe('image/png')
   expect(response.headers.get('Set-Cookie')).toBeNull()
+  expect(response.headers.get('cache-control')).toBe(
+    'public, max-age=31536000, immutable',
+  )
 })
 
 describe('returns placeholder', () => {

@@ -19,12 +19,13 @@ export async function assetProxy(request: Request): Promise<Response | null> {
   }
 
   const originalResponse = await fetch(assetUrl, {
-    cf: { cacheTtl: 24 * 60 * 60 },
+    cf: { cacheTtl: 24 * 60 * 60 * 30 },
   })
 
   if (originalResponse.ok && isImageResponse(originalResponse)) {
     const response = new Response(originalResponse.body, originalResponse)
     response.headers.delete('set-cookie')
+    response.headers.set('cache-control', 'public, max-age=31536000, immutable')
     return response
   }
 
