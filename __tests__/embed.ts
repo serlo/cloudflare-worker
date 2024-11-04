@@ -10,6 +10,7 @@ import {
   localTestEnvironment,
   expectSentryEvent,
   expectNoSentryError,
+  expectIsPlaceholderResponse,
 } from './__utils__'
 
 describe('embed.serlo.org/thumbnail?url=...', () => {
@@ -650,12 +651,6 @@ describe('embed.serlo.org/thumbnail?url=...', () => {
     })
   })
 })
-
-function expectIsPlaceholderResponse(response: Response) {
-  expect(response.status).toBe(200)
-  expect(response.headers.get('content-type')).toBe('image/png')
-  expect(response.headers.get('content-length')).toBe('135')
-}
 
 async function requestThumbnail(
   url: string,
