@@ -14,7 +14,6 @@ import { robotsTxt } from './robots'
 import { sentryHelloWorld } from './sentry'
 import { SentryFactory, CFEnvironment } from './utils'
 
-// eslint-disable-next-line import/no-default-export
 export default {
   async fetch(
     request: Request,
