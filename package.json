@@ -43,7 +43,7 @@
     "@iarna/toml": "^2.2.5",
     "@jest/globals": "^29.7.0",
     "@sentry/types": "^8.36.0",
-    "@testing-library/jest-dom": "^6.5.0",
+    "@testing-library/jest-dom": "^6.6.3",
     "@types/iarna__toml": "^2.0.5",
     "@types/jest": "^29.5.14",
     "@typescript-eslint/eslint-plugin": "^8.13.0",
