@@ -55,7 +55,7 @@ test('reports to sentry when frontend responded with redirect', async () => {
   const env = localTestEnvironment()
   const redirectResponse = await env.fetch({
     subdomain: 'en',
-    pathname: '/math',
+    pathname: '/api/.ory/login',
   })
 
   expect(redirectResponse.status).toEqual(302)
@@ -68,7 +68,7 @@ test('reports to sentry when frontend responded with redirect', async () => {
     context: {
       backendUrl: env.createUrl({
         subdomain: 'frontend',
-        pathname: '/en/math',
+        pathname: '/api/.ory/login',
       }),
       location: 'https://frontend.serlo.org/',
     },
