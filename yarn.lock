@@ -723,15 +723,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/compat@npm:^1.2.2":
-  version: 1.2.2
-  resolution: "@eslint/compat@npm:1.2.2"
+"@eslint/compat@npm:^1.2.3":
+  version: 1.2.3
+  resolution: "@eslint/compat@npm:1.2.3"
   peerDependencies:
     eslint: ^9.10.0
   peerDependenciesMeta:
     eslint:
       optional: true
-  checksum: 02708de14b32870f44b4fbb78d1bf9e7fb8741a3038bcaea91239a161a0884b676b4c9b5a2346a145d76981710427f5a2d56f65e5bc0579bd288286e88f43ee2
+  checksum: 71b328099365fd24d6f16fb7dc64c117d74a42c3622605351b66c5eab5027e00f7d8a8a3f42c45221e8ad41221b598e3865078eb11171a2d6d3296a1626c4d9b
   languageName: node
   linkType: hard
 
@@ -770,6 +770,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@eslint/eslintrc@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "@eslint/eslintrc@npm:3.2.0"
+  dependencies:
+    ajv: ^6.12.4
+    debug: ^4.3.2
+    espree: ^10.0.1
+    globals: ^14.0.0
+    ignore: ^5.2.0
+    import-fresh: ^3.2.1
+    js-yaml: ^4.1.0
+    minimatch: ^3.1.2
+    strip-json-comments: ^3.1.1
+  checksum: c898e4d12f4c9a79a61ee3c91e38eea5627a04e021cb749191e8537445858bfe32f810eca0cb2dc9902b8ad8b65ca07ef7221dc4bad52afe60cbbf50ec56c236
+  languageName: node
+  linkType: hard
+
 "@eslint/js@npm:9.14.0, @eslint/js@npm:^9.14.0":
   version: 9.14.0
   resolution: "@eslint/js@npm:9.14.0"
@@ -785,11 +802,11 @@ __metadata:
   linkType: hard
 
 "@eslint/plugin-kit@npm:^0.2.0":
-  version: 0.2.2
-  resolution: "@eslint/plugin-kit@npm:0.2.2"
+  version: 0.2.3
+  resolution: "@eslint/plugin-kit@npm:0.2.3"
   dependencies:
     levn: ^0.4.1
-  checksum: 08935d81f59f8b2ccc6df1e2517684d6cb9911390e210dacd861be60a000224b0b2f5aa9364ff78e4b14152d1d777aa621f587479aae07d0670b2e14a5a18ef6
+  checksum: b93b9c3f5b1722d09cc4e609abd4510130f659f70f6417b68ac7c4ad9fbf9e3d4f0ef5b6f2bad106eb8c1c1b2146bd0391e0a1c00ddeae46c917f175b8c0da4b
   languageName: node
   linkType: hard
 
@@ -1220,9 +1237,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mswjs/interceptors@npm:^0.36.5":
-  version: 0.36.10
-  resolution: "@mswjs/interceptors@npm:0.36.10"
+"@mswjs/interceptors@npm:^0.37.0":
+  version: 0.37.1
+  resolution: "@mswjs/interceptors@npm:0.37.1"
   dependencies:
     "@open-draft/deferred-promise": ^2.2.0
     "@open-draft/logger": ^0.3.0
@@ -1230,7 +1247,7 @@ __metadata:
     is-node-process: ^1.2.0
     outvariant: ^1.4.3
     strict-event-emitter: ^0.5.1
-  checksum: e4d22f66782c911836c2b7370b8782ad2466d7f781e96703727b736caede29cc80f31cfbdcb5c4f44faf8737d321db1cbd5367dbd179cd213852a27f586f3cc9
+  checksum: 89f3717ff50595eb4075c540ce9c143290cdd24474ac7957097c4e6f53ad7536f1868cddce5b44d4344981fe837b31f127113cde1f15512929c8dba79767858d
   languageName: node
   linkType: hard
 
@@ -1353,8 +1370,8 @@ __metadata:
   resolution: "@serlo/serlo.org-cloudflare-worker@workspace:."
   dependencies:
     "@cloudflare/workers-types": ^4.20241106.0
-    "@eslint/compat": ^1.2.2
-    "@eslint/eslintrc": ^3.1.0
+    "@eslint/compat": ^1.2.3
+    "@eslint/eslintrc": ^3.2.0
     "@eslint/js": ^9.14.0
     "@iarna/toml": ^2.2.5
     "@jest/globals": ^29.7.0
@@ -1376,7 +1393,7 @@ __metadata:
     io-ts: ^2.2.21
     jest: ^29.7.0
     jose: ^5.9.6
-    msw: ^2.6.4
+    msw: ^2.6.5
     npm-run-all: ^4.1.5
     prettier: ^3.3.3
     prettier-plugin-packagejson: ^2.5.3
@@ -2799,15 +2816,15 @@ __metadata:
   linkType: hard
 
 "cross-spawn@npm:^6.0.5":
-  version: 6.0.5
-  resolution: "cross-spawn@npm:6.0.5"
+  version: 6.0.6
+  resolution: "cross-spawn@npm:6.0.6"
   dependencies:
     nice-try: ^1.0.4
     path-key: ^2.0.1
     semver: ^5.5.0
     shebang-command: ^1.2.0
     which: ^1.2.9
-  checksum: f893bb0d96cd3d5751d04e67145bdddf25f99449531a72e82dcbbd42796bbc8268c1076c6b3ea51d4d455839902804b94bc45dfb37ecbb32ea8e54a6741c3ab9
+  checksum: a6e2e5b04a0e0f806c1df45f92cd079b65f95fbe5a7650ee1ab60318c33a6c156a8a2f8b6898f57764f7363ec599a0625e9855dfa78d52d2d73dbd32eb11c25e
   languageName: node
   linkType: hard
 
@@ -6096,15 +6113,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"msw@npm:^2.6.4":
-  version: 2.6.4
-  resolution: "msw@npm:2.6.4"
+"msw@npm:^2.6.5":
+  version: 2.6.5
+  resolution: "msw@npm:2.6.5"
   dependencies:
     "@bundled-es-modules/cookie": ^2.0.1
     "@bundled-es-modules/statuses": ^1.0.1
     "@bundled-es-modules/tough-cookie": ^0.1.6
     "@inquirer/confirm": ^5.0.0
-    "@mswjs/interceptors": ^0.36.5
+    "@mswjs/interceptors": ^0.37.0
     "@open-draft/deferred-promise": ^2.2.0
     "@open-draft/until": ^2.1.0
     "@types/cookie": ^0.6.0
@@ -6125,7 +6142,7 @@ __metadata:
       optional: true
   bin:
     msw: cli/index.js
-  checksum: b53b0a8746b735220b8111284c5345baadd78b858c1119472635b5b59323e8246891947aaac30c9f5eb4c1fa5ccd5f2b77baedce21db36619cd90ee4ab7011f0
+  checksum: 7396dd90fc021dba94daf194806ad9049dedfcf16017af1e4b8e58aef16e83e3c807baef6afc9b0b2f359f228cd31b46cfc3b43aab9cc7e1398841f63d1e8755
   languageName: node
   linkType: hard
 

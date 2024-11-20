@@ -18,9 +18,12 @@ export async function assetProxy(request: Request): Promise<Response | null> {
     return getPlaceholder()
   }
 
-  const originalResponse = await fetch(assetUrl, {
-    cf: { cacheTtl: 24 * 60 * 60 * 30 },
-  })
+  const originalResponse = await fetch(
+    new Request(assetUrl.toString(), request),
+    {
+      cf: { cacheTtl: 24 * 60 * 60 * 30 },
+    },
+  )
 
   if (originalResponse.ok && isImageResponse(originalResponse)) {
     const response = new Response(originalResponse.body, originalResponse)

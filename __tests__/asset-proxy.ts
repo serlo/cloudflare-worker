@@ -1,4 +1,4 @@
-import { http } from 'msw'
+import { bypass, http } from 'msw'
 
 import {
   currentTestEnvironment,
@@ -21,6 +21,13 @@ beforeEach(() => {
         headers: { 'content-type': 'application/json' },
       })
     }),
+    // it would be better to internally fake the response, but for some reason msw does not handle Content-Encoding header correctly
+    http.get(
+      'https://upload.wikimedia.org/wikipedia/commons/8/8b/Sinus_mit_y.svg',
+      async ({ request }) => {
+        return await fetch(bypass(new Request(request.url, request)))
+      },
+    ),
   )
 })
 
@@ -32,6 +39,28 @@ test('request to https://asset-proxy.serlo.org/image?url=* gets asset from url q
   })
   expect(response.status).toBe(200)
   expect(response.headers.get('content-type')).toBe('image/png')
+  expect(response.headers.get('Set-Cookie')).toBeNull()
+  expect(response.headers.get('cache-control')).toBe(
+    'public, max-age=31536000, immutable',
+  )
+})
+
+test('request to asset-proxy works also in case of other encodings', async () => {
+  const env = currentTestEnvironment()
+  const response = await env.fetch(
+    {
+      subdomain: 'asset-proxy',
+      pathname:
+        '/image?url=https://upload.wikimedia.org/wikipedia/commons/8/8b/Sinus_mit_y.svg',
+    },
+    {
+      headers: {
+        'Accept-Encoding': '*',
+      },
+    },
+  )
+  expect(response.status).toBe(200)
+  expect(response.headers.get('content-type')).toBe('image/svg+xml')
   expect(response.headers.get('Set-Cookie')).toBeNull()
   expect(response.headers.get('cache-control')).toBe(
     'public, max-age=31536000, immutable',
