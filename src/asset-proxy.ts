@@ -20,6 +20,7 @@ export async function assetProxy(request: Request): Promise<Response | null> {
 
   const originalResponse = await fetch(assetUrl, {
     cf: { cacheTtl: 24 * 60 * 60 * 30 },
+    headers: { 'Accept-Encoding': '*' },
   })
 
   if (originalResponse.ok && isImageResponse(originalResponse)) {
