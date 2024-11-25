@@ -1393,7 +1393,7 @@ __metadata:
     io-ts: ^2.2.21
     jest: ^29.7.0
     jose: ^5.9.6
-    msw: ^2.6.5
+    msw: ^2.6.6
     npm-run-all: ^4.1.5
     prettier: ^3.3.3
     prettier-plugin-packagejson: ^2.5.3
@@ -6113,9 +6113,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"msw@npm:^2.6.5":
-  version: 2.6.5
-  resolution: "msw@npm:2.6.5"
+"msw@npm:^2.6.6":
+  version: 2.6.6
+  resolution: "msw@npm:2.6.6"
   dependencies:
     "@bundled-es-modules/cookie": ^2.0.1
     "@bundled-es-modules/statuses": ^1.0.1
@@ -6142,7 +6142,7 @@ __metadata:
       optional: true
   bin:
     msw: cli/index.js
-  checksum: 7396dd90fc021dba94daf194806ad9049dedfcf16017af1e4b8e58aef16e83e3c807baef6afc9b0b2f359f228cd31b46cfc3b43aab9cc7e1398841f63d1e8755
+  checksum: 803d60ca38fb8b3b35a81e5f95739ccb2a8935957f9a29e9baf3948fda1839e54a1164af305cbab1e75fa957f45258a609bc3ea5b1f97cb09a671a12e964ada8
   languageName: node
   linkType: hard
 
