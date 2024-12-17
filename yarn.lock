@@ -1389,7 +1389,7 @@ __metadata:
     eslint-plugin-react: ^7.37.2
     fp-ts: ^2.16.9
     globals: ^15.12.0
-    io-ts: ^2.2.21
+    io-ts: ^2.2.22
     jest: ^29.7.0
     jose: ^5.9.6
     msw: ^2.6.8
@@ -4653,12 +4653,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"io-ts@npm:^2.2.21":
-  version: 2.2.21
-  resolution: "io-ts@npm:2.2.21"
+"io-ts@npm:^2.2.22":
+  version: 2.2.22
+  resolution: "io-ts@npm:2.2.22"
   peerDependencies:
     fp-ts: ^2.5.0
-  checksum: c6ae5237e313f7428c874fa5667b3656adaa5ec29f7f34194ad8ea8894b525c89322a5b74ca560e7cd66f8334b0b48cae6c4dc517c662de72da86110140646d4
+  checksum: d1b6a5f9d3e0ce1f4304955c0c40e3f1c31d9d5a42df83fc0d42eb356aa8b2c29c1342615aa51704f0309a75d1ba2924e87de87484a89e9326de62a869bad118
   languageName: node
   linkType: hard
 
