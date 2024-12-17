@@ -1322,10 +1322,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/core@npm:8.42.0":
-  version: 8.42.0
-  resolution: "@sentry/core@npm:8.42.0"
-  checksum: 9364ae4c9201cbbae01411986334c666faf5f0d20248452daa8f81aa6544f41ea351decec1570240583c430eb78173a896c4506a32492755c29ba142ed20d594
+"@sentry/core@npm:8.45.1":
+  version: 8.45.1
+  resolution: "@sentry/core@npm:8.45.1"
+  checksum: 81ed72485685d7baf246ed35c01428664a97eece445ab7b801b908e93dcb58652eaca588c2f9f80baa95419590eb78251305f9e5258ba8a1efee839cb40b15c8
   languageName: node
   linkType: hard
 
@@ -1346,12 +1346,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/types@npm:^8.42.0":
-  version: 8.42.0
-  resolution: "@sentry/types@npm:8.42.0"
+"@sentry/types@npm:^8.45.1":
+  version: 8.45.1
+  resolution: "@sentry/types@npm:8.45.1"
   dependencies:
-    "@sentry/core": 8.42.0
-  checksum: 8acbb40a8b41d8504e63f5b482b7aef25b14bd33f0f536e5bde8401944a2a9fcd809c717ebb9b2d93bca7ef3eebd3645ea4b5f81d0d0cf63b4279049e6f6b943
+    "@sentry/core": 8.45.1
+  checksum: 522a803303a3999cbd1c39e6e50ef38985065a2c4a8a138880d504abc65bef227701e47c664dd64a3f4c4728701f43a1679f2b72ea3b4a9a5c25402139259a0b
   languageName: node
   linkType: hard
 
@@ -1374,7 +1374,7 @@ __metadata:
     "@eslint/js": ^9.17.0
     "@iarna/toml": ^2.2.5
     "@jest/globals": ^29.7.0
-    "@sentry/types": ^8.42.0
+    "@sentry/types": ^8.45.1
     "@testing-library/jest-dom": ^6.6.3
     "@types/iarna__toml": ^2.0.5
     "@types/jest": ^29.5.14
