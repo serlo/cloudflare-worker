@@ -21,6 +21,9 @@ beforeEach(() => {
     '/1658759018166-f30bdef5-b33f-480c-95b9-41b20a7926af.png': {
       contentLength: 490,
     },
+    '/wikimedia/video.webm': {
+      contentLength: 123456,
+    },
   })
 })
 
@@ -60,6 +63,15 @@ test('assets.serlo.org/legacy/<hash>/<fileName>.<ext>', async () => {
   })
 
   expectAsset({ response, expectedStoredContentLength: 899629 })
+})
+
+test('assets.serlo.org/wikimedia/*', async () => {
+  const response = await env.fetch({
+    subdomain: 'assets',
+    pathname: '/wikimedia/video.webm',
+  })
+
+  expectAsset({ response, expectedStoredContentLength: 123456 })
 })
 
 function givenAssets(assets: { [P in string]?: { contentLength: number } }) {
