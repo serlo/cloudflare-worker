@@ -10,7 +10,11 @@ export async function semanticFileNames(request: Request) {
   const re = /^\/(legacy\/|)((?!legacy)[\w-]+)\/([\w\-+]+)\.(\w+)$/
   const match = re.exec(url.pathname)
 
-  if (!url.pathname.startsWith('/meta') && match) {
+  if (
+    !url.pathname.startsWith('/meta') &&
+    !url.pathname.startsWith('/wikimedia') &&
+    match
+  ) {
     const prefix = match[1]
     const hash = match[2]
     const extension = match[4]
