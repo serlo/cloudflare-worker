@@ -263,4 +263,20 @@ export function redirects(request: Request, env: CFEnvironment) {
     url.pathname = '/mathe/307340/zentrale-prüfung-zp-10-msa-mathematik-2021'
     return url.toRedirect(301)
   }
+
+  if (url.pathnameWithoutTrailingSlash.startsWith('/ais')) {
+    const redirectUrl =
+      url.pathnameWithoutTrailingSlash === '/ais/feedback'
+        ? 'https://drive.google.com/file/d/15mLT3zGWajfSHWz8WnIQ5yVyUVJheCPt/view?usp=drive_link'
+        : url.pathnameWithoutTrailingSlash === '/ais/lernpfad'
+          ? 'https://drive.google.com/file/d/1e6OcR--vNIB8Vj9bVp1qWEYEEEeqLJT-/view?usp=drive_link'
+          : url.pathnameWithoutTrailingSlash === '/ais/kopilot'
+            ? 'https://drive.google.com/file/d/1G1D8BO0oyvBuTnQHI51ItTX8zG8bDTZr/view?usp=drive_link'
+            : url.pathnameWithoutTrailingSlash === '/ais/domain'
+              ? 'https://drive.google.com/file/d/1-CpJ7c5HBt-FDIvCup4vgwX2aNlrQ4_r/view?usp=drive_link'
+              : undefined
+    if (redirectUrl) {
+      return Response.redirect(redirectUrl, 302)
+    }
+  }
 }
