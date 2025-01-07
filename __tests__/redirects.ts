@@ -315,3 +315,42 @@ test('redirects to exams landing page when old alias target is called', async ()
 
   expectToBeRedirectTo(response, target, 302)
 })
+
+describe('AIS redirects', () => {
+  test('/ais/feedback', async () => {
+    const response = await env.fetch({
+      subdomain: 'de',
+      pathname: '/ais/feedback',
+    })
+    const target =
+      'https://drive.google.com/file/d/15mLT3zGWajfSHWz8WnIQ5yVyUVJheCPt/view?usp=drive_link'
+    expectToBeRedirectTo(response, target, 302)
+  })
+  test('/ais/lernpfad', async () => {
+    const response = await env.fetch({
+      subdomain: 'de',
+      pathname: '/ais/lernpfad',
+    })
+    const target =
+      'https://drive.google.com/file/d/1e6OcR--vNIB8Vj9bVp1qWEYEEEeqLJT-/view?usp=drive_link'
+    expectToBeRedirectTo(response, target, 302)
+  })
+  test('/ais/kopilot', async () => {
+    const response = await env.fetch({
+      subdomain: 'de',
+      pathname: '/ais/kopilot',
+    })
+    const target =
+      'https://drive.google.com/file/d/1G1D8BO0oyvBuTnQHI51ItTX8zG8bDTZr/view?usp=drive_link'
+    expectToBeRedirectTo(response, target, 302)
+  })
+  test('/ais/domain', async () => {
+    const response = await env.fetch({
+      subdomain: 'de',
+      pathname: '/ais/domain',
+    })
+    const target =
+      'https://drive.google.com/file/d/1-CpJ7c5HBt-FDIvCup4vgwX2aNlrQ4_r/view?usp=drive_link'
+    expectToBeRedirectTo(response, target, 302)
+  })
+})
