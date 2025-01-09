@@ -267,13 +267,13 @@ export function redirects(request: Request, env: CFEnvironment) {
   if (url.pathnameWithoutTrailingSlash.startsWith('/ais')) {
     const redirectUrl =
       url.pathnameWithoutTrailingSlash === '/ais/feedback'
-        ? 'https://drive.google.com/file/d/15mLT3zGWajfSHWz8WnIQ5yVyUVJheCPt/view?usp=drive_link'
+        ? 'https://mega.nz/file/rN5Wyb6S#NvwIQFZHWWlc3ZSTD9Izvp3aWR0IELXX929ZiEA95dM'
         : url.pathnameWithoutTrailingSlash === '/ais/lernpfad'
-          ? 'https://drive.google.com/file/d/1e6OcR--vNIB8Vj9bVp1qWEYEEEeqLJT-/view?usp=drive_link'
+          ? 'https://mega.nz/file/vJJm0AoL#X-7e-X78Idb_INGdP8DtNsGcRe7U9X5GqHwALQA65uk'
           : url.pathnameWithoutTrailingSlash === '/ais/kopilot'
-            ? 'https://drive.google.com/file/d/1G1D8BO0oyvBuTnQHI51ItTX8zG8bDTZr/view?usp=drive_link'
+            ? 'https://mega.nz/file/uFhn2CQI#XAuxHbsP2TfUsNmQeRUbGABVG5npUNpTnzbmMElXKvE'
             : url.pathnameWithoutTrailingSlash === '/ais/domain'
-              ? 'https://drive.google.com/file/d/1-CpJ7c5HBt-FDIvCup4vgwX2aNlrQ4_r/view?usp=drive_link'
+              ? 'https://mega.nz/file/uYYEFSxT#-p5wWKcme7Xt8YvuOdqOCqoEIL1xdbW25Ah0boouFJg'
               : undefined
     if (redirectUrl) {
       return Response.redirect(redirectUrl, 302)
