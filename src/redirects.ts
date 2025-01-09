@@ -269,7 +269,7 @@ export function redirects(request: Request, env: CFEnvironment) {
       url.pathnameWithoutTrailingSlash === '/ais/feedback'
         ? 'https://mega.nz/file/rN5Wyb6S#NvwIQFZHWWlc3ZSTD9Izvp3aWR0IELXX929ZiEA95dM'
         : url.pathnameWithoutTrailingSlash === '/ais/lernpfad'
-          ? 'https://mega.nz/file/vJJm0AoL#X-7e-X78Idb_INGdP8DtNsGcRe7U9X5GqHwALQA65uk'
+          ? 'https://mega.nz/file/6BQ3hC4b#rUzo2pe8yZl2iCN7m3ptCtTFaYFDzVEHsNYW2DoeJt0'
           : url.pathnameWithoutTrailingSlash === '/ais/kopilot'
             ? 'https://mega.nz/file/uFhn2CQI#XAuxHbsP2TfUsNmQeRUbGABVG5npUNpTnzbmMElXKvE'
             : url.pathnameWithoutTrailingSlash === '/ais/domain'
