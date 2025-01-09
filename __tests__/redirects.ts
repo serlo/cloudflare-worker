@@ -323,7 +323,7 @@ describe('AIS redirects', () => {
       pathname: '/ais/feedback',
     })
     const target =
-      'https://drive.google.com/file/d/15mLT3zGWajfSHWz8WnIQ5yVyUVJheCPt/view?usp=drive_link'
+      'https://mega.nz/file/rN5Wyb6S#NvwIQFZHWWlc3ZSTD9Izvp3aWR0IELXX929ZiEA95dM'
     expectToBeRedirectTo(response, target, 302)
   })
   test('/ais/lernpfad', async () => {
@@ -332,7 +332,7 @@ describe('AIS redirects', () => {
       pathname: '/ais/lernpfad',
     })
     const target =
-      'https://drive.google.com/file/d/1e6OcR--vNIB8Vj9bVp1qWEYEEEeqLJT-/view?usp=drive_link'
+      'https://mega.nz/file/vJJm0AoL#X-7e-X78Idb_INGdP8DtNsGcRe7U9X5GqHwALQA65uk'
     expectToBeRedirectTo(response, target, 302)
   })
   test('/ais/kopilot', async () => {
@@ -341,7 +341,7 @@ describe('AIS redirects', () => {
       pathname: '/ais/kopilot',
     })
     const target =
-      'https://drive.google.com/file/d/1G1D8BO0oyvBuTnQHI51ItTX8zG8bDTZr/view?usp=drive_link'
+      'https://mega.nz/file/uFhn2CQI#XAuxHbsP2TfUsNmQeRUbGABVG5npUNpTnzbmMElXKvE'
     expectToBeRedirectTo(response, target, 302)
   })
   test('/ais/domain', async () => {
@@ -350,7 +350,7 @@ describe('AIS redirects', () => {
       pathname: '/ais/domain',
     })
     const target =
-      'https://drive.google.com/file/d/1-CpJ7c5HBt-FDIvCup4vgwX2aNlrQ4_r/view?usp=drive_link'
+      'https://mega.nz/file/uYYEFSxT#-p5wWKcme7Xt8YvuOdqOCqoEIL1xdbW25Ah0boouFJg'
     expectToBeRedirectTo(response, target, 302)
   })
 })
