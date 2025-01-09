@@ -332,7 +332,7 @@ describe('AIS redirects', () => {
       pathname: '/ais/lernpfad',
     })
     const target =
-      'https://mega.nz/file/vJJm0AoL#X-7e-X78Idb_INGdP8DtNsGcRe7U9X5GqHwALQA65uk'
+      'https://mega.nz/file/6BQ3hC4b#rUzo2pe8yZl2iCN7m3ptCtTFaYFDzVEHsNYW2DoeJt0'
     expectToBeRedirectTo(response, target, 302)
   })
   test('/ais/kopilot', async () => {
