@@ -122,6 +122,7 @@ class LocalEnvironment extends TestEnvironment {
       },
       // This is needed to match the shape of the ExecutionContext type.
       passThroughOnException() {},
+      props: undefined,
     })
 
     await Promise.all(waitForPromises)
