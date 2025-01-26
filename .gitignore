@@ -115,9 +115,9 @@ worker/
 # Generated pact files
 pacts/
 
-# Yarn
+# Yarn (without PnP and zero-installs)
+.pnp.*
 .yarn/*
-!.yarn/cache
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
