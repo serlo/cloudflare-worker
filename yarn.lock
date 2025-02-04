@@ -706,15 +706,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/compat@npm:^1.2.5":
-  version: 1.2.5
-  resolution: "@eslint/compat@npm:1.2.5"
+"@eslint/compat@npm:^1.2.6":
+  version: 1.2.6
+  resolution: "@eslint/compat@npm:1.2.6"
   peerDependencies:
     eslint: ^9.10.0
   peerDependenciesMeta:
     eslint:
       optional: true
-  checksum: 267afd3dc8fd70562c728ba4714678b7b76f9aaa8615c461f24346a5362cf0b41a736a2a97205e53dab8cef95de9dc14528184f74cf4e5dc712981f2c12848e6
+  checksum: 116c277749de4f1d20bcb8b9b9c25bcec6e02aab43e01333fecef1831a2443a0c974e135561d3640c409dc7d07be52ac13e8ef1a303a4a2632da01b0075d960f
   languageName: node
   linkType: hard
 
@@ -1339,7 +1339,7 @@ __metadata:
   resolution: "@serlo/serlo.org-cloudflare-worker@workspace:."
   dependencies:
     "@cloudflare/workers-types": ^4.20250129.0
-    "@eslint/compat": ^1.2.5
+    "@eslint/compat": ^1.2.6
     "@eslint/eslintrc": ^3.2.0
     "@eslint/js": ^9.19.0
     "@iarna/toml": ^2.2.5
