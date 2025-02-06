@@ -1,4 +1,4 @@
-import { SeverityLevel } from '@sentry/types'
+import { SeverityLevel } from '@sentry/core'
 
 export async function expectContainsText(response: Response, texts: string[]) {
   expect(response).not.toBeNull()
