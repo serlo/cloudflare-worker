@@ -25,7 +25,10 @@ export async function assetProxy(request: Request): Promise<Response | null> {
     },
   )
 
-  if (originalResponse.ok && isImageResponse(originalResponse)) {
+  if (
+    originalResponse.ok &&
+    (isImageResponse(originalResponse) || isFromPixabayCdn(originalResponse))
+  ) {
     const response = new Response(originalResponse.body, originalResponse)
     response.headers.delete('set-cookie')
     response.headers.set('cache-control', 'public, max-age=31536000, immutable')
@@ -33,4 +36,15 @@ export async function assetProxy(request: Request): Promise<Response | null> {
   }
 
   return getPlaceholder()
+}
+
+function isFromPixabayCdn(response: Response) {
+  const url = new Url(response.url)
+  const contentType = response.headers.get('content-type')
+
+  return (
+    response.status === 200 &&
+    `${url.subdomain}.${url.domain}` === 'cdn.pixabay.com' &&
+    contentType === 'binary/octet-stream'
+  )
 }
