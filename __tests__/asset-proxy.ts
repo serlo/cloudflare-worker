@@ -1,4 +1,4 @@
-import { bypass, http } from 'msw'
+import { http } from 'msw'
 
 import {
   currentTestEnvironment,
