@@ -28,6 +28,12 @@ beforeEach(() => {
         return await fetch(bypass(new Request(request.url, request)))
       },
     ),
+    http.get(
+      'https://cdn.pixabay.com/photo/2018/06/27/16/56/minimal-3502044_1280.jpg',
+      async ({ request }) => {
+        return await fetch(bypass(new Request(request.url, request)))
+      },
+    ),
   )
 })
 
@@ -61,6 +67,28 @@ test('request to asset-proxy works also in case of other encodings', async () =>
   )
   expect(response.status).toBe(200)
   expect(response.headers.get('content-type')).toBe('image/svg+xml')
+  expect(response.headers.get('Set-Cookie')).toBeNull()
+  expect(response.headers.get('cache-control')).toBe(
+    'public, max-age=31536000, immutable',
+  )
+})
+
+test('request to asset-proxy works for pixabays CDN even if its response content-type is not image ', async () => {
+  const env = currentTestEnvironment()
+  const response = await env.fetch(
+    {
+      subdomain: 'asset-proxy',
+      pathname:
+        '/image?url=https://cdn.pixabay.com/photo/2018/06/27/16/56/minimal-3502044_1280.jpg',
+    },
+    {
+      headers: {
+        'Accept-Encoding': '*',
+      },
+    },
+  )
+  expect(response.status).toBe(200)
+  expect(response.headers.get('content-type')).toBe('binary/octet-stream')
   expect(response.headers.get('Set-Cookie')).toBeNull()
   expect(response.headers.get('cache-control')).toBe(
     'public, max-age=31536000, immutable',
