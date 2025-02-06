@@ -21,17 +21,20 @@ beforeEach(() => {
         headers: { 'content-type': 'application/json' },
       })
     }),
-    // it would be better to internally fake the response, but for some reason msw does not handle Content-Encoding header correctly
     http.get(
       'https://upload.wikimedia.org/wikipedia/commons/8/8b/Sinus_mit_y.svg',
-      async ({ request }) => {
-        return await fetch(bypass(new Request(request.url, request)))
+      () => {
+        return new Response('', {
+          headers: { 'content-type': 'image/svg+xml' },
+        })
       },
     ),
     http.get(
       'https://cdn.pixabay.com/photo/2018/06/27/16/56/minimal-3502044_1280.jpg',
-      async ({ request }) => {
-        return await fetch(bypass(new Request(request.url, request)))
+      () => {
+        return new Response('', {
+          headers: { 'content-type': 'binary/octet-stream' },
+        })
       },
     ),
   )
