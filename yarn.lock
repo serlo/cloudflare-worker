@@ -1575,7 +1575,7 @@ __metadata:
     prettier: ^3.5.1
     prettier-plugin-packagejson: ^2.5.8
     prettier-plugin-sh: ^0.14.0
-    toucan-js: ^4.1.0
+    toucan-js: ^4.1.1
     ts-jest: ^29.2.6
     ts-unused-exports: ^11.0.1
     typescript: ^5.7.3
@@ -7759,14 +7759,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"toucan-js@npm:^4.1.0":
-  version: 4.1.0
-  resolution: "toucan-js@npm:4.1.0"
+"toucan-js@npm:^4.1.1":
+  version: 4.1.1
+  resolution: "toucan-js@npm:4.1.1"
   dependencies:
     "@sentry/core": 8.9.2
     "@sentry/types": 8.9.2
     "@sentry/utils": 8.9.2
-  checksum: 4b50011a38a9193c03a4814422ffd74ac69fdc32e38a1a272c836e24b8e57e2b58ae95a0a91f78f1b1b2915ec389bff25952be3c47795a38571546d479782a97
+  checksum: 288ebd19586e67d67bb14d305aacc92f2aca52806c275dd75be6792eed132932881532440b906e536885e982dd6a8fdc3caff5ce58fd09d67ea724a722d0656e
   languageName: node
   linkType: hard
 
