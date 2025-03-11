@@ -788,10 +788,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/js@npm:^9.20.0":
-  version: 9.20.0
-  resolution: "@eslint/js@npm:9.20.0"
-  checksum: e49dcbcea1a7892222988ba410b3f1e2b756177558f3f11fa3627682c3aca7585f8124c128711035e176daf56f82b4af47dc5655ca7a825057451607e42e5d13
+"@eslint/js@npm:^9.22.0":
+  version: 9.22.0
+  resolution: "@eslint/js@npm:9.22.0"
+  checksum: 3eb6ed01c31f185b1822b78a872af5b87daa4aaf2ed753ce81c0c7227c852a09e1c7356103259f35f09e77d9e116c796cec6958702044d057f0c179b53b783ec
   languageName: node
   linkType: hard
 
@@ -1549,7 +1549,7 @@ __metadata:
     "@cloudflare/workers-types": ^4.20250129.0
     "@eslint/compat": ^1.2.7
     "@eslint/eslintrc": ^3.2.0
-    "@eslint/js": ^9.20.0
+    "@eslint/js": ^9.22.0
     "@iarna/toml": ^2.2.5
     "@jest/globals": ^29.7.0
     "@sentry/core": ^9.3.0
