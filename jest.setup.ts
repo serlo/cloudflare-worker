@@ -56,16 +56,7 @@ function addGlobalMocks() {
   //
   // @ts-expect-error When running node `self` is not defined but `globalThis` is
   globalThis.crypto = {
-    subtle: {
-      digest(encoding: string, message: Uint8Array) {
-        return Promise.resolve(
-          cryptoNode
-            .createHash(encoding.toLowerCase().replace('-', ''))
-            .update(message)
-            .digest(),
-        )
-      },
-    },
+    subtle: cryptoNode.webcrypto.subtle,
     randomUUID: cryptoNode.randomUUID,
   } as unknown as typeof crypto
 }
