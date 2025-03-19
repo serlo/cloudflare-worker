@@ -73,7 +73,8 @@ function getAllowedOrigin(requestOrigin: string | null, env: CFEnvironment) {
               url.port === '8000' ||
               url.port === '8080')) ||
             url.hostname.includes('-serlo.vercel.app'))) ||
-        url.hostname.includes('.adornis.de')
+        url.hostname.includes('.adornis.de') ||
+        url.domain === 'chancencampus.org'
       ) {
         return requestOrigin
       }
