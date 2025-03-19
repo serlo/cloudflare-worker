@@ -79,6 +79,7 @@ describe('setting of response header `Access-Control-Allow-Origin`', () => {
       'http://localhost:3000',
       'http://localhost:3001',
       'https://frontend-7md9ymhyw-serlo.vercel.app',
+      'https://chancencampus.org',
     ]
 
     describe('when we are in the staging environment, the same value is sent back in `Access-Control-Allow-Origin`', () => {
@@ -94,7 +95,7 @@ describe('setting of response header `Access-Control-Allow-Origin`', () => {
       })
     })
 
-    describe('when we are in the production environment, the current domain is sent back in `Access-Control-Allow-Origin`', () => {
+    describe('when we are in the production environment, the current domain or chancencampus.org is sent back in `Access-Control-Allow-Origin`', () => {
       test.each(domains)('when `Origin` is `%s`', async (origin) => {
         const env = currentTestEnvironmentWhen(
           (conf) => conf.ENVIRONMENT === 'production',
@@ -103,9 +104,15 @@ describe('setting of response header `Access-Control-Allow-Origin`', () => {
 
         const response = await fetchApi({ headers: { Origin: origin } }, env)
 
-        expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
-          `https://${env.getDomain()}`,
-        )
+        if (origin == 'https://chancencampus.org') {
+          expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+            'https://chancencampus.org',
+          )
+        } else {
+          expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+            `https://${env.getDomain()}`,
+          )
+        }
       })
     })
   })
