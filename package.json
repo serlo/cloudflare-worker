@@ -65,7 +65,7 @@
     "ts-jest": "^29.3.0",
     "ts-unused-exports": "^11.0.1",
     "typescript": "^5.8.2",
-    "wrangler": "^4.0.0"
+    "wrangler": "^4.4.0"
   },
   "packageManager": "yarn@3.6.0",
   "engines": {
