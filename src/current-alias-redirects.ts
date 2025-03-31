@@ -51,13 +51,6 @@ const ApiResult = t.type({
 const CourseResult = t.type({
   id: t.number,
   alias: t.string,
-  currentRevision: t.type({ content: t.string }),
-})
-
-const CourseContent = t.type({
-  state: t.type({
-    pages: t.array(t.type({ title: t.string, id: t.string })),
-  }),
 })
 
 async function getPathInfo(
@@ -94,9 +87,6 @@ async function getPathInfo(
         ... on Course {
           id
           alias
-          currentRevision {
-            content
-          }
         }
         ... on Comment {
           id
@@ -136,53 +126,29 @@ async function getPathInfo(
 
   const isTrashedComment = uuid.__typename === 'Comment' && uuid.trashed
   let currentPath: string = ''
+  let hash: string = ''
 
   if (coursePageId !== null) {
     if (!CourseResult.is(uuid)) return null
 
-    try {
-      const courseContent = JSON.parse(uuid.currentRevision.content) as unknown
-
-      if (!CourseContent.is(courseContent)) return null
-
-      if (courseContent.state.pages.at(0)?.id?.startsWith(coursePageId)) {
-        currentPath = uuid.alias
-      } else {
-        const coursePage = courseContent.state.pages.find((page) =>
-          page.id.startsWith(coursePageId),
-        )
-
-        if (coursePage === undefined) {
-          // This case should never happen => return course alias as a fallback
-          currentPath = uuid.alias
-        } else {
-          const subject = uuid.alias.split('/').at(1) ?? 'serlo'
-          const slugTitle = toSlug(coursePage.title)
-          const shortPageId = coursePage.id.split('-').at(0)
-          if (!shortPageId) {
-            currentPath = uuid.alias
-          } else {
-            currentPath = `/${subject}/${uuid.id}/${shortPageId}/${slugTitle}`
-          }
-        }
-      }
-    } catch {
-      return null
-    }
+    currentPath = uuid.alias
+    hash = `#${coursePageId}`
   } else {
     currentPath = isTrashedComment
       ? `error/deleted/${uuid.__typename}`
       : uuid.legacyObject !== undefined
         ? uuid.legacyObject.alias
         : (uuid.alias ?? path)
+
+    if (uuid.legacyObject !== undefined && !isTrashedComment) {
+      hash = `#comment-${uuid.id ?? 0}`
+    }
   }
 
   const result = {
     currentPath,
     instance: uuid.instance,
-    ...(uuid.legacyObject !== undefined && !isTrashedComment
-      ? { hash: `#comment-${uuid.id ?? 0}` }
-      : {}),
+    ...(hash ? { hash } : {}),
   }
 
   await env.PATH_INFO_KV.put(cacheKey, JSON.stringify(result), {
@@ -198,26 +164,4 @@ async function getPathInfo(
  */
 function gql(strings: TemplateStringsArray): string {
   return strings[0]
-}
-
-// Copied from https://github.com/serlo/api.serlo.org/blob/ce94045b513e59da1ddd191b498fe01f6ff6aa0a/packages/server/src/schema/uuid/abstract-uuid/resolvers.ts#L685-L703
-// Try to keep both functions in sync
-function toSlug(name: string) {
-  return name
-    .toLowerCase()
-    .replace(/ä/g, 'ae')
-    .replace(/ö/g, 'oe')
-    .replace(/ü/g, 'ue')
-    .replace(/ß/g, 'ss')
-    .replace(/á/g, 'a')
-    .replace(/é/g, 'e')
-    .replace(/í/g, 'i')
-    .replace(/ó/g, 'o')
-    .replace(/ú/g, 'u')
-    .replace(/ñ/g, 'n')
-    .replace(/ /g, '-') // replace spaces with hyphens
-    .replace(/[^\w-]+/g, '') // remove all non-word chars including _
-    .replace(/--+/g, '-') // replace multiple hyphens
-    .replace(/^-+/, '') // trim starting hyphen
-    .replace(/-+$/, '') // trim end hyphen
 }
