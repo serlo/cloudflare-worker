@@ -13,4 +13,5 @@ jobs:
         uses: kulla/sync-to-gitlab@v1
         with:
           owner: stephan_kulla
+          repository_name: serlo-cloudflare-worker
           token: ${{ secrets.GITLAB_TOKEN }}
