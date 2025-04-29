@@ -1522,10 +1522,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/core@npm:^9.10.1":
-  version: 9.10.1
-  resolution: "@sentry/core@npm:9.10.1"
-  checksum: 1d7bac88b750311bbdc4dbe1573040746dbbbdfdf051cdd5ab01187047e6cb86a3486fb15bc05b9416e2214b394993edb1540e9675b841917cea7f93e86a83f2
+"@sentry/core@npm:^9.14.0":
+  version: 9.14.0
+  resolution: "@sentry/core@npm:9.14.0"
+  checksum: 7fc4f48236af8c6ad41d31457df5e5504f7f640c8f30d4ca63957cb3d1e1f3ec8daca9cb8e00432d925348aa03c2b88a244e72eeb20c7fe6ed4463a10d087ed9
   languageName: node
   linkType: hard
 
@@ -1555,7 +1555,7 @@ __metadata:
     "@eslint/js": ^9.25.1
     "@iarna/toml": ^2.2.5
     "@jest/globals": ^29.7.0
-    "@sentry/core": ^9.10.1
+    "@sentry/core": ^9.14.0
     "@testing-library/jest-dom": ^6.6.3
     "@types/iarna__toml": ^2.0.5
     "@types/jest": ^29.5.14
