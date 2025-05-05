@@ -30,7 +30,7 @@
     "test:staging": "cross-env TEST_ENVIRONMENT=staging yarn test --runInBand"
   },
   "dependencies": {
-    "fp-ts": "^2.16.9",
+    "fp-ts": "^2.16.10",
     "io-ts": "^2.2.22",
     "jose": "^6.0.10",
     "toucan-js": "^4.1.1"
