@@ -1568,7 +1568,7 @@ __metadata:
     eslint-plugin-deprecation: ^3.0.0
     eslint-plugin-import: ^2.31.0
     eslint-plugin-react: ^7.37.5
-    fp-ts: ^2.16.9
+    fp-ts: ^2.16.10
     globals: ^16.0.0
     io-ts: ^2.2.22
     jest: ^29.7.0
@@ -4032,10 +4032,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fp-ts@npm:^2.16.9":
-  version: 2.16.9
-  resolution: "fp-ts@npm:2.16.9"
-  checksum: 910a443dbd2a1a3f76527e8b9c1ccaae103cffd797b812cb2fdd7143fca5c010a05df35dca18bb7b2083249ceaec59fa0436c0c3f4b5b60bf5c62934c1a23ce5
+"fp-ts@npm:^2.16.10":
+  version: 2.16.10
+  resolution: "fp-ts@npm:2.16.10"
+  checksum: b2a2769d4e59d77487f60b3052587584e0811333911a9b7b6035650a2705b6096fdb924b89e45f2d92422e454ad2b548908fc54ebc4af7ea5c0c7bccdb6a0809
   languageName: node
   linkType: hard
 
