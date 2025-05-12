@@ -1590,7 +1590,7 @@ __metadata:
     globals: ^16.0.0
     io-ts: ^2.2.22
     jest: ^29.7.0
-    jose: ^6.0.10
+    jose: ^6.0.11
     msw: ^2.7.6
     npm-run-all: ^4.1.5
     prettier: ^3.5.3
@@ -5493,10 +5493,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jose@npm:^6.0.10":
-  version: 6.0.10
-  resolution: "jose@npm:6.0.10"
-  checksum: 11481dc955fd466d51a58cfe59e8fff9f402f091793c917e424de6e4c6e6d58952405705a643fb4613fb85ba99025cbff573da81f9bc7a005b49b590ca329ccf
+"jose@npm:^6.0.11":
+  version: 6.0.11
+  resolution: "jose@npm:6.0.11"
+  checksum: 4c4c4d2a170b411d1ccc8bc63812f90d08c0586a079ba057a10fd38f5ea5801d9cc08611caa39fbed6037a8948426aa8e1da32adb945a06c1ba3b85cccf5f47f
   languageName: node
   linkType: hard
 
