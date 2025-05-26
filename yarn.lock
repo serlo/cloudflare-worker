@@ -1575,7 +1575,7 @@ __metadata:
     cross-env: ^7.0.3
     depcheck: ^1.4.7
     eslint: ^9.27.0
-    eslint-config-prettier: ^10.1.2
+    eslint-config-prettier: ^10.1.5
     eslint-plugin-deprecation: ^3.0.0
     eslint-plugin-import: ^2.31.0
     eslint-plugin-react: ^7.37.5
@@ -3578,14 +3578,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-prettier@npm:^10.1.2":
-  version: 10.1.2
-  resolution: "eslint-config-prettier@npm:10.1.2"
+"eslint-config-prettier@npm:^10.1.5":
+  version: 10.1.5
+  resolution: "eslint-config-prettier@npm:10.1.5"
   peerDependencies:
     eslint: ">=7.0.0"
   bin:
     eslint-config-prettier: bin/cli.js
-  checksum: 6b317378214a5935457bd9d7c3220ec37fb621e07bf31cf1ffb82bf38eca1cd89f338d18284114d504a865a6bb932faa5df29a18a72e6e43484dbc959d087620
+  checksum: 6d8eb41c716fc2b073bfd9daede0c87c4c2b29055f15c94618eec00a19c5499024ddb89902d6793b5ac9102075e4739d7cc2d4d58c7e7ed4cc2dcf79e3fbcacc
   languageName: node
   linkType: hard
 
