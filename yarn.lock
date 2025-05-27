@@ -462,16 +462,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cloudflare/unenv-preset@npm:2.3.1":
-  version: 2.3.1
-  resolution: "@cloudflare/unenv-preset@npm:2.3.1"
+"@cloudflare/unenv-preset@npm:2.3.2":
+  version: 2.3.2
+  resolution: "@cloudflare/unenv-preset@npm:2.3.2"
   peerDependencies:
-    unenv: 2.0.0-rc.15
-    workerd: ^1.20250320.0
+    unenv: 2.0.0-rc.17
+    workerd: ^1.20250508.0
   peerDependenciesMeta:
     workerd:
       optional: true
-  checksum: 85bbacaee3f44cbdf91efeffdd3444b475069946e4de01e4a0260469d3ecd1975dfb0bf952af719ccf597ba07f4bf5c781c8e56a9a13c83d4b5a1936a505b7b0
+  checksum: 9c00c3e756062eb0eb35d8490492fb11cffb00b0d8a1212b815f035641341891707cc6bb7eac0e605fa04aef3197852dd5742df909e2cfbbb42070f94437f086
   languageName: node
   linkType: hard
 
@@ -1593,7 +1593,7 @@ __metadata:
     ts-jest: ^29.3.2
     ts-unused-exports: ^11.0.1
     typescript: ^5.8.3
-    wrangler: ^4.15.2
+    wrangler: ^4.16.1
   languageName: unknown
   linkType: soft
 
@@ -5833,15 +5833,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"miniflare@npm:4.20250508.2":
-  version: 4.20250508.2
-  resolution: "miniflare@npm:4.20250508.2"
+"miniflare@npm:4.20250508.3":
+  version: 4.20250508.3
+  resolution: "miniflare@npm:4.20250508.3"
   dependencies:
     "@cspotcode/source-map-support": 0.8.1
     acorn: 8.14.0
     acorn-walk: 8.3.2
     exit-hook: 2.2.1
     glob-to-regexp: 0.4.1
+    sharp: ^0.33.5
     stoppable: 1.1.0
     undici: ^5.28.5
     workerd: 1.20250508.0
@@ -5850,7 +5851,7 @@ __metadata:
     zod: 3.22.3
   bin:
     miniflare: bootstrap.js
-  checksum: e17485e9a801fea467787e790c9613dcfee70cf955b14a110ad599df15cdb398479598be50f11133bb95a1edb324bfd5dda56a440aee9cd11af9f3ca0a3ed995
+  checksum: 43a76eb35a69fd386bdd160b4590af6eb470077c544cbbd80ccb27858339d9281451c0ec9dd9372ba80a2c1fe8facb690b0c25f53a8c708050c0a6ebe4c1954a
   languageName: node
   linkType: hard
 
@@ -7943,10 +7944,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ufo@npm:^1.5.4":
-  version: 1.5.4
-  resolution: "ufo@npm:1.5.4"
-  checksum: f244703b7d4f9f0df4f9af23921241ab73410b591f4e5b39c23e3147f3159b139a4b1fb5903189c306129f7a16b55995dac0008e0fbae88a37c3e58cbc34d833
+"ufo@npm:^1.6.1":
+  version: 1.6.1
+  resolution: "ufo@npm:1.6.1"
+  checksum: 2c401dd45bd98ad00806e044aa8571aa2aa1762fffeae5e78c353192b257ef2c638159789f119e5d8d5e5200e34228cd1bbde871a8f7805de25daa8576fb1633
   languageName: node
   linkType: hard
 
@@ -7971,16 +7972,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unenv@npm:2.0.0-rc.15":
-  version: 2.0.0-rc.15
-  resolution: "unenv@npm:2.0.0-rc.15"
+"unenv@npm:2.0.0-rc.17":
+  version: 2.0.0-rc.17
+  resolution: "unenv@npm:2.0.0-rc.17"
   dependencies:
     defu: ^6.1.4
     exsolve: ^1.0.4
     ohash: ^2.0.11
     pathe: ^2.0.3
-    ufo: ^1.5.4
-  checksum: 4132f5978171f6d99f0a364ecc6594e9a0b45b0b53c081070fed3a632c1c4b8dab40370233403e9ea1977c624dac1ab293c8705902bc276d1afdbcf33faaa0ad
+    ufo: ^1.6.1
+  checksum: 896111fec9db9f8a81367a6326ccca6370cac34ec66e4ee4f812b92fdd0ff572f51963a4191901160d411181669690c3e1695008e399260676b80175750fadc6
   languageName: node
   linkType: hard
 
@@ -8196,19 +8197,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wrangler@npm:^4.15.2":
-  version: 4.15.2
-  resolution: "wrangler@npm:4.15.2"
+"wrangler@npm:^4.16.1":
+  version: 4.16.1
+  resolution: "wrangler@npm:4.16.1"
   dependencies:
     "@cloudflare/kv-asset-handler": 0.4.0
-    "@cloudflare/unenv-preset": 2.3.1
+    "@cloudflare/unenv-preset": 2.3.2
     blake3-wasm: 2.1.5
     esbuild: 0.25.4
     fsevents: ~2.3.2
-    miniflare: 4.20250508.2
+    miniflare: 4.20250508.3
     path-to-regexp: 6.3.0
     sharp: ^0.33.5
-    unenv: 2.0.0-rc.15
+    unenv: 2.0.0-rc.17
     workerd: 1.20250508.0
   peerDependencies:
     "@cloudflare/workers-types": ^4.20250508.0
@@ -8223,7 +8224,7 @@ __metadata:
   bin:
     wrangler: bin/wrangler.js
     wrangler2: bin/wrangler.js
-  checksum: 0b0af30f68bdd91c0aed71d05dd6fec51ada507e0b60f1253ab2e1a9621dc0b083529687eef4260388f2dad0bfb1ba85e78ebcee817b4356d2f33fb5d37a6588
+  checksum: 781fa63ec2e8549da6154c12d8fc32941db87cd50fa339bb4d1a801559f4ba9994d8945d2e3edb029d5a3732b29f62581fb89c21365d5f07a08708b87971f9ca
   languageName: node
   linkType: hard
 
