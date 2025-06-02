@@ -1509,10 +1509,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@reteps/dockerfmt@npm:^0.3.2":
-  version: 0.3.5
-  resolution: "@reteps/dockerfmt@npm:0.3.5"
-  checksum: b5f1800054d07d0806adbf5e27a4bbf5cab1b7b13b75b682827191fab8c1c4d85ab306242c99e58bdecf3f6237ece5ee0aca15b59f42a6acc69dd7329e60a717
+"@reteps/dockerfmt@npm:^0.3.5":
+  version: 0.3.6
+  resolution: "@reteps/dockerfmt@npm:0.3.6"
+  checksum: 701b908e1d89d4657c24eaf54d26842de5817c2261e4634d55285676d232d338429075c8e072bcfad157412a8e7ad94e318fe3833e1e928d68a9eee3714afc64
   languageName: node
   linkType: hard
 
@@ -1588,7 +1588,7 @@ __metadata:
     npm-run-all: ^4.1.5
     prettier: ^3.5.3
     prettier-plugin-packagejson: ^2.5.12
-    prettier-plugin-sh: ^0.17.2
+    prettier-plugin-sh: ^0.17.4
     toucan-js: ^4.1.1
     ts-jest: ^29.3.4
     ts-unused-exports: ^11.0.1
@@ -6610,15 +6610,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier-plugin-sh@npm:^0.17.2":
-  version: 0.17.2
-  resolution: "prettier-plugin-sh@npm:0.17.2"
+"prettier-plugin-sh@npm:^0.17.4":
+  version: 0.17.4
+  resolution: "prettier-plugin-sh@npm:0.17.4"
   dependencies:
-    "@reteps/dockerfmt": ^0.3.2
+    "@reteps/dockerfmt": ^0.3.5
     sh-syntax: ^0.5.6
   peerDependencies:
     prettier: ^3.0.3
-  checksum: 378a165eaafca9a303eab303b82c7687c4dc8516f3b12cf8749da9de35acd2d62e658f9a97332626b49bb7197299d2848ad98e53957d40f79f48d16654984c09
+  checksum: 29af62cdb8f95b509b8e2af1e51bcaafc0bdf17bec01903b8579c49de5b0135268903a45cfb008abb565af7e10192cb0a4573160f124aa33e26fd19befbf0e80
   languageName: node
   linkType: hard
 
