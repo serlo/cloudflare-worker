@@ -1421,9 +1421,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mswjs/interceptors@npm:^0.37.0":
-  version: 0.37.1
-  resolution: "@mswjs/interceptors@npm:0.37.1"
+"@mswjs/interceptors@npm:^0.39.1":
+  version: 0.39.2
+  resolution: "@mswjs/interceptors@npm:0.39.2"
   dependencies:
     "@open-draft/deferred-promise": ^2.2.0
     "@open-draft/logger": ^0.3.0
@@ -1431,7 +1431,7 @@ __metadata:
     is-node-process: ^1.2.0
     outvariant: ^1.4.3
     strict-event-emitter: ^0.5.1
-  checksum: 89f3717ff50595eb4075c540ce9c143290cdd24474ac7957097c4e6f53ad7536f1868cddce5b44d4344981fe837b31f127113cde1f15512929c8dba79767858d
+  checksum: 0fb6d21c87ec38452209025df6234f68669b68111c3d3385a59e4569fed8a6b7bdd7590be3634a077bbc1f6ab310f003f239902d93f56483af818981e1e3ef5d
   languageName: node
   linkType: hard
 
@@ -1584,7 +1584,7 @@ __metadata:
     io-ts: ^2.2.22
     jest: ^29.7.0
     jose: ^6.0.11
-    msw: ^2.7.6
+    msw: ^2.10.2
     npm-run-all: ^4.1.5
     prettier: ^3.5.3
     prettier-plugin-packagejson: ^2.5.12
@@ -6005,15 +6005,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"msw@npm:^2.7.6":
-  version: 2.7.6
-  resolution: "msw@npm:2.7.6"
+"msw@npm:^2.10.2":
+  version: 2.10.2
+  resolution: "msw@npm:2.10.2"
   dependencies:
     "@bundled-es-modules/cookie": ^2.0.1
     "@bundled-es-modules/statuses": ^1.0.1
     "@bundled-es-modules/tough-cookie": ^0.1.6
     "@inquirer/confirm": ^5.0.0
-    "@mswjs/interceptors": ^0.37.0
+    "@mswjs/interceptors": ^0.39.1
     "@open-draft/deferred-promise": ^2.2.0
     "@open-draft/until": ^2.1.0
     "@types/cookie": ^0.6.0
@@ -6034,7 +6034,7 @@ __metadata:
       optional: true
   bin:
     msw: cli/index.js
-  checksum: ebb9c0d27683fa953da30c346540d1513dd11da8ca22d0c5e3591bc8300fdc68fde307ee639894eece72d8f2ccff2ab9bcf303f3fa264fb063f346bf914d6f94
+  checksum: ca79300c3af2821e9ab7ab426657caaafd791c777139d54c3ad1752a592c4e249dd267b9da97328964f269850b54b1c6b538fa0b27f2f5881430db454ecd9b35
   languageName: node
   linkType: hard
 
