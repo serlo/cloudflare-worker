@@ -510,10 +510,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cloudflare/workers-types@npm:^4.20250428.0":
-  version: 4.20250428.0
-  resolution: "@cloudflare/workers-types@npm:4.20250428.0"
-  checksum: a141bfb3371e89dffdfe82c2dbe51546f3788c281d2cf161264690d9fd2170b0d835ac80a8c4c8591b50cbef95e95d92953d762e9ad0e1897dc890ba08f38316
+"@cloudflare/workers-types@npm:^4.20250702.0":
+  version: 4.20250702.0
+  resolution: "@cloudflare/workers-types@npm:4.20250702.0"
+  checksum: b5798c1429e3af43573fb14d2b43742f0dbfa9e7105567903eaa631a1138f0cbd2e2713c45ea680ea55b495d840b537255bc76a1a124e53d1778a8ec03e7b200
   languageName: node
   linkType: hard
 
@@ -1567,7 +1567,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@serlo/serlo.org-cloudflare-worker@workspace:."
   dependencies:
-    "@cloudflare/workers-types": ^4.20250428.0
+    "@cloudflare/workers-types": ^4.20250702.0
     "@eslint/compat": ^1.3.1
     "@eslint/eslintrc": ^3.3.1
     "@eslint/js": ^9.29.0
