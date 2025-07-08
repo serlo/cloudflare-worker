@@ -1509,10 +1509,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pkgr/core@npm:^0.2.3":
-  version: 0.2.4
-  resolution: "@pkgr/core@npm:0.2.4"
-  checksum: 8544f0346c3f7035b9e2fdf60179c68b12d3c76b3fba9533844099af67cf5c0ce5257538f5faa05953d48cc1536d046f003231f321b2f75b3fb449db8410a2b7
+"@pkgr/core@npm:^0.2.4":
+  version: 0.2.7
+  resolution: "@pkgr/core@npm:0.2.7"
+  checksum: b16959878940f3d3016b79a4b2c23fd518aaec6b47295baa3154fbcf6574fee644c51023bb69069fa3ea9cdcaca40432818f54695f11acc0ae326cf56676e4d1
   languageName: node
   linkType: hard
 
@@ -1594,7 +1594,7 @@ __metadata:
     msw: ^2.10.2
     npm-run-all: ^4.1.5
     prettier: ^3.5.3
-    prettier-plugin-packagejson: ^2.5.12
+    prettier-plugin-packagejson: ^2.5.18
     prettier-plugin-sh: ^0.17.4
     toucan-js: ^4.1.1
     ts-jest: ^29.3.4
@@ -6633,18 +6633,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier-plugin-packagejson@npm:^2.5.12":
-  version: 2.5.12
-  resolution: "prettier-plugin-packagejson@npm:2.5.12"
+"prettier-plugin-packagejson@npm:^2.5.18":
+  version: 2.5.18
+  resolution: "prettier-plugin-packagejson@npm:2.5.18"
   dependencies:
-    sort-package-json: 3.2.1
-    synckit: 0.11.4
+    sort-package-json: 3.4.0
+    synckit: 0.11.8
   peerDependencies:
     prettier: ">= 1.16.0"
   peerDependenciesMeta:
     prettier:
       optional: true
-  checksum: d74b7329c78d1a8032e2599ddc3641556afabbe82d70ed35f8b7932a52ced77471c1ffdd57e022cb66ebcf8b74a35629a241c5f0a084eb88b322cf2104609fdc
+  checksum: 2d56b9311dd5c01b4061db075c450e6f31d0418e764f646f02093619bef491be4c9b587f3eda4dafd8d5b21014f2c8419c9aab4c990a31f645bdd1935f3077b1
   languageName: node
   linkType: hard
 
@@ -7357,9 +7357,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sort-package-json@npm:3.2.1":
-  version: 3.2.1
-  resolution: "sort-package-json@npm:3.2.1"
+"sort-package-json@npm:3.4.0":
+  version: 3.4.0
+  resolution: "sort-package-json@npm:3.4.0"
   dependencies:
     detect-indent: ^7.0.1
     detect-newline: ^4.0.1
@@ -7370,7 +7370,7 @@ __metadata:
     tinyglobby: ^0.2.12
   bin:
     sort-package-json: cli.js
-  checksum: 205cd80020e35d1f5a01f7a3c3ae540f9c90dedc0d41189fa44466d8ee687fc1efbd22be5f569a71c37810f671352bf2eb6b138604d71b4d452b19298fbaeb63
+  checksum: 47ee11a14c6882954b537b59e7a66994adfc8ce370ca957d89d52c0379067900ee9f322625f496f00e2e5c01554c90633839f562a6bcb4f1bc1f262cf69a2072
   languageName: node
   linkType: hard
 
@@ -7698,13 +7698,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"synckit@npm:0.11.4":
-  version: 0.11.4
-  resolution: "synckit@npm:0.11.4"
+"synckit@npm:0.11.8":
+  version: 0.11.8
+  resolution: "synckit@npm:0.11.8"
   dependencies:
-    "@pkgr/core": ^0.2.3
-    tslib: ^2.8.1
-  checksum: ebbc345153c5cadcdd5b15b3a97ced98cfcff7cb6c2ef4c448e60814dd64e9dea0e0e77a7f0dd3daf6c4c287e170b83cbed8f4d5c08c8566152b293c4d889e11
+    "@pkgr/core": ^0.2.4
+  checksum: dd7193736e0b5eb209192e280649b98b539537bf23bef20c8a2b24cd12ccde47bcf4e77773ff9cb66c35960d2cb41e28c05e0b19124488abbfb6423258b56275
   languageName: node
   linkType: hard
 
