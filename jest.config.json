@@ -3,8 +3,7 @@
     "^.+\\.tsx?$": [
       "ts-jest",
       {
-        "useESM": true,
-        "isolatedModules": true
+        "useESM": true
       }
     ]
   },
