@@ -7,7 +7,7 @@
     "outDir": "dist",
     "noEmit": true,
     "target": "es2022",
-    "lib": ["es2022"],
+    "lib": ["es2023"],
     "jsx": "react",
     "jsxFactory": "h",
     "allowSyntheticDefaultImports": true,
