@@ -2025,6 +2025,7 @@ __metadata:
     "@testing-library/jest-dom": ^6.6.3
     "@types/iarna__toml": ^2.0.5
     "@types/jest": ^30.0.0
+    "@types/node": 20
     "@typescript-eslint/eslint-plugin": ^8.38.0
     "@typescript-eslint/parser": ^8.38.0
     cross-env: ^7.0.3
@@ -2253,6 +2254,15 @@ __metadata:
   version: 20.4.2
   resolution: "@types/node@npm:20.4.2"
   checksum: 99e544ea7560d51f01f95627fc40394c24a13da8f041121a0da13e4ef0a2aa332932eaf9a5e8d0e30d1c07106e96a183be392cbba62e8cf0bf6a085d5c0f4149
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:20":
+  version: 20.19.11
+  resolution: "@types/node@npm:20.19.11"
+  dependencies:
+    undici-types: ~6.21.0
+  checksum: 8e41e75abd1a50dfba18eed3eb5a8c5e6aa4e46ec840aad645056a678c5b2ee1bd28dbb3bfcc41c7b5c73e9997a39210bd9705466c0c568691baeecef8b23df7
   languageName: node
   linkType: hard
 
@@ -8734,6 +8744,13 @@ __metadata:
     has-symbols: ^1.1.0
     which-boxed-primitive: ^1.1.1
   checksum: 729f13b84a5bfa3fead1d8139cee5c38514e63a8d6a437819a473e241ba87eeb593646568621c7fc7f133db300ef18d65d1a5a60dc9c7beb9000364d93c581df
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~6.21.0":
+  version: 6.21.0
+  resolution: "undici-types@npm:6.21.0"
+  checksum: 46331c7d6016bf85b3e8f20c159d62f5ae471aba1eb3dc52fff35a0259d58dcc7d592d4cc4f00c5f9243fa738a11cfa48bd20203040d4a9e6bc25e807fab7ab3
   languageName: node
   linkType: hard
 
