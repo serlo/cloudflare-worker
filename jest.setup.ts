@@ -82,8 +82,6 @@ function mockSentryServer() {
 export {}
 
 declare global {
-  // eslint-disable-next-line no-var
   var server: ReturnType<typeof import('msw/node').setupServer>
-  // eslint-disable-next-line no-var
   var sentryEvents: SentryEvent[]
 }

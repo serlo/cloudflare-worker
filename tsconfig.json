@@ -15,6 +15,7 @@
     "importHelpers": true,
     "module": "esnext",
     "moduleResolution": "node",
+    "isolatedModules": true,
     "skipLibCheck": true,
     "strict": true,
     "types": ["@cloudflare/workers-types/2022-11-30", "jest", "node"]
