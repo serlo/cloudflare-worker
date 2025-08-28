@@ -12,7 +12,7 @@
   "scripts": {
     "_eslint": "eslint \"{{__tests__,scripts,src}/**/*,*}.{js,jsx,ts,tsx}\"",
     "_prettier": "prettier .",
-    "build": "wrangler deploy --dry-run --outdir=dist",
+    "build": "wrangler deploy --dry-run --outdir=dist --env=staging",
     "check:all": "scripts/run_all_checks.sh",
     "check:unused-dependencies": "depcheck",
     "check:unused-exports": "ts-unused-exports tsconfig.json --ignoreTestFiles",
