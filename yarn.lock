@@ -1611,7 +1611,7 @@ __metadata:
     "@testing-library/jest-dom": ^6.8.0
     "@types/iarna__toml": ^2.0.5
     "@types/jest": ^30.0.0
-    "@types/node": 20.19.18
+    "@types/node": 24.6.0
     "@typescript-eslint/eslint-plugin": ^8.45.0
     "@typescript-eslint/parser": ^8.45.0
     cross-env: ^10.1.0
@@ -1828,12 +1828,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:20.19.18":
-  version: 20.19.18
-  resolution: "@types/node@npm:20.19.18"
+"@types/node@npm:*, @types/node@npm:24.6.0":
+  version: 24.6.0
+  resolution: "@types/node@npm:24.6.0"
   dependencies:
-    undici-types: ~6.21.0
-  checksum: ac56e19820a50e57c7db05fd88ff87e7f4d1f67b19dd407cdf4c3099885e97c8a17cd0e165d818f94f45b05883acd540c1e5a9aa4c3adf847a63d935f5bf4f45
+    undici-types: ~7.13.0
+  checksum: 5550f2c93824f9dde6b4277f2774a833f5d276e3ebd5cf2f071d76553dff6fb896965fccc0ebed79374720034f24936841a7c544188f4d3d9ae52dc00b7aa63b
   languageName: node
   linkType: hard
 
@@ -8009,10 +8009,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici-types@npm:~6.21.0":
-  version: 6.21.0
-  resolution: "undici-types@npm:6.21.0"
-  checksum: 46331c7d6016bf85b3e8f20c159d62f5ae471aba1eb3dc52fff35a0259d58dcc7d592d4cc4f00c5f9243fa738a11cfa48bd20203040d4a9e6bc25e807fab7ab3
+"undici-types@npm:~7.13.0":
+  version: 7.13.0
+  resolution: "undici-types@npm:7.13.0"
+  checksum: fcb3e1195a36615fce3935eb97c21ebe4dbafe968f831ed00e6f22e8e73c0655b8e3242acc6ba4ff0f3c34e3f3f860f19fbb59c00b261bd4e20b515abbc2de7c
   languageName: node
   linkType: hard
 
