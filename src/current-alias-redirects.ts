@@ -10,6 +10,11 @@ export async function redirectToCurrentAlias(
 ) {
   const url = Url.fromRequest(request)
   if (isInstance(url.subdomain)) {
+    // Block common hacker paths with 404 response
+    if (isCommonHackerPath(url.pathname)) {
+      return new Response('Not Found', { status: 404 })
+    }
+
     const pathInfo = await getPathInfo(url.subdomain, url.pathname, env)
 
     if (pathInfo !== null) {
@@ -123,9 +128,6 @@ async function getPathInfo(
 ): Promise<PathInfo | null> {
   if (path === '/user/me' || path === '/user/public')
     return { currentPath: path }
-
-  // Block common hacker paths before querying the database
-  if (isCommonHackerPath(path)) return null
 
   const cacheKey = await toCacheKey(`/${lang}${path}`)
   const cachedValue = await env.PATH_INFO_KV.get(cacheKey)

@@ -302,7 +302,7 @@ describe('blocks common hacker paths', () => {
     '/configuration.php',
   ])('blocks file-based attack path: %s', async (path) => {
     const response = await env.fetch({ subdomain: 'en', pathname: path })
-    expect(response.status).not.toBe(301)
+    expect(response.status).toBe(404)
   })
 
   test.each([
@@ -314,7 +314,7 @@ describe('blocks common hacker paths', () => {
     '/wp-config.php',
   ])('blocks WordPress-related path: %s', async (path) => {
     const response = await env.fetch({ subdomain: 'en', pathname: path })
-    expect(response.status).not.toBe(301)
+    expect(response.status).toBe(404)
   })
 
   test.each([
@@ -329,7 +329,7 @@ describe('blocks common hacker paths', () => {
     '/drupal/admin',
   ])('blocks CMS and admin panel path: %s', async (path) => {
     const response = await env.fetch({ subdomain: 'en', pathname: path })
-    expect(response.status).not.toBe(301)
+    expect(response.status).toBe(404)
   })
 
   test.each([
@@ -341,7 +341,7 @@ describe('blocks common hacker paths', () => {
     '/file.pl',
   ])('blocks disallowed file extension: %s', async (path) => {
     const response = await env.fetch({ subdomain: 'en', pathname: path })
-    expect(response.status).not.toBe(301)
+    expect(response.status).toBe(404)
   })
 
   test('legitimate paths still work and redirect properly', async () => {
