@@ -18,6 +18,6 @@
     "isolatedModules": true,
     "skipLibCheck": true,
     "strict": true,
-    "types": ["@cloudflare/workers-types/2022-11-30", "jest", "node"]
+    "types": ["@cloudflare/workers-types/2023-07-01", "jest", "node"]
   }
 }
