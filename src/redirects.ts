@@ -51,7 +51,8 @@ export function redirects(request: Request, env: CFEnvironment) {
         return Response.redirect('https://de.serlo.org/privacy', 301)
       case '/impressum':
       case '/imprint':
-        return Response.redirect('https://de.serlo.org/legal', 301)
+      case '/legal':
+        return Response.redirect('https://chancenwerk.de/impressum/', 302)
       case '/nutzungsbedingungen':
       case '/21654':
       case '/21654/nutzungsbedingungen-und-urheberrecht':

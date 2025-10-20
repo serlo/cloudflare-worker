@@ -45,24 +45,16 @@ test('de.serlo.org/datenschutz', async () => {
   expectToBeRedirectTo(response, target, 301)
 })
 
-test('de.serlo.org/impressum', async () => {
-  const response = await env.fetch({
-    subdomain: 'de',
-    pathname: '/impressum',
-  })
+describe('Imprint', () => {
+  test.each(['/impressum', '/imprint', '/legal'])(
+    'de.serlo.org%s',
+    async (pathname) => {
+      const response = await env.fetch({ subdomain: 'de', pathname })
 
-  const target = 'https://de.serlo.org/legal'
-  expectToBeRedirectTo(response, target, 301)
-})
-
-test('de.serlo.org/impressum', async () => {
-  const response = await env.fetch({
-    subdomain: 'de',
-    pathname: '/imprint',
-  })
-
-  const target = 'https://de.serlo.org/legal'
-  expectToBeRedirectTo(response, target, 301)
+      const target = 'https://chancenwerk.de/impressum/'
+      expectToBeRedirectTo(response, target, 302)
+    },
+  )
 })
 
 test('de.serlo.org/nutzungsbedingungen ', async () => {

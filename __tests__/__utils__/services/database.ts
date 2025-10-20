@@ -1,7 +1,6 @@
 import { Instance } from '../../../src/utils'
 
 declare global {
-  // eslint-disable-next-line no-var
   var uuids: Uuid[]
 }
 

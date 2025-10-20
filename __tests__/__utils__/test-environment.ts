@@ -12,7 +12,6 @@ import { CFEnvironment, CFVariables, isInstance } from '../../src/utils'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 declare global {
-  // eslint-disable-next-line no-var
   var server: ReturnType<typeof import('msw/node').setupServer>
 }
 

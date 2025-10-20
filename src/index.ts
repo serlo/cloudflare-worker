@@ -2,6 +2,7 @@ import { api } from './api'
 import { assetProxy } from './asset-proxy'
 import { semanticFileNames } from './assets'
 import { auth } from './auth'
+import { blockCommonHackerPaths } from './block-common-hacker-paths'
 import { cloudflareWorkerDev } from './cloudflare-worker-dev'
 import { redirectToCurrentAlias } from './current-alias-redirects'
 import { embed } from './embed'
@@ -30,6 +31,7 @@ export default {
         (await quickbarProxy(request, sentryFactory)) ||
         (await pdfProxy(request, sentryFactory)) ||
         robotsTxt(request, env) ||
+        blockCommonHackerPaths(request) ||
         (await frontendSpecialPaths(request, sentryFactory, env)) ||
         sentryHelloWorld(request, sentryFactory) ||
         redirects(request, env) ||

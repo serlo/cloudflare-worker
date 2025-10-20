@@ -35,7 +35,7 @@ function main() {
   yarn test
 
   print_header "Run build"
-  yarn build
+  yarn build --env staging
 }
 
 function test_no_uncommitted_changes_when_pushing() {
