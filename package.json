@@ -42,11 +42,11 @@
     "@eslint/js": "^9.38.0",
     "@iarna/toml": "^2.2.5",
     "@jest/globals": "^30.2.0",
-    "@sentry/core": "^10.20.0",
+    "@sentry/core": "^10.21.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@types/iarna__toml": "^2.0.5",
     "@types/jest": "^30.0.0",
-    "@types/node": "24.9.0",
+    "@types/node": "24.9.1",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
     "cross-env": "^10.1.0",
@@ -66,7 +66,7 @@
     "ts-jest": "^29.4.5",
     "ts-unused-exports": "^11.0.1",
     "typescript": "^5.9.3",
-    "wrangler": "^4.43.0"
+    "wrangler": "^4.44.0"
   },
   "packageManager": "yarn@3.6.0",
   "engines": {
