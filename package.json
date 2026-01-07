@@ -36,7 +36,7 @@
     "toucan-js": "^4.1.1"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260103.0",
+    "@cloudflare/workers-types": "^4.20260107.1",
     "@eslint/compat": "^2.0.0",
     "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^9.39.2",
@@ -66,7 +66,7 @@
     "ts-jest": "^29.4.6",
     "ts-unused-exports": "^11.0.1",
     "typescript": "^5.9.3",
-    "wrangler": "^4.56.0"
+    "wrangler": "^4.57.0"
   },
   "packageManager": "yarn@3.6.0",
   "engines": {
