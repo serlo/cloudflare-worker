@@ -46,6 +46,12 @@ export function redirects(request: Request, env: CFEnvironment) {
     isInstance(url.subdomain) && url.subdomain === Instance.De
 
   if (isDeInstance) {
+    if (url.pathnameWithoutTrailingSlash === '/team') {
+      return Response.redirect(
+        'https://de.serlo.org/serlo/19871/diese-seite-wird-gerade-ueberarbeitet',
+        302,
+      )
+    }
     switch (url.pathname) {
       case '/datenschutz':
         return Response.redirect('https://de.serlo.org/privacy', 301)
