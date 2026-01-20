@@ -46,7 +46,10 @@ export function redirects(request: Request, env: CFEnvironment) {
     isInstance(url.subdomain) && url.subdomain === Instance.De
 
   if (isDeInstance) {
-    if (url.pathnameWithoutTrailingSlash === '/team') {
+    // Umleitung für Seiten, die gerade überarbeitet werden oder Fehler werfen
+    const inBearbeitung = ['/team', '/jobs']
+
+    if (inBearbeitung.includes(url.pathnameWithoutTrailingSlash)) {
       return Response.redirect(
         'https://de.serlo.org/serlo/19871/diese-seite-wird-gerade-ueberarbeitet',
         302,
