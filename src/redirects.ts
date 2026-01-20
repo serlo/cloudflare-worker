@@ -46,7 +46,7 @@ export function redirects(request: Request, env: CFEnvironment) {
     isInstance(url.subdomain) && url.subdomain === Instance.De
 
   if (isDeInstance) {
-   // Umleitung für Seiten, die gerade überarbeitet werden oder Fehler werfen
+    // Umleitung für Seiten, die gerade überarbeitet werden oder Fehler werfen
     const inBearbeitung = ['/team', '/jobs']
 
     if (inBearbeitung.includes(url.pathnameWithoutTrailingSlash)) {
