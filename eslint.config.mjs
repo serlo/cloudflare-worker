@@ -1,7 +1,6 @@
 import typescriptEslint from '@typescript-eslint/eslint-plugin'
 import _import from 'eslint-plugin-import'
 import react from 'eslint-plugin-react'
-import _deprecation from 'eslint-plugin-deprecation'
 import { fixupPluginRules } from '@eslint/compat'
 import globals from 'globals'
 import tsParser from '@typescript-eslint/parser'
@@ -30,7 +29,6 @@ export default [
       '@typescript-eslint': typescriptEslint,
       import: fixupPluginRules(_import),
       react,
-      deprecation: fixupPluginRules(_deprecation),
     },
 
     languageOptions: {
@@ -87,7 +85,6 @@ export default [
 
       '@typescript-eslint/no-useless-constructor': 'error',
       '@typescript-eslint/prefer-ts-expect-error': 'error',
-      'deprecation/deprecation': 'warn',
       'import/export': 'error',
 
       'import/extensions': [
