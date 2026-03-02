@@ -125,7 +125,7 @@ async function getPathInfo(
   const coursePageId = coursePageMatch?.groups?.coursePageId ?? null
 
   const isTrashedComment = uuid.__typename === 'Comment' && uuid.trashed
-  let currentPath: string = ''
+  let currentPath: string
   let hash: string = ''
 
   if (coursePageId !== null) {

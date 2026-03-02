@@ -97,7 +97,7 @@ async function getVimeoThumbnail(url: URL, sentry: SentryReporter) {
     return getPlaceholder()
   }
 
-  let apiResponseJson: unknown = undefined
+  let apiResponseJson: unknown
 
   try {
     apiResponseJson = JSON.parse(apiResponseText) as unknown
