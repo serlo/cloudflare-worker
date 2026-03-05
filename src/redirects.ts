@@ -58,11 +58,11 @@ export function redirects(request: Request, env: CFEnvironment) {
     switch (url.pathname) {
       case '/datenschutz':
         return Response.redirect('https://de.serlo.org/privacy', 301)
-      case '/partner':
-        return Response.redirect('https://chancenwerk.de/ueber-uns/unsere-partnerinnen/', 301)
       case '/impressum':
       case '/imprint':
         return Response.redirect('https://de.serlo.org/legal', 301)
+      case '/partner':
+        return Response.redirect('https://chancenwerk.de/ueber-uns/unsere-partnerinnen/', 301)
       case '/nutzungsbedingungen':
       case '/21654':
       case '/21654/nutzungsbedingungen-und-urheberrecht':
