@@ -60,7 +60,7 @@ export function redirects(request: Request, env: CFEnvironment) {
       case '/imprint':
         return Response.redirect('https://de.serlo.org/legal', 301)
       case '/Partner':
-        return Response.redirect('https://chancenwerk.de/ueber-uns/unsere-partnerinnen/',301)
+        return Response.redirect('https://chancenwerk.de/ueber-uns/unsere-partnerinnen/', 301)
       case '/nutzungsbedingungen':
       case '/21654':
       case '/21654/nutzungsbedingungen-und-urheberrecht':
