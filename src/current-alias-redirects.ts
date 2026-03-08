@@ -152,7 +152,7 @@ async function getPathInfo(
   }
 
   await env.PATH_INFO_KV.put(cacheKey, JSON.stringify(result), {
-    expirationTtl: 60 * 60,
+    expirationTtl: 60 * 60 * 24,
   })
 
   return result
