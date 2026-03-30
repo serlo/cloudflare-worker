@@ -14,7 +14,7 @@
     "esModuleInterop": true,
     "importHelpers": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "isolatedModules": true,
     "skipLibCheck": true,
     "strict": true,
