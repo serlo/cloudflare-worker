@@ -1,11 +1,6 @@
 {
   "transform": {
-    "^.+\\.tsx?$": [
-      "ts-jest",
-      {
-        "useESM": true
-      }
-    ]
+    "^.+\\.tsx?$": "<rootDir>/esbuild-transformer.js"
   },
   "extensionsToTreatAsEsm": [".ts", ".tsx", ".mts"],
   "testPathIgnorePatterns": ["/node_modules/", "/__tests__\\/__utils__/"],

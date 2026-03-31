@@ -220,11 +220,11 @@ describe('cache', () => {
     await expectCorrectRedirect()
   })
 
-  test('stores path for max 1 hour', async () => {
+  test('stores path for max 1 day', async () => {
     await expectCorrectRedirect()
 
     givenUuid({ __typename: 'Article', id: 42, alias: '/new-path' })
-    env.cfEnv.waitForSeconds(60 * 60 + 1)
+    env.cfEnv.waitForSeconds(60 * 60 * 24 + 1)
 
     const response = await env.fetch({ subdomain: 'de', pathname: '/42' })
     const target = env.createUrl({ subdomain: 'de', pathname: '/new-path' })

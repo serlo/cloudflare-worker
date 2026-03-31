@@ -125,7 +125,7 @@ async function getPathInfo(
   const coursePageId = coursePageMatch?.groups?.coursePageId ?? null
 
   const isTrashedComment = uuid.__typename === 'Comment' && uuid.trashed
-  let currentPath: string = ''
+  let currentPath: string
   let hash: string = ''
 
   if (coursePageId !== null) {
@@ -152,7 +152,8 @@ async function getPathInfo(
   }
 
   await env.PATH_INFO_KV.put(cacheKey, JSON.stringify(result), {
-    expirationTtl: 60 * 60,
+    // randomize TTL a bit to avoid cache stampedes
+    expirationTtl: Math.floor(60 * 60 * (16 + Math.random() * 8)),
   })
 
   return result
