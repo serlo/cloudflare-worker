@@ -36,7 +36,7 @@
     "toucan-js": "^4.1.1"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260317.1",
+    "@cloudflare/workers-types": "^4.20260329.1",
     "@eslint/compat": "^2.0.3",
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^10.0.1",
@@ -47,8 +47,8 @@
     "@types/iarna__toml": "^2.0.5",
     "@types/jest": "^30.0.0",
     "@types/node": "24.12.0",
-    "@typescript-eslint/eslint-plugin": "^8.57.2",
-    "@typescript-eslint/parser": "^8.57.2",
+    "@typescript-eslint/eslint-plugin": "^8.58.0",
+    "@typescript-eslint/parser": "^8.58.0",
     "cross-env": "^10.1.0",
     "depcheck": "^1.4.7",
     "eslint": "^10.1.0",
