@@ -46,8 +46,10 @@ export function redirects(request: Request, env: CFEnvironment) {
     isInstance(url.subdomain) && url.subdomain === Instance.De
 
   if (isDeInstance) {
-    // Umleitung Team-Seite (In Bearbeitung)
-    if (url.pathnameWithoutTrailingSlash === '/team') {
+    // Umleitung für Seiten, die gerade überarbeitet werden oder Fehler werfen
+    const inBearbeitung = ['/team', '/jobs']
+
+    if (inBearbeitung.includes(url.pathnameWithoutTrailingSlash)) {
       return Response.redirect(
         'https://de.serlo.org/serlo/19871/diese-seite-wird-gerade-ueberarbeitet',
         302,
@@ -59,6 +61,11 @@ export function redirects(request: Request, env: CFEnvironment) {
       case '/impressum':
       case '/imprint':
         return Response.redirect('https://de.serlo.org/legal', 301)
+      case '/partner':
+        return Response.redirect(
+          'https://chancenwerk.de/ueber-uns/unsere-partnerinnen/',
+          301,
+        )
       case '/nutzungsbedingungen':
       case '/21654':
       case '/21654/nutzungsbedingungen-und-urheberrecht':
