@@ -153,7 +153,7 @@ async function getPathInfo(
 
   await env.PATH_INFO_KV.put(cacheKey, JSON.stringify(result), {
     // randomize TTL a bit to avoid cache stampedes
-    expirationTtl: 60 * 60 * (16 + Math.random() * 8),
+    expirationTtl: Math.floor(60 * 60 * (16 + Math.random() * 8)),
   })
 
   return result
