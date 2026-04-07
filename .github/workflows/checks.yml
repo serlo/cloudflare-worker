@@ -2,7 +2,8 @@ name: CI Checks
 on:
   push:
     branches:
-      - main
+      - staging
+      - production
   pull_request:
   merge_group:
 
