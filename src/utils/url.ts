@@ -1,5 +1,3 @@
-import type { URLSearchParams } from '@cloudflare/workers-types'
-
 const contentApiParameters = [
   'contentOnly',
   'hideTopbar',
@@ -33,10 +31,7 @@ export class Url extends URL {
   }
 
   public hasContentApiParameters() {
-    // FIXME: Somehow Typescript does not take the URLSearchParams definition
-    // of `@cloudflare/worker-types`. This a a shaky workaround to make
-    // Typescript happy.
-    const params = this.searchParams as URLSearchParams
+    const params = this.searchParams
 
     return Array.from(params.keys()).some((key) =>
       contentApiParameters.includes(key),

@@ -58,7 +58,7 @@ function addGlobalMocks() {
   globalThis.crypto = {
     subtle: cryptoNode.webcrypto.subtle,
     randomUUID: cryptoNode.randomUUID,
-  } as unknown as typeof crypto
+  }
 }
 
 function mockSentryServer() {
