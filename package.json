@@ -36,7 +36,7 @@
     "toucan-js": "^4.1.1"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260519.1",
+    "@cloudflare/workers-types": "^4.20260526.1",
     "@eslint/compat": "^2.1.0",
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^10.0.1",
@@ -47,8 +47,8 @@
     "@types/iarna__toml": "^2.0.5",
     "@types/jest": "^30.0.0",
     "@types/node": "24.12.4",
-    "@typescript-eslint/eslint-plugin": "^8.59.4",
-    "@typescript-eslint/parser": "^8.59.4",
+    "@typescript-eslint/eslint-plugin": "^8.60.0",
+    "@typescript-eslint/parser": "^8.60.0",
     "cross-env": "^10.1.0",
     "esbuild": "^0.28.0",
     "eslint": "^10.4.0",
@@ -63,7 +63,7 @@
     "prettier-plugin-packagejson": "^3.0.2",
     "prettier-plugin-sh": "^0.18.1",
     "typescript": "^6.0.3",
-    "wrangler": "^4.92.0"
+    "wrangler": "^4.94.0"
   },
   "packageManager": "yarn@4.13.0",
   "engines": {
