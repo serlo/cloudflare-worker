@@ -77,8 +77,6 @@ async function fetchBackend({
 function getRoute(request: Request): RouteConfig | null {
   const url = Url.fromRequest(request)
 
-  if (!isInstance(url.subdomain)) return null
-
   if (
     url.pathname.startsWith('/api/auth/') ||
     url.pathname.startsWith('/api/oauth/') ||
@@ -94,6 +92,8 @@ function getRoute(request: Request): RouteConfig | null {
     }
   }
 
+  if (!isInstance(url.subdomain)) return null
+  
   const subjectStartPages: { [I in Instance]?: string[] } = {
     de: [
       '/biologie',
