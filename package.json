@@ -36,7 +36,7 @@
     "toucan-js": "^4.1.1"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260624.1",
+    "@cloudflare/workers-types": "^5.20260719.1",
     "@eslint/compat": "^2.1.0",
     "@eslint/eslintrc": "^3.3.6",
     "@eslint/js": "^10.0.1",
